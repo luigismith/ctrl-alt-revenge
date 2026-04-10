@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -m pip install pygame-ce)",
+      "Bash(where python3:*)",
+      "Bash(where py:*)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Read(//c/Users/**)",
+      "Bash(py --version)",
+      "Bash(py -m pip --version)",
+      "Bash(\"/c/Users/luigi.massari/AppData/Local/Programs/Python/Python313/python.exe\" --version)",
+      "Bash(ls \"/c/Users/luigi.massari/AppData/Local/Programs/Python/\"*/python.exe)",
+      "Bash(conda --version)",
+      "Bash(ls /c/Python3*/python.exe)",
+      "Bash(cmd.exe /c \"where python\")",
+      "Bash(cmd.exe /c \"where py\")",
+      "Bash(/c/Users/luigi.massari/AppData/Local/Microsoft/WindowsApps/python3.exe --version)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe --version)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe -m pip install pygame-ce)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe -m ensurepip)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe -c ':*)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe main.py)"
+    ]
+  }
+}

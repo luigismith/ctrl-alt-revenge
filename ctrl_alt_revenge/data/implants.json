@@ -1,0 +1,34 @@
+[
+    {
+        "id": "thermal_vision",
+        "name": "Visione Termica",
+        "description": "Evidenzia nemici dietro i muri",
+        "slot": "occhi",
+        "cooldown": 0,
+        "unlocked": true
+    },
+    {
+        "id": "emp_shot",
+        "name": "Proiettile EMP",
+        "description": "Stordisce nemici cibernetici. Cooldown 6s.",
+        "slot": "braccia",
+        "cooldown": 360,
+        "unlocked": true
+    },
+    {
+        "id": "bullet_time",
+        "name": "Bullet Time",
+        "description": "3 secondi di slow-mo. Ricarica a uccisione.",
+        "slot": "core",
+        "cooldown": 540,
+        "unlocked": true
+    },
+    {
+        "id": "double_jump",
+        "name": "Doppio Salto Servoassistito",
+        "description": "Sblocca il double jump",
+        "slot": "gambe",
+        "cooldown": 0,
+        "unlocked": true
+    }
+]
