@@ -19,6 +19,7 @@ from ctrl_alt_revenge.settings import (
     COLOR_GREEN_HACK, COLOR_DARK_GRAY, COLOR_MID_GRAY,
     HACK_SLOWMO_FACTOR, HEAT_DECAY_RATE, HEAT_MAX,
     STRINGS, EMP_COOLDOWN, BULLET_TIME_DURATION,
+    PLAYER_IFRAMES,
 )
 from ctrl_alt_revenge.core.state_machine import StateMachine, State
 from ctrl_alt_revenge.core.input import InputManager
@@ -163,6 +164,9 @@ class PlayState(State):
         self.boss_intro_shown = False
         self.level_complete = False
         self._loaded = False
+        self.screen_shake_timer = 0
+        self.parry_flash_timer = 0
+        self.particles = []
 
     def enter(self, **kwargs):
         # Carica il livello solo la prima volta o se esplicitamente richiesto
@@ -269,6 +273,15 @@ class PlayState(State):
         self.level_complete = False
         self.projectiles = []
         self.slow_mo = 1.0
+        self.screen_shake_timer = 0
+        self.parry_flash_timer = 0
+        self.particles = []
+
+        # Pre-generate slow-mo overlay
+        self.slowmo_overlay = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+        self.slowmo_overlay.fill((0, 15, 50, 45))
+        for y in range(0, INTERNAL_HEIGHT, 3):
+            pygame.draw.line(self.slowmo_overlay, (0, 0, 0, 25), (0, y), (INTERNAL_WIDTH, y))
 
         # Pre-generate tile surfaces and background layers
         self._generate_tile_surfaces()
@@ -284,35 +297,41 @@ class PlayState(State):
         for v in range(4):
             rng = random.Random(1000 + v)
             surf = pygame.Surface((TS, TS))
-            surf.fill((35, 32, 60))
-            # Random noise pixels
+            surf.fill((50, 45, 75))
+            # Random noise pixels for texture
             for py in range(TS):
                 for px in range(TS):
-                    if rng.random() < 0.15:
-                        offset = rng.randint(-8, 8)
-                        c = (max(0, min(255, 35 + offset)),
-                             max(0, min(255, 32 + offset)),
-                             max(0, min(255, 60 + offset)))
+                    if rng.random() < 0.2:
+                        offset = rng.randint(-8, 10)
+                        c = (max(0, min(255, 50 + offset)),
+                             max(0, min(255, 45 + offset)),
+                             max(0, min(255, 75 + offset)))
                         surf.set_at((px, py), c)
+            # Top edge highlight (subtle lighter line)
+            for px in range(TS):
+                surf.set_at((px, 0), (62, 57, 90))
             # Occasional crack line
             if v in (0, 2):
                 cx = rng.randint(3, 12)
                 for cy in range(rng.randint(2, 5), rng.randint(10, 14)):
-                    surf.set_at((cx + rng.randint(-1, 1), cy), (25, 22, 45))
+                    surf.set_at((cx + rng.randint(-1, 1), cy), (38, 34, 58))
             variants.append(surf)
         self.tile_surfaces[1] = variants
 
         # --- Type 2: Wall/ceiling (metal panel) ---
         surf = pygame.Surface((TS, TS))
-        surf.fill((45, 42, 70))
-        # 1px bright border
-        pygame.draw.rect(surf, (65, 62, 95), (0, 0, TS, TS), 1)
-        # Rivet dots in corners
-        for rx, ry in [(2, 2), (TS - 3, 2), (2, TS - 3), (TS - 3, TS - 3)]:
-            surf.set_at((rx, ry), (90, 88, 120))
+        surf.fill((55, 50, 80))
+        # Panel border (bright)
+        pygame.draw.rect(surf, (75, 70, 105), (0, 0, TS, TS), 1)
+        # Inner panel line for depth
+        pygame.draw.rect(surf, (48, 43, 72), (2, 2, TS - 4, TS - 4), 1)
+        # Rivet dots in corners and mid-edges
+        for rx, ry in [(2, 2), (TS - 3, 2), (2, TS - 3), (TS - 3, TS - 3),
+                        (TS // 2, 2), (TS // 2, TS - 3), (2, TS // 2), (TS - 3, TS // 2)]:
+            surf.set_at((rx, ry), (100, 98, 135))
         self.tile_surfaces[2] = surf
 
-        # --- Type 3: Platform (thin neon blue gradient) ---
+        # --- Type 3: Platform (thin neon blue gradient + support dots) ---
         surf = pygame.Surface((TS, TS), pygame.SRCALPHA)
         surf.fill((0, 0, 0, 0))
         for py in range(3):
@@ -321,6 +340,10 @@ class PlayState(State):
             g = int(229 * (1 - t) + 50 * t)
             b = int(255 * (1 - t) + 80 * t)
             pygame.draw.line(surf, (r, g, b), (0, py), (TS - 1, py))
+        # Small support dots below the platform
+        for px in (3, 7, 11):
+            surf.set_at((px, 4), (0, 140, 160, 180))
+            surf.set_at((px, 5), (0, 100, 120, 120))
         self.tile_surfaces[3] = surf
 
         # --- Type 4: Gate (vertical bars) ---
@@ -334,31 +357,40 @@ class PlayState(State):
 
         # --- Type 5: Crate (cover) ---
         surf = pygame.Surface((TS, TS))
-        surf.fill((40, 38, 55))
-        # X pattern
-        pygame.draw.line(surf, (55, 52, 75), (1, 1), (TS - 2, TS - 2))
-        pygame.draw.line(surf, (55, 52, 75), (TS - 2, 1), (1, TS - 2))
+        surf.fill((60, 55, 80))
+        # X pattern — lighter lines for visibility
+        pygame.draw.line(surf, (80, 75, 110), (1, 1), (TS - 2, TS - 2))
+        pygame.draw.line(surf, (80, 75, 110), (TS - 2, 1), (1, TS - 2))
         # Border
-        pygame.draw.rect(surf, (60, 58, 80), (0, 0, TS, TS), 1)
+        pygame.draw.rect(surf, (85, 80, 115), (0, 0, TS, TS), 1)
         # Bright corner pixels
         for cx, cy in [(1, 1), (TS - 2, 1), (1, TS - 2), (TS - 2, TS - 2)]:
-            surf.set_at((cx, cy), (80, 78, 110))
+            surf.set_at((cx, cy), (110, 105, 145))
         self.tile_surfaces[5] = surf
 
         # --- Type 6: Boss floor (warning stripes) ---
         surf = pygame.Surface((TS, TS))
-        surf.fill((55, 25, 25))
-        # Diagonal yellow stripes (2px wide)
+        surf.fill((70, 30, 30))
+        # Diagonal warning stripes (2px wide, brighter orange)
         for i in range(-TS, TS * 2, 6):
-            pygame.draw.line(surf, (200, 180, 40), (i, 0), (i + TS, TS), 2)
+            pygame.draw.line(surf, (255, 140, 30), (i, 0), (i + TS, TS), 2)
+        # Dark separator between stripes for contrast
+        for i in range(-TS + 3, TS * 2, 6):
+            pygame.draw.line(surf, (45, 18, 18), (i, 0), (i + TS, TS), 1)
         self.tile_surfaces[6] = surf
 
         # --- Type 7: Boss wall (reinforced with neon orange trim) ---
         surf = pygame.Surface((TS, TS))
-        surf.fill((45, 28, 28))
-        # Horizontal neon orange trim lines
+        surf.fill((50, 32, 32))
+        # More visible horizontal neon orange trim lines
+        pygame.draw.line(surf, (255, 140, 30), (0, 3), (TS - 1, 3))
         pygame.draw.line(surf, COLOR_NEON_ORANGE, (0, 4), (TS - 1, 4))
+        pygame.draw.line(surf, (255, 140, 30), (0, 11), (TS - 1, 11))
         pygame.draw.line(surf, COLOR_NEON_ORANGE, (0, 12), (TS - 1, 12))
+        # Subtle rivet dots between trim lines
+        for rx in (3, 7, 11):
+            surf.set_at((rx, 7), (90, 55, 55))
+            surf.set_at((rx, 8), (90, 55, 55))
         self.tile_surfaces[7] = surf
 
     def _generate_bg_layers(self):
@@ -367,6 +399,19 @@ class PlayState(State):
         H = INTERNAL_HEIGHT
 
         rng = random.Random(42)
+
+        # --- Horizon gradient layer (rendered once, blitted first) ---
+        self.bg_horizon = pygame.Surface((BG_W, H), pygame.SRCALPHA)
+        self.bg_horizon.fill((0, 0, 0, 0))
+        grad_height = 60
+        for gy in range(grad_height):
+            t = 1.0 - gy / grad_height  # 1.0 at bottom, 0.0 at top
+            r = int(20 * t)
+            g = int(15 * t)
+            b = int(45 * t)
+            a = int(180 * t)
+            pygame.draw.line(self.bg_horizon, (r, g, b, a),
+                             (0, H - grad_height + gy), (BG_W - 1, H - grad_height + gy))
 
         # --- Layer 1 (far): Tall building silhouettes ---
         self.bg_layer_far = pygame.Surface((BG_W, H), pygame.SRCALPHA)
@@ -377,12 +422,17 @@ class PlayState(State):
             gap = rng.randint(2, 8)
             bh = rng.randint(60, 120)
             by = H - bh
-            pygame.draw.rect(self.bg_layer_far, (15, 14, 40), (x, by, bw, bh))
-            # Occasional lit windows
-            for wy in range(by + 4, by + bh - 4, 7):
-                for wx in range(x + 3, x + bw - 3, 6):
-                    if rng.random() < 0.2:
-                        c = rng.choice([(60, 55, 90), (80, 75, 110), (50, 80, 100)])
+            pygame.draw.rect(self.bg_layer_far, (25, 22, 55), (x, by, bw, bh))
+            # Rooftop edge highlight
+            pygame.draw.line(self.bg_layer_far, (35, 32, 70), (x, by), (x + bw - 1, by))
+            # Lit windows — more frequent, brighter colors
+            for wy in range(by + 4, by + bh - 4, 6):
+                for wx in range(x + 3, x + bw - 3, 5):
+                    if rng.random() < 0.35:
+                        c = rng.choice([
+                            (90, 85, 130), (110, 100, 150), (70, 110, 140),
+                            (130, 120, 80), (80, 130, 110),
+                        ])
                         self.bg_layer_far.set_at((wx, wy), c)
                         if wx + 1 < x + bw - 2:
                             self.bg_layer_far.set_at((wx + 1, wy), c)
@@ -397,25 +447,33 @@ class PlayState(State):
             gap = rng.randint(3, 10)
             bh = rng.randint(40, 80)
             by = H - bh
-            pygame.draw.rect(self.bg_layer_mid, (22, 20, 55), (x, by, bw, bh))
-            # More lit windows
-            for wy in range(by + 3, by + bh - 3, 6):
-                for wx in range(x + 2, x + bw - 2, 5):
-                    if rng.random() < 0.3:
+            pygame.draw.rect(self.bg_layer_mid, (35, 30, 65), (x, by, bw, bh))
+            # Rooftop edge highlight
+            pygame.draw.line(self.bg_layer_mid, (50, 45, 85), (x, by), (x + bw - 1, by))
+            # Lit windows — even more frequent and brighter
+            for wy in range(by + 3, by + bh - 3, 5):
+                for wx in range(x + 2, x + bw - 2, 4):
+                    if rng.random() < 0.45:
                         c = rng.choice([
-                            (80, 75, 120), (100, 95, 140),
-                            (60, 90, 110), (120, 100, 80),
+                            (110, 100, 160), (140, 130, 180),
+                            (80, 150, 170), (160, 140, 90),
+                            (0, 200, 220), (180, 120, 60),
                         ])
                         self.bg_layer_mid.set_at((wx, wy), c)
                         if wx + 1 < x + bw - 1:
                             self.bg_layer_mid.set_at((wx + 1, wy), c)
                         if wy + 1 < by + bh - 2:
                             self.bg_layer_mid.set_at((wx, wy + 1), c)
-            # Neon accent line on some buildings
-            if rng.random() < 0.4:
+            # Neon accent lines on most buildings
+            if rng.random() < 0.55:
                 ny = by + rng.randint(5, max(6, bh - 5))
                 nc = rng.choice([COLOR_NEON_BLUE, COLOR_NEON_PURPLE, COLOR_NEON_ORANGE])
                 pygame.draw.line(self.bg_layer_mid, nc, (x, ny), (x + bw - 1, ny))
+            # Second accent line for some buildings
+            if rng.random() < 0.25:
+                ny2 = by + rng.randint(2, max(3, bh - 8))
+                nc2 = rng.choice([COLOR_NEON_BLUE, COLOR_NEON_PURPLE])
+                pygame.draw.line(self.bg_layer_mid, nc2, (x + 2, ny2), (x + bw - 3, ny2))
             x += bw + gap
 
         # --- Layer 3 (near): Close details, neon signs, power lines ---
@@ -427,27 +485,49 @@ class PlayState(State):
             gap = rng.randint(8, 20)
             bh = rng.randint(15, 40)
             by = H - bh
-            pygame.draw.rect(self.bg_layer_near, (28, 26, 60), (x, by, bw, bh))
+            pygame.draw.rect(self.bg_layer_near, (35, 32, 70), (x, by, bw, bh))
+            # Edge highlight
+            pygame.draw.line(self.bg_layer_near, (50, 45, 90), (x, by), (x + bw - 1, by))
             x += bw + gap
-        # Neon signs (small colored rectangles)
-        for _ in range(12):
+        # Neon signs (bright colored rectangles, larger 4x3)
+        for _ in range(20):
             sx = rng.randint(10, BG_W - 20)
-            sy = rng.randint(H - 100, H - 30)
+            sy = rng.randint(H - 110, H - 25)
             sc = rng.choice([COLOR_NEON_BLUE, COLOR_NEON_PURPLE,
-                             COLOR_NEON_ORANGE, COLOR_RED_ALARM])
-            pygame.draw.rect(self.bg_layer_near, sc, (sx, sy, 3, 2))
-        # Power line cables (horizontal lines)
-        for _ in range(4):
-            ly = rng.randint(H - 120, H - 50)
+                             COLOR_NEON_ORANGE, COLOR_RED_ALARM,
+                             (0, 220, 255), (255, 100, 40), (180, 50, 255)])
+            sw = rng.randint(3, 5)
+            sh = rng.randint(2, 3)
+            pygame.draw.rect(self.bg_layer_near, sc, (sx, sy, sw, sh))
+            # Subtle glow around sign (1px border, dimmer)
+            gr = min(255, sc[0] // 3)
+            gg = min(255, sc[1] // 3)
+            gb = min(255, sc[2] // 3)
+            pygame.draw.rect(self.bg_layer_near, (gr, gg, gb, 100),
+                             (sx - 1, sy - 1, sw + 2, sh + 2), 1)
+        # Power line cables (horizontal lines with glow dots)
+        for _ in range(5):
+            ly = rng.randint(H - 130, H - 45)
             lx1 = rng.randint(0, BG_W // 3)
             lx2 = rng.randint(BG_W // 3, BG_W - 1)
-            pygame.draw.line(self.bg_layer_near, (30, 28, 55), (lx1, ly), (lx2, ly))
+            cable_color = (45, 42, 75)
             # Slight sag in middle
             mx = (lx1 + lx2) // 2
-            pygame.draw.line(self.bg_layer_near, (30, 28, 55),
+            pygame.draw.line(self.bg_layer_near, cable_color,
                              (lx1, ly), (mx, ly + 3))
-            pygame.draw.line(self.bg_layer_near, (30, 28, 55),
+            pygame.draw.line(self.bg_layer_near, cable_color,
                              (mx, ly + 3), (lx2, ly))
+            # Small glow dots along cable
+            num_dots = rng.randint(2, 5)
+            for d in range(num_dots):
+                t = (d + 1) / (num_dots + 1)
+                dx = int(lx1 + (lx2 - lx1) * t)
+                sag = int(3 * (1 - abs(2 * t - 1)))
+                dy = ly + sag
+                dot_c = rng.choice([(0, 200, 255), (255, 140, 30), (200, 80, 255)])
+                self.bg_layer_near.set_at((dx, dy), dot_c)
+                if dx + 1 < BG_W:
+                    self.bg_layer_near.set_at((dx + 1, dy), dot_c)
 
     def _spawn_boss_drone(self, x, y, count):
         """Callback per il boss per spawnare droni."""
@@ -517,6 +597,35 @@ class PlayState(State):
 
         # Combat
         self.combat.update(self.player, self.enemies, effective_dt)
+
+        # Screen shake on player hit
+        if self.player.iframes > 0 and self.player.iframes > PLAYER_IFRAMES - 2:
+            self.screen_shake_timer = 12
+        if self.screen_shake_timer > 0:
+            self.screen_shake_timer -= 1
+
+        # Parry flash
+        if self.player.parry_success:
+            self.parry_flash_timer = 4
+            self.player.parry_success = False
+        if self.parry_flash_timer > 0:
+            self.parry_flash_timer -= 1
+
+        # Landing particles
+        if self.player.on_ground and not self.player._was_on_ground and self.player.vel_y >= -0.1:
+            for _ in range(5):
+                self.particles.append({
+                    "x": self.player.x + self.player.collision_width // 2 + random.randint(-8, 8),
+                    "y": self.player.y + self.player.collision_height,
+                    "vx": random.uniform(-0.8, 0.8),
+                    "vy": random.uniform(-1.5, -0.3),
+                    "timer": random.randint(8, 16),
+                })
+
+        # Update particles
+        for p in self.particles:
+            p["x"] += p["vx"]; p["y"] += p["vy"]; p["vy"] += 0.05; p["timer"] -= 1
+        self.particles = [p for p in self.particles if p["timer"] > 0]
 
         # Heat decay
         self.player.heat = max(0, self.player.heat - HEAT_DECAY_RATE * effective_dt)
@@ -622,7 +731,11 @@ class PlayState(State):
                 self.projectiles.remove(p)
 
     def draw(self, surface):
-        cam_off = self.camera.get_offset()
+        cam_off = list(self.camera.get_offset())
+        if self.screen_shake_timer > 0:
+            cam_off[0] += random.randint(-2, 2)
+            cam_off[1] += random.randint(-2, 2)
+        cam_off = tuple(cam_off)
         visible = self.camera.get_visible_rect()
 
         # Sfondo parallasse semplice
@@ -650,11 +763,11 @@ class PlayState(State):
                 continue
             # Visione termica: evidenzia nemici
             if self.player.thermal_vision and enemy.alive:
-                thermal_rect = enemy.rect.move(cam_off[0], cam_off[1])
-                thermal_surf = pygame.Surface(
-                    (thermal_rect.width + 4, thermal_rect.height + 4), pygame.SRCALPHA)
-                thermal_surf.fill((255, 100, 0, 60))
-                surface.blit(thermal_surf, (thermal_rect.x - 2, thermal_rect.y - 2))
+                er = enemy.rect.move(cam_off[0], cam_off[1])
+                pygame.draw.rect(surface, (255, 120, 0), er.inflate(4, 4), 2)
+                glow = pygame.Surface((er.width + 8, er.height + 8), pygame.SRCALPHA)
+                pygame.draw.rect(glow, (255, 100, 0, 35), glow.get_rect(), 3)
+                surface.blit(glow, (er.x - 4, er.y - 4))
             enemy.draw(surface, cam_off)
 
         # Proiettili
@@ -667,6 +780,15 @@ class PlayState(State):
         # Player
         self.player.draw(surface, cam_off)
 
+        # Landing dust particles
+        for p in self.particles:
+            alpha = int(200 * p["timer"] / 16)
+            px = int(p["x"]) + cam_off[0]
+            py = int(p["y"]) + cam_off[1]
+            ps_surf = pygame.Surface((2, 2), pygame.SRCALPHA)
+            ps_surf.fill((180, 180, 200, alpha))
+            surface.blit(ps_surf, (px, py))
+
         # Effetti combat
         self.combat.draw_effects(surface, cam_off,
                                  self.game.sprites.get("particles", {}))
@@ -675,20 +797,27 @@ class PlayState(State):
         if self.player.nearby_hackable and not self.hacking.active:
             pass  # già disegnato sopra
 
-        # HUD
-        implant_info = self.implants.get_equipped_info()
-        self.hud.draw(surface, self.player, implant_info, self.player.heat)
+        # Parry flash
+        if self.parry_flash_timer > 0:
+            flash = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+            flash.fill((255, 255, 255, 60))
+            surface.blit(flash, (0, 0))
 
         # Slow-mo overlay
         if self.slow_mo < 1.0:
-            overlay = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
-            overlay.fill((0, 0, 40, 30))
-            surface.blit(overlay, (0, 0))
+            surface.blit(self.slowmo_overlay, (0, 0))
+
+        # HUD
+        implant_info = self.implants.get_equipped_info()
+        self.hud.draw(surface, self.player, implant_info, self.player.heat)
 
     def _draw_background(self, surface, cam_off):
         """Sfondo parallasse cyberpunk — blit pre-generated layers."""
         BG_W = 800
         W = INTERNAL_WIDTH
+
+        # Horizon gradient (static, no parallax)
+        surface.blit(self.bg_horizon, (0, 0))
 
         # Layer 1 (far, parallax 0.05)
         ox = int(cam_off[0] * 0.05) % BG_W

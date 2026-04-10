@@ -30,6 +30,7 @@ class Entity:
         self.anim_frame = 0
         self.anim_timer = 0
         self.anim_speed = 8  # frame tra un cambio di sprite
+        self.anim_speeds = {}  # velocità per-animazione (override)
 
         # Sprite
         self.sprites = {}
@@ -72,8 +73,9 @@ class Entity:
         if not frames:
             return
 
+        speed = self.anim_speeds.get(self.current_anim, self.anim_speed)
         self.anim_timer += dt
-        if self.anim_timer >= self.anim_speed:
+        if self.anim_timer >= speed:
             self.anim_timer = 0
             self.anim_frame = (self.anim_frame + 1) % len(frames)
 
@@ -84,6 +86,9 @@ class Entity:
 
     def draw(self, surface, camera_offset=(0, 0)):
         if self.image and self.active:
-            draw_x = int(self.x) + camera_offset[0]
-            draw_y = int(self.y) + camera_offset[1]
+            sprite_w = self.image.get_width()
+            sprite_h = self.image.get_height()
+            # Ancora al centro-basso della collision box
+            draw_x = int(self.x) + self.collision_width // 2 - sprite_w // 2 + camera_offset[0]
+            draw_y = int(self.y) + self.collision_height - sprite_h + camera_offset[1]
             surface.blit(self.image, (draw_x, draw_y))
