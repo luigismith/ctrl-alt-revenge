@@ -58,7 +58,7 @@ class Entity:
 
     def update_animation(self, dt=1.0):
         """Avanza l'animazione."""
-        suffix = "_right" if self.facing == 1 else "_left"
+        suffix = "_left" if self.facing == 1 else "_right"
         anim_key = self.current_anim + suffix
 
         if anim_key not in self.sprites:
