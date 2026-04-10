@@ -1,204 +1,205 @@
 # data/levels/level_01.py — "Sotto la Linea"
 # Mappa come array Python: 0=vuoto, 1=solido, 2=one-way platform
-# Sezioni: tutorial -> terminale -> stealth -> arena thug -> platform verticale -> boss
+# Visual: 1=ground, 2=wall, 3=platform, 4=gate, 5=cover, 6=boss_floor, 7=boss_wall
+# Sezioni: tutorial (0-25) -> stealth (25-50) -> combat arena (50-75) -> vertical (75-100) -> boss (100-130)
 from ctrl_alt_revenge.settings import TILE_SIZE
 
-# Mappa larga ~200 tile (3200px), alta 30 tile (480px)
-MAP_WIDTH_TILES = 200
+MAP_WIDTH_TILES = 130
 MAP_HEIGHT_TILES = 30
 
-def generate_level_01():
-    """Genera il livello 1 completo. Restituisce un dizionario con tutti i dati."""
 
-    # Inizializza mappa vuota
+def generate_level_01():
+    """Genera il livello 1 completo — versione compatta con migliore pacing."""
+
     collision = [[0] * MAP_WIDTH_TILES for _ in range(MAP_HEIGHT_TILES)]
     visual = [[0] * MAP_WIDTH_TILES for _ in range(MAP_HEIGHT_TILES)]
 
-    # --- PAVIMENTO BASE (riga 26-29 = solido) ---
-    for x in range(MAP_WIDTH_TILES):
-        for y in range(26, MAP_HEIGHT_TILES):
+    # Helper per piazzare blocchi
+    def solid(x, y, vis=1):
+        if 0 <= x < MAP_WIDTH_TILES and 0 <= y < MAP_HEIGHT_TILES:
             collision[y][x] = 1
-            visual[y][x] = 1
+            visual[y][x] = vis
 
-    # --- SEZIONE 1: TUTORIAL MOVIMENTO (tile 0-30) ---
-    # Muro iniziale a sinistra
+    def oneway(x, y, vis=3):
+        if 0 <= x < MAP_WIDTH_TILES and 0 <= y < MAP_HEIGHT_TILES:
+            collision[y][x] = 2
+            visual[y][x] = vis
+
+    def solid_rect(x1, x2, y1, y2, vis=1):
+        for x in range(x1, x2):
+            for y in range(y1, y2):
+                solid(x, y, vis)
+
+    def oneway_row(x1, x2, y, vis=3):
+        for x in range(x1, x2):
+            oneway(x, y, vis)
+
+    # === PAVIMENTO BASE (riga 26-29) ===
+    solid_rect(0, MAP_WIDTH_TILES, 26, MAP_HEIGHT_TILES, 1)
+
+    # === SOFFITTO GENERALE (riga 0) ===
+    solid_rect(0, MAP_WIDTH_TILES, 0, 1, 2)
+
+    # === SEZIONE 1: TUTORIAL (tile 0-25) ===
+    # Muro sinistro
     for y in range(0, 26):
-        collision[y][0] = 1
-        visual[y][0] = 1
+        solid(0, y, 2)
 
-    # Piccole piattaforme per tutorial salto
-    for x in range(12, 16):
-        collision[22][x] = 2  # one-way
-        visual[22][x] = 3
-    for x in range(18, 22):
-        collision[19][x] = 2
-        visual[19][x] = 3
-    for x in range(24, 28):
-        collision[22][x] = 2
-        visual[22][x] = 3
+    # Piattaforma bassa per imparare il salto
+    oneway_row(8, 12, 23)
+    # Piattaforma media per doppio salto
+    oneway_row(14, 18, 20)
+    # Walkway sopraelevata — crea un secondo livello
+    solid_rect(6, 22, 16, 17, 2)
+    # Scale a sinistra per salire sulla walkway
+    oneway_row(4, 7, 19)
+    oneway_row(3, 6, 22)
 
-    # --- SEZIONE 2: PRIMO TERMINALE + CANCELLO (tile 30-45) ---
-    # Cancello (muro verticale con buco in alto)
-    for y in range(10, 26):
-        collision[y][42] = 1
-        visual[y][42] = 4  # porta/cancello
-        collision[y][43] = 1
-        visual[y][43] = 4
+    # === GATE + TERMINALE (tile 22-27) ===
+    # Cancello verticale
+    for y in range(8, 26):
+        solid(25, y, 4)
+        solid(26, y, 4)
+    # Terminale platform
+    oneway_row(20, 24, 23)
 
-    # Piattaforma vicino al terminale
-    for x in range(33, 38):
-        collision[20][x] = 2
-        visual[20][x] = 3
+    # === SEZIONE 2: STEALTH (tile 27-50) ===
+    # Soffitto basso per atmosfera opprimente
+    solid_rect(27, 50, 6, 8, 2)
 
-    # --- SEZIONE 3: STEALTH CON TELECAMERE (tile 45-75) ---
-    # Soffitto basso per sezione stealth
-    for x in range(48, 72):
-        collision[10][x] = 1
-        visual[10][x] = 2
+    # Passaggio sotterraneo (scavato nel pavimento) — alternativa stealth
+    solid_rect(30, 48, 24, 25, 1)  # ripristina pavimento sopra il tunnel
+    for x in range(32, 46):
+        collision[24][x] = 0  # scava tunnel
+        visual[24][x] = 0
+    # Entrata tunnel a sinistra
+    collision[25][31] = 0
+    visual[25][31] = 0
+    collision[24][31] = 0
+    visual[24][31] = 0
+    # Uscita tunnel a destra
+    collision[25][46] = 0
+    visual[25][46] = 0
+    collision[24][46] = 0
+    visual[24][46] = 0
 
-    # Coperture per nascondersi (2 tile alte, saltabili)
-    for x in range(52, 54):
+    # Coperture in superficie
+    for cx in [30, 36, 42]:
         for y in range(24, 26):
-            collision[y][x] = 1
-            visual[y][x] = 5  # copertura
+            solid(cx, y, 5)
+            solid(cx + 1, y, 5)
 
-    for x in range(60, 62):
-        for y in range(24, 26):
-            collision[y][x] = 1
-            visual[y][x] = 5
+    # Piattaforme elevate per drone patrol
+    oneway_row(33, 37, 14)
+    oneway_row(40, 44, 11)
 
-    for x in range(68, 70):
-        for y in range(24, 26):
-            collision[y][x] = 1
-            visual[y][x] = 5
+    # === SEZIONE 3: COMBAT ARENA (tile 50-75) ===
+    # Muri parziali dell'arena
+    for y in range(8, 22):
+        solid(50, y, 2)
+    for y in range(8, 22):
+        solid(75, y, 2)
 
-    # --- SEZIONE 4: ARENA THUG (tile 75-100) ---
-    # Muri parziali dell'arena (con apertura in basso per passare)
-    for y in range(10, 22):
-        collision[y][75] = 1
-        visual[y][75] = 2
-    for y in range(10, 22):
-        collision[y][100] = 1
-        visual[y][100] = 2
+    # Multi-livello nell'arena
+    # Piano inferiore — pavimento standard a y=25
+    # Piano medio — walkway
+    oneway_row(54, 60, 21)
+    oneway_row(65, 72, 21)
+    # Piano alto — piattaforme per vantaggio tattico
+    oneway_row(57, 62, 17)
+    oneway_row(67, 71, 14)
+    # Pilastro centrale spezzato
+    solid(62, 22, 2)
+    solid(62, 23, 2)
+    solid(62, 24, 2)
+    solid(62, 25, 2)
+    solid(63, 22, 2)
+    solid(63, 23, 2)
+    solid(63, 24, 2)
+    solid(63, 25, 2)
+    oneway_row(61, 65, 18)
 
-    # Piattaforme nell'arena
-    for x in range(80, 84):
-        collision[21][x] = 2
-        visual[21][x] = 3
-    for x in range(88, 92):
-        collision[18][x] = 2
-        visual[18][x] = 3
-    for x in range(95, 99):
-        collision[21][x] = 2
-        visual[21][x] = 3
+    # === SEZIONE 4: VERTICAL PLATFORMING (tile 75-100) ===
+    # Shaft verticale stretto con wall-jump
+    for y in range(1, 26):
+        solid(78, y, 2)
+    for y in range(1, 26):
+        solid(88, y, 2)
 
-    # --- SEZIONE 5: PLATFORM VERTICALE CON WALL-JUMP (tile 100-130) ---
-    # Corridoio verticale stretto (apertura in basso per entrare)
-    for y in range(0, 23):
-        collision[y][105] = 1
-        visual[y][105] = 2
-    for y in range(0, 23):
-        collision[y][115] = 1
-        visual[y][115] = 2
+    # Piattaforme alternate dentro lo shaft
+    oneway_row(79, 83, 23)
+    oneway_row(84, 88, 19)
+    oneway_row(79, 83, 15)
+    oneway_row(84, 88, 11)
+    oneway_row(79, 83, 7)
 
-    # Piattaforme alternate per wall-jump
-    for x in range(106, 110):
-        collision[22][x] = 2
-        visual[22][x] = 3
-    for x in range(111, 115):
-        collision[18][x] = 2
-        visual[18][x] = 3
-    for x in range(106, 110):
-        collision[14][x] = 2
-        visual[14][x] = 3
-    for x in range(111, 115):
-        collision[10][x] = 2
-        visual[10][x] = 3
-    for x in range(106, 110):
-        collision[6][x] = 2
-        visual[6][x] = 3
+    # Uscita in alto — ponte verso boss
+    solid_rect(83, 100, 5, 6, 2)
 
-    # Uscita in alto
-    for x in range(106, 115):
-        collision[4][x] = 0
-    # Ponte in alto che porta alla sezione boss
-    for x in range(115, 140):
-        collision[6][x] = 1
-        visual[6][x] = 2
-    # Scale per tornare giù
-    for x in range(135, 140):
-        for y in range(6, 26):
-            if y % 4 == 0:
-                collision[y][x] = 2
-                visual[y][x] = 3
+    # Scale/piattaforme discendenti dal ponte
+    oneway_row(93, 97, 9)
+    oneway_row(90, 94, 14)
+    oneway_row(95, 99, 19)
+    oneway_row(92, 96, 23)
 
-    # --- SEZIONE 6: ARENA BOSS (tile 140-180) ---
-    # Pavimento boss arena
-    for x in range(140, 180):
-        for y in range(26, MAP_HEIGHT_TILES):
-            collision[y][x] = 1
-            visual[y][x] = 6  # pavimento boss
+    # === SEZIONE 5: BOSS ARENA (tile 100-130) ===
+    # Pavimento boss
+    solid_rect(100, 129, 26, MAP_HEIGHT_TILES, 6)
 
-    # Muri arena boss (apertura a sinistra per entrare)
-    for y in range(0, 22):
-        collision[y][140] = 1
-        visual[y][140] = 7  # muro boss
-    for y in range(0, 26):
-        collision[y][179] = 1
-        visual[y][179] = 7
+    # Muro sinistro boss (con apertura in basso per entrare)
+    for y in range(1, 22):
+        solid(100, y, 7)
+    # Muro destro boss (chiuso)
+    for y in range(1, 26):
+        solid(129, y, 7)
 
     # Soffitto arena boss
-    for x in range(140, 180):
-        collision[0][x] = 1
-        visual[0][x] = 7
+    solid_rect(100, 130, 0, 1, 7)
 
     # Piattaforme nell'arena boss
-    for x in range(148, 153):
-        collision[20][x] = 2
-        visual[20][x] = 3
-    for x in range(158, 163):
-        collision[17][x] = 2
-        visual[17][x] = 3
-    for x in range(168, 173):
-        collision[20][x] = 2
-        visual[20][x] = 3
+    oneway_row(106, 111, 21)
+    oneway_row(114, 120, 17)
+    oneway_row(122, 127, 21)
 
-    # Soffitto generale (tile 0-140)
-    for x in range(0, 140):
-        collision[0][x] = 1
-
-    # --- ENTITA' ---
+    # === ENTITA' ===
     entities = {
         "player_spawn": (3 * TILE_SIZE, 24 * TILE_SIZE),
 
         "terminals": [
-            {"x": 39 * TILE_SIZE, "y": 24 * TILE_SIZE, "type": "door",
-             "gate_tiles": [(42, y) for y in range(10, 26)] + [(43, y) for y in range(10, 26)]},
+            {"x": 22 * TILE_SIZE, "y": 22 * TILE_SIZE, "type": "door",
+             "gate_tiles": [(25, y) for y in range(8, 26)] + [(26, y) for y in range(8, 26)]},
         ],
 
         "cameras": [
-            {"x": 50 * TILE_SIZE, "y": 10 * TILE_SIZE, "facing": 1},
-            {"x": 58 * TILE_SIZE, "y": 10 * TILE_SIZE, "facing": -1},
-            {"x": 66 * TILE_SIZE, "y": 10 * TILE_SIZE, "facing": 1},
+            {"x": 32 * TILE_SIZE, "y": 6 * TILE_SIZE, "facing": 1},
+            {"x": 40 * TILE_SIZE, "y": 6 * TILE_SIZE, "facing": -1},
+            {"x": 46 * TILE_SIZE, "y": 6 * TILE_SIZE, "facing": 1},
         ],
 
         "thugs": [
-            {"x": 80 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 60},
-            {"x": 88 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 40},
-            {"x": 95 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 50},
+            # 2 guardie al cancello
+            {"x": 28 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 30},
+            {"x": 24 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 20},
+            # 3 nell'arena combat
+            {"x": 55 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 50},
+            {"x": 63 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 40},
+            {"x": 70 * TILE_SIZE, "y": 24 * TILE_SIZE, "patrol": 60},
         ],
 
         "drones": [
-            {"x": 55 * TILE_SIZE, "y": 14 * TILE_SIZE, "patrol": 80},
-            {"x": 65 * TILE_SIZE, "y": 14 * TILE_SIZE, "patrol": 60},
+            # 1 nella sezione stealth
+            {"x": 38 * TILE_SIZE, "y": 10 * TILE_SIZE, "patrol": 100},
+            # 2 nella sezione verticale
+            {"x": 83 * TILE_SIZE, "y": 12 * TILE_SIZE, "patrol": 60},
+            {"x": 83 * TILE_SIZE, "y": 20 * TILE_SIZE, "patrol": 40},
         ],
 
-        "boss_spawn": (160 * TILE_SIZE, 22 * TILE_SIZE),
+        "boss_spawn": (115 * TILE_SIZE, 22 * TILE_SIZE),
 
         "dialogs": [
             {"x": 5 * TILE_SIZE, "y": 24 * TILE_SIZE, "dialog_id": "intro",
              "trigger_once": True},
-            {"x": 142 * TILE_SIZE, "y": 24 * TILE_SIZE, "dialog_id": "boss_intro",
+            {"x": 102 * TILE_SIZE, "y": 24 * TILE_SIZE, "dialog_id": "boss_intro",
              "trigger_once": True},
         ],
     }
