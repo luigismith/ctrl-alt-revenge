@@ -22,7 +22,7 @@ class HackingMinigame:
         self.success = False
         self.failed = False
         self.target_entity = None
-        self.cell_size = 20
+        self.cell_size = 16
         self.grid_offset_x = 0
         self.grid_offset_y = 0
         self._calc_layout()
@@ -163,16 +163,18 @@ class HackingMinigame:
         surface.blit(overlay, (0, 0))
 
         # Titolo
-        font = pygame.font.SysFont("consolas", 8)
+        font = pygame.font.SysFont("consolas", 10)
+        font_label = pygame.font.SysFont("consolas", 10)
+        font_result = pygame.font.SysFont("consolas", 12)
         title = font.render("< HACK IN CORSO >", False, COLOR_GREEN_HACK)
         surface.blit(title, (INTERNAL_WIDTH // 2 - title.get_width() // 2,
-                             self.grid_offset_y - 20))
+                             self.grid_offset_y - 36))
 
         # Timer
         timer_color = COLOR_GREEN_HACK if self.time_left > 2 else COLOR_RED_ALARM
         timer_text = font.render(f"T-{self.time_left:.1f}s", False, timer_color)
         surface.blit(timer_text, (INTERNAL_WIDTH // 2 - timer_text.get_width() // 2,
-                                  self.grid_offset_y - 10))
+                                  self.grid_offset_y - 18))
 
         # Griglia
         for r in range(self.grid_size):
@@ -198,11 +200,11 @@ class HackingMinigame:
 
                 # Etichette
                 if cell == 2:
-                    s = font.render("S", False, COLOR_WHITE_UI)
-                    surface.blit(s, (x + 6, y + 5))
+                    s = font_label.render("S", False, COLOR_WHITE_UI)
+                    surface.blit(s, (x + 4, y + 3))
                 elif cell == 3:
-                    e = font.render("E", False, COLOR_WHITE_UI)
-                    surface.blit(e, (x + 6, y + 5))
+                    e = font_label.render("E", False, COLOR_WHITE_UI)
+                    surface.blit(e, (x + 4, y + 3))
 
                 # Bordo griglia
                 pygame.draw.rect(surface, (40, 40, 60),
@@ -225,10 +227,10 @@ class HackingMinigame:
 
         # Messaggio risultato
         if self.success:
-            msg = font.render("ACCESSO GARANTITO", False, COLOR_GREEN_HACK)
+            msg = font_result.render("ACCESSO GARANTITO", False, COLOR_GREEN_HACK)
             surface.blit(msg, (INTERNAL_WIDTH // 2 - msg.get_width() // 2,
-                               self.grid_offset_y + self.grid_size * self.cell_size + 10))
+                               self.grid_offset_y + self.grid_size * self.cell_size + 14))
         elif self.failed:
-            msg = font.render("ACCESSO NEGATO", False, COLOR_RED_ALARM)
+            msg = font_result.render("ACCESSO NEGATO", False, COLOR_RED_ALARM)
             surface.blit(msg, (INTERNAL_WIDTH // 2 - msg.get_width() // 2,
-                               self.grid_offset_y + self.grid_size * self.cell_size + 10))
+                               self.grid_offset_y + self.grid_size * self.cell_size + 14))

@@ -14,9 +14,16 @@ class Thug(Enemy):
         self.init_ai(patrol_range, THUG_SIGHT_RANGE, THUG_SIGHT_CONE)
         self.attack_range = 18
         self.contact_damage = 1
-        self.attack_wind_up = 15  # frame prima del colpo
+        self.attack_wind_up = 10  # frame prima del colpo (faster attacks)
         self.attack_wind_timer = 0
         self.chase_speed = THUG_SPEED * 1.5
+
+    def take_damage(self, amount, knockback_x=0, knockback_y=0):
+        """Override: switch to chase after getting hit."""
+        result = super().take_damage(amount, knockback_x, knockback_y)
+        if result and self.alive and self.target:
+            self.ai_state = "chase"
+        return result
 
     def _ai_update(self, dt):
         if self.ai_state == "patrol":

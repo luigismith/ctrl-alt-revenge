@@ -21,8 +21,8 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.init_hitbox()
         self.init_hurtbox()
 
-        self.collision_width = 12
-        self.collision_height = 26
+        self.collision_width = 14
+        self.collision_height = 28
         # Offset per centrare la collision box nello sprite
         self.col_offset_x = (PLAYER_WIDTH - self.collision_width) // 2
 
@@ -69,6 +69,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
 
         # Stato per animazione
         self._was_on_ground = False
+        self.land_timer = 0
 
     def update(self, input_mgr, dt=1.0):
         """Aggiornamento completo del player."""
@@ -109,7 +110,21 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             self.attack_timer -= dt
             if self.attack_timer <= 0:
                 self.is_attacking = False
+                self.anim_speed = 8  # restore default anim speed
                 self.deactivate_hitbox()
+            elif self.attack_timer < 3:
+                # Allow canceling attack recovery into new attack or jump
+                self.anim_speed = 8  # restore default anim speed
+                if input_mgr.is_just_pressed("punch"):
+                    self._do_attack("punch")
+                elif input_mgr.is_just_pressed("kick"):
+                    self._do_attack("kick")
+                elif input_mgr.is_just_pressed("jump"):
+                    self.is_attacking = False
+                    self.deactivate_hitbox()
+                else:
+                    self.update_animation(dt)
+                    return
             else:
                 self.update_animation(dt)
                 return  # non processa input durante attacco
@@ -127,7 +142,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             self.slide_timer -= dt
             if self.slide_timer <= 0:
                 self.is_sliding = False
-                self.collision_height = 26
+                old_bottom = self.y + self.collision_height
+                self.collision_height = 28
+                self.y = old_bottom - self.collision_height
             else:
                 self.set_anim("slide")
                 self.update_animation(dt)
@@ -147,19 +164,26 @@ class Player(Entity, Health, Hitbox, Hurtbox):
                 if abs(self.vel_x) < 0.1:
                     self.vel_x = 0
 
-        # Accovacciamento
+        # Accovacciamento (aggiusta y per mantenere i piedi fissi)
         if input_mgr.is_held("down") and self.on_ground and not self.is_sliding:
+            if not self.is_crouching:
+                old_bottom = self.y + self.collision_height
+                self.collision_height = 18
+                self.y = old_bottom - self.collision_height
             self.is_crouching = True
-            self.collision_height = 18
             # Slide: giù + salto mentre si corre
             if input_mgr.is_just_pressed("jump") and abs(self.vel_x) > 1.5:
+                old_bottom = self.y + self.collision_height
                 self.is_sliding = True
                 self.slide_timer = self.slide_duration
                 self.vel_x = self.facing * PLAYER_SPEED * 1.8
                 self.collision_height = 14
+                self.y = old_bottom - self.collision_height
         else:
             if self.is_crouching:
-                self.collision_height = 26
+                old_bottom = self.y + self.collision_height
+                self.collision_height = 28
+                self.y = old_bottom - self.collision_height
             self.is_crouching = False
 
         # --- SALTO ---
@@ -206,9 +230,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.drop_through = input_mgr.is_held("down") and input_mgr.is_just_pressed("jump") and self.on_ground
 
         # --- COMBAT ---
-        if input_mgr.is_just_pressed("punch") and not self.is_crouching:
+        if input_mgr.is_just_pressed("punch"):
             self._do_attack("punch")
-        elif input_mgr.is_just_pressed("kick") and not self.is_crouching:
+        elif input_mgr.is_just_pressed("kick"):
             self._do_attack("kick")
 
         # Parry
@@ -217,6 +241,12 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             self.parry_timer = PARRY_WINDOW
             self.parry_success = False
             self.set_anim("parry")
+
+        # Landing detection
+        if self.on_ground and not self._was_on_ground and self.vel_y >= 0:
+            self.land_timer = 6
+        if self.land_timer > 0:
+            self.land_timer -= dt
 
         # --- ANIMAZIONE ---
         self._update_anim_state()
@@ -228,6 +258,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         """Esegue un attacco."""
         self.is_attacking = True
         self.attack_timer = self.attack_duration
+        self.anim_speed = 3  # faster attack animations
 
         if attack_type == "punch":
             if self.combo_timer > 0 and self.combo_count < 3:
@@ -253,6 +284,8 @@ class Player(Entity, Health, Hitbox, Hurtbox):
 
         if self.iframes > 0 and not self.on_ground:
             self.set_anim("hurt")
+        elif self.land_timer > 0 and self.on_ground:
+            self.set_anim("land")
         elif self.is_wall_sliding:
             self.set_anim("wall_slide")
         elif self.is_crouching:
@@ -282,8 +315,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             return
 
         if self.image:
-            draw_x = int(self.x) - self.col_offset_x + camera_offset[0]
-            draw_y = int(self.y) + camera_offset[1]
-            # Aggiusta se sprite è più alto dell'area di collisione
-            draw_y -= (self.height - self.collision_height)
+            sprite_w = self.image.get_width()
+            sprite_h = self.image.get_height()
+            # Centrato sul fondo della collision box (come Entity.draw)
+            draw_x = int(self.x) + self.collision_width // 2 - sprite_w // 2 + camera_offset[0]
+            draw_y = int(self.y) + self.collision_height - sprite_h + camera_offset[1]
             surface.blit(self.image, (draw_x, draw_y))

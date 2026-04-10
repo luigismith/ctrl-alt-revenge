@@ -15,13 +15,13 @@ class AssetManager:
         self._font_cache = {}
         self._base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
 
-    def get_font(self, size=8):
+    def get_font(self, size=14):
         """Font pixel monospace senza antialias."""
         if size not in self._font_cache:
             self._font_cache[size] = pygame.font.SysFont("consolas", size, bold=False)
         return self._font_cache[size]
 
-    def render_text(self, text, size=8, color=COLOR_WHITE_UI, antialias=False):
+    def render_text(self, text, size=14, color=COLOR_WHITE_UI, antialias=False):
         """Renderizza testo con font pixel."""
         font = self.get_font(size)
         return font.render(text, antialias, color)

@@ -31,6 +31,13 @@ class Drone(Enemy, Hackable):
         self.hacked_timer = 0
         self.hacked_ally = False
         self.anim_speed = 4  # eliche veloci
+        self.anim_speeds = {
+            "fly": 4,
+            "hacked": 4,
+            "shoot": 8,
+            "death": 8,
+            "stunned": 8,
+        }
 
     def _ai_update(self, dt):
         if self.hacked_ally:

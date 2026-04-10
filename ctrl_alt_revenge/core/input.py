@@ -37,6 +37,53 @@ class InputManager:
             elif event.type == pygame.JOYBUTTONUP:
                 self._just_released[("joy", event.button)] = True
                 self._pressed.pop(("joy", event.button), None)
+            elif event.type == pygame.JOYHATMOTION:
+                # D-pad (hat) support
+                hat_x, hat_y = event.value
+                # Clear previous hat state
+                for key in [("hat", "left"), ("hat", "right"), ("hat", "up"), ("hat", "down")]:
+                    if key in self._pressed:
+                        self._just_released[key] = True
+                        self._pressed.pop(key, None)
+                # Set new hat state
+                if hat_x < 0:
+                    self._just_pressed[("hat", "left")] = True
+                    self._pressed[("hat", "left")] = True
+                elif hat_x > 0:
+                    self._just_pressed[("hat", "right")] = True
+                    self._pressed[("hat", "right")] = True
+                if hat_y > 0:
+                    self._just_pressed[("hat", "up")] = True
+                    self._pressed[("hat", "up")] = True
+                elif hat_y < 0:
+                    self._just_pressed[("hat", "down")] = True
+                    self._pressed[("hat", "down")] = True
+
+        # Trigger support for implants (axis 4 = left trigger, axis 5 = right trigger)
+        if self._gamepad:
+            try:
+                left_trigger = self._gamepad.get_axis(4)
+                right_trigger = self._gamepad.get_axis(5)
+                lt_key = ("trigger", "left")
+                rt_key = ("trigger", "right")
+                if left_trigger > 0.5:
+                    if lt_key not in self._pressed:
+                        self._just_pressed[lt_key] = True
+                    self._pressed[lt_key] = True
+                else:
+                    if lt_key in self._pressed:
+                        self._just_released[lt_key] = True
+                        self._pressed.pop(lt_key, None)
+                if right_trigger > 0.5:
+                    if rt_key not in self._pressed:
+                        self._just_pressed[rt_key] = True
+                    self._pressed[rt_key] = True
+                else:
+                    if rt_key in self._pressed:
+                        self._just_released[rt_key] = True
+                        self._pressed.pop(rt_key, None)
+            except Exception:
+                pass
 
     def is_held(self, action):
         """Tasto/pulsante tenuto premuto."""
@@ -46,6 +93,15 @@ class InputManager:
         if action in GAMEPAD_MAP:
             if ("joy", GAMEPAD_MAP[action]) in self._pressed:
                 return True
+        # D-pad (hat) support
+        if action in ("left", "right", "up", "down"):
+            if ("hat", action) in self._pressed:
+                return True
+        # Trigger support for implants
+        if action == "implant1" and ("trigger", "left") in self._pressed:
+            return True
+        if action == "implant2" and ("trigger", "right") in self._pressed:
+            return True
         # Asse analogico per movimento
         if self._gamepad:
             if action == "left" and self._gamepad.get_axis(0) < -0.3:
@@ -66,6 +122,15 @@ class InputManager:
         if action in GAMEPAD_MAP:
             if ("joy", GAMEPAD_MAP[action]) in self._just_pressed:
                 return True
+        # D-pad (hat) support
+        if action in ("left", "right", "up", "down"):
+            if ("hat", action) in self._just_pressed:
+                return True
+        # Trigger support for implants
+        if action == "implant1" and ("trigger", "left") in self._just_pressed:
+            return True
+        if action == "implant2" and ("trigger", "right") in self._just_pressed:
+            return True
         return False
 
     def is_just_released(self, action):
@@ -76,6 +141,15 @@ class InputManager:
         if action in GAMEPAD_MAP:
             if ("joy", GAMEPAD_MAP[action]) in self._just_released:
                 return True
+        # D-pad (hat) support
+        if action in ("left", "right", "up", "down"):
+            if ("hat", action) in self._just_released:
+                return True
+        # Trigger support for implants
+        if action == "implant1" and ("trigger", "left") in self._just_released:
+            return True
+        if action == "implant2" and ("trigger", "right") in self._just_released:
+            return True
         return False
 
     def get_axis_x(self):
@@ -95,3 +169,11 @@ class InputManager:
         if self.is_held("down"):
             val += 1
         return val
+
+    def rumble(self, low=0.5, high=0.5, duration=200):
+        """Attiva vibrazione del gamepad se disponibile."""
+        if self._gamepad:
+            try:
+                self._gamepad.rumble(low, high, duration)
+            except Exception:
+                pass

@@ -82,7 +82,10 @@ class PhysicsSystem:
         self._build_collision_map(level_data)
 
     def apply_gravity(self, entity, dt=1.0):
-        """Applica gravità all'entità."""
+        """Applica gravità all'entità. Salta se già a terra."""
+        if entity.on_ground and entity.vel_y >= 0:
+            entity.vel_y = 0
+            return
         entity.vel_y += GRAVITY * dt
         if entity.vel_y > MAX_FALL_SPEED:
             entity.vel_y = MAX_FALL_SPEED
@@ -120,6 +123,7 @@ class PhysicsSystem:
         for tile_rect in self.solid_tiles:
             if entity_rect.colliderect(tile_rect):
                 if entity.vel_y > 0:
+                    # Snap a valore intero esatto per evitare oscillazione
                     entity.y = float(tile_rect.top - entity.collision_height)
                     on_ground = True
                 elif entity.vel_y < 0:
@@ -136,10 +140,23 @@ class PhysicsSystem:
                 if entity_rect.colliderect(tile_rect):
                     # Solo se i piedi sono vicini alla cima della piattaforma
                     if (entity_rect.bottom - tile_rect.top) < TILE_SIZE // 2 + 2:
-                        entity.y = tile_rect.top - entity.collision_height
+                        entity.y = float(tile_rect.top - entity.collision_height)
                         entity.vel_y = 0
                         on_ground = True
 
+        # Ground probe: controlla 1px sotto i piedi per mantenere on_ground stabile
+        if not on_ground and entity.vel_y >= 0:
+            probe_rect = pygame.Rect(round(entity.x) + 2, round(entity.y) + entity.collision_height,
+                                     entity.collision_width - 4, 2)
+            for tile_rect in self.solid_tiles:
+                if probe_rect.colliderect(tile_rect):
+                    on_ground = True
+                    break
+            if not on_ground:
+                for tile_rect in self.one_way_tiles:
+                    if probe_rect.colliderect(tile_rect):
+                        on_ground = True
+                        break
         entity.on_ground = on_ground
         entity.on_wall_left = on_wall_left
         entity.on_wall_right = on_wall_right
