@@ -56,8 +56,8 @@ def generate_level_01():
     oneway_row(3, 6, 22)
 
     # === GATE + TERMINALE (tile 22-27) ===
-    # Cancello verticale
-    for y in range(8, 26):
+    # Cancello verticale (con apertura in basso per passare dopo hack)
+    for y in range(8, 23):
         solid(25, y, 4)
         solid(26, y, 4)
     # Terminale platform
@@ -83,11 +83,10 @@ def generate_level_01():
     collision[24][46] = 0
     visual[24][46] = 0
 
-    # Coperture in superficie
+    # Coperture in superficie (one-way per non bloccare il passaggio)
     for cx in [30, 36, 42]:
-        for y in range(24, 26):
-            solid(cx, y, 5)
-            solid(cx + 1, y, 5)
+        oneway(cx, 24, 5)
+        oneway(cx + 1, 24, 5)
 
     # Piattaforme elevate per drone patrol
     oneway_row(33, 37, 14)
@@ -195,6 +194,17 @@ def generate_level_01():
              "trigger_once": True},
             {"x": 102 * TILE_SIZE, "y": 24 * TILE_SIZE, "dialog_id": "boss_intro",
              "trigger_once": True},
+        ],
+
+        "pickups": [
+            # Medikit dopo la sezione stealth
+            {"x": 48 * TILE_SIZE, "y": 24 * TILE_SIZE, "type": "medikit"},
+            # Ammo nell'arena combat
+            {"x": 60 * TILE_SIZE, "y": 20 * TILE_SIZE, "type": "ammo"},
+            # Medikit nella sezione verticale
+            {"x": 81 * TILE_SIZE, "y": 22 * TILE_SIZE, "type": "medikit"},
+            # Ammo prima del boss
+            {"x": 96 * TILE_SIZE, "y": 22 * TILE_SIZE, "type": "ammo"},
         ],
     }
 

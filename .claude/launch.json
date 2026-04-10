@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ctrl-alt-revenge",
+      "runtimeExecutable": "C:\\Users\\luigi.massari\\.platformio\\python3\\python.exe",
+      "runtimeArgs": ["main.py"],
+      "port": 0
+    }
+  ]
+}

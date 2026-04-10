@@ -33,13 +33,14 @@ class HackingMinigame:
         self.grid_offset_x = (INTERNAL_WIDTH - total_w) // 2
         self.grid_offset_y = (INTERNAL_HEIGHT - total_h) // 2
 
-    def start(self, target_entity, difficulty=1):
+    def start(self, target_entity, difficulty=1, time_limit=None):
         """Avvia il mini-gioco per un'entità hackable."""
         self.active = True
         self.success = False
         self.failed = False
         self.target_entity = target_entity
-        self.time_left = HACK_TIME_LIMIT
+        self.hack_time_limit = time_limit if time_limit is not None else HACK_TIME_LIMIT
+        self.time_left = self.hack_time_limit
         self.path = []
         self._generate_grid(difficulty)
         # Cursore su START

@@ -4,7 +4,7 @@ from ctrl_alt_revenge.settings import (
     COLOR_WHITE_UI, COLOR_RED_ALARM, COLOR_NEON_BLUE, COLOR_NEON_ORANGE,
     COLOR_NEON_PURPLE, COLOR_GREEN_HACK, COLOR_DARK_GRAY, COLOR_YELLOW,
     INTERNAL_WIDTH, INTERNAL_HEIGHT, HEAT_ALARM_THRESHOLD,
-    STRINGS,
+    STRINGS, GUN_AMMO_MAX,
 )
 
 
@@ -52,6 +52,10 @@ class HUD:
         self._draw_hearts(surface, player.hp, player.max_hp)
         self._draw_heat_bar(surface, heat)
         self._draw_implant_slots(surface, implant_info)
+
+        # Ammo counter
+        if hasattr(player, 'has_gun') and player.has_gun:
+            self._draw_ammo(surface, player.gun_ammo)
 
         # Notification
         if self.notification_timer > 0:
@@ -132,6 +136,14 @@ class HUD:
             num_x = sx + (slot_size - num.get_width()) // 2
             num_y = y + (slot_size - num.get_height()) // 2
             surface.blit(num, (num_x, num_y))
+
+    def _draw_ammo(self, surface, ammo):
+        """Ammo counter below implant slots."""
+        color = COLOR_YELLOW if ammo > 3 else COLOR_RED_ALARM
+        text = self.font.render(f"AMMO:{ammo}", False, color)
+        x = INTERNAL_WIDTH - text.get_width() - 6
+        y = 20
+        surface.blit(text, (x, y))
 
     def _draw_notification(self, surface):
         """Centered notification with dark background and neon border."""

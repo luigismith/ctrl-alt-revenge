@@ -49,6 +49,19 @@ def _square(freq, duration, volume=0.3, sample_rate=SAMPLE_RATE):
     return buf
 
 
+def _pulse(freq, duration, duty=0.25, volume=0.3, sample_rate=SAMPLE_RATE):
+    """Generate a pulse wave buffer with variable duty cycle."""
+    n = int(sample_rate * duration)
+    buf = array.array('h')
+    amp = volume * 32767
+    period = sample_rate / freq if freq > 0 else sample_rate
+    for i in range(n):
+        phase = (i % int(period)) / period
+        val = amp if phase < duty else -amp
+        buf.append(_clamp16(val))
+    return buf
+
+
 def _sawtooth(freq, duration, volume=0.3, sample_rate=SAMPLE_RATE):
     """Generate a sawtooth wave buffer."""
     n = int(sample_rate * duration)
@@ -62,6 +75,23 @@ def _sawtooth(freq, duration, volume=0.3, sample_rate=SAMPLE_RATE):
     return buf
 
 
+def _chorus_saw(freq, duration, detune=0.005, volume=0.3, sample_rate=SAMPLE_RATE):
+    """Sawtooth with detuned copy for chorus effect."""
+    n = int(sample_rate * duration)
+    buf = array.array('h')
+    amp = volume * 32767 * 0.5  # halved since we mix two
+    freq2 = freq * (1.0 + detune)
+    period1 = sample_rate / freq if freq > 0 else sample_rate
+    period2 = sample_rate / freq2 if freq2 > 0 else sample_rate
+    for i in range(n):
+        phase1 = (i % int(period1)) / period1
+        phase2 = (i % int(period2)) / period2
+        v1 = 2.0 * phase1 - 1.0
+        v2 = 2.0 * phase2 - 1.0
+        buf.append(_clamp16(amp * (v1 + v2)))
+    return buf
+
+
 def _noise(duration, volume=0.3, sample_rate=SAMPLE_RATE):
     """Generate white noise buffer."""
     n = int(sample_rate * duration)
@@ -70,6 +100,50 @@ def _noise(duration, volume=0.3, sample_rate=SAMPLE_RATE):
     rng = random.Random(42)
     for _ in range(n):
         buf.append(_clamp16(amp * (rng.random() * 2.0 - 1.0)))
+    return buf
+
+
+def _kick_drum(duration=0.12, volume=0.4, sample_rate=SAMPLE_RATE):
+    """Proper kick: sine sweep 150Hz->40Hz over 80ms + body."""
+    n = int(sample_rate * duration)
+    buf = array.array('h')
+    amp = volume * 32767
+    for i in range(n):
+        t = i / sample_rate
+        # Pitch sweep: 150->40 Hz exponentially
+        freq = 40.0 + 110.0 * math.exp(-t * 30.0)
+        # Phase accumulation would be better but this is close enough
+        phase = 2.0 * math.pi * freq * t
+        env = math.exp(-t * 15.0)
+        buf.append(_clamp16(amp * env * math.sin(phase)))
+    return buf
+
+
+def _snare_drum(duration=0.12, volume=0.3, sample_rate=SAMPLE_RATE):
+    """Snare: noise burst + pitched body."""
+    n = int(sample_rate * duration)
+    buf = array.array('h')
+    amp = volume * 32767
+    rng = random.Random(77)
+    for i in range(n):
+        t = i / sample_rate
+        env = math.exp(-t * 18.0)
+        noise_val = rng.random() * 2.0 - 1.0
+        body = math.sin(2.0 * math.pi * 180.0 * t)
+        buf.append(_clamp16(amp * env * (noise_val * 0.7 + body * 0.3)))
+    return buf
+
+
+def _hihat(duration=0.04, volume=0.15, sample_rate=SAMPLE_RATE):
+    """Hi-hat: short noise burst with fast decay."""
+    n = int(sample_rate * duration)
+    buf = array.array('h')
+    amp = volume * 32767
+    rng = random.Random(55)
+    for i in range(n):
+        t = i / sample_rate
+        env = math.exp(-t * 60.0)
+        buf.append(_clamp16(amp * env * (rng.random() * 2.0 - 1.0)))
     return buf
 
 
@@ -96,6 +170,34 @@ def _noise_decay(duration, volume=0.3, decay=20.0, sample_rate=SAMPLE_RATE):
         t = i / sample_rate
         env = math.exp(-t * decay)
         buf.append(_clamp16(amp * env * (rng.random() * 2.0 - 1.0)))
+    return buf
+
+
+def _apply_adsr(buf, attack=0.01, decay=0.05, sustain=0.7, release=0.05,
+                sample_rate=SAMPLE_RATE):
+    """Apply ADSR envelope to a buffer in-place."""
+    n = len(buf)
+    a_samples = int(attack * sample_rate)
+    d_samples = int(decay * sample_rate)
+    r_samples = int(release * sample_rate)
+    s_start = a_samples + d_samples
+    r_start = max(s_start, n - r_samples)
+    for i in range(n):
+        if i < a_samples:
+            # Attack: ramp up
+            env = i / a_samples if a_samples > 0 else 1.0
+        elif i < s_start:
+            # Decay: ramp down to sustain
+            progress = (i - a_samples) / d_samples if d_samples > 0 else 1.0
+            env = 1.0 - (1.0 - sustain) * progress
+        elif i < r_start:
+            # Sustain
+            env = sustain
+        else:
+            # Release: ramp down
+            progress = (i - r_start) / r_samples if r_samples > 0 else 1.0
+            env = sustain * (1.0 - progress)
+        buf[i] = _clamp16(buf[i] * env)
     return buf
 
 
@@ -144,212 +246,152 @@ def _note_freq(note, octave):
 # ── Music track builders ─────────────────────────────────────────────
 
 def _build_menu_music():
-    """Dark ambient synthwave pad — slow arpeggiated minor progression.
+    """Dark cinematic synthwave — Cm - Ab - Eb - Bb progression.
 
-    Chord progression: Am - F - C - G (i - VI - III - VII in A minor)
-    Each chord lasts ~2s, total loop ~8s at ~90 BPM.
+    Layered: pulse bass + chorus saw pad + arpeggiated lead.
+    ~8s seamless loop at 85 BPM.
     """
-    bpm = 90
-    beat_dur = 60.0 / bpm  # ~0.667s per beat
-    # 3 beats per chord, 4 chords = 12 beats total = ~8s
-    beats_per_chord = 3
+    bpm = 85
+    beat_dur = 60.0 / bpm
+    beats_per_chord = 4
     chord_dur = beat_dur * beats_per_chord
-
-    # Arpeggiated notes for each chord (root, 3rd, 5th in low octave)
-    chords = [
-        # Am: A2, C3, E3
-        [_note_freq('A', 2), _note_freq('C', 3), _note_freq('E', 3)],
-        # F:  F2, A2, C3
-        [_note_freq('F', 2), _note_freq('A', 2), _note_freq('C', 3)],
-        # C:  C2, E2, G2
-        [_note_freq('C', 2), _note_freq('E', 2), _note_freq('G', 2)],
-        # G:  G2, B2, D3
-        [_note_freq('G', 2), _note_freq('B', 2), _note_freq('D', 3)],
-    ]
-
-    note_dur = chord_dur / 3.0  # each arpeggio note
-    total_dur = chord_dur * len(chords)
+    num_chords = 4
+    total_dur = chord_dur * num_chords
     total_samples = int(SAMPLE_RATE * total_dur)
-    result = array.array('h', [0] * total_samples)
 
-    for ci, chord_notes in enumerate(chords):
-        for ni, freq in enumerate(chord_notes):
-            start_t = ci * chord_dur + ni * note_dur
+    # Cm - Ab - Eb - Bb (root notes)
+    roots = [
+        _note_freq('C', 2),   # Cm
+        _note_freq('Ab', 1),  # Ab
+        _note_freq('Eb', 2),  # Eb
+        _note_freq('Bb', 1),  # Bb
+    ]
+    # Minor chord intervals: root, minor 3rd (6/5), 5th (3/2)
+    def minor_chord(root):
+        return [root, root * 6.0 / 5.0, root * 3.0 / 2.0]
+
+    # ── Bass: pulse wave (25% duty), whole notes ──
+    bass_buf = array.array('h', [0] * total_samples)
+    for ci, root in enumerate(roots):
+        start_s = int(ci * chord_dur * SAMPLE_RATE)
+        note = _pulse(root, chord_dur * 0.95, duty=0.25, volume=0.20)
+        _apply_adsr(note, attack=0.02, decay=0.1, sustain=0.6, release=0.15)
+        _overlay_at(bass_buf, note, start_s)
+
+    # ── Pad: chorus sawtooth playing chord tones ──
+    pad_buf = array.array('h', [0] * total_samples)
+    for ci, root in enumerate(roots):
+        chord_tones = minor_chord(root * 2)  # one octave up
+        start_s = int(ci * chord_dur * SAMPLE_RATE)
+        for freq in chord_tones:
+            tone = _chorus_saw(freq, chord_dur * 0.92, detune=0.006, volume=0.06)
+            _apply_adsr(tone, attack=0.15, decay=0.1, sustain=0.7, release=0.2)
+            _overlay_at(pad_buf, tone, start_s)
+
+    # ── Lead: arpeggiated minor chord, 8th notes ──
+    lead_buf = array.array('h', [0] * total_samples)
+    eighth_dur = beat_dur / 2.0
+    for ci, root in enumerate(roots):
+        chord_tones = minor_chord(root * 4)  # two octaves up
+        arp_pattern = [0, 1, 2, 1, 0, 2, 1, 0]  # arpeggio indices
+        for ni, idx in enumerate(arp_pattern):
+            freq = chord_tones[idx]
+            start_t = ci * chord_dur + ni * eighth_dur
             start_s = int(start_t * SAMPLE_RATE)
-            # Use square wave at low volume for that retro pad feel
-            note_buf = _square(freq, note_dur * 0.9, volume=0.12)
-            # Apply fade-in/fade-out envelope
-            fade_samples = min(int(SAMPLE_RATE * 0.05), len(note_buf) // 4)
-            for j in range(fade_samples):
-                env = j / fade_samples
-                note_buf[j] = _clamp16(note_buf[j] * env)
-                note_buf[-(j + 1)] = _clamp16(note_buf[-(j + 1)] * env)
-            _overlay_at(result, note_buf, start_s)
+            note = _chorus_saw(freq, eighth_dur * 0.7, detune=0.004, volume=0.08)
+            _apply_adsr(note, attack=0.008, decay=0.04, sustain=0.5, release=0.04)
+            _overlay_at(lead_buf, note, start_s)
 
-    # Add a slow sine pad underneath for warmth
-    pad = _sine(_note_freq('A', 1), total_dur, volume=0.06)
-    result = _mix_buffers(result, pad)
+    # ── Subtle kick on beats 1 and 3 for pulse ──
+    drum_buf = array.array('h', [0] * total_samples)
+    kick = _kick_drum(duration=0.10, volume=0.18)
+    for ci in range(num_chords):
+        for b in [0, 2]:
+            pos = int((ci * chord_dur + b * beat_dur) * SAMPLE_RATE)
+            _overlay_at(drum_buf, kick, pos)
 
+    result = _mix_buffers(bass_buf, pad_buf, lead_buf, drum_buf)
     return _make_sound(result)
 
 
 def _build_level_music():
-    """Driving beat-em-up energy — bass, drums, lead synth.
+    """Driving synthwave energy — Em - C - G - D progression.
 
-    Tempo: ~130 BPM, 16 beats = ~7.4s loop.
-    Bass: 8th-note square wave pattern
-    Drums: kick 1&3, snare 2&4, hi-hat on 8ths
-    Lead: 4-bar synth riff with sawtooth
+    Layered: 16th-note pulse bass + full drums + chorus saw lead.
+    ~7.4s seamless loop at 130 BPM.
     """
     bpm = 130
-    beat_dur = 60.0 / bpm  # ~0.462s
-    num_beats = 16  # 4 bars of 4/4
-    total_dur = beat_dur * num_beats
-    total_samples = int(SAMPLE_RATE * total_dur)
-    eighth_dur = beat_dur / 2.0
-
-    # ── Bass line (square wave, 8th notes) ──
-    bass_notes = [
-        'A', 'A', 'C', 'C', 'D', 'D', 'E', 'E',  # bar 1-2
-        'A', 'A', 'G', 'G', 'F', 'F', 'E', 'E',  # bar 3-4
-        'A', 'A', 'C', 'C', 'D', 'D', 'E', 'E',
-        'F', 'F', 'G', 'G', 'A', 'A', 'E', 'E',
-    ]
-    bass_buf = array.array('h', [0] * total_samples)
-    for i, note_name in enumerate(bass_notes):
-        freq = _note_freq(note_name, 2)
-        start_s = int(i * eighth_dur * SAMPLE_RATE)
-        note = _square(freq, eighth_dur * 0.85, volume=0.18)
-        # Quick decay envelope
-        decay_len = len(note)
-        for j in range(decay_len):
-            env = max(0, 1.0 - (j / decay_len) * 0.4)
-            note[j] = _clamp16(note[j] * env)
-        _overlay_at(bass_buf, note, start_s)
-
-    # ── Drums ──
-    kick = _sine_decay(60, 0.15, volume=0.35)
-    snare = _noise_decay(0.12, volume=0.20, decay=18.0)
-    hihat = _noise_decay(0.05, volume=0.10, decay=50.0)
-
-    drum_buf = array.array('h', [0] * total_samples)
-    for beat in range(num_beats):
-        beat_start = int(beat * beat_dur * SAMPLE_RATE)
-        # Hi-hat on every 8th note
-        for sub in range(2):
-            hh_start = beat_start + int(sub * eighth_dur * SAMPLE_RATE)
-            _overlay_at(drum_buf, hihat, hh_start)
-        # Kick on beats 1 and 3 (of each bar)
-        bar_beat = beat % 4
-        if bar_beat == 0 or bar_beat == 2:
-            _overlay_at(drum_buf, kick, beat_start)
-        # Snare on beats 2 and 4
-        if bar_beat == 1 or bar_beat == 3:
-            _overlay_at(drum_buf, snare, beat_start)
-
-    # ── Lead melody (sawtooth, 4-bar riff) ──
-    # Each entry: (note, octave, duration_in_eighths)
-    lead_pattern = [
-        ('A', 4, 2), ('C', 5, 1), ('E', 5, 1),
-        ('D', 5, 2), ('C', 5, 2),
-        ('A', 4, 1), ('G', 4, 1), ('E', 4, 2),
-        ('rest', 0, 4),
-        ('A', 4, 2), ('C', 5, 1), ('E', 5, 1),
-        ('G', 5, 2), ('E', 5, 1), ('D', 5, 1),
-        ('C', 5, 2), ('A', 4, 2),
-        ('rest', 0, 4),
-    ]
-    lead_buf = array.array('h', [0] * total_samples)
-    pos = 0  # position in 8th notes
-    for note_name, octave, dur_eighths in lead_pattern:
-        if note_name == 'rest':
-            pos += dur_eighths
-            continue
-        freq = _note_freq(note_name, octave)
-        note_dur_s = dur_eighths * eighth_dur
-        start_s = int(pos * eighth_dur * SAMPLE_RATE)
-        note = _sawtooth(freq, note_dur_s * 0.8, volume=0.10)
-        # Fade in/out
-        fade = min(int(SAMPLE_RATE * 0.02), len(note) // 4)
-        for j in range(fade):
-            env = j / fade
-            note[j] = _clamp16(note[j] * env)
-            note[-(j + 1)] = _clamp16(note[-(j + 1)] * env)
-        _overlay_at(lead_buf, note, start_s)
-        pos += dur_eighths
-
-    result = _mix_buffers(bass_buf, drum_buf, lead_buf)
-    return _make_sound(result)
-
-
-def _build_boss_music():
-    """Intense boss fight music — aggressive bass, double-time drums,
-    dissonant lead with minor 2nds and tritones.
-
-    Tempo: ~150 BPM, 16 beats = ~6.4s loop.
-    """
-    bpm = 150
     beat_dur = 60.0 / bpm
-    num_beats = 16
+    num_beats = 16  # 4 bars of 4/4
     total_dur = beat_dur * num_beats
     total_samples = int(SAMPLE_RATE * total_dur)
     eighth_dur = beat_dur / 2.0
     sixteenth_dur = beat_dur / 4.0
 
-    # ── Aggressive bass (16th note pattern) ──
-    bass_pattern = [
-        'E', 'E', 'E', 'E',   'Bb', 'Bb', 'E', 'E',
-        'F', 'F', 'E', 'E',   'Bb', 'Bb', 'B', 'B',
-        'E', 'E', 'E', 'E',   'F', 'F', 'E', 'E',
-        'Bb', 'Bb', 'B', 'B', 'E', 'E', 'Eb', 'Eb',
-        'E', 'E', 'E', 'E',   'Bb', 'Bb', 'E', 'E',
-        'F', 'F', 'E', 'E',   'Bb', 'Bb', 'B', 'B',
-        'E', 'E', 'E', 'E',   'Gb', 'Gb', 'E', 'E',
-        'F', 'F', 'Bb', 'Bb', 'E', 'E', 'E', 'E',
+    # Em - C - G - D (each chord = 1 bar = 4 beats)
+    chord_roots = [
+        _note_freq('E', 2),
+        _note_freq('C', 2),
+        _note_freq('G', 2),
+        _note_freq('D', 2),
     ]
-    bass_buf = array.array('h', [0] * total_samples)
-    for i, note_name in enumerate(bass_pattern):
-        freq = _note_freq(note_name, 2)
-        start_s = int(i * sixteenth_dur * SAMPLE_RATE)
-        note = _square(freq, sixteenth_dur * 0.8, volume=0.20)
-        # Sharp attack envelope
-        attack = min(int(SAMPLE_RATE * 0.005), len(note) // 2)
-        for j in range(attack):
-            note[j] = _clamp16(note[j] * (j / attack))
-        _overlay_at(bass_buf, note, start_s)
 
-    # ── Double-time drums ──
-    kick = _sine_decay(55, 0.12, volume=0.38)
-    snare = _noise_decay(0.10, volume=0.22, decay=20.0)
-    hihat = _noise_decay(0.04, volume=0.12, decay=55.0)
+    # ── Bass: 16th-note pulse wave pattern ──
+    bass_buf = array.array('h', [0] * total_samples)
+    # Pattern per bar: root in 16ths with rhythmic gaps
+    bass_rhythm = [1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1]
+    for ci, root in enumerate(chord_roots):
+        bar_start = ci * 4 * beat_dur
+        for si, hit in enumerate(bass_rhythm):
+            if not hit:
+                continue
+            freq = root
+            start_s = int((bar_start + si * sixteenth_dur) * SAMPLE_RATE)
+            note = _pulse(freq, sixteenth_dur * 0.75, duty=0.25, volume=0.22)
+            _apply_adsr(note, attack=0.003, decay=0.02, sustain=0.6, release=0.01)
+            _overlay_at(bass_buf, note, start_s)
+
+    # ── Drums: kick, snare, hihat ──
+    kick = _kick_drum(duration=0.12, volume=0.38)
+    snare = _snare_drum(duration=0.10, volume=0.25)
+    hh = _hihat(duration=0.04, volume=0.14)
+    hh_open = _hihat(duration=0.08, volume=0.10)
 
     drum_buf = array.array('h', [0] * total_samples)
     for beat in range(num_beats):
         beat_start = int(beat * beat_dur * SAMPLE_RATE)
-        # Hi-hat on every 16th note
-        for sub in range(4):
-            hh_start = beat_start + int(sub * sixteenth_dur * SAMPLE_RATE)
-            _overlay_at(drum_buf, hihat, hh_start)
-        # Kick on every beat + the "and" of 2 and 4
         bar_beat = beat % 4
-        _overlay_at(drum_buf, kick, beat_start)
-        if bar_beat == 1 or bar_beat == 3:
+        # Kick on 1 and 3, plus syncopated kick on "and" of 4
+        if bar_beat == 0 or bar_beat == 2:
+            _overlay_at(drum_buf, kick, beat_start)
+        if bar_beat == 3:
             _overlay_at(drum_buf, kick,
                         beat_start + int(eighth_dur * SAMPLE_RATE))
         # Snare on 2 and 4
         if bar_beat == 1 or bar_beat == 3:
             _overlay_at(drum_buf, snare, beat_start)
+        # Hi-hat on every 8th, open on "and" of 2
+        for sub in range(2):
+            hh_start = beat_start + int(sub * eighth_dur * SAMPLE_RATE)
+            if bar_beat == 1 and sub == 1:
+                _overlay_at(drum_buf, hh_open, hh_start)
+            else:
+                _overlay_at(drum_buf, hh, hh_start)
 
-    # ── Dissonant lead (tritones, minor 2nds) ──
+    # ── Lead melody: chorus sawtooth riff ──
     lead_pattern = [
-        ('E', 5, 2), ('F', 5, 1), ('Bb', 5, 1),  # E->F minor 2nd, E->Bb tritone
-        ('B', 4, 2), ('C', 5, 2),
-        ('E', 5, 1), ('Bb', 5, 1), ('A', 5, 2),
-        ('rest', 0, 4),
-        ('E', 5, 2), ('F', 5, 2),
-        ('Bb', 5, 1), ('B', 5, 1), ('E', 5, 2),
-        ('F', 5, 1), ('E', 5, 1), ('Eb', 5, 2),
-        ('rest', 0, 4),
+        # Bar 1 (Em): driving 8th notes
+        ('E', 4, 1), ('G', 4, 1), ('B', 4, 1), ('E', 5, 1),
+        ('D', 5, 1), ('B', 4, 1), ('G', 4, 1), ('A', 4, 1),
+        # Bar 2 (C): melodic phrase
+        ('C', 5, 2), ('E', 5, 1), ('G', 5, 1),
+        ('E', 5, 2), ('C', 5, 2),
+        # Bar 3 (G): ascending run
+        ('G', 4, 1), ('B', 4, 1), ('D', 5, 1), ('G', 5, 1),
+        ('rest', 0, 2), ('D', 5, 2),
+        # Bar 4 (D): resolving phrase
+        ('D', 5, 2), ('F#', 5, 1), ('A', 5, 1),
+        ('F#', 5, 1), ('D', 5, 1), ('rest', 0, 2),
     ]
     lead_buf = array.array('h', [0] * total_samples)
     pos = 0
@@ -360,14 +402,99 @@ def _build_boss_music():
         freq = _note_freq(note_name, octave)
         note_dur_s = dur_eighths * eighth_dur
         start_s = int(pos * eighth_dur * SAMPLE_RATE)
-        note = _sawtooth(freq, note_dur_s * 0.75, volume=0.09)
-        fade = min(int(SAMPLE_RATE * 0.01), len(note) // 4)
-        for j in range(fade):
-            env = j / fade
-            note[j] = _clamp16(note[j] * env)
-            note[-(j + 1)] = _clamp16(note[-(j + 1)] * env)
+        note = _chorus_saw(freq, note_dur_s * 0.85, detune=0.005, volume=0.10)
+        _apply_adsr(note, attack=0.005, decay=0.03, sustain=0.6, release=0.03)
         _overlay_at(lead_buf, note, start_s)
         pos += dur_eighths
+
+    result = _mix_buffers(bass_buf, drum_buf, lead_buf)
+    return _make_sound(result)
+
+
+def _build_boss_music():
+    """Intense boss fight — Am - E - Am - F progression.
+
+    Fast arpeggios, aggressive bass, double-time drums.
+    ~6.4s seamless loop at 150 BPM.
+    """
+    bpm = 150
+    beat_dur = 60.0 / bpm
+    num_beats = 16
+    total_dur = beat_dur * num_beats
+    total_samples = int(SAMPLE_RATE * total_dur)
+    eighth_dur = beat_dur / 2.0
+    sixteenth_dur = beat_dur / 4.0
+
+    # Am - E - Am - F (each = 1 bar = 4 beats)
+    chord_roots = [
+        _note_freq('A', 2),
+        _note_freq('E', 2),
+        _note_freq('A', 2),
+        _note_freq('F', 2),
+    ]
+
+    # ── Aggressive bass: 16th note pulse wave ──
+    bass_buf = array.array('h', [0] * total_samples)
+    # Driving pattern with octave jumps
+    bass_rhythm = [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0]
+    for ci, root in enumerate(chord_roots):
+        bar_start = ci * 4 * beat_dur
+        for si, hit in enumerate(bass_rhythm):
+            if not hit:
+                continue
+            # Alternate between root and octave for punch
+            freq = root if si % 3 != 0 else root * 2
+            start_s = int((bar_start + si * sixteenth_dur) * SAMPLE_RATE)
+            note = _pulse(freq, sixteenth_dur * 0.7, duty=0.25, volume=0.24)
+            _apply_adsr(note, attack=0.002, decay=0.01, sustain=0.7, release=0.005)
+            _overlay_at(bass_buf, note, start_s)
+
+    # ── Double-time drums ──
+    kick = _kick_drum(duration=0.10, volume=0.40)
+    snare = _snare_drum(duration=0.08, volume=0.28)
+    hh = _hihat(duration=0.03, volume=0.13)
+
+    drum_buf = array.array('h', [0] * total_samples)
+    for beat in range(num_beats):
+        beat_start = int(beat * beat_dur * SAMPLE_RATE)
+        bar_beat = beat % 4
+        # Kick on every beat + "and" of 2 and 4
+        _overlay_at(drum_buf, kick, beat_start)
+        if bar_beat == 1 or bar_beat == 3:
+            _overlay_at(drum_buf, kick,
+                        beat_start + int(eighth_dur * SAMPLE_RATE))
+        # Snare on 2 and 4
+        if bar_beat == 1 or bar_beat == 3:
+            _overlay_at(drum_buf, snare, beat_start)
+        # Hi-hat on every 16th note
+        for sub in range(4):
+            hh_start = beat_start + int(sub * sixteenth_dur * SAMPLE_RATE)
+            _overlay_at(drum_buf, hh, hh_start)
+
+    # ── Fast arpeggiated lead ──
+    # Arpeggiate each chord as fast 16th notes
+    def minor_chord_freqs(root_freq):
+        return [root_freq, root_freq * 6.0 / 5.0, root_freq * 3.0 / 2.0]
+
+    def major_chord_freqs(root_freq):
+        return [root_freq, root_freq * 5.0 / 4.0, root_freq * 3.0 / 2.0]
+
+    lead_buf = array.array('h', [0] * total_samples)
+    chord_types = [minor_chord_freqs, major_chord_freqs,
+                   minor_chord_freqs, major_chord_freqs]
+    for ci, (root, chord_fn) in enumerate(zip(chord_roots, chord_types)):
+        freqs = chord_fn(root * 4)  # two octaves up for lead
+        # Fast arpeggio: cycle through chord tones in 16ths
+        arp_seq = [0, 1, 2, 1, 0, 2, 1, 2, 0, 1, 2, 0, 2, 1, 0, 1]
+        bar_start = ci * 4 * beat_dur
+        for si, idx in enumerate(arp_seq):
+            freq = freqs[idx]
+            start_s = int((bar_start + si * sixteenth_dur) * SAMPLE_RATE)
+            note = _chorus_saw(freq, sixteenth_dur * 0.65, detune=0.007,
+                               volume=0.09)
+            _apply_adsr(note, attack=0.003, decay=0.015, sustain=0.5,
+                        release=0.01)
+            _overlay_at(lead_buf, note, start_s)
 
     result = _mix_buffers(bass_buf, drum_buf, lead_buf)
     return _make_sound(result)

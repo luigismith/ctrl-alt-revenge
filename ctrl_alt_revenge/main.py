@@ -21,6 +21,8 @@ from ctrl_alt_revenge.settings import (
     HACK_SLOWMO_FACTOR, HEAT_DECAY_RATE, HEAT_MAX,
     STRINGS, EMP_COOLDOWN, BULLET_TIME_DURATION,
     PLAYER_IFRAMES,
+    GUN_DAMAGE, BULLET_SPEED, GUN_AMMO_MAX, MEDIKIT_HEAL,
+    COLOR_YELLOW,
 )
 from ctrl_alt_revenge.core.state_machine import StateMachine, State
 from ctrl_alt_revenge.core.input import InputManager
@@ -181,6 +183,11 @@ class PlayState(State):
         self.parry_flash_timer = 0
         self.particles = []
         self.hitstop_timer = 0
+        self.bullets = []
+        self.pickups = []
+        self.hack_time_limit = settings.HACK_TIME_LIMIT
+        self.enemy_damage_mult = 1.0
+        self.enemy_speed_mult = 1.0
 
     def enter(self, **kwargs):
         # Carica il livello solo la prima volta o se esplicitamente richiesto
@@ -207,6 +214,10 @@ class PlayState(State):
         # Apply difficulty settings
         diff = settings.DIFFICULTIES[settings.CURRENT_DIFFICULTY]
         self.player.init_health(diff["player_hp"])
+        self.player.parry_window = diff["parry_window"]
+        self.hack_time_limit = diff["hack_time_limit"]
+        self.enemy_damage_mult = diff["enemy_damage_mult"]
+        self.enemy_speed_mult = diff["enemy_speed_mult"]
 
         # Camera
         self.camera = Camera(self.level_data["width_px"],
@@ -259,7 +270,9 @@ class PlayState(State):
                             self.level_data["collision"][gy][gx] = 0
                             self.level_data["visual"][gy][gx] = 0
                     self.physics.rebuild(self.level_data)
-                    self.hud.show_notification(STRINGS["hack_success"])
+                    hack_time = self.hacking.hack_time_limit - self.hacking.time_left
+                    self.hud.show_notification(
+                        f"Sistema bucato in {hack_time:.1f} secondi. Patetico.")
                 return callback
             hackable.on_hack_success = make_success_callback(hackable)
             def make_fail_callback(h):
@@ -269,6 +282,13 @@ class PlayState(State):
                 return callback
             hackable.on_hack_fail = make_fail_callback(hackable)
             self.hackables.append(hackable)
+
+        # Apply difficulty multipliers to enemies
+        for enemy in self.enemies:
+            enemy.move_speed *= self.enemy_speed_mult
+            enemy.contact_damage = int(enemy.contact_damage * self.enemy_damage_mult)
+            if enemy.contact_damage < 1 and self.enemy_damage_mult > 0:
+                enemy.contact_damage = 1
 
         # Aggiungi droni alla lista hackables
         for enemy in self.enemies:
@@ -281,6 +301,10 @@ class PlayState(State):
         self.boss.set_sprites(sprites["warden"])
         self.boss.set_arena(140 * TILE_SIZE, 179 * TILE_SIZE)
         self.boss.spawn_callback = self._spawn_boss_drone
+        self.boss.move_speed *= self.enemy_speed_mult
+        self.boss.contact_damage = int(self.boss.contact_damage * self.enemy_damage_mult)
+        if self.boss.contact_damage < 1 and self.enemy_damage_mult > 0:
+            self.boss.contact_damage = 1
         self.enemies.append(self.boss)
 
         # Dialoghi
@@ -292,11 +316,20 @@ class PlayState(State):
         self.boss_intro_shown = False
         self.level_complete = False
         self.projectiles = []
+        self.bullets = []
         self.slow_mo = 1.0
         self.screen_shake_timer = 0
         self.parry_flash_timer = 0
         self.particles = []
         self.hitstop_timer = 0
+
+        # Pickups
+        self.pickups = []
+        for pk in ent.get("pickups", []):
+            self.pickups.append({
+                "x": pk["x"], "y": pk["y"],
+                "type": pk["type"], "active": True,
+            })
 
         # Pre-generate parry flash surface (avoid per-frame allocation)
         self.parry_flash = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
@@ -592,6 +625,18 @@ class PlayState(State):
         self.physics.apply_gravity(self.player, effective_dt)
         self.physics.move_and_collide(self.player, effective_dt)
 
+        # Gun bullet spawning
+        if self.player.gun_just_fired:
+            bx = self.player.x + self.player.collision_width // 2
+            by = self.player.y + self.player.collision_height // 2
+            vel_x = self.player.facing * BULLET_SPEED
+            self.bullets.append({
+                "x": bx, "y": by, "vel_x": vel_x,
+                "damage": GUN_DAMAGE, "timer": 60,
+            })
+            if self.game.audio:
+                self.game.audio.play_sfx("punch")  # reuse punch sfx for gun
+
         # Morte per caduta
         if self.player.y > self.level_data["height_px"] + 100:
             self.player.hp = 0
@@ -691,7 +736,8 @@ class PlayState(State):
         # Tasto hack
         if (self.game.input_mgr.is_just_pressed("hack") and
                 self.player.nearby_hackable and self.player.alive):
-            self.hacking.start(self.player.nearby_hackable)
+            self.hacking.start(self.player.nearby_hackable,
+                               time_limit=self.hack_time_limit)
             self.game.fsm.change("hack")
 
         # Innesti
@@ -743,6 +789,12 @@ class PlayState(State):
         # Proiettili
         self._update_projectiles(effective_dt)
 
+        # Gun bullets
+        self._update_bullets(effective_dt)
+
+        # Pickups
+        self._update_pickups()
+
     def _fire_emp(self):
         """Spara un proiettile EMP nella direzione del player."""
         px = self.player.x + self.player.collision_width // 2
@@ -780,6 +832,48 @@ class PlayState(State):
         for p in to_remove:
             if p in self.projectiles:
                 self.projectiles.remove(p)
+
+    def _update_bullets(self, dt):
+        """Aggiorna proiettili del fucile."""
+        to_remove = []
+        for b in self.bullets:
+            b["x"] += b["vel_x"] * dt
+            b["timer"] -= dt
+            if b["timer"] <= 0:
+                to_remove.append(b)
+                continue
+            b_rect = pygame.Rect(int(b["x"]) - 2, int(b["y"]) - 2, 4, 4)
+            for enemy in self.enemies:
+                if not enemy.alive:
+                    continue
+                if b_rect.colliderect(enemy.hurtbox_rect):
+                    kb_x = 2.0 if b["vel_x"] > 0 else -2.0
+                    enemy.take_damage(b["damage"], kb_x, -1.0)
+                    to_remove.append(b)
+                    break
+        for b in to_remove:
+            if b in self.bullets:
+                self.bullets.remove(b)
+
+    def _update_pickups(self):
+        """Controlla collisioni giocatore-pickup."""
+        p_rect = self.player.hurtbox_rect
+        for pk in self.pickups:
+            if not pk["active"]:
+                continue
+            pk_rect = pygame.Rect(int(pk["x"]), int(pk["y"]), 12, 12)
+            if p_rect.colliderect(pk_rect):
+                if pk["type"] == "medikit":
+                    if self.player.hp < self.player.max_hp:
+                        self.player.hp = min(self.player.hp + MEDIKIT_HEAL,
+                                             self.player.max_hp)
+                        pk["active"] = False
+                        self.hud.show_notification("Riparato. +2 HP.", 90)
+                elif pk["type"] == "ammo":
+                    if self.player.gun_ammo < GUN_AMMO_MAX:
+                        self.player.gun_ammo = GUN_AMMO_MAX
+                        pk["active"] = False
+                        self.hud.show_notification("Munizioni ricaricate.", 90)
 
     def draw(self, surface):
         cam_off = list(self.camera.get_offset())
@@ -829,6 +923,27 @@ class PlayState(State):
                 sx = int(proj["x"]) + cam_off[0] - proj["sprite"].get_width() // 2
                 sy = int(proj["y"]) + cam_off[1] - proj["sprite"].get_height() // 2
                 surface.blit(proj["sprite"], (sx, sy))
+
+        # Gun bullets
+        for b in self.bullets:
+            bx = int(b["x"]) + cam_off[0]
+            by = int(b["y"]) + cam_off[1]
+            pygame.draw.rect(surface, COLOR_YELLOW, (bx - 2, by - 1, 4, 2))
+
+        # Pickups
+        for pk in self.pickups:
+            if not pk["active"]:
+                continue
+            px = int(pk["x"]) + cam_off[0]
+            py = int(pk["y"]) + cam_off[1]
+            if pk["type"] == "medikit":
+                # Green cross 8x8
+                pygame.draw.rect(surface, COLOR_GREEN_HACK, (px + 2, py, 4, 8))
+                pygame.draw.rect(surface, COLOR_GREEN_HACK, (px, py + 2, 8, 4))
+            elif pk["type"] == "ammo":
+                # Yellow box 6x6
+                pygame.draw.rect(surface, COLOR_YELLOW, (px, py, 6, 6))
+                pygame.draw.rect(surface, (200, 180, 30), (px, py, 6, 6), 1)
 
         # Player
         self.player.draw(surface, cam_off)

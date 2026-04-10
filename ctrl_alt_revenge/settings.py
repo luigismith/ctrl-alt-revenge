@@ -58,6 +58,13 @@ KICK_DAMAGE = 2
 COMBO_WINDOW = 25          # frame per continuare la combo
 PARRY_WINDOW = 10          # frame di finestra parry
 
+# Gun
+GUN_DAMAGE = 2
+GUN_COOLDOWN = 20  # frames between shots
+GUN_AMMO_MAX = 12
+BULLET_SPEED = 6.0
+MEDIKIT_HEAL = 2
+
 # Hacking
 HACK_SLOWMO_FACTOR = 0.25
 HACK_TIME_LIMIT = 5.0      # secondi

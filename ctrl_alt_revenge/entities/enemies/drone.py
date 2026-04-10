@@ -1,5 +1,6 @@
 # entities/enemies/drone.py — Drone volante con traiettoria sinusoidale e laser
 import math
+import random
 from ctrl_alt_revenge.entities.enemy import Enemy
 from ctrl_alt_revenge.entities.components import Hackable
 from ctrl_alt_revenge.settings import (
@@ -9,7 +10,10 @@ from ctrl_alt_revenge.settings import (
 
 
 class Drone(Enemy, Hackable):
-    """Drone volante: vola in sinusoide, spara laser telegrafato."""
+    """Drone volante: vola in sinusoide, spara laser telegrafato.
+
+    AI behaviors: strafe, retreat when low HP, dive bomb.
+    """
 
     def __init__(self, x, y, patrol_range=120):
         super().__init__(x, y, DRONE_WIDTH, DRONE_HEIGHT, DRONE_HP, DRONE_SPEED)
@@ -39,18 +43,35 @@ class Drone(Enemy, Hackable):
             "stunned": 8,
         }
 
+        # AI-driven behavior state
+        self.strafe_dir = 1 if random.random() > 0.5 else -1
+        self.strafe_speed = DRONE_SPEED * 0.4
+        self.is_retreating = False
+        self.dive_bombing = False
+        self.dive_target_x = 0
+        self.dive_target_y = 0
+        self.dive_timer = 0
+        self.attack_cycle_count = 0
+
     def _ai_update(self, dt):
         if self.hacked_ally:
             self._hacked_behavior(dt)
             return
 
         # Hover sinusoidale
-        self.hover_timer += self.hover_speed * dt
-        hover_offset = math.sin(self.hover_timer) * self.hover_amplitude
-        self.y = self.base_y + hover_offset
+        if not self.dive_bombing:
+            self.hover_timer += self.hover_speed * dt
+            hover_offset = math.sin(self.hover_timer) * self.hover_amplitude
+            self.y = self.base_y + hover_offset
 
         self.laser_active = False
         self.laser_rect = None
+
+        # Retreat behavior: when HP = 1, fly higher and extend range
+        if self.hp <= 1 and not self.is_retreating:
+            self.is_retreating = True
+            self.base_y -= 30  # fly higher
+            self.sight_range = int(self.sight_range * 1.5)  # increase shoot range
 
         if self.ai_state == "patrol":
             self.patrol_update(dt)
@@ -80,18 +101,29 @@ class Drone(Enemy, Hackable):
 
             # Spara se in raggio e cooldown pronto
             if dist < self.sight_range and self.shoot_cooldown <= 0:
-                self.ai_state = "shooting"
-                self.shoot_telegraph = 20  # frame di telegraph
-                self.vel_x = 0
+                self.attack_cycle_count += 1
+                # Dive bomb: 10% chance per attack cycle
+                if random.random() < 0.10 and self.target:
+                    self.ai_state = "dive_bomb"
+                    self.dive_bombing = True
+                    self.dive_target_x = self.target.x
+                    self.dive_target_y = self.target.y
+                    self.dive_timer = 20
+                    self.vel_x = 0
+                else:
+                    self.ai_state = "shooting"
+                    self.shoot_telegraph = 20  # frame di telegraph
+                    self.vel_x = 0
 
             if dist > self.sight_range * 1.5:
                 self.ai_state = "patrol"
                 self.patrol_start_x = self.x
 
         elif self.ai_state == "shooting":
-            self.vel_x = 0
+            # Strafe: slowly move perpendicular to player while shooting
             self.vel_y = 0
             self.on_ground = True
+            self.vel_x = self.strafe_dir * self.strafe_speed
             self.shoot_telegraph -= dt
 
             if self.shoot_telegraph <= 0:
@@ -101,10 +133,34 @@ class Drone(Enemy, Hackable):
                 self.laser_rect = self._create_laser()
                 self.set_anim("shoot")
                 self.shoot_cooldown = DRONE_SHOOT_COOLDOWN
+                # Flip strafe direction for next time
+                self.strafe_dir *= -1
                 self.ai_state = "chase"
             else:
                 # Telegraph: lampeggio
                 self.set_anim("fly")
+
+        elif self.ai_state == "dive_bomb":
+            # Dive toward player quickly
+            self.on_ground = True
+            self.dive_timer -= dt
+            dx = self.dive_target_x - self.x
+            dy = self.dive_target_y - self.y
+            speed = self.move_speed * 3.0
+            dist = max(1.0, (dx * dx + dy * dy) ** 0.5)
+            self.vel_x = (dx / dist) * speed
+            # Move Y directly since drones fly
+            self.y += (dy / dist) * speed * dt
+            self.set_anim("fly")
+            # Activate hitbox during dive
+            self.activate_hitbox(self.width, 0, self.width, self.height, 1)
+            if self.dive_timer <= 0 or dist < 10:
+                # End dive
+                self.dive_bombing = False
+                self.deactivate_hitbox()
+                self.shoot_cooldown = DRONE_SHOOT_COOLDOWN
+                self.base_y = self.y - 20  # recover to near current height
+                self.ai_state = "chase"
 
     def _create_laser(self):
         """Crea il rettangolo del laser sotto il drone."""

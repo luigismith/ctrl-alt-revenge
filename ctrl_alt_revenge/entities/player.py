@@ -9,6 +9,7 @@ from ctrl_alt_revenge.settings import (
     PLAYER_WIDTH, PLAYER_HEIGHT, PUNCH_DAMAGE, KICK_DAMAGE,
     COMBO_WINDOW, PARRY_WINDOW, KNOCKBACK_FORCE_X, KNOCKBACK_FORCE_Y,
     DIR_LEFT, DIR_RIGHT,
+    GUN_DAMAGE, GUN_COOLDOWN, GUN_AMMO_MAX,
 )
 
 
@@ -53,6 +54,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.parry_timer = 0
         self.parry_success = False
 
+        # Parry window (overridable by difficulty)
+        self.parry_window = PARRY_WINDOW
+
         # Hacking
         self.nearby_hackable = None
         self.is_hacking = False
@@ -63,6 +67,12 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.bullet_time_timer = 0
         self.emp_cooldown = 0
         self.thermal_vision = False
+
+        # Gun
+        self.has_gun = True
+        self.gun_ammo = 6
+        self.gun_cooldown = 0
+        self.gun_just_fired = False  # signals main.py to spawn a bullet
 
         # Heat
         self.heat = 0.0
@@ -238,9 +248,21 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         # Parry
         if input_mgr.is_just_pressed("parry"):
             self.is_parrying = True
-            self.parry_timer = PARRY_WINDOW
+            self.parry_timer = self.parry_window
             self.parry_success = False
             self.set_anim("parry")
+
+        # Gun cooldown
+        self.gun_just_fired = False
+        if self.gun_cooldown > 0:
+            self.gun_cooldown -= dt
+        # Shoot with hack key when no hackable nearby
+        if (self.has_gun and self.gun_ammo > 0 and self.gun_cooldown <= 0 and
+                not self.nearby_hackable and
+                input_mgr.is_just_pressed("hack")):
+            self.gun_ammo -= 1
+            self.gun_cooldown = GUN_COOLDOWN
+            self.gun_just_fired = True
 
         # Landing detection
         if self.on_ground and not self._was_on_ground and self.vel_y >= 0:
