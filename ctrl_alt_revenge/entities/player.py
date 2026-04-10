@@ -21,8 +21,8 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.init_hitbox()
         self.init_hurtbox()
 
-        self.collision_width = 12
-        self.collision_height = 26
+        self.collision_width = 14
+        self.collision_height = 28
         # Offset per centrare la collision box nello sprite
         self.col_offset_x = (PLAYER_WIDTH - self.collision_width) // 2
 

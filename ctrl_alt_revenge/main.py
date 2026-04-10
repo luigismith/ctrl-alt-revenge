@@ -2,6 +2,7 @@
 # CTRL+ALT REVENGE! — Picchia Duro a Scorrimento
 import sys
 import os
+import random
 
 # Aggiungi la directory padre al path per gli import
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -269,6 +270,185 @@ class PlayState(State):
         self.projectiles = []
         self.slow_mo = 1.0
 
+        # Pre-generate tile surfaces and background layers
+        self._generate_tile_surfaces()
+        self._generate_bg_layers()
+
+    def _generate_tile_surfaces(self):
+        """Pre-render 16x16 tile surfaces for each tile type."""
+        TS = TILE_SIZE
+        self.tile_surfaces = {}
+
+        # --- Type 1: Ground (dark concrete) - 4 variants ---
+        variants = []
+        for v in range(4):
+            rng = random.Random(1000 + v)
+            surf = pygame.Surface((TS, TS))
+            surf.fill((35, 32, 60))
+            # Random noise pixels
+            for py in range(TS):
+                for px in range(TS):
+                    if rng.random() < 0.15:
+                        offset = rng.randint(-8, 8)
+                        c = (max(0, min(255, 35 + offset)),
+                             max(0, min(255, 32 + offset)),
+                             max(0, min(255, 60 + offset)))
+                        surf.set_at((px, py), c)
+            # Occasional crack line
+            if v in (0, 2):
+                cx = rng.randint(3, 12)
+                for cy in range(rng.randint(2, 5), rng.randint(10, 14)):
+                    surf.set_at((cx + rng.randint(-1, 1), cy), (25, 22, 45))
+            variants.append(surf)
+        self.tile_surfaces[1] = variants
+
+        # --- Type 2: Wall/ceiling (metal panel) ---
+        surf = pygame.Surface((TS, TS))
+        surf.fill((45, 42, 70))
+        # 1px bright border
+        pygame.draw.rect(surf, (65, 62, 95), (0, 0, TS, TS), 1)
+        # Rivet dots in corners
+        for rx, ry in [(2, 2), (TS - 3, 2), (2, TS - 3), (TS - 3, TS - 3)]:
+            surf.set_at((rx, ry), (90, 88, 120))
+        self.tile_surfaces[2] = surf
+
+        # --- Type 3: Platform (thin neon blue gradient) ---
+        surf = pygame.Surface((TS, TS), pygame.SRCALPHA)
+        surf.fill((0, 0, 0, 0))
+        for py in range(3):
+            t = py / 2.0  # 0.0 -> 1.0
+            r = int(0 * (1 - t) + 15 * t)
+            g = int(229 * (1 - t) + 50 * t)
+            b = int(255 * (1 - t) + 80 * t)
+            pygame.draw.line(surf, (r, g, b), (0, py), (TS - 1, py))
+        self.tile_surfaces[3] = surf
+
+        # --- Type 4: Gate (vertical bars) ---
+        surf = pygame.Surface((TS, TS), pygame.SRCALPHA)
+        surf.fill((0, 0, 0, 0))
+        for px in range(0, TS, 3):
+            pygame.draw.line(surf, (55, 55, 75), (px, 0), (px, TS - 1))
+            if px + 1 < TS:
+                pygame.draw.line(surf, (40, 38, 60), (px + 1, 0), (px + 1, TS - 1))
+        self.tile_surfaces[4] = surf
+
+        # --- Type 5: Crate (cover) ---
+        surf = pygame.Surface((TS, TS))
+        surf.fill((40, 38, 55))
+        # X pattern
+        pygame.draw.line(surf, (55, 52, 75), (1, 1), (TS - 2, TS - 2))
+        pygame.draw.line(surf, (55, 52, 75), (TS - 2, 1), (1, TS - 2))
+        # Border
+        pygame.draw.rect(surf, (60, 58, 80), (0, 0, TS, TS), 1)
+        # Bright corner pixels
+        for cx, cy in [(1, 1), (TS - 2, 1), (1, TS - 2), (TS - 2, TS - 2)]:
+            surf.set_at((cx, cy), (80, 78, 110))
+        self.tile_surfaces[5] = surf
+
+        # --- Type 6: Boss floor (warning stripes) ---
+        surf = pygame.Surface((TS, TS))
+        surf.fill((55, 25, 25))
+        # Diagonal yellow stripes (2px wide)
+        for i in range(-TS, TS * 2, 6):
+            pygame.draw.line(surf, (200, 180, 40), (i, 0), (i + TS, TS), 2)
+        self.tile_surfaces[6] = surf
+
+        # --- Type 7: Boss wall (reinforced with neon orange trim) ---
+        surf = pygame.Surface((TS, TS))
+        surf.fill((45, 28, 28))
+        # Horizontal neon orange trim lines
+        pygame.draw.line(surf, COLOR_NEON_ORANGE, (0, 4), (TS - 1, 4))
+        pygame.draw.line(surf, COLOR_NEON_ORANGE, (0, 12), (TS - 1, 12))
+        self.tile_surfaces[7] = surf
+
+    def _generate_bg_layers(self):
+        """Pre-generate 3 parallax background layers as wide surfaces."""
+        BG_W = 800
+        H = INTERNAL_HEIGHT
+
+        rng = random.Random(42)
+
+        # --- Layer 1 (far): Tall building silhouettes ---
+        self.bg_layer_far = pygame.Surface((BG_W, H), pygame.SRCALPHA)
+        self.bg_layer_far.fill((0, 0, 0, 0))
+        x = 0
+        for i in range(20):
+            bw = rng.randint(20, 45)
+            gap = rng.randint(2, 8)
+            bh = rng.randint(60, 120)
+            by = H - bh
+            pygame.draw.rect(self.bg_layer_far, (15, 14, 40), (x, by, bw, bh))
+            # Occasional lit windows
+            for wy in range(by + 4, by + bh - 4, 7):
+                for wx in range(x + 3, x + bw - 3, 6):
+                    if rng.random() < 0.2:
+                        c = rng.choice([(60, 55, 90), (80, 75, 110), (50, 80, 100)])
+                        self.bg_layer_far.set_at((wx, wy), c)
+                        if wx + 1 < x + bw - 2:
+                            self.bg_layer_far.set_at((wx + 1, wy), c)
+            x += bw + gap
+
+        # --- Layer 2 (mid): Medium buildings ---
+        self.bg_layer_mid = pygame.Surface((BG_W, H), pygame.SRCALPHA)
+        self.bg_layer_mid.fill((0, 0, 0, 0))
+        x = 0
+        for i in range(18):
+            bw = rng.randint(25, 50)
+            gap = rng.randint(3, 10)
+            bh = rng.randint(40, 80)
+            by = H - bh
+            pygame.draw.rect(self.bg_layer_mid, (22, 20, 55), (x, by, bw, bh))
+            # More lit windows
+            for wy in range(by + 3, by + bh - 3, 6):
+                for wx in range(x + 2, x + bw - 2, 5):
+                    if rng.random() < 0.3:
+                        c = rng.choice([
+                            (80, 75, 120), (100, 95, 140),
+                            (60, 90, 110), (120, 100, 80),
+                        ])
+                        self.bg_layer_mid.set_at((wx, wy), c)
+                        if wx + 1 < x + bw - 1:
+                            self.bg_layer_mid.set_at((wx + 1, wy), c)
+                        if wy + 1 < by + bh - 2:
+                            self.bg_layer_mid.set_at((wx, wy + 1), c)
+            # Neon accent line on some buildings
+            if rng.random() < 0.4:
+                ny = by + rng.randint(5, max(6, bh - 5))
+                nc = rng.choice([COLOR_NEON_BLUE, COLOR_NEON_PURPLE, COLOR_NEON_ORANGE])
+                pygame.draw.line(self.bg_layer_mid, nc, (x, ny), (x + bw - 1, ny))
+            x += bw + gap
+
+        # --- Layer 3 (near): Close details, neon signs, power lines ---
+        self.bg_layer_near = pygame.Surface((BG_W, H), pygame.SRCALPHA)
+        self.bg_layer_near.fill((0, 0, 0, 0))
+        x = 0
+        for i in range(15):
+            bw = rng.randint(15, 35)
+            gap = rng.randint(8, 20)
+            bh = rng.randint(15, 40)
+            by = H - bh
+            pygame.draw.rect(self.bg_layer_near, (28, 26, 60), (x, by, bw, bh))
+            x += bw + gap
+        # Neon signs (small colored rectangles)
+        for _ in range(12):
+            sx = rng.randint(10, BG_W - 20)
+            sy = rng.randint(H - 100, H - 30)
+            sc = rng.choice([COLOR_NEON_BLUE, COLOR_NEON_PURPLE,
+                             COLOR_NEON_ORANGE, COLOR_RED_ALARM])
+            pygame.draw.rect(self.bg_layer_near, sc, (sx, sy, 3, 2))
+        # Power line cables (horizontal lines)
+        for _ in range(4):
+            ly = rng.randint(H - 120, H - 50)
+            lx1 = rng.randint(0, BG_W // 3)
+            lx2 = rng.randint(BG_W // 3, BG_W - 1)
+            pygame.draw.line(self.bg_layer_near, (30, 28, 55), (lx1, ly), (lx2, ly))
+            # Slight sag in middle
+            mx = (lx1 + lx2) // 2
+            pygame.draw.line(self.bg_layer_near, (30, 28, 55),
+                             (lx1, ly), (mx, ly + 3))
+            pygame.draw.line(self.bg_layer_near, (30, 28, 55),
+                             (mx, ly + 3), (lx2, ly))
+
     def _spawn_boss_drone(self, x, y, count):
         """Callback per il boss per spawnare droni."""
         sprites = self.game.sprites
@@ -460,9 +640,9 @@ class PlayState(State):
                     surface.blit(h.sprite, (sx, sy))
                     # Indicatore hack range
                     if h == self.player.nearby_hackable:
-                        font = pygame.font.SysFont("consolas", 6)
+                        font = pygame.font.SysFont("consolas", 12)
                         txt = font.render("[E] HACK", False, COLOR_GREEN_HACK)
-                        surface.blit(txt, (sx - 4, sy - 8))
+                        surface.blit(txt, (sx - 4, sy - 16))
 
         # Nemici
         for enemy in self.enemies:
@@ -506,50 +686,35 @@ class PlayState(State):
             surface.blit(overlay, (0, 0))
 
     def _draw_background(self, surface, cam_off):
-        """Sfondo parallasse cyberpunk."""
-        # Strato grattacieli lontani (parallasse lenta)
-        parallax_x = cam_off[0] * 0.1
-        for i in range(15):
-            bx = int(i * 40 + parallax_x) % INTERNAL_WIDTH - 20
-            bh = 60 + (i * 37) % 80
-            by = INTERNAL_HEIGHT - bh - 20
-            pygame.draw.rect(surface, (18, 16, 48), (bx, by, 25, bh))
-            # Finestre
-            for wy in range(by + 4, by + bh - 4, 8):
-                for wx in range(bx + 3, bx + 22, 6):
-                    if (wx + wy) % 13 < 5:
-                        pygame.draw.rect(surface, (40, 35, 70), (wx, wy, 3, 4))
+        """Sfondo parallasse cyberpunk — blit pre-generated layers."""
+        BG_W = 800
+        W = INTERNAL_WIDTH
 
-        # Strato medio (parallasse media)
-        parallax_x2 = cam_off[0] * 0.3
-        for i in range(10):
-            bx = int(i * 55 + parallax_x2) % INTERNAL_WIDTH - 30
-            bh = 40 + (i * 53) % 60
-            by = INTERNAL_HEIGHT - bh - 5
-            pygame.draw.rect(surface, (22, 20, 55), (bx, by, 35, bh))
-            # Neon
-            if i % 3 == 0:
-                neon_color = [COLOR_NEON_BLUE, COLOR_NEON_PURPLE, COLOR_NEON_ORANGE][i % 3]
-                pygame.draw.line(surface, neon_color,
-                                 (bx, by + bh // 2), (bx + 35, by + bh // 2), 1)
+        # Layer 1 (far, parallax 0.05)
+        ox = int(cam_off[0] * 0.05) % BG_W
+        surface.blit(self.bg_layer_far, (-ox, 0))
+        if ox > BG_W - W:
+            surface.blit(self.bg_layer_far, (BG_W - ox, 0))
+
+        # Layer 2 (mid, parallax 0.2)
+        ox = int(cam_off[0] * 0.2) % BG_W
+        surface.blit(self.bg_layer_mid, (-ox, 0))
+        if ox > BG_W - W:
+            surface.blit(self.bg_layer_mid, (BG_W - ox, 0))
+
+        # Layer 3 (near, parallax 0.4)
+        ox = int(cam_off[0] * 0.4) % BG_W
+        surface.blit(self.bg_layer_near, (-ox, 0))
+        if ox > BG_W - W:
+            surface.blit(self.bg_layer_near, (BG_W - ox, 0))
 
     def _draw_tiles(self, surface, cam_off, visible):
-        """Disegna le tile visibili."""
+        """Disegna le tile visibili usando superfici pre-generate."""
         visual = self.level_data["visual"]
         start_col = max(0, visible.left // TILE_SIZE - 1)
         end_col = min(self.level_data["width"], visible.right // TILE_SIZE + 2)
         start_row = max(0, visible.top // TILE_SIZE - 1)
         end_row = min(self.level_data["height"], visible.bottom // TILE_SIZE + 2)
-
-        tile_colors = {
-            1: (35, 32, 60),      # pavimento standard
-            2: (45, 42, 70),      # muro/soffitto
-            3: (55, 52, 80),      # piattaforma one-way
-            4: (50, 50, 65),      # porta/cancello
-            5: (40, 38, 55),      # copertura stealth
-            6: (55, 25, 25),      # pavimento boss
-            7: (65, 30, 30),      # muro boss
-        }
 
         for row in range(start_row, end_row):
             for col in range(start_col, end_col):
@@ -558,23 +723,15 @@ class PlayState(State):
                     continue
                 tx = col * TILE_SIZE + cam_off[0]
                 ty = row * TILE_SIZE + cam_off[1]
-                color = tile_colors.get(tile, (35, 32, 60))
-                pygame.draw.rect(surface, color, (tx, ty, TILE_SIZE, TILE_SIZE))
-                # Bordo sottile per visibilità
-                pygame.draw.rect(surface, (25, 22, 45), (tx, ty, TILE_SIZE, TILE_SIZE), 1)
-
-                # Dettagli speciali
-                if tile == 3:  # one-way: linea superiore luminosa
-                    pygame.draw.line(surface, COLOR_NEON_BLUE,
-                                     (tx, ty), (tx + TILE_SIZE - 1, ty), 1)
-                elif tile == 4:  # cancello: barre
-                    for bar_y in range(ty + 2, ty + TILE_SIZE, 4):
-                        pygame.draw.line(surface, (70, 70, 90),
-                                         (tx + 2, bar_y), (tx + TILE_SIZE - 2, bar_y), 1)
-                elif tile == 6:  # boss floor: pattern
-                    if (row + col) % 2 == 0:
-                        pygame.draw.rect(surface, (60, 28, 28),
-                                         (tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4))
+                tile_surf = self.tile_surfaces.get(tile)
+                if tile_surf is None:
+                    continue
+                # Type 1 has 4 variants, pick by position
+                if tile == 1:
+                    variant_idx = (col * 7 + row * 13) % 4
+                    surface.blit(tile_surf[variant_idx], (tx, ty))
+                else:
+                    surface.blit(tile_surf, (tx, ty))
 
 
 class HackState(State):
