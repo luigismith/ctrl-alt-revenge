@@ -5,14 +5,14 @@ TITLE = "CTRL+ALT REVENGE!"
 VERSION = "0.1.0"
 
 # Risoluzione interna pixel-perfect
-INTERNAL_WIDTH = 480
-INTERNAL_HEIGHT = 270
+INTERNAL_WIDTH = 320
+INTERNAL_HEIGHT = 240
 SCALE = 3
-SCREEN_WIDTH = INTERNAL_WIDTH * SCALE   # 1440
-SCREEN_HEIGHT = INTERNAL_HEIGHT * SCALE  # 810
+SCREEN_WIDTH = INTERNAL_WIDTH * SCALE   # 960
+SCREEN_HEIGHT = INTERNAL_HEIGHT * SCALE  # 720
 
 FPS = 60
-GRAVITY = 0.55
+GRAVITY = 0.5
 MAX_FALL_SPEED = 10.0
 
 # Tile
@@ -39,8 +39,8 @@ COLOR_GREEN_HACK   = (0, 255, 100)
 COLOR_YELLOW       = (255, 220, 50)
 
 # Player
-PLAYER_SPEED = 2.5
-PLAYER_JUMP_FORCE = -7.5
+PLAYER_SPEED = 3.0
+PLAYER_JUMP_FORCE = -8.0
 PLAYER_JUMP_CUT = -2.0     # velocità minima se rilasci il tasto
 PLAYER_WALL_SLIDE_SPEED = 1.2
 PLAYER_WALL_JUMP_FORCE_X = 4.0
@@ -55,8 +55,8 @@ KNOCKBACK_FORCE_Y = -3.0
 # Combat
 PUNCH_DAMAGE = 1
 KICK_DAMAGE = 2
-COMBO_WINDOW = 20          # frame per continuare la combo
-PARRY_WINDOW = 8           # frame di finestra parry
+COMBO_WINDOW = 25          # frame per continuare la combo
+PARRY_WINDOW = 10          # frame di finestra parry
 
 # Hacking
 HACK_SLOWMO_FACTOR = 0.25
@@ -69,12 +69,12 @@ BULLET_TIME_DURATION = 180 # frame (3 secondi)
 
 # Nemici
 THUG_HP = 3
-THUG_SPEED = 1.0
+THUG_SPEED = 1.2
 THUG_SIGHT_RANGE = 120
 THUG_SIGHT_CONE = 60       # gradi metà-cono
 
 DRONE_HP = 2
-DRONE_SPEED = 1.5
+DRONE_SPEED = 1.8
 DRONE_SIGHT_RANGE = 150
 DRONE_SHOOT_COOLDOWN = 90  # frame
 
@@ -155,3 +155,29 @@ DRONE_WIDTH = 24
 DRONE_HEIGHT = 14
 WARDEN_WIDTH = 40
 WARDEN_HEIGHT = 48
+
+# Difficulty presets
+DIFFICULTIES = {
+    "FACILE": {
+        "player_hp": 6,
+        "enemy_damage_mult": 0.5,
+        "enemy_speed_mult": 0.8,
+        "hack_time_limit": 8.0,
+        "parry_window": 12,
+    },
+    "NORMALE": {
+        "player_hp": 4,
+        "enemy_damage_mult": 1.0,
+        "enemy_speed_mult": 1.0,
+        "hack_time_limit": 5.0,
+        "parry_window": 8,
+    },
+    "DIFFICILE": {
+        "player_hp": 3,
+        "enemy_damage_mult": 1.5,
+        "enemy_speed_mult": 1.3,
+        "hack_time_limit": 3.5,
+        "parry_window": 6,
+    },
+}
+CURRENT_DIFFICULTY = "NORMALE"

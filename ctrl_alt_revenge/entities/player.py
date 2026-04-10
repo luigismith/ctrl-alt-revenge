@@ -110,7 +110,21 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             self.attack_timer -= dt
             if self.attack_timer <= 0:
                 self.is_attacking = False
+                self.anim_speed = 8  # restore default anim speed
                 self.deactivate_hitbox()
+            elif self.attack_timer < 3:
+                # Allow canceling attack recovery into new attack or jump
+                self.anim_speed = 8  # restore default anim speed
+                if input_mgr.is_just_pressed("punch"):
+                    self._do_attack("punch")
+                elif input_mgr.is_just_pressed("kick"):
+                    self._do_attack("kick")
+                elif input_mgr.is_just_pressed("jump"):
+                    self.is_attacking = False
+                    self.deactivate_hitbox()
+                else:
+                    self.update_animation(dt)
+                    return
             else:
                 self.update_animation(dt)
                 return  # non processa input durante attacco
@@ -216,9 +230,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.drop_through = input_mgr.is_held("down") and input_mgr.is_just_pressed("jump") and self.on_ground
 
         # --- COMBAT ---
-        if input_mgr.is_just_pressed("punch") and not self.is_crouching:
+        if input_mgr.is_just_pressed("punch"):
             self._do_attack("punch")
-        elif input_mgr.is_just_pressed("kick") and not self.is_crouching:
+        elif input_mgr.is_just_pressed("kick"):
             self._do_attack("kick")
 
         # Parry
@@ -244,6 +258,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         """Esegue un attacco."""
         self.is_attacking = True
         self.attack_timer = self.attack_duration
+        self.anim_speed = 3  # faster attack animations
 
         if attack_type == "punch":
             if self.combo_timer > 0 and self.combo_count < 3:

@@ -2,6 +2,7 @@
 import pygame
 import math
 import random
+import ctrl_alt_revenge.settings as settings
 from ctrl_alt_revenge.settings import (
     COLOR_BG_NIGHT, COLOR_WHITE_UI, COLOR_NEON_BLUE, COLOR_NEON_PURPLE,
     COLOR_NEON_ORANGE, COLOR_RED_ALARM, COLOR_GREEN_HACK,
@@ -14,13 +15,16 @@ class MainMenu:
     """Cyberpunk title screen with cityscape, rain, GIG character, and neon glow."""
 
     def __init__(self):
-        self.font_title = pygame.font.SysFont("consolas", 28, bold=True)
-        self.font_sub = pygame.font.SysFont("consolas", 14)
-        self.font_opt = pygame.font.SysFont("consolas", 16)
+        self.font_title = pygame.font.SysFont("consolas", 20, bold=True)
+        self.font_sub = pygame.font.SysFont("consolas", 12)
+        self.font_opt = pygame.font.SysFont("consolas", 14)
         self.font_small = pygame.font.SysFont("consolas", 12)
         self.timer = 0
         self.selected = 0
         self.options = ["INIZIA", "COMANDI", "ESCI"]
+        self.state = "main"  # "main" or "difficulty"
+        self.diff_selected = 0
+        self.diff_options = list(settings.DIFFICULTIES.keys())
         self.scanline_offset = 0
         self.cursor_blink = 0
 
@@ -71,7 +75,7 @@ class MainMenu:
         # Sky gradient: dark purple top to blue-purple at horizon
         sky_top = (13, 11, 43)
         sky_bottom = (24, 21, 63)
-        horizon_y = 195
+        horizon_y = int(H * 0.72)
         for y in range(horizon_y):
             t = y / max(horizon_y - 1, 1)
             r = int(sky_top[0] + (sky_bottom[0] - sky_top[0]) * t)
@@ -91,9 +95,9 @@ class MainMenu:
         buildings_data = []
         # Far buildings (darker, shorter variation)
         far_buildings = [
-            (0, 85), (30, 70), (55, 95), (85, 60), (120, 80),
-            (155, 100), (190, 65), (215, 90), (250, 75), (280, 105),
-            (310, 55), (340, 88), (370, 72), (400, 95), (435, 68), (460, 82)
+            (0, 85), (22, 70), (42, 95), (62, 60), (85, 80),
+            (108, 100), (130, 65), (150, 90), (172, 75), (195, 105),
+            (218, 55), (240, 88), (260, 72), (280, 95), (300, 68)
         ]
         for bx, bh in far_buildings:
             bw = rng.randint(18, 28)
@@ -115,9 +119,9 @@ class MainMenu:
 
         # Near buildings (taller, more detail)
         near_buildings = [
-            (5, 110), (40, 80), (75, 120), (115, 70), (150, 105),
-            (195, 130), (235, 75), (270, 100), (310, 115), (355, 85),
-            (390, 125), (430, 90), (460, 100)
+            (5, 110), (30, 80), (55, 120), (85, 70), (110, 105),
+            (140, 130), (170, 75), (195, 100), (225, 115), (255, 85),
+            (285, 125)
         ]
         for bx, bh in near_buildings:
             bw = rng.randint(22, 35)
@@ -233,12 +237,30 @@ class MainMenu:
         self.neon_pulse_phase += dt * 0.03
 
         # Input
-        if input_mgr.is_just_pressed("up"):
-            self.selected = (self.selected - 1) % len(self.options)
-        if input_mgr.is_just_pressed("down"):
-            self.selected = (self.selected + 1) % len(self.options)
-        if input_mgr.is_just_pressed("confirm"):
-            return self.options[self.selected]
+        if self.state == "main":
+            if input_mgr.is_just_pressed("up"):
+                self.selected = (self.selected - 1) % len(self.options)
+            if input_mgr.is_just_pressed("down"):
+                self.selected = (self.selected + 1) % len(self.options)
+            if input_mgr.is_just_pressed("confirm"):
+                chosen = self.options[self.selected]
+                if chosen == "INIZIA":
+                    self.state = "difficulty"
+                    self.diff_selected = self.diff_options.index(settings.CURRENT_DIFFICULTY)
+                    return None
+                return chosen
+        elif self.state == "difficulty":
+            if input_mgr.is_just_pressed("up"):
+                self.diff_selected = (self.diff_selected - 1) % len(self.diff_options)
+            if input_mgr.is_just_pressed("down"):
+                self.diff_selected = (self.diff_selected + 1) % len(self.diff_options)
+            if input_mgr.is_just_pressed("confirm"):
+                settings.CURRENT_DIFFICULTY = self.diff_options[self.diff_selected]
+                self.state = "main"
+                return "INIZIA"
+            if input_mgr.is_just_pressed("pause"):
+                self.state = "main"
+                return None
         return None
 
     def draw(self, surface):
@@ -260,11 +282,11 @@ class MainMenu:
         pulse = int(12 + 8 * math.sin(self.neon_pulse_phase))
         pulse_surf = pygame.Surface((INTERNAL_WIDTH, 3), pygame.SRCALPHA)
         pulse_surf.fill((255, 80, 20, pulse))
-        surface.blit(pulse_surf, (0, 140))
+        surface.blit(pulse_surf, (0, int(INTERNAL_HEIGHT * 0.58)))
 
         # GIG character
         if self.gig_sprite is not None:
-            gig_x, gig_y = 350, 150
+            gig_x, gig_y = INTERNAL_WIDTH - 70, INTERNAL_HEIGHT - 90
             # Cyan glow under feet
             glow_foot = pygame.Surface((50, 8), pygame.SRCALPHA)
             glow_foot.fill((0, 180, 220, 30))
@@ -285,22 +307,22 @@ class MainMenu:
         title_main = self.font_title.render(title_text, False, (245, 241, 216))
 
         tx = INTERNAL_WIDTH // 2 - title_main.get_width() // 2
-        ty = 45
+        ty = 30
         surface.blit(glow_far, (tx + 2, ty + 2))
         surface.blit(glow_near, (tx + 1, ty + 1))
         surface.blit(title_main, (tx, ty))
 
         # --- Subtitle ---
         sub = self.font_sub.render(STRINGS["subtitle"], False, COLOR_NEON_ORANGE)
-        surface.blit(sub, (INTERNAL_WIDTH // 2 - sub.get_width() // 2, 78))
+        surface.blit(sub, (INTERNAL_WIDTH // 2 - sub.get_width() // 2, 58))
 
         # --- Thin neon separator line above menu ---
-        sep_x = 80
-        sep_y = 123
+        sep_x = 60
+        sep_y = 100
         pygame.draw.line(surface, (0, 180, 220), (sep_x, sep_y), (sep_x + 40, sep_y), 1)
 
         # --- Menu options ---
-        opt_y_start = 130
+        opt_y_start = 108
         show_cursor = self.cursor_blink < 15
         for i, opt in enumerate(self.options):
             oy = opt_y_start + i * 20
@@ -311,7 +333,7 @@ class MainMenu:
                 color = (160, 155, 170)
                 prefix = "  "
             text = self.font_opt.render(prefix + opt, False, color)
-            surface.blit(text, (80, oy))
+            surface.blit(text, (60, oy))
 
         # --- Version footer ---
         ver = self.font_small.render("v0.1 -- AGOSTO 2026", False, (60, 58, 80))
@@ -323,6 +345,30 @@ class MainMenu:
         offset = int(self.scanline_offset)
         for row in range(offset, INTERNAL_HEIGHT, 3):
             surface.blit(scanline_surf, (0, row))
+
+        # --- Difficulty sub-menu overlay ---
+        if self.state == "difficulty":
+            overlay = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 160))
+            surface.blit(overlay, (0, 0))
+
+            diff_title = self.font_opt.render("SCEGLI DIFFICOLTA'", False, COLOR_NEON_BLUE)
+            surface.blit(diff_title, (INTERNAL_WIDTH // 2 - diff_title.get_width() // 2, 70))
+
+            show_cursor = self.cursor_blink < 15
+            for i, opt in enumerate(self.diff_options):
+                oy = 95 + i * 22
+                if i == self.diff_selected:
+                    color = COLOR_NEON_ORANGE
+                    prefix = "> " if show_cursor else "  "
+                else:
+                    color = (160, 155, 170)
+                    prefix = "  "
+                text = self.font_opt.render(prefix + opt, False, color)
+                surface.blit(text, (INTERNAL_WIDTH // 2 - text.get_width() // 2, oy))
+
+            desc = self.font_small.render("ESC per tornare", False, (100, 98, 120))
+            surface.blit(desc, (INTERNAL_WIDTH // 2 - desc.get_width() // 2, 170))
 
 
 class PauseMenu:

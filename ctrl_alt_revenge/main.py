@@ -11,6 +11,7 @@ import pygame
 pygame.init()
 pygame.mixer.init()
 
+import ctrl_alt_revenge.settings as settings
 from ctrl_alt_revenge.settings import (
     TITLE, INTERNAL_WIDTH, INTERNAL_HEIGHT, SCALE,
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TILE_SIZE,
@@ -167,6 +168,7 @@ class PlayState(State):
         self.screen_shake_timer = 0
         self.parry_flash_timer = 0
         self.particles = []
+        self.hitstop_timer = 0
 
     def enter(self, **kwargs):
         # Carica il livello solo la prima volta o se esplicitamente richiesto
@@ -187,6 +189,10 @@ class PlayState(State):
         self.player = Player(px, py)
         self.player.set_sprites(sprites["gig"])
         self.player.can_double_jump = True  # innesto attivo di default
+
+        # Apply difficulty settings
+        diff = settings.DIFFICULTIES[settings.CURRENT_DIFFICULTY]
+        self.player.init_health(diff["player_hp"])
 
         # Camera
         self.camera = Camera(self.level_data["width_px"],
@@ -276,6 +282,11 @@ class PlayState(State):
         self.screen_shake_timer = 0
         self.parry_flash_timer = 0
         self.particles = []
+        self.hitstop_timer = 0
+
+        # Pre-generate parry flash surface (avoid per-frame allocation)
+        self.parry_flash = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+        self.parry_flash.fill((255, 255, 255, 60))
 
         # Pre-generate slow-mo overlay
         self.slowmo_overlay = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
@@ -557,6 +568,11 @@ class PlayState(State):
         elif self.slow_mo != 1.0 and not self.hacking.active:
             self.slow_mo = 1.0
 
+        # Hit-stop: freeze everything for impact pause
+        if self.hitstop_timer > 0:
+            self.hitstop_timer -= 1
+            return
+
         # Player
         self.player.update(self.game.input_mgr, effective_dt)
         self.physics.apply_gravity(self.player, effective_dt)
@@ -598,6 +614,12 @@ class PlayState(State):
         # Combat
         self.combat.update(self.player, self.enemies, effective_dt)
 
+        # Hit-stop on new hits (classic beat-em-up impact pause)
+        if self.combat.hit_effects:
+            # Check if any hit effect is brand new (timer near max)
+            if any(t >= 9 for _, _, t in self.combat.hit_effects):
+                self.hitstop_timer = 3
+
         # Screen shake on player hit
         if self.player.iframes > 0 and self.player.iframes > PLAYER_IFRAMES - 2:
             self.screen_shake_timer = 12
@@ -611,9 +633,11 @@ class PlayState(State):
         if self.parry_flash_timer > 0:
             self.parry_flash_timer -= 1
 
-        # Landing particles
+        # Landing particles (pooled, max 30)
         if self.player.on_ground and not self.player._was_on_ground and self.player.vel_y >= -0.1:
             for _ in range(5):
+                if len(self.particles) >= 30:
+                    break
                 self.particles.append({
                     "x": self.player.x + self.player.collision_width // 2 + random.randint(-8, 8),
                     "y": self.player.y + self.player.collision_height,
@@ -757,10 +781,12 @@ class PlayState(State):
                         txt = font.render("[E] HACK", False, COLOR_GREEN_HACK)
                         surface.blit(txt, (sx - 4, sy - 16))
 
-        # Nemici
+        # Nemici (with off-screen culling)
         for enemy in self.enemies:
             if not enemy.active:
                 continue
+            if not visible.colliderect(enemy.rect):
+                continue  # skip off-screen enemies
             # Visione termica: evidenzia nemici
             if self.player.thermal_vision and enemy.alive:
                 er = enemy.rect.move(cam_off[0], cam_off[1])
@@ -797,11 +823,9 @@ class PlayState(State):
         if self.player.nearby_hackable and not self.hacking.active:
             pass  # già disegnato sopra
 
-        # Parry flash
+        # Parry flash (pre-generated surface)
         if self.parry_flash_timer > 0:
-            flash = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
-            flash.fill((255, 255, 255, 60))
-            surface.blit(flash, (0, 0))
+            surface.blit(self.parry_flash, (0, 0))
 
         # Slow-mo overlay
         if self.slow_mo < 1.0:
