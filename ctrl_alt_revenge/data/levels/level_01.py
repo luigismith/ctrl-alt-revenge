@@ -108,22 +108,16 @@ def generate_level_01():
     # Piano alto — piattaforme per vantaggio tattico
     oneway_row(57, 62, 17)
     oneway_row(67, 71, 14)
-    # Pilastro centrale spezzato
-    solid(62, 22, 2)
-    solid(62, 23, 2)
-    solid(62, 24, 2)
-    solid(62, 25, 2)
-    solid(63, 22, 2)
-    solid(63, 23, 2)
-    solid(63, 24, 2)
-    solid(63, 25, 2)
+    # Pilastro centrale spezzato (one-way platform at top, passable at ground)
+    oneway(62, 20, 3)
+    oneway(63, 20, 3)
     oneway_row(61, 65, 18)
 
     # === SEZIONE 4: VERTICAL PLATFORMING (tile 75-100) ===
-    # Shaft verticale stretto con wall-jump
-    for y in range(1, 26):
+    # Shaft verticale stretto con wall-jump (opening at bottom for ground passage)
+    for y in range(1, 22):
         solid(78, y, 2)
-    for y in range(1, 26):
+    for y in range(1, 22):
         solid(88, y, 2)
 
     # Piattaforme alternate dentro lo shaft

@@ -21,8 +21,8 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         self.init_hitbox()
         self.init_hurtbox()
 
-        self.collision_width = 14
-        self.collision_height = 28
+        self.collision_width = 18
+        self.collision_height = 42
         # Offset per centrare la collision box nello sprite
         self.col_offset_x = (PLAYER_WIDTH - self.collision_width) // 2
 
@@ -143,7 +143,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             if self.slide_timer <= 0:
                 self.is_sliding = False
                 old_bottom = self.y + self.collision_height
-                self.collision_height = 28
+                self.collision_height = 42
                 self.y = old_bottom - self.collision_height
             else:
                 self.set_anim("slide")
@@ -168,7 +168,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         if input_mgr.is_held("down") and self.on_ground and not self.is_sliding:
             if not self.is_crouching:
                 old_bottom = self.y + self.collision_height
-                self.collision_height = 18
+                self.collision_height = 28
                 self.y = old_bottom - self.collision_height
             self.is_crouching = True
             # Slide: giù + salto mentre si corre
@@ -177,12 +177,12 @@ class Player(Entity, Health, Hitbox, Hurtbox):
                 self.is_sliding = True
                 self.slide_timer = self.slide_duration
                 self.vel_x = self.facing * PLAYER_SPEED * 1.8
-                self.collision_height = 14
+                self.collision_height = 20
                 self.y = old_bottom - self.collision_height
         else:
             if self.is_crouching:
                 old_bottom = self.y + self.collision_height
-                self.collision_height = 28
+                self.collision_height = 42
                 self.y = old_bottom - self.collision_height
             self.is_crouching = False
 

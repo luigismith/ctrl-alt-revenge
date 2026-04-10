@@ -36,6 +36,7 @@ from ctrl_alt_revenge.systems.combat import CombatSystem
 from ctrl_alt_revenge.systems.hacking import HackingMinigame
 from ctrl_alt_revenge.systems.implants import ImplantSystem
 from ctrl_alt_revenge.systems.dialog import DialogSystem
+from ctrl_alt_revenge.systems.audio import AudioManager
 from ctrl_alt_revenge.ui.hud import HUD
 from ctrl_alt_revenge.ui.dialog_box import DialogBox
 from ctrl_alt_revenge.ui.menu import (
@@ -59,6 +60,11 @@ class Game:
         self.input_mgr = InputManager()
         self.asset_mgr = AssetManager()
         self.sprites = generate_all_sprites()
+
+        try:
+            self.audio = AudioManager()
+        except Exception:
+            self.audio = None
 
         self.fsm = StateMachine()
         self._register_states()
@@ -111,12 +117,18 @@ class MenuState(State):
 
     def enter(self, **kwargs):
         self.menu.selected = 0
+        if self.game.audio:
+            self.game.audio.play_music("menu")
 
     def update(self, dt):
         result = self.menu.update(self.game.input_mgr, dt)
         if result == "INIZIA":
+            if self.game.audio:
+                self.game.audio.play_sfx("menu_select")
             self.game.fsm.change("play", reload=True)
         elif result == "COMANDI":
+            if self.game.audio:
+                self.game.audio.play_sfx("menu_select")
             self.game.fsm.change("controls")
         elif result == "ESCI":
             self.game.running = False
@@ -175,6 +187,8 @@ class PlayState(State):
         if not self._loaded or kwargs.get("reload", False):
             self._load_level()
             self._loaded = True
+            if self.game.audio:
+                self.game.audio.play_music("level")
 
     def _load_level(self):
         """Carica il livello 1."""
@@ -619,10 +633,14 @@ class PlayState(State):
             # Check if any hit effect is brand new (timer near max)
             if any(t >= 9 for _, _, t in self.combat.hit_effects):
                 self.hitstop_timer = 3
+                if self.game.audio:
+                    self.game.audio.play_sfx("punch")
 
         # Screen shake on player hit
         if self.player.iframes > 0 and self.player.iframes > PLAYER_IFRAMES - 2:
             self.screen_shake_timer = 12
+            if self.game.audio:
+                self.game.audio.play_sfx("hurt")
         if self.screen_shake_timer > 0:
             self.screen_shake_timer -= 1
 
@@ -630,8 +648,15 @@ class PlayState(State):
         if self.player.parry_success:
             self.parry_flash_timer = 4
             self.player.parry_success = False
+            if self.game.audio:
+                self.game.audio.play_sfx("parry")
         if self.parry_flash_timer > 0:
             self.parry_flash_timer -= 1
+
+        # Jump SFX (player just left ground with upward velocity)
+        if not self.player.on_ground and getattr(self.player, '_was_on_ground', False) and self.player.vel_y < -1:
+            if self.game.audio:
+                self.game.audio.play_sfx("jump")
 
         # Landing particles (pooled, max 30)
         if self.player.on_ground and not self.player._was_on_ground and self.player.vel_y >= -0.1:
@@ -692,6 +717,8 @@ class PlayState(State):
         # Boss intro
         if not self.boss_intro_shown and self.player.x > 142 * TILE_SIZE:
             self.boss_intro_shown = True
+            if self.game.audio:
+                self.game.audio.play_music("boss")
             if self.dialog_sys.start_dialog("boss_intro"):
                 self.triggered_dialogs.add("boss_intro")
                 self.game.fsm.change("dialog")
@@ -914,6 +941,11 @@ class HackState(State):
             if play_state.hacking.failed:
                 play_state.player.heat = min(
                     play_state.player.heat + 0.3, HEAT_MAX)
+                if self.game.audio:
+                    self.game.audio.play_sfx("hack_fail")
+            elif play_state.hacking.success:
+                if self.game.audio:
+                    self.game.audio.play_sfx("hack_success")
             self.game.fsm.change("play")
 
     def draw(self, surface):
@@ -954,14 +986,24 @@ class PauseState(State):
 
     def enter(self, **kwargs):
         self.menu.selected = 0
+        if self.game.audio:
+            self.game.audio.set_music_volume(0.1)
 
     def update(self, dt):
         result = self.menu.update(self.game.input_mgr, dt)
         if result == "CONTINUA":
+            if self.game.audio:
+                self.game.audio.set_music_volume(0.3)
+                self.game.audio.play_sfx("menu_select")
             self.game.fsm.change("play")
         elif result == "COMANDI":
+            if self.game.audio:
+                self.game.audio.play_sfx("menu_select")
             self.game.fsm.change("controls")
         elif result == "MENU PRINCIPALE":
+            if self.game.audio:
+                self.game.audio.set_music_volume(0.3)
+                self.game.audio.play_sfx("menu_select")
             # Reset per ricaricare il livello al prossimo avvio
             play_state = self.game.fsm._states.get("play")
             if play_state:
@@ -982,6 +1024,8 @@ class GameOverState(State):
 
     def enter(self, **kwargs):
         self.screen.timer = 0
+        if self.game.audio:
+            self.game.audio.stop_music()
 
     def update(self, dt):
         result = self.screen.update(self.game.input_mgr, dt)
@@ -999,6 +1043,8 @@ class LevelCompleteState(State):
 
     def enter(self, **kwargs):
         self.screen.timer = 0
+        if self.game.audio:
+            self.game.audio.stop_music()
 
     def update(self, dt):
         result = self.screen.update(self.game.input_mgr, dt)
