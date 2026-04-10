@@ -159,140 +159,182 @@ def _dither_rect(surf, x, y, w, h, col_a, col_b):
 # ===================================================================
 # GIG -- Protagonist
 # Base art 24x32 on 34x32 canvas, ox=5 oy=0
+# Redesigned with: larger head (9px wide), defined beard jawline,
+# wider cyber arm (4px), slimmer legs (3px), boot soles, collar,
+# bigger ponytail, belt buckle, 2x2 cyber eye
 # ===================================================================
 
 def _draw_gig_head(surf, ox, oy, bob=0, ponytail_extra=0):
-    """Draw GIG's head at given offset with optional vertical bob."""
+    """Draw GIG's head at given offset with optional vertical bob.
+    Head: 9px wide (ox+6 to ox+14), 9px tall (rows 0-8).
+    """
     b = bob
-    # Hair top (2 rows)
-    _draw_rect(surf, 7+ox, 0+b+oy, 8, 2, COLOR_HAIR_GRAY)
-    _set_pixel(surf, 8+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
-    _set_pixel(surf, 10+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
-    _set_pixel(surf, 12+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
-    _set_pixel(surf, 7+ox, 1+b+oy, COLOR_HAIR_GRAY_DARK)
+    # --- Hair top (rows 0-1): 9px wide with highlights ---
+    # Row 0: hair crown
+    _draw_rect(surf, 6+ox, 0+b+oy, 9, 1, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 7+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
+    _set_pixel(surf, 9+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
+    _set_pixel(surf, 11+ox, 0+b+oy, COLOR_HAIR_GRAY_LIGHT)
+    # Row 1: hair continues, full width
+    _draw_rect(surf, 6+ox, 1+b+oy, 9, 1, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 6+ox, 1+b+oy, COLOR_HAIR_GRAY_DARK)
     _set_pixel(surf, 14+ox, 1+b+oy, COLOR_HAIR_GRAY_DARK)
-    # Ponytail trailing behind (3-4 px)
+
+    # --- Ponytail: 3px trailing clearly behind head ---
     pt_b = ponytail_extra
     _set_pixel(surf, 15+ox, 1+b+oy, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 16+ox, 1+b+oy, COLOR_HAIR_GRAY_LIGHT)
     _set_pixel(surf, 16+ox, 2+b+oy+pt_b, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 17+ox, 2+b+oy+pt_b, COLOR_HAIR_GRAY_LIGHT)
     _set_pixel(surf, 17+ox, 3+b+oy+pt_b, COLOR_HAIR_GRAY)
-    _set_pixel(surf, 17+ox, 4+b+oy+pt_b, COLOR_HAIR_GRAY_LIGHT)
+    _set_pixel(surf, 18+ox, 4+b+oy+pt_b, COLOR_HAIR_GRAY_LIGHT)
 
-    # Face (8 wide, 6 tall)
-    _draw_rect(surf, 7+ox, 2+b+oy, 8, 6, COLOR_SKIN)
-    # Highlight top-left of forehead
+    # --- Face (9 wide, 6 tall, rows 2-7) ---
+    _draw_rect(surf, 6+ox, 2+b+oy, 9, 6, COLOR_SKIN)
+    # Highlight top-left of forehead (light from top-left)
+    _set_pixel(surf, 7+ox, 2+b+oy, COLOR_SKIN_HIGHLIGHT)
     _set_pixel(surf, 8+ox, 2+b+oy, COLOR_SKIN_HIGHLIGHT)
     _set_pixel(surf, 9+ox, 2+b+oy, COLOR_SKIN_HIGHLIGHT)
-    _set_pixel(surf, 10+ox, 2+b+oy, COLOR_SKIN_HIGHLIGHT)
-    # Shadow under jaw
-    _draw_rect(surf, 7+ox, 7+b+oy, 8, 1, COLOR_SKIN_SHADOW)
-    _set_pixel(surf, 7+ox, 6+b+oy, COLOR_SKIN_SHADOW)
+    _set_pixel(surf, 6+ox, 3+b+oy, COLOR_SKIN_HIGHLIGHT)
+    # Shadow right edge and under jaw
+    _set_pixel(surf, 14+ox, 5+b+oy, COLOR_SKIN_SHADOW)
     _set_pixel(surf, 14+ox, 6+b+oy, COLOR_SKIN_SHADOW)
+    _draw_rect(surf, 6+ox, 7+b+oy, 9, 1, COLOR_SKIN_SHADOW)
 
-    # Cybernetic LEFT eye: 2px bright cyan with halo
-    _set_pixel(surf, 8+ox, 4+b+oy, COLOR_CYBER_GLOW)
-    _set_pixel(surf, 9+ox, 4+b+oy, COLOR_CYBER_GLOW)
-    # Halo around cyber eye
-    _set_pixel(surf, 7+ox, 4+b+oy, COLOR_CYBER_GLOW_HALO)
+    # --- Cybernetic LEFT eye: 2x2 bright cyan at (7,4)-(8,5) ---
+    _draw_rect(surf, 7+ox, 4+b+oy, 2, 2, COLOR_CYBER_GLOW)
+    # Halo around cyber eye (soft glow)
+    _set_pixel(surf, 6+ox, 4+b+oy, COLOR_CYBER_GLOW_HALO)
+    _set_pixel(surf, 6+ox, 5+b+oy, (0, 120, 160, 60))
+    _set_pixel(surf, 7+ox, 3+b+oy, (0, 150, 200, 80))
     _set_pixel(surf, 8+ox, 3+b+oy, (0, 150, 200, 80))
-    _set_pixel(surf, 9+ox, 3+b+oy, (0, 150, 200, 80))
-    _set_pixel(surf, 10+ox, 4+b+oy, (0, 150, 200, 100))
-    _set_pixel(surf, 8+ox, 5+b+oy, (0, 120, 160, 60))
+    _set_pixel(surf, 9+ox, 4+b+oy, (0, 150, 200, 100))
+    _set_pixel(surf, 9+ox, 5+b+oy, (0, 120, 160, 60))
+    _set_pixel(surf, 7+ox, 6+b+oy, (0, 100, 130, 40))
+    _set_pixel(surf, 8+ox, 6+b+oy, (0, 100, 130, 40))
 
-    # RIGHT eye: dark pixel
+    # --- RIGHT eye: white + pupil at (12,4)-(13,4) ---
     _set_pixel(surf, 12+ox, 4+b+oy, COLOR_EYE)
     _set_pixel(surf, 13+ox, 4+b+oy, COLOR_BLACK)
 
-    # Eyebrows (angry tilt)
+    # --- Eyebrows (angry tilt) ---
+    _set_pixel(surf, 7+ox, 3+b+oy, COLOR_HAIR_GRAY_DARK)
     _set_pixel(surf, 8+ox, 3+b+oy, COLOR_HAIR_GRAY_DARK)
     _set_pixel(surf, 12+ox, 3+b+oy, COLOR_BLACK)
     _set_pixel(surf, 13+ox, 3+b+oy, COLOR_BLACK)
 
-    # Thick beard (darker skin tones)
-    _draw_rect(surf, 7+ox, 6+b+oy, 7, 2, COLOR_HAIR_GRAY)
+    # --- Nose hint ---
+    _set_pixel(surf, 10+ox, 5+b+oy, COLOR_SKIN_SHADOW)
+
+    # --- Beard: shaped jawline (rows 6-8), not a rectangle ---
+    # Row 6: beard starts narrow at cheeks
+    _set_pixel(surf, 7+ox, 6+b+oy, COLOR_HAIR_GRAY)
+    _draw_rect(surf, 8+ox, 6+b+oy, 5, 1, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 13+ox, 6+b+oy, COLOR_HAIR_GRAY_DARK)
+    # Row 7: fuller beard, jawline defined
+    _draw_rect(surf, 7+ox, 7+b+oy, 7, 1, COLOR_HAIR_GRAY)
     _set_pixel(surf, 8+ox, 7+b+oy, COLOR_HAIR_GRAY_LIGHT)
     _set_pixel(surf, 9+ox, 7+b+oy, COLOR_HAIR_GRAY_LIGHT)
     _set_pixel(surf, 10+ox, 7+b+oy, COLOR_HAIR_GRAY_LIGHT)
-    _set_pixel(surf, 11+ox, 7+b+oy, COLOR_HAIR_GRAY_LIGHT)
     _set_pixel(surf, 7+ox, 7+b+oy, COLOR_HAIR_GRAY_DARK)
     _set_pixel(surf, 13+ox, 7+b+oy, COLOR_HAIR_GRAY_DARK)
+    # Row 8: chin point (narrower, 5px centered)
+    _draw_rect(surf, 8+ox, 8+b+oy, 5, 1, COLOR_HAIR_GRAY)
+    _set_pixel(surf, 9+ox, 8+b+oy, COLOR_HAIR_GRAY_LIGHT)
+    _set_pixel(surf, 10+ox, 8+b+oy, COLOR_HAIR_GRAY_LIGHT)
+    _set_pixel(surf, 8+ox, 8+b+oy, COLOR_HAIR_GRAY_DARK)
+    _set_pixel(surf, 12+ox, 8+b+oy, COLOR_HAIR_GRAY_DARK)
 
 
 def _draw_gig_torso(surf, ox, oy, bob=0):
-    """Jacket, shirt, belt, pockets."""
+    """Jacket, shirt, belt, pockets.
+    Torso spans rows 9-19, 12px wide (ox+5 to ox+16).
+    """
     b = bob
-    # Collar
-    _draw_rect(surf, 8+ox, 8+b+oy, 6, 1, COLOR_JACKET_HIGHLIGHT)
-    _set_pixel(surf, 7+ox, 8+b+oy, COLOR_JACKET_BROWN)
-    _set_pixel(surf, 14+ox, 8+b+oy, COLOR_JACKET_BROWN)
+    # --- Collar: 1px lighter at neckline ---
+    _draw_rect(surf, 8+ox, 9+b+oy, 6, 1, COLOR_JACKET_HIGHLIGHT)
+    _set_pixel(surf, 7+ox, 9+b+oy, COLOR_JACKET_BROWN)
+    _set_pixel(surf, 14+ox, 9+b+oy, COLOR_JACKET_BROWN)
 
-    # Main jacket torso: 3-tone shading
-    # Shadow left edge
-    _draw_rect(surf, 5+ox, 9+b+oy, 2, 10, COLOR_JACKET_SHADOW)
-    # Deep shadow far left
-    _set_pixel(surf, 5+ox, 10+b+oy, COLOR_JACKET_DEEP)
+    # --- Main jacket torso: 3-tone shading (rows 10-18) ---
+    # Shadow left edge (2px)
+    _draw_rect(surf, 5+ox, 10+b+oy, 2, 9, COLOR_JACKET_SHADOW)
+    # Deep shadow accents
     _set_pixel(surf, 5+ox, 11+b+oy, COLOR_JACKET_DEEP)
-    _set_pixel(surf, 5+ox, 14+b+oy, COLOR_JACKET_DEEP)
+    _set_pixel(surf, 5+ox, 12+b+oy, COLOR_JACKET_DEEP)
+    _set_pixel(surf, 5+ox, 15+b+oy, COLOR_JACKET_DEEP)
     # Base colour mid torso
-    _draw_rect(surf, 7+ox, 9+b+oy, 8, 10, COLOR_JACKET_BROWN)
+    _draw_rect(surf, 7+ox, 10+b+oy, 8, 9, COLOR_JACKET_BROWN)
     # Highlight on right shoulder area
-    _draw_rect(surf, 15+ox, 9+b+oy, 2, 3, COLOR_JACKET_HIGHLIGHT)
-    _set_pixel(surf, 14+ox, 9+b+oy, COLOR_JACKET_HIGHLIGHT)
+    _draw_rect(surf, 15+ox, 10+b+oy, 2, 3, COLOR_JACKET_HIGHLIGHT)
+    _set_pixel(surf, 14+ox, 10+b+oy, COLOR_JACKET_HIGHLIGHT)
     # Fill right side
-    _draw_rect(surf, 15+ox, 12+b+oy, 2, 7, COLOR_JACKET_BROWN)
+    _draw_rect(surf, 15+ox, 13+b+oy, 2, 6, COLOR_JACKET_BROWN)
 
     # V-neck dark shirt underneath
-    _draw_rect(surf, 9+ox, 9+b+oy, 4, 3, COLOR_DARK_GRAY)
-    _set_pixel(surf, 10+ox, 12+b+oy, COLOR_DARK_GRAY)
-    _set_pixel(surf, 11+ox, 12+b+oy, COLOR_DARK_GRAY)
+    _draw_rect(surf, 9+ox, 10+b+oy, 4, 3, COLOR_DARK_GRAY)
+    _set_pixel(surf, 10+ox, 13+b+oy, COLOR_DARK_GRAY)
+    _set_pixel(surf, 11+ox, 13+b+oy, COLOR_DARK_GRAY)
 
     # Chest pocket (2x3 darker rectangle)
     _draw_rect(surf, 13+ox, 13+b+oy, 2, 3, COLOR_JACKET_SHADOW)
     _set_pixel(surf, 13+ox, 13+b+oy, COLOR_JACKET_DEEP)
 
     # Lapel line (1px darker line down front of jacket)
-    for yy in range(9, 18):
+    for yy in range(10, 18):
         _set_pixel(surf, 8+ox, yy+b+oy, COLOR_JACKET_SHADOW)
 
-    # Belt
+    # --- Belt with buckle ---
     _draw_rect(surf, 5+ox, 19+b+oy, 12, 1, COLOR_BLACK)
-    _set_pixel(surf, 10+ox, 19+b+oy, COLOR_NEON_ORANGE)  # buckle
+    # Orange buckle (2px for visibility)
+    _set_pixel(surf, 10+ox, 19+b+oy, COLOR_NEON_ORANGE)
     _set_pixel(surf, 11+ox, 19+b+oy, COLOR_NEON_ORANGE)
 
 
 def _draw_gig_cyber_arm(surf, ox, oy, bob=0, glow_phase=0):
-    """Left arm -- cybernetic with glow segments."""
+    """Left arm -- cybernetic, 4px wide with glow segments.
+    Arm at x=1..4, rows 10-18.
+    """
     b = bob
-    # Upper arm (gunmetal gray, 3-tone)
-    _draw_rect(surf, 2+ox, 10+b+oy, 3, 7, COLOR_CYBER_ARM)
-    _set_pixel(surf, 2+ox, 10+b+oy, COLOR_CYBER_ARM_SH)
-    _set_pixel(surf, 2+ox, 11+b+oy, COLOR_CYBER_ARM_SH)
+    # Upper arm (gunmetal gray, 4px wide, 3-tone)
+    _draw_rect(surf, 1+ox, 10+b+oy, 4, 7, COLOR_CYBER_ARM)
+    # Highlight on top-right (light source)
     _set_pixel(surf, 4+ox, 10+b+oy, COLOR_CYBER_ARM_HI)
     _set_pixel(surf, 4+ox, 11+b+oy, COLOR_CYBER_ARM_HI)
-    # Hand
-    _draw_rect(surf, 2+ox, 17+b+oy, 3, 2, COLOR_CYBER_ARM)
+    _set_pixel(surf, 3+ox, 10+b+oy, COLOR_CYBER_ARM_HI)
+    # Shadow on bottom-left
+    _set_pixel(surf, 1+ox, 15+b+oy, COLOR_CYBER_ARM_SH)
+    _set_pixel(surf, 1+ox, 16+b+oy, COLOR_CYBER_ARM_SH)
+    # Hand (fist shape, 4px wide)
+    _draw_rect(surf, 1+ox, 17+b+oy, 4, 2, COLOR_CYBER_ARM)
     _set_pixel(surf, 4+ox, 17+b+oy, COLOR_CYBER_ARM_HI)
 
-    # 4 glow segments alternating bright/dim
+    # 6 glow segments along center column, alternating bright/dim
     bright = COLOR_CYBER_GLOW
     dim = COLOR_CYBER_GLOW_DIM
     if glow_phase == 1:
         bright, dim = dim, bright  # swap for animation
+    _set_pixel(surf, 2+ox, 11+b+oy, bright)
     _set_pixel(surf, 3+ox, 11+b+oy, bright)
+    _set_pixel(surf, 2+ox, 12+b+oy, dim)
     _set_pixel(surf, 3+ox, 12+b+oy, dim)
+    _set_pixel(surf, 2+ox, 13+b+oy, bright)
     _set_pixel(surf, 3+ox, 13+b+oy, bright)
+    _set_pixel(surf, 2+ox, 14+b+oy, dim)
     _set_pixel(surf, 3+ox, 14+b+oy, dim)
+    _set_pixel(surf, 2+ox, 15+b+oy, bright)
     _set_pixel(surf, 3+ox, 15+b+oy, bright)
+    _set_pixel(surf, 2+ox, 16+b+oy, dim)
     _set_pixel(surf, 3+ox, 16+b+oy, dim)
-    # Glow bleed (1px into adjacent areas)
-    _set_pixel(surf, 2+ox, 12+b+oy, (0, 80, 100, 80))
+    # Glow bleed (soft halo on sides)
+    _set_pixel(surf, 1+ox, 12+b+oy, (0, 80, 100, 80))
     _set_pixel(surf, 4+ox, 13+b+oy, (0, 80, 100, 80))
-    _set_pixel(surf, 2+ox, 14+b+oy, (0, 80, 100, 80))
+    _set_pixel(surf, 1+ox, 14+b+oy, (0, 80, 100, 80))
     _set_pixel(surf, 4+ox, 15+b+oy, (0, 80, 100, 80))
 
 
 def _draw_gig_human_arm(surf, ox, oy, bob=0):
-    """Right arm -- jacket sleeve + human hand."""
+    """Right arm -- jacket sleeve + human hand, 3px wide."""
     b = bob
     # Sleeve -- highlight on shoulder, shadow below
     _draw_rect(surf, 17+ox, 10+b+oy, 3, 7, COLOR_JACKET_BROWN)
@@ -307,35 +349,38 @@ def _draw_gig_human_arm(surf, ox, oy, bob=0):
 
 
 def _draw_gig_legs(surf, ox, oy, l_off=0, r_off=0):
-    """Pants + boots with 2-tone shading."""
-    # Left leg
-    _draw_rect(surf, 5+ox+l_off, 20+oy, 4, 7, COLOR_PANTS_DARK)
-    _set_pixel(surf, 5+ox+l_off, 20+oy, COLOR_PANTS_HI)
+    """Pants + boots with 2-tone shading.
+    Each leg 3px wide, boots 4px wide with sole line.
+    Legs: rows 20-26, boots: rows 27-31.
+    """
+    # --- Left leg (3px wide) ---
+    _draw_rect(surf, 6+ox+l_off, 20+oy, 3, 7, COLOR_PANTS_DARK)
     _set_pixel(surf, 6+ox+l_off, 20+oy, COLOR_PANTS_HI)
-    _set_pixel(surf, 5+ox+l_off, 25+oy, COLOR_PANTS_SH)
-    _set_pixel(surf, 5+ox+l_off, 26+oy, COLOR_PANTS_SH)
-    # Right leg
-    _draw_rect(surf, 13+ox+r_off, 20+oy, 4, 7, COLOR_PANTS_DARK)
-    _set_pixel(surf, 16+ox+r_off, 20+oy, COLOR_PANTS_HI)
+    _set_pixel(surf, 7+ox+l_off, 20+oy, COLOR_PANTS_HI)
+    _set_pixel(surf, 6+ox+l_off, 25+oy, COLOR_PANTS_SH)
+    _set_pixel(surf, 6+ox+l_off, 26+oy, COLOR_PANTS_SH)
+    # --- Right leg (3px wide) ---
+    _draw_rect(surf, 13+ox+r_off, 20+oy, 3, 7, COLOR_PANTS_DARK)
+    _set_pixel(surf, 15+ox+r_off, 20+oy, COLOR_PANTS_HI)
     _set_pixel(surf, 13+ox+r_off, 25+oy, COLOR_PANTS_SH)
     _set_pixel(surf, 13+ox+r_off, 26+oy, COLOR_PANTS_SH)
 
-    # Left boot
-    _draw_rect(surf, 4+ox+l_off, 27+oy, 5, 5, COLOR_BOOTS_BROWN)
-    _set_pixel(surf, 5+ox+l_off, 27+oy, COLOR_BOOTS_HI)  # highlight on toe cap
-    _set_pixel(surf, 6+ox+l_off, 27+oy, COLOR_BOOTS_HI)
-    _draw_rect(surf, 4+ox+l_off, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
+    # --- Left boot (4px wide with shaped toe and sole) ---
+    _draw_rect(surf, 5+ox+l_off, 27+oy, 4, 4, COLOR_BOOTS_BROWN)
+    _set_pixel(surf, 6+ox+l_off, 27+oy, COLOR_BOOTS_HI)  # highlight on toe cap
+    _set_pixel(surf, 7+ox+l_off, 27+oy, COLOR_BOOTS_HI)
+    _draw_rect(surf, 5+ox+l_off, 31+oy, 4, 1, COLOR_BOOTS_SOLE)  # sole line
     # Lace detail
-    _set_pixel(surf, 5+ox+l_off, 28+oy, COLOR_BLACK)
-    _set_pixel(surf, 7+ox+l_off, 28+oy, COLOR_BLACK)
+    _set_pixel(surf, 6+ox+l_off, 28+oy, COLOR_BLACK)
+    _set_pixel(surf, 7+ox+l_off, 29+oy, COLOR_BLACK)
 
-    # Right boot
-    _draw_rect(surf, 13+ox+r_off, 27+oy, 5, 5, COLOR_BOOTS_BROWN)
+    # --- Right boot (4px wide with shaped toe and sole) ---
+    _draw_rect(surf, 13+ox+r_off, 27+oy, 4, 4, COLOR_BOOTS_BROWN)
     _set_pixel(surf, 14+ox+r_off, 27+oy, COLOR_BOOTS_HI)
     _set_pixel(surf, 15+ox+r_off, 27+oy, COLOR_BOOTS_HI)
-    _draw_rect(surf, 13+ox+r_off, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
+    _draw_rect(surf, 13+ox+r_off, 31+oy, 4, 1, COLOR_BOOTS_SOLE)  # sole line
     _set_pixel(surf, 14+ox+r_off, 28+oy, COLOR_BLACK)
-    _set_pixel(surf, 16+ox+r_off, 28+oy, COLOR_BLACK)
+    _set_pixel(surf, 15+ox+r_off, 29+oy, COLOR_BLACK)
 
 
 def _draw_gig_base(surf, facing_right=True, ox=5, oy=0, bob=0, glow_phase=0,
@@ -373,8 +418,11 @@ def generate_gig_sprites():
                        ponytail_extra=pt)
         if f == 2:
             # Extra bright glow on pulse frame
+            _set_pixel(surf, 2+ox, 11+oy, (0, 255, 255))
             _set_pixel(surf, 3+ox, 11+oy, (0, 255, 255))
+            _set_pixel(surf, 2+ox, 13+oy, (0, 255, 255))
             _set_pixel(surf, 3+ox, 13+oy, (0, 255, 255))
+            _set_pixel(surf, 2+ox, 15+oy, (0, 255, 255))
             _set_pixel(surf, 3+ox, 15+oy, (0, 255, 255))
         _draw_outline(surf)
         idle_frames.append(surf)
@@ -399,12 +447,15 @@ def generate_gig_sprites():
 
         # Arm pump: arms swing opposite to legs
         arm_y_off = 2 if f in (0, 2) else -2
-        # Cyber arm (left)
-        _draw_rect(surf, 2+ox, 10+bob+oy, 3, 7, COLOR_CYBER_ARM)
+        # Cyber arm (left, 4px wide)
+        _draw_rect(surf, 1+ox, 10+bob+oy, 4, 7, COLOR_CYBER_ARM)
         _set_pixel(surf, 4+ox, 10+bob+oy, COLOR_CYBER_ARM_HI)
-        _draw_rect(surf, 2+ox, 17+bob+oy-arm_y_off, 3, 2, COLOR_CYBER_ARM)
+        _draw_rect(surf, 1+ox, 17+bob+oy-arm_y_off, 4, 2, COLOR_CYBER_ARM)
+        _set_pixel(surf, 2+ox, 11+bob+oy, COLOR_CYBER_GLOW)
         _set_pixel(surf, 3+ox, 11+bob+oy, COLOR_CYBER_GLOW)
+        _set_pixel(surf, 2+ox, 13+bob+oy, COLOR_CYBER_GLOW_DIM)
         _set_pixel(surf, 3+ox, 13+bob+oy, COLOR_CYBER_GLOW_DIM)
+        _set_pixel(surf, 2+ox, 15+bob+oy, COLOR_CYBER_GLOW)
         _set_pixel(surf, 3+ox, 15+bob+oy, COLOR_CYBER_GLOW)
         # Human arm (right)
         _draw_rect(surf, 17+ox, 10+bob+oy, 3, 7, COLOR_JACKET_BROWN)
@@ -423,18 +474,18 @@ def generate_gig_sprites():
     jump_frames = []
     for jf in range(2):
         surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
-        # Tucked legs: boots up higher, knees bent
-        _draw_rect(surf, 5+ox, 23+oy, 4, 4, COLOR_PANTS_DARK)
-        _set_pixel(surf, 5+ox, 23+oy, COLOR_PANTS_HI)
-        _draw_rect(surf, 13+ox, 23+oy, 4, 4, COLOR_PANTS_DARK)
-        _set_pixel(surf, 16+ox, 23+oy, COLOR_PANTS_HI)
-        # Boots underneath bent legs
-        _draw_rect(surf, 4+ox, 27+oy, 5, 4, COLOR_BOOTS_BROWN)
-        _set_pixel(surf, 5+ox, 27+oy, COLOR_BOOTS_HI)
-        _draw_rect(surf, 4+ox, 30+oy, 5, 1, COLOR_BOOTS_SOLE)
-        _draw_rect(surf, 13+ox, 27+oy, 5, 4, COLOR_BOOTS_BROWN)
+        # Tucked legs: boots up higher, knees bent (3px wide legs)
+        _draw_rect(surf, 6+ox, 23+oy, 3, 4, COLOR_PANTS_DARK)
+        _set_pixel(surf, 6+ox, 23+oy, COLOR_PANTS_HI)
+        _draw_rect(surf, 13+ox, 23+oy, 3, 4, COLOR_PANTS_DARK)
+        _set_pixel(surf, 15+ox, 23+oy, COLOR_PANTS_HI)
+        # Boots underneath bent legs (4px wide)
+        _draw_rect(surf, 5+ox, 27+oy, 4, 3, COLOR_BOOTS_BROWN)
+        _set_pixel(surf, 6+ox, 27+oy, COLOR_BOOTS_HI)
+        _draw_rect(surf, 5+ox, 30+oy, 4, 1, COLOR_BOOTS_SOLE)
+        _draw_rect(surf, 13+ox, 27+oy, 4, 3, COLOR_BOOTS_BROWN)
         _set_pixel(surf, 14+ox, 27+oy, COLOR_BOOTS_HI)
-        _draw_rect(surf, 13+ox, 30+oy, 5, 1, COLOR_BOOTS_SOLE)
+        _draw_rect(surf, 13+ox, 30+oy, 4, 1, COLOR_BOOTS_SOLE)
 
         # Belt
         _draw_rect(surf, 5+ox, 22+oy, 12, 1, COLOR_BLACK)
@@ -448,11 +499,14 @@ def generate_gig_sprites():
         _draw_rect(surf, 17+ox, 7+oy+adj, 3, 7, COLOR_JACKET_BROWN)
         _set_pixel(surf, 17+ox, 7+oy+adj, COLOR_JACKET_HIGHLIGHT)
         _draw_rect(surf, 17+ox, 14+oy+adj, 3, 2, COLOR_SKIN)
-        _draw_rect(surf, 2+ox, 7+oy, 3, 7, COLOR_CYBER_ARM)
+        _draw_rect(surf, 1+ox, 7+oy, 4, 7, COLOR_CYBER_ARM)
         _set_pixel(surf, 4+ox, 7+oy, COLOR_CYBER_ARM_HI)
-        _draw_rect(surf, 2+ox, 14+oy, 3, 2, COLOR_CYBER_ARM)
+        _draw_rect(surf, 1+ox, 14+oy, 4, 2, COLOR_CYBER_ARM)
+        _set_pixel(surf, 2+ox, 8+oy, COLOR_CYBER_GLOW)
         _set_pixel(surf, 3+ox, 8+oy, COLOR_CYBER_GLOW)
+        _set_pixel(surf, 2+ox, 10+oy, COLOR_CYBER_GLOW_DIM)
         _set_pixel(surf, 3+ox, 10+oy, COLOR_CYBER_GLOW_DIM)
+        _set_pixel(surf, 2+ox, 12+oy, COLOR_CYBER_GLOW)
         _set_pixel(surf, 3+ox, 12+oy, COLOR_CYBER_GLOW)
 
         # Head
@@ -478,11 +532,14 @@ def generate_gig_sprites():
         _draw_rect(surf, 18+ox, 10+oy+arm_drop, 3, 6, COLOR_JACKET_BROWN)
         _set_pixel(surf, 18+ox, 10+oy+arm_drop, COLOR_JACKET_HIGHLIGHT)
         _draw_rect(surf, 18+ox, 16+oy+arm_drop, 3, 2, COLOR_SKIN)
-        _draw_rect(surf, 1+ox, 10+oy+arm_drop, 3, 6, COLOR_CYBER_ARM)
+        _draw_rect(surf, 0+ox, 10+oy+arm_drop, 4, 6, COLOR_CYBER_ARM)
         _set_pixel(surf, 3+ox, 10+oy+arm_drop, COLOR_CYBER_ARM_HI)
-        _draw_rect(surf, 1+ox, 16+oy+arm_drop, 3, 2, COLOR_CYBER_ARM)
+        _draw_rect(surf, 0+ox, 16+oy+arm_drop, 4, 2, COLOR_CYBER_ARM)
+        _set_pixel(surf, 1+ox, 11+oy+arm_drop, COLOR_CYBER_GLOW)
         _set_pixel(surf, 2+ox, 11+oy+arm_drop, COLOR_CYBER_GLOW)
+        _set_pixel(surf, 1+ox, 13+oy+arm_drop, COLOR_CYBER_GLOW_DIM)
         _set_pixel(surf, 2+ox, 13+oy+arm_drop, COLOR_CYBER_GLOW_DIM)
+        _set_pixel(surf, 1+ox, 15+oy+arm_drop, COLOR_CYBER_GLOW)
         _set_pixel(surf, 2+ox, 15+oy+arm_drop, COLOR_CYBER_GLOW)
 
         # Coat tail flutter (small triangles at jacket bottom)
@@ -509,30 +566,32 @@ def generate_gig_sprites():
         surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
         if lf == 0:
             # Squash: wide stance, compressed body, shifted down
-            # Wide feet
-            _draw_rect(surf, 2+ox, 28+oy, 6, 4, COLOR_BOOTS_BROWN)
-            _set_pixel(surf, 3+ox, 28+oy, COLOR_BOOTS_HI)
-            _draw_rect(surf, 2+ox, 31+oy, 6, 1, COLOR_BOOTS_SOLE)
-            _draw_rect(surf, 14+ox, 28+oy, 6, 4, COLOR_BOOTS_BROWN)
+            # Wide feet (4px boots)
+            _draw_rect(surf, 3+ox, 28+oy, 5, 3, COLOR_BOOTS_BROWN)
+            _set_pixel(surf, 4+ox, 28+oy, COLOR_BOOTS_HI)
+            _draw_rect(surf, 3+ox, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
+            _draw_rect(surf, 14+ox, 28+oy, 5, 3, COLOR_BOOTS_BROWN)
             _set_pixel(surf, 15+ox, 28+oy, COLOR_BOOTS_HI)
-            _draw_rect(surf, 14+ox, 31+oy, 6, 1, COLOR_BOOTS_SOLE)
-            # Squat legs
-            _draw_rect(surf, 4+ox, 24+oy, 5, 4, COLOR_PANTS_DARK)
-            _set_pixel(surf, 4+ox, 24+oy, COLOR_PANTS_HI)
-            _draw_rect(surf, 13+ox, 24+oy, 5, 4, COLOR_PANTS_DARK)
-            _set_pixel(surf, 17+ox, 24+oy, COLOR_PANTS_HI)
+            _draw_rect(surf, 14+ox, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
+            # Squat legs (3px wide)
+            _draw_rect(surf, 5+ox, 24+oy, 3, 4, COLOR_PANTS_DARK)
+            _set_pixel(surf, 5+ox, 24+oy, COLOR_PANTS_HI)
+            _draw_rect(surf, 14+ox, 24+oy, 3, 4, COLOR_PANTS_DARK)
+            _set_pixel(surf, 16+ox, 24+oy, COLOR_PANTS_HI)
             _draw_rect(surf, 4+ox, 23+oy, 14, 1, COLOR_BLACK)
             # Compressed torso
             _draw_rect(surf, 5+ox, 14+oy, 12, 9, COLOR_JACKET_BROWN)
             _draw_rect(surf, 5+ox, 14+oy, 2, 9, COLOR_JACKET_SHADOW)
             _draw_rect(surf, 15+ox, 14+oy, 2, 3, COLOR_JACKET_HIGHLIGHT)
             _draw_rect(surf, 9+ox, 14+oy, 4, 3, COLOR_DARK_GRAY)
-            # Arms hanging low
+            # Arms hanging low (4px cyber arm)
             _draw_rect(surf, 17+ox, 15+oy, 3, 5, COLOR_JACKET_BROWN)
             _draw_rect(surf, 17+ox, 20+oy, 3, 2, COLOR_SKIN)
-            _draw_rect(surf, 2+ox, 15+oy, 3, 5, COLOR_CYBER_ARM)
-            _draw_rect(surf, 2+ox, 20+oy, 3, 2, COLOR_CYBER_ARM)
+            _draw_rect(surf, 1+ox, 15+oy, 4, 5, COLOR_CYBER_ARM)
+            _draw_rect(surf, 1+ox, 20+oy, 4, 2, COLOR_CYBER_ARM)
+            _set_pixel(surf, 2+ox, 16+oy, COLOR_CYBER_GLOW)
             _set_pixel(surf, 3+ox, 16+oy, COLOR_CYBER_GLOW)
+            _set_pixel(surf, 2+ox, 18+oy, COLOR_CYBER_GLOW_DIM)
             _set_pixel(surf, 3+ox, 18+oy, COLOR_CYBER_GLOW_DIM)
             # Compressed head
             _draw_gig_head(surf, ox, oy, 6, 0)
@@ -540,9 +599,9 @@ def generate_gig_sprites():
             # Recovery: basically standing but slight bend
             _draw_gig_base(surf, ox=ox, oy=oy)
             # Slight knee bend (shift left leg 1px)
-            _draw_rect(surf, 5+ox, 20+oy, 4, 7, (0, 0, 0, 0))
-            _draw_rect(surf, 6+ox, 21+oy, 4, 6, COLOR_PANTS_DARK)
-            _set_pixel(surf, 6+ox, 21+oy, COLOR_PANTS_HI)
+            _draw_rect(surf, 6+ox, 20+oy, 3, 7, (0, 0, 0, 0))
+            _draw_rect(surf, 7+ox, 21+oy, 3, 6, COLOR_PANTS_DARK)
+            _set_pixel(surf, 7+ox, 21+oy, COLOR_PANTS_HI)
         _draw_outline(surf)
         land_frames.append(surf)
     sprites["land_right"] = land_frames
@@ -561,27 +620,30 @@ def generate_gig_sprites():
 
     # --- CROUCH (1 frame) ---
     surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
-    # Compressed down
-    _draw_rect(surf, 4+ox, 28+oy, 5, 4, COLOR_BOOTS_BROWN)
-    _set_pixel(surf, 5+ox, 28+oy, COLOR_BOOTS_HI)
-    _draw_rect(surf, 4+ox, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
-    _draw_rect(surf, 13+ox, 28+oy, 5, 4, COLOR_BOOTS_BROWN)
+    # Compressed down -- 4px boots
+    _draw_rect(surf, 5+ox, 28+oy, 4, 3, COLOR_BOOTS_BROWN)
+    _set_pixel(surf, 6+ox, 28+oy, COLOR_BOOTS_HI)
+    _draw_rect(surf, 5+ox, 31+oy, 4, 1, COLOR_BOOTS_SOLE)
+    _draw_rect(surf, 13+ox, 28+oy, 4, 3, COLOR_BOOTS_BROWN)
     _set_pixel(surf, 14+ox, 28+oy, COLOR_BOOTS_HI)
-    _draw_rect(surf, 13+ox, 31+oy, 5, 1, COLOR_BOOTS_SOLE)
-    _draw_rect(surf, 5+ox, 24+oy, 4, 4, COLOR_PANTS_DARK)
-    _draw_rect(surf, 13+ox, 24+oy, 4, 4, COLOR_PANTS_DARK)
+    _draw_rect(surf, 13+ox, 31+oy, 4, 1, COLOR_BOOTS_SOLE)
+    # 3px wide legs
+    _draw_rect(surf, 6+ox, 24+oy, 3, 4, COLOR_PANTS_DARK)
+    _draw_rect(surf, 13+ox, 24+oy, 3, 4, COLOR_PANTS_DARK)
     _draw_rect(surf, 5+ox, 23+oy, 12, 1, COLOR_BLACK)
     # Short torso
     _draw_rect(surf, 5+ox, 16+oy, 12, 7, COLOR_JACKET_BROWN)
     _draw_rect(surf, 5+ox, 16+oy, 2, 7, COLOR_JACKET_SHADOW)
     _draw_rect(surf, 15+ox, 16+oy, 2, 2, COLOR_JACKET_HIGHLIGHT)
     _draw_rect(surf, 9+ox, 16+oy, 4, 3, COLOR_DARK_GRAY)
-    # Arms
+    # Arms (4px cyber arm)
     _draw_rect(surf, 17+ox, 17+oy, 3, 5, COLOR_JACKET_BROWN)
     _draw_rect(surf, 17+ox, 22+oy, 3, 2, COLOR_SKIN)
-    _draw_rect(surf, 2+ox, 17+oy, 3, 5, COLOR_CYBER_ARM)
-    _draw_rect(surf, 2+ox, 22+oy, 3, 2, COLOR_CYBER_ARM)
+    _draw_rect(surf, 1+ox, 17+oy, 4, 5, COLOR_CYBER_ARM)
+    _draw_rect(surf, 1+ox, 22+oy, 4, 2, COLOR_CYBER_ARM)
+    _set_pixel(surf, 2+ox, 18+oy, COLOR_CYBER_GLOW)
     _set_pixel(surf, 3+ox, 18+oy, COLOR_CYBER_GLOW)
+    _set_pixel(surf, 2+ox, 20+oy, COLOR_CYBER_GLOW_DIM)
     _set_pixel(surf, 3+ox, 20+oy, COLOR_CYBER_GLOW_DIM)
     # Head shifted down
     _draw_gig_head(surf, ox, oy, 8, 0)
@@ -591,11 +653,11 @@ def generate_gig_sprites():
 
     # --- SLIDE (1 frame, body nearly horizontal) ---
     surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
-    # Feet forward
-    _draw_rect(surf, 0+ox, 23+oy, 6, 4, COLOR_BOOTS_BROWN)
+    # Feet forward (4px boots)
+    _draw_rect(surf, 0+ox, 23+oy, 5, 3, COLOR_BOOTS_BROWN)
     _set_pixel(surf, 1+ox, 23+oy, COLOR_BOOTS_HI)
-    _draw_rect(surf, 0+ox, 26+oy, 6, 1, COLOR_BOOTS_SOLE)
-    _draw_rect(surf, 0+ox, 20+oy, 6, 3, COLOR_PANTS_DARK)
+    _draw_rect(surf, 0+ox, 26+oy, 5, 1, COLOR_BOOTS_SOLE)
+    _draw_rect(surf, 0+ox, 20+oy, 5, 3, COLOR_PANTS_DARK)
     # Body stretched horizontal
     _draw_rect(surf, 5+ox, 18+oy, 14, 5, COLOR_JACKET_BROWN)
     _draw_rect(surf, 5+ox, 18+oy, 2, 5, COLOR_JACKET_SHADOW)
@@ -739,11 +801,13 @@ def generate_gig_sprites():
     # --- HACK (1 frame, cyber arm extended with hologram) ---
     surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
     _draw_gig_base(surf, ox=ox, oy=oy)
-    # Cyber arm extended forward
-    _draw_rect(surf, 0+ox, 10+oy, 3, 7, COLOR_CYBER_ARM)
-    _set_pixel(surf, 2+ox, 10+oy, COLOR_CYBER_ARM_HI)
+    # Cyber arm extended forward (4px wide)
+    _draw_rect(surf, 0+ox, 10+oy, 4, 7, COLOR_CYBER_ARM)
+    _set_pixel(surf, 3+ox, 10+oy, COLOR_CYBER_ARM_HI)
     _set_pixel(surf, 1+ox, 11+oy, COLOR_CYBER_GLOW)
+    _set_pixel(surf, 2+ox, 11+oy, COLOR_CYBER_GLOW)
     _set_pixel(surf, 1+ox, 13+oy, COLOR_CYBER_GLOW)
+    _set_pixel(surf, 2+ox, 13+oy, COLOR_CYBER_GLOW)
     # Hologram (green scanline checkerboard)
     for hy in range(5):
         for hx in range(5):
@@ -761,47 +825,57 @@ def generate_gig_sprites():
 # ===================================================================
 # THUG -- Street enforcer
 # Base 22x32 on 32x32 canvas, ox=5 oy=0
+# Redesigned with: bandana with trailing knot, visible muscular arms,
+# V-shaped angry eyebrows, scowl, wider heavier stance, skin-colored
+# fists with brass knuckles
 # ===================================================================
 
 def _draw_thug_base(surf, alert=False, ox=5, oy=0):
     W, H = THUG_WIDTH, THUG_HEIGHT
 
-    # --- Boots (heavy black) ---
-    _draw_rect(surf, 3+ox, 27+oy, 6, 5, COLOR_BLACK)
-    _set_pixel(surf, 4+ox, 27+oy, (30, 30, 30))  # highlight on toe
-    _set_pixel(surf, 5+ox, 27+oy, (30, 30, 30))
-    _draw_rect(surf, 3+ox, 31+oy, 6, 1, (15, 12, 10))  # thick sole
-    _draw_rect(surf, 13+ox, 27+oy, 6, 5, COLOR_BLACK)
+    # --- Boots (heavy black, 6px wide each for heavy stance) ---
+    _draw_rect(surf, 2+ox, 27+oy, 7, 5, COLOR_BLACK)
+    _set_pixel(surf, 3+ox, 27+oy, (30, 30, 30))  # highlight on toe
+    _set_pixel(surf, 4+ox, 27+oy, (30, 30, 30))
+    _draw_rect(surf, 2+ox, 31+oy, 7, 1, (15, 12, 10))  # thick sole
+    _draw_rect(surf, 13+ox, 27+oy, 7, 5, COLOR_BLACK)
     _set_pixel(surf, 14+ox, 27+oy, (30, 30, 30))
     _set_pixel(surf, 15+ox, 27+oy, (30, 30, 30))
-    _draw_rect(surf, 13+ox, 31+oy, 6, 1, (15, 12, 10))
+    _draw_rect(surf, 13+ox, 31+oy, 7, 1, (15, 12, 10))
 
-    # --- Pants ---
-    _draw_rect(surf, 5+ox, 20+oy, 4, 7, COLOR_PANTS_DARK)
+    # --- Pants (wider stance, 5px each leg) ---
+    _draw_rect(surf, 4+ox, 20+oy, 5, 7, COLOR_PANTS_DARK)
+    _set_pixel(surf, 4+ox, 20+oy, COLOR_PANTS_HI)
     _set_pixel(surf, 5+ox, 20+oy, COLOR_PANTS_HI)
-    _set_pixel(surf, 5+ox, 26+oy, COLOR_PANTS_SH)
-    _draw_rect(surf, 13+ox, 20+oy, 4, 7, COLOR_PANTS_DARK)
-    _set_pixel(surf, 16+ox, 20+oy, COLOR_PANTS_HI)
+    _set_pixel(surf, 4+ox, 26+oy, COLOR_PANTS_SH)
+    _draw_rect(surf, 13+ox, 20+oy, 5, 7, COLOR_PANTS_DARK)
+    _set_pixel(surf, 17+ox, 20+oy, COLOR_PANTS_HI)
     _set_pixel(surf, 13+ox, 26+oy, COLOR_PANTS_SH)
     # Belt
-    _draw_rect(surf, 4+ox, 19+oy, 14, 1, COLOR_BLACK)
+    _draw_rect(surf, 3+ox, 19+oy, 16, 1, COLOR_BLACK)
 
-    # --- Torso: stockier, wider (14px) ---
+    # --- Torso: stockier, wider (16px), shoulders wider than waist ---
     body_color = COLOR_RED_ALARM if alert else COLOR_THUG_SHIRT
     body_sh = (180, 30, 55) if alert else COLOR_THUG_SHIRT_SH
-    _draw_rect(surf, 3+ox, 9+oy, 16, 10, body_color)
+    # Main body block (14px wide for chest)
+    _draw_rect(surf, 3+ox, 10+oy, 16, 9, body_color)
+    # Shoulder shelf: 2px extra each side at top
+    _draw_rect(surf, 1+ox, 9+oy, 20, 2, body_color)
     # Shadow on left side
-    _draw_rect(surf, 3+ox, 9+oy, 3, 10, body_sh)
+    _draw_rect(surf, 1+ox, 9+oy, 3, 10, body_sh)
     # Highlight on right shoulder
-    _set_pixel(surf, 17+ox, 9+oy, (80, 30, 30) if not alert else (255, 80, 100))
-    _set_pixel(surf, 18+ox, 9+oy, (80, 30, 30) if not alert else (255, 80, 100))
+    _set_pixel(surf, 19+ox, 9+oy, (80, 30, 30) if not alert else (255, 80, 100))
+    _set_pixel(surf, 20+ox, 9+oy, (80, 30, 30) if not alert else (255, 80, 100))
+    # Narrower waist (indent bottom of torso)
+    _set_pixel(surf, 3+ox, 18+oy, (0, 0, 0, 0))
+    _set_pixel(surf, 18+ox, 18+oy, (0, 0, 0, 0))
     # Tank top neckline (V shape)
     _draw_rect(surf, 7+ox, 9+oy, 8, 2, COLOR_DARK_GRAY)
     _set_pixel(surf, 9+ox, 11+oy, COLOR_DARK_GRAY)
     _set_pixel(surf, 10+ox, 11+oy, COLOR_DARK_GRAY)
     _set_pixel(surf, 11+ox, 11+oy, COLOR_DARK_GRAY)
     _set_pixel(surf, 12+ox, 11+oy, COLOR_DARK_GRAY)
-    # Skull X marking
+    # Skull X marking on shirt
     marking = (100, 50, 50)
     _set_pixel(surf, 9+ox, 13+oy, marking)
     _set_pixel(surf, 12+ox, 13+oy, marking)
@@ -810,61 +884,78 @@ def _draw_thug_base(surf, alert=False, ox=5, oy=0):
     _set_pixel(surf, 9+ox, 15+oy, marking)
     _set_pixel(surf, 12+ox, 15+oy, marking)
 
-    # --- Arms: muscular, shaded skin ---
-    # Right arm
-    _draw_rect(surf, 19+ox, 10+oy, 3, 7, COLOR_THUG_SKIN)
-    _set_pixel(surf, 19+ox, 10+oy, COLOR_THUG_SKIN_SH)
-    _set_pixel(surf, 21+ox, 11+oy, COLOR_THUG_SKIN_HI)  # bicep bulge
-    _set_pixel(surf, 21+ox, 12+oy, COLOR_THUG_SKIN_HI)
-    _draw_rect(surf, 19+ox, 17+oy, 3, 2, COLOR_THUG_SKIN)
+    # --- Arms: muscular, shaded skin, visible extending from body ---
+    # Right arm (3px wide, extending from shoulder)
+    _draw_rect(surf, 21+ox, 10+oy, 3, 7, COLOR_THUG_SKIN)
+    _set_pixel(surf, 21+ox, 10+oy, COLOR_THUG_SKIN_SH)
+    _set_pixel(surf, 23+ox, 11+oy, COLOR_THUG_SKIN_HI)  # bicep bulge
+    _set_pixel(surf, 23+ox, 12+oy, COLOR_THUG_SKIN_HI)
+    _set_pixel(surf, 21+ox, 14+oy, COLOR_THUG_SKIN_SH)
+    # Right fist
+    _draw_rect(surf, 21+ox, 17+oy, 3, 2, COLOR_THUG_SKIN)
     # Brass knuckles
-    _set_pixel(surf, 19+ox, 17+oy, COLOR_BRASS)
-    _set_pixel(surf, 20+ox, 17+oy, COLOR_BRASS_HI)
     _set_pixel(surf, 21+ox, 17+oy, COLOR_BRASS)
-    # Left arm
-    _draw_rect(surf, 0+ox, 10+oy, 3, 7, COLOR_THUG_SKIN)
-    _set_pixel(surf, 0+ox, 10+oy, COLOR_THUG_SKIN_SH)
-    _set_pixel(surf, 0+ox, 11+oy, COLOR_THUG_SKIN_SH)
-    _set_pixel(surf, 2+ox, 11+oy, COLOR_THUG_SKIN_HI)
-    _draw_rect(surf, 0+ox, 17+oy, 3, 2, COLOR_THUG_SKIN)
+    _set_pixel(surf, 22+ox, 17+oy, COLOR_BRASS_HI)
+    _set_pixel(surf, 23+ox, 17+oy, COLOR_BRASS)
+    # Left arm (3px wide)
+    _draw_rect(surf, -2+ox, 10+oy, 3, 7, COLOR_THUG_SKIN)
+    _set_pixel(surf, -2+ox, 10+oy, COLOR_THUG_SKIN_SH)
+    _set_pixel(surf, -2+ox, 11+oy, COLOR_THUG_SKIN_SH)
+    _set_pixel(surf, 0+ox, 11+oy, COLOR_THUG_SKIN_HI)
+    _set_pixel(surf, 0+ox, 12+oy, COLOR_THUG_SKIN_HI)
+    # Left fist
+    _draw_rect(surf, -2+ox, 17+oy, 3, 2, COLOR_THUG_SKIN)
+    _set_pixel(surf, -2+ox, 17+oy, COLOR_BRASS)
+    _set_pixel(surf, -1+ox, 17+oy, COLOR_BRASS_HI)
     _set_pixel(surf, 0+ox, 17+oy, COLOR_BRASS)
-    _set_pixel(surf, 1+ox, 17+oy, COLOR_BRASS_HI)
-    _set_pixel(surf, 2+ox, 17+oy, COLOR_BRASS)
 
     # --- Head (10 wide, 7 tall) ---
     _draw_rect(surf, 6+ox, 2+oy, 10, 7, COLOR_THUG_SKIN)
     # Skin shading: highlight top-left, shadow lower-right
     _set_pixel(surf, 7+ox, 2+oy, COLOR_THUG_SKIN_HI)
     _set_pixel(surf, 8+ox, 2+oy, COLOR_THUG_SKIN_HI)
+    _set_pixel(surf, 6+ox, 3+oy, COLOR_THUG_SKIN_HI)
     _set_pixel(surf, 14+ox, 7+oy, COLOR_THUG_SKIN_SH)
     _set_pixel(surf, 15+ox, 7+oy, COLOR_THUG_SKIN_SH)
     _set_pixel(surf, 15+ox, 8+oy, COLOR_THUG_SKIN_SH)
 
-    # Red bandana with 2px trailing tail
+    # --- Red bandana: wraps around head with knot/tail ---
+    # Main bandana band (2 rows)
     _draw_rect(surf, 6+ox, 1+oy, 10, 2, COLOR_THUG_BANDANA)
+    # Shading on bandana
     _set_pixel(surf, 6+ox, 1+oy, COLOR_THUG_BANDANA_SH)
     _set_pixel(surf, 15+ox, 1+oy, COLOR_THUG_BANDANA_SH)
-    _set_pixel(surf, 16+ox, 2+oy, COLOR_THUG_BANDANA)   # tail 1
-    _set_pixel(surf, 17+ox, 3+oy, COLOR_THUG_BANDANA)   # tail 2
-    _set_pixel(surf, 17+ox, 3+oy, COLOR_THUG_BANDANA_SH)
+    # Knot bump on right side
+    _set_pixel(surf, 16+ox, 1+oy, COLOR_THUG_BANDANA)
+    # Trailing tail: 3px down-and-right
+    _set_pixel(surf, 16+ox, 2+oy, COLOR_THUG_BANDANA)
+    _set_pixel(surf, 17+ox, 3+oy, COLOR_THUG_BANDANA)
+    _set_pixel(surf, 17+ox, 4+oy, COLOR_THUG_BANDANA_SH)
+    _set_pixel(surf, 18+ox, 4+oy, COLOR_THUG_BANDANA_SH)
+    # Top fold highlight
+    _set_pixel(surf, 9+ox, 1+oy, (255, 80, 100))
+    _set_pixel(surf, 10+ox, 1+oy, (255, 80, 100))
 
-    # Angry V-shaped eyebrows
-    _set_pixel(surf, 8+ox, 3+oy, COLOR_BLACK)
-    _set_pixel(surf, 9+ox, 3+oy, COLOR_BLACK)
-    _set_pixel(surf, 10+ox, 4+oy, COLOR_BLACK)  # brow angles down
-    _set_pixel(surf, 12+ox, 4+oy, COLOR_BLACK)  # other brow
-    _set_pixel(surf, 13+ox, 3+oy, COLOR_BLACK)
+    # --- V-shaped angry eyebrows (angled inward) ---
+    # Left brow: \ shape
+    _set_pixel(surf, 7+ox, 3+oy, COLOR_BLACK)
+    _set_pixel(surf, 8+ox, 4+oy, COLOR_BLACK)
+    # Right brow: / shape
     _set_pixel(surf, 14+ox, 3+oy, COLOR_BLACK)
+    _set_pixel(surf, 13+ox, 4+oy, COLOR_BLACK)
 
-    # Beady eyes
-    _set_pixel(surf, 9+ox, 5+oy, COLOR_BLACK)
+    # Beady eyes (1px each, set into brow shadow)
+    _set_pixel(surf, 8+ox, 5+oy, COLOR_BLACK)
     _set_pixel(surf, 13+ox, 5+oy, COLOR_BLACK)
 
-    # Sneer/mouth
+    # --- Scowl / angry mouth ---
     _set_pixel(surf, 9+ox, 7+oy, COLOR_BLACK)
     _set_pixel(surf, 10+ox, 7+oy, COLOR_BLACK)
     _set_pixel(surf, 11+ox, 7+oy, COLOR_BLACK)
     _set_pixel(surf, 12+ox, 7+oy, COLOR_BLACK)
+    # Down-turned corners
+    _set_pixel(surf, 8+ox, 7+oy, COLOR_THUG_SKIN_SH)
+    _set_pixel(surf, 13+ox, 7+oy, COLOR_THUG_SKIN_SH)
 
 
 def generate_thug_sprites():
@@ -894,13 +985,13 @@ def generate_thug_sprites():
         surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
         _draw_thug_base(surf, ox=ox, oy=oy)
         lo1, lo2 = leg_off[f]
-        # Override feet with offset
-        _draw_rect(surf, 3+ox+lo1, 27+oy, 6, 5, COLOR_BLACK)
-        _set_pixel(surf, 4+ox+lo1, 27+oy, (30, 30, 30))
-        _draw_rect(surf, 3+ox+lo1, 31+oy, 6, 1, (15, 12, 10))
-        _draw_rect(surf, 13+ox+lo2, 27+oy, 6, 5, COLOR_BLACK)
+        # Override feet with offset (7px wide boots)
+        _draw_rect(surf, 2+ox+lo1, 27+oy, 7, 5, COLOR_BLACK)
+        _set_pixel(surf, 3+ox+lo1, 27+oy, (30, 30, 30))
+        _draw_rect(surf, 2+ox+lo1, 31+oy, 7, 1, (15, 12, 10))
+        _draw_rect(surf, 13+ox+lo2, 27+oy, 7, 5, COLOR_BLACK)
         _set_pixel(surf, 14+ox+lo2, 27+oy, (30, 30, 30))
-        _draw_rect(surf, 13+ox+lo2, 31+oy, 6, 1, (15, 12, 10))
+        _draw_rect(surf, 13+ox+lo2, 31+oy, 7, 1, (15, 12, 10))
         _draw_outline(surf)
         walk_frames.append(surf)
     sprites["walk_right"] = walk_frames
@@ -960,7 +1051,7 @@ def generate_thug_sprites():
     _draw_thug_base(surf, ox=ox, oy=oy)
     # Red flash on torso area
     for py in range(9+oy, 19+oy):
-        for px in range(3+ox, 19+ox):
+        for px in range(1+ox, 21+ox):
             r, g, b, a = surf.get_at((px, py))
             if a > 0:
                 nr = min(255, r + 100)
@@ -1002,55 +1093,61 @@ def generate_thug_sprites():
 # ===================================================================
 # DRONE -- Surveillance drone
 # Base 24x14 on 32x20 canvas, ox=4 oy=3
+# Redesigned with: aerodynamic tapered shape (wider middle, narrow ends),
+# clear propeller mounts with motion blur, 2x2 sensor eye with ring
 # ===================================================================
 
 def _draw_drone_base(surf, propeller_frame=0, eye_bright=True, ox=4, oy=3):
     w, h = DRONE_WIDTH, DRONE_HEIGHT
 
-    # --- Body: aerodynamic shape (rounded front, tapered back) ---
-    # Main body block
-    _draw_rect(surf, 6+ox, 5+oy, 12, 6, COLOR_DRONE_BODY)
-    # Top curve
-    _draw_rect(surf, 7+ox, 4+oy, 10, 1, COLOR_DRONE_BODY)
-    _set_pixel(surf, 8+ox, 4+oy, COLOR_DRONE_BODY_HI)
-    _set_pixel(surf, 9+ox, 4+oy, COLOR_DRONE_BODY_HI)
-    # Bottom curve
-    _draw_rect(surf, 7+ox, 11+oy, 10, 1, COLOR_DRONE_BODY)
-    # Nose cone (rounded front)
-    _set_pixel(surf, 5+ox, 6+oy, COLOR_DRONE_BODY)
-    _set_pixel(surf, 5+ox, 7+oy, COLOR_DRONE_BODY)
-    _set_pixel(surf, 5+ox, 8+oy, COLOR_DRONE_BODY)
-    # Tapered back
-    _set_pixel(surf, 18+ox, 6+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 18+ox, 7+oy, COLOR_DRONE_BODY_SH)
+    # --- Body: aerodynamic shape (wide in middle, tapered at ends) ---
+    # Core body: widest section in middle rows (rows 5-9)
+    _draw_rect(surf, 5+ox, 5+oy, 14, 5, COLOR_DRONE_BODY)
+    # Taper top: narrower (rows 3-4)
+    _draw_rect(surf, 7+ox, 3+oy, 10, 2, COLOR_DRONE_BODY)
+    # Taper bottom: narrower (row 10)
+    _draw_rect(surf, 7+ox, 10+oy, 10, 1, COLOR_DRONE_BODY)
+    # Nose cone (rounded front, tapers to point at left)
+    _set_pixel(surf, 4+ox, 6+oy, COLOR_DRONE_BODY)
+    _set_pixel(surf, 4+ox, 7+oy, COLOR_DRONE_BODY)
+    _set_pixel(surf, 4+ox, 8+oy, COLOR_DRONE_BODY)
+    _set_pixel(surf, 3+ox, 7+oy, COLOR_DRONE_BODY_SH)
+    # Tapered tail (right side narrows)
+    _set_pixel(surf, 19+ox, 5+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 19+ox, 6+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 19+ox, 7+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 19+ox, 8+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 20+ox, 6+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 20+ox, 7+oy, COLOR_DRONE_BODY_SH)
 
     # Highlight on top-left of body (light source)
+    _set_pixel(surf, 7+ox, 3+oy, COLOR_DRONE_BODY_HI)
+    _set_pixel(surf, 8+ox, 3+oy, COLOR_DRONE_BODY_HI)
+    _set_pixel(surf, 9+ox, 3+oy, COLOR_DRONE_BODY_HI)
+    _set_pixel(surf, 5+ox, 5+oy, COLOR_DRONE_BODY_HI)
+    _set_pixel(surf, 6+ox, 5+oy, COLOR_DRONE_BODY_HI)
     _set_pixel(surf, 7+ox, 5+oy, COLOR_DRONE_BODY_HI)
-    _set_pixel(surf, 8+ox, 5+oy, COLOR_DRONE_BODY_HI)
-    _set_pixel(surf, 9+ox, 5+oy, COLOR_DRONE_BODY_HI)
     # Shadow on bottom-right
-    _set_pixel(surf, 16+ox, 10+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 17+ox, 10+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 15+ox, 10+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 16+ox, 9+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 17+ox, 9+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 18+ox, 9+oy, COLOR_DRONE_BODY_SH)
 
     # Panel lines (1px darker dividers)
-    _set_pixel(surf, 10+ox, 5+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 10+ox, 10+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 14+ox, 5+oy, COLOR_DRONE_BODY_SH)
-    _set_pixel(surf, 14+ox, 10+oy, COLOR_DRONE_BODY_SH)
-    for yy in range(5, 11):
+    for yy in range(4, 10):
         _set_pixel(surf, 10+ox, yy+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 14+ox, 4+oy, COLOR_DRONE_BODY_SH)
+    _set_pixel(surf, 14+ox, 9+oy, COLOR_DRONE_BODY_SH)
 
-    # Ventral panel
-    _draw_rect(surf, 8+ox, 9+oy, 8, 2, COLOR_MID_GRAY)
+    # Ventral panel (underside detail)
+    _draw_rect(surf, 8+ox, 9+oy, 8, 1, COLOR_MID_GRAY)
 
     # Thruster glow underneath
-    _set_pixel(surf, 9+ox, 12+oy, COLOR_NEON_ORANGE)
-    _set_pixel(surf, 10+ox, 13+oy, (255, 150, 50, 120))
-    _set_pixel(surf, 14+ox, 12+oy, COLOR_NEON_ORANGE)
-    _set_pixel(surf, 13+ox, 13+oy, (255, 150, 50, 120))
+    _set_pixel(surf, 9+ox, 11+oy, COLOR_NEON_ORANGE)
+    _set_pixel(surf, 10+ox, 12+oy, (255, 150, 50, 120))
+    _set_pixel(surf, 14+ox, 11+oy, COLOR_NEON_ORANGE)
+    _set_pixel(surf, 13+ox, 12+oy, (255, 150, 50, 120))
 
-    # --- Sensor eye: 2x2 with bright core ---
+    # --- Sensor eye: 2x2 bright core with 1px surround ring ---
     if eye_bright:
         eye_core = (255, 80, 80)
         eye_surround = (200, 40, 50)
@@ -1059,31 +1156,49 @@ def _draw_drone_base(surf, propeller_frame=0, eye_bright=True, ox=4, oy=3):
         eye_core = (150, 30, 40)
         eye_surround = (100, 20, 30)
         eye_outer = (60, 10, 15)
+    # 2x2 core
     _draw_rect(surf, 11+ox, 6+oy, 2, 2, eye_core)
+    # Surround ring (4-connected, 1px thick)
     _set_pixel(surf, 10+ox, 6+oy, eye_surround)
     _set_pixel(surf, 13+ox, 6+oy, eye_surround)
     _set_pixel(surf, 10+ox, 7+oy, eye_surround)
     _set_pixel(surf, 13+ox, 7+oy, eye_surround)
+    _set_pixel(surf, 11+ox, 5+oy, eye_surround)
+    _set_pixel(surf, 12+ox, 5+oy, eye_surround)
+    _set_pixel(surf, 11+ox, 8+oy, eye_surround)
+    _set_pixel(surf, 12+ox, 8+oy, eye_surround)
+    # Outer glow corners
     _set_pixel(surf, 10+ox, 5+oy, eye_outer)
+    _set_pixel(surf, 13+ox, 5+oy, eye_outer)
+    _set_pixel(surf, 10+ox, 8+oy, eye_outer)
     _set_pixel(surf, 13+ox, 8+oy, eye_outer)
 
-    # --- Propeller mounts + blur ---
-    # Struts connecting to body
-    _set_pixel(surf, 3+ox, 4+oy, COLOR_DARK_GRAY)
-    _set_pixel(surf, 3+ox, 5+oy, COLOR_DARK_GRAY)
-    _set_pixel(surf, 20+ox, 4+oy, COLOR_DARK_GRAY)
-    _set_pixel(surf, 20+ox, 5+oy, COLOR_DARK_GRAY)
+    # --- Propeller mounts (visible struts) + motion blur ---
+    # Left mount: 2px strut connecting body to rotor
+    _draw_rect(surf, 2+ox, 3+oy, 2, 3, COLOR_DARK_GRAY)
+    _set_pixel(surf, 2+ox, 3+oy, COLOR_MID_GRAY)
+    # Right mount: 2px strut
+    _draw_rect(surf, 20+ox, 3+oy, 2, 3, COLOR_DARK_GRAY)
+    _set_pixel(surf, 20+ox, 3+oy, COLOR_MID_GRAY)
+    # Rotor hub dots
+    _set_pixel(surf, 3+ox, 3+oy, COLOR_MID_GRAY)
+    _set_pixel(surf, 21+ox, 3+oy, COLOR_MID_GRAY)
+
     # Propeller blur (semi-transparent, shifts by frame)
     if propeller_frame == 0:
-        _draw_rect(surf, 0+ox, 2+oy, 7, 1, (160, 165, 180, 100))
-        _draw_rect(surf, 1+ox, 3+oy, 5, 1, (160, 165, 180, 60))
-        _draw_rect(surf, 17+ox, 2+oy, 7, 1, (160, 165, 180, 100))
-        _draw_rect(surf, 18+ox, 3+oy, 5, 1, (160, 165, 180, 60))
+        _draw_rect(surf, 0+ox, 1+oy, 7, 1, (160, 165, 180, 120))
+        _draw_rect(surf, 1+ox, 2+oy, 5, 1, (160, 165, 180, 70))
+        _draw_rect(surf, 0+ox, 3+oy, 7, 1, (160, 165, 180, 40))
+        _draw_rect(surf, 17+ox, 1+oy, 7, 1, (160, 165, 180, 120))
+        _draw_rect(surf, 18+ox, 2+oy, 5, 1, (160, 165, 180, 70))
+        _draw_rect(surf, 17+ox, 3+oy, 7, 1, (160, 165, 180, 40))
     else:
-        _draw_rect(surf, 1+ox, 2+oy, 5, 1, (160, 165, 180, 80))
-        _draw_rect(surf, 0+ox, 3+oy, 7, 1, (160, 165, 180, 60))
-        _draw_rect(surf, 18+ox, 2+oy, 5, 1, (160, 165, 180, 80))
-        _draw_rect(surf, 17+ox, 3+oy, 7, 1, (160, 165, 180, 60))
+        _draw_rect(surf, 1+ox, 1+oy, 5, 1, (160, 165, 180, 90))
+        _draw_rect(surf, 0+ox, 2+oy, 7, 1, (160, 165, 180, 80))
+        _draw_rect(surf, 1+ox, 3+oy, 5, 1, (160, 165, 180, 40))
+        _draw_rect(surf, 18+ox, 1+oy, 5, 1, (160, 165, 180, 90))
+        _draw_rect(surf, 17+ox, 2+oy, 7, 1, (160, 165, 180, 80))
+        _draw_rect(surf, 18+ox, 3+oy, 5, 1, (160, 165, 180, 40))
 
     # Antenna nubs
     _set_pixel(surf, 7+ox, 1+oy, COLOR_NEON_BLUE)
@@ -1171,42 +1286,50 @@ def generate_drone_sprites():
 # ===================================================================
 # WARDEN -- Level 1 Boss
 # Base 40x48 on 54x58 canvas, ox=7 oy=10
+# Redesigned with: thicker legs (6px thighs), wider shoulder pads (4px
+# extension), 3x3 gauntlet fists with glow knuckles, 3-tone core gradient
 # ===================================================================
 
 def _draw_warden_base(surf, phase=0, ox=7, oy=10):
     w, h = WARDEN_WIDTH, WARDEN_HEIGHT
 
     # --- Heavy boots (rows 41-47) ---
-    _draw_rect(surf, 6+ox, 41+oy, 10, 7, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 5+ox, 41+oy, 12, 7, COLOR_WARDEN_ARMOR)
+    _set_pixel(surf, 6+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 7+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 8+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
-    _draw_rect(surf, 6+ox, 47+oy, 10, 1, COLOR_BLACK)
-    _draw_rect(surf, 6+ox, 46+oy, 10, 1, (20, 20, 20))  # tread
-    _draw_rect(surf, 24+ox, 41+oy, 10, 7, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 5+ox, 47+oy, 12, 1, COLOR_BLACK)
+    _draw_rect(surf, 5+ox, 46+oy, 12, 1, (20, 20, 20))  # tread
+    _draw_rect(surf, 23+ox, 41+oy, 12, 7, COLOR_WARDEN_ARMOR)
+    _set_pixel(surf, 24+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 25+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 26+ox, 41+oy, COLOR_WARDEN_ARMOR_HI)
-    _draw_rect(surf, 24+ox, 47+oy, 10, 1, COLOR_BLACK)
-    _draw_rect(surf, 24+ox, 46+oy, 10, 1, (20, 20, 20))
+    _draw_rect(surf, 23+ox, 47+oy, 12, 1, COLOR_BLACK)
+    _draw_rect(surf, 23+ox, 46+oy, 12, 1, (20, 20, 20))
     # Boot trim
-    _draw_rect(surf, 6+ox, 41+oy, 10, 1, COLOR_WARDEN_TRIM)
-    _draw_rect(surf, 24+ox, 41+oy, 10, 1, COLOR_WARDEN_TRIM)
+    _draw_rect(surf, 5+ox, 41+oy, 12, 1, COLOR_WARDEN_TRIM)
+    _draw_rect(surf, 23+ox, 41+oy, 12, 1, COLOR_WARDEN_TRIM)
 
-    # --- Leg armor (rows 29-40) ---
-    _draw_rect(surf, 8+ox, 29+oy, 8, 12, COLOR_WARDEN_ARMOR)
-    _draw_rect(surf, 24+ox, 29+oy, 8, 12, COLOR_WARDEN_ARMOR)
+    # --- Leg armor (rows 29-40): 6px wide thighs ---
+    _draw_rect(surf, 7+ox, 29+oy, 10, 12, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 23+ox, 29+oy, 10, 12, COLOR_WARDEN_ARMOR)
     # Highlight on top-left of each leg
+    _set_pixel(surf, 8+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 9+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 10+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
+    _set_pixel(surf, 24+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 25+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 26+ox, 29+oy, COLOR_WARDEN_ARMOR_HI)
     # Shadow on inner legs
-    _set_pixel(surf, 15+ox, 32+oy, COLOR_WARDEN_ARMOR_SH)
-    _set_pixel(surf, 15+ox, 35+oy, COLOR_WARDEN_ARMOR_SH)
-    _set_pixel(surf, 24+ox, 32+oy, COLOR_WARDEN_ARMOR_SH)
-    _set_pixel(surf, 24+ox, 35+oy, COLOR_WARDEN_ARMOR_SH)
-    # Knee pads
-    _draw_rect(surf, 8+ox, 34+oy, 8, 2, COLOR_WARDEN_TRIM)
-    _draw_rect(surf, 24+ox, 34+oy, 8, 2, COLOR_WARDEN_TRIM)
+    _set_pixel(surf, 16+ox, 32+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 16+ox, 35+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 16+ox, 38+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 23+ox, 32+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 23+ox, 35+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 23+ox, 38+oy, COLOR_WARDEN_ARMOR_SH)
+    # Knee pads (wider)
+    _draw_rect(surf, 7+ox, 34+oy, 10, 2, COLOR_WARDEN_TRIM)
+    _draw_rect(surf, 23+ox, 34+oy, 10, 2, COLOR_WARDEN_TRIM)
     # Seam lines
     _set_pixel(surf, 12+ox, 30+oy, COLOR_BLACK)
     _set_pixel(surf, 12+ox, 33+oy, COLOR_BLACK)
@@ -1240,52 +1363,73 @@ def _draw_warden_base(surf, phase=0, ox=7, oy=10):
     _draw_rect(surf, 9+ox, 13+oy, 22, 1, COLOR_WARDEN_TRIM)
     _draw_rect(surf, 9+ox, 22+oy, 22, 1, COLOR_WARDEN_TRIM)
 
-    # --- Energy core: 4x4 with concentric rings ---
+    # --- Energy core: 3-tone gradient rings ---
     core_colors = [COLOR_NEON_BLUE, COLOR_NEON_ORANGE, COLOR_RED_ALARM]
     core_col = core_colors[min(phase, 2)]
-    dim_core = tuple(max(0, c - 80) for c in core_col[:3])
-    outer_core = tuple(max(0, c - 140) for c in core_col[:3])
+    # 3-tone gradient: bright center -> medium -> dim outer
+    dim_core = tuple(max(0, c - 60) for c in core_col[:3])
+    outer_core = tuple(max(0, c - 130) for c in core_col[:3])
+    faint_core = tuple(max(0, c - 180) for c in core_col[:3])
+    # Faint outer ring (8x8)
+    _draw_rect(surf, 16+ox, 15+oy, 8, 8, faint_core)
     # Outer ring (6x6)
     _draw_rect(surf, 17+ox, 16+oy, 6, 6, outer_core)
     # Mid ring (4x4)
     _draw_rect(surf, 18+ox, 17+oy, 4, 4, dim_core)
-    # Inner core (2x2)
+    # Inner core (2x2) -- brightest
     _draw_rect(surf, 19+ox, 18+oy, 2, 2, core_col)
 
-    # --- Shoulder pads (extending 3px past body each side) ---
-    _draw_rect(surf, 2+ox, 10+oy, 8, 5, COLOR_WARDEN_ARMOR)
-    _draw_rect(surf, 30+ox, 10+oy, 8, 5, COLOR_WARDEN_ARMOR)
+    # --- Shoulder pads (extending 4px past body each side) ---
+    _draw_rect(surf, 1+ox, 10+oy, 9, 5, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 30+ox, 10+oy, 9, 5, COLOR_WARDEN_ARMOR)
     # Highlight on top
-    _draw_rect(surf, 2+ox, 10+oy, 8, 1, COLOR_WARDEN_TRIM)
-    _draw_rect(surf, 30+ox, 10+oy, 8, 1, COLOR_WARDEN_TRIM)
+    _draw_rect(surf, 1+ox, 10+oy, 9, 1, COLOR_WARDEN_TRIM)
+    _draw_rect(surf, 30+ox, 10+oy, 9, 1, COLOR_WARDEN_TRIM)
     # Shading on shoulder pads
+    _set_pixel(surf, 2+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 3+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 4+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 31+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 32+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
+    _set_pixel(surf, 33+ox, 11+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 8+ox, 14+oy, COLOR_WARDEN_ARMOR_SH)
-    _set_pixel(surf, 36+ox, 14+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 9+ox, 14+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 37+ox, 14+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 38+ox, 14+oy, COLOR_WARDEN_ARMOR_SH)
     # Shoulder seam
-    _set_pixel(surf, 6+ox, 12+oy, COLOR_BLACK)
-    _set_pixel(surf, 34+ox, 12+oy, COLOR_BLACK)
+    _set_pixel(surf, 5+ox, 12+oy, COLOR_BLACK)
+    _set_pixel(surf, 35+ox, 12+oy, COLOR_BLACK)
 
-    # --- Arms ---
-    _draw_rect(surf, 3+ox, 15+oy, 4, 12, COLOR_WARDEN_ARMOR)
-    _draw_rect(surf, 33+ox, 15+oy, 4, 12, COLOR_WARDEN_ARMOR)
+    # --- Arms (4px wide) ---
+    _draw_rect(surf, 2+ox, 15+oy, 5, 12, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 33+ox, 15+oy, 5, 12, COLOR_WARDEN_ARMOR)
     # Arm highlight
+    _set_pixel(surf, 3+ox, 15+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 4+ox, 15+oy, COLOR_WARDEN_ARMOR_HI)
     _set_pixel(surf, 34+ox, 15+oy, COLOR_WARDEN_ARMOR_HI)
+    _set_pixel(surf, 35+ox, 15+oy, COLOR_WARDEN_ARMOR_HI)
     # Arm shadow
-    _set_pixel(surf, 3+ox, 25+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 2+ox, 25+oy, COLOR_WARDEN_ARMOR_SH)
+    _set_pixel(surf, 6+ox, 25+oy, COLOR_WARDEN_ARMOR_SH)
     _set_pixel(surf, 33+ox, 25+oy, COLOR_WARDEN_ARMOR_SH)
-    # Gauntlets
-    _draw_rect(surf, 3+ox, 27+oy, 4, 3, COLOR_DARK_GRAY)
-    _draw_rect(surf, 33+ox, 27+oy, 4, 3, COLOR_DARK_GRAY)
-    # Glow accents on knuckles
-    _set_pixel(surf, 4+ox, 28+oy, core_col)
-    _set_pixel(surf, 5+ox, 29+oy, core_col)
-    _set_pixel(surf, 34+ox, 28+oy, core_col)
-    _set_pixel(surf, 35+ox, 29+oy, core_col)
+    _set_pixel(surf, 37+ox, 25+oy, COLOR_WARDEN_ARMOR_SH)
+
+    # --- Gauntlets: 3x3 fist shapes with glow knuckles ---
+    # Left gauntlet
+    _draw_rect(surf, 2+ox, 27+oy, 5, 4, COLOR_DARK_GRAY)
+    _set_pixel(surf, 2+ox, 27+oy, COLOR_MID_GRAY)  # highlight
+    # Glow accents on knuckles (3 knuckle dots)
+    _set_pixel(surf, 3+ox, 27+oy, core_col)
+    _set_pixel(surf, 4+ox, 27+oy, core_col)
+    _set_pixel(surf, 5+ox, 27+oy, core_col)
+    _set_pixel(surf, 3+ox, 30+oy, COLOR_DARK_GRAY)
+    # Right gauntlet
+    _draw_rect(surf, 33+ox, 27+oy, 5, 4, COLOR_DARK_GRAY)
+    _set_pixel(surf, 37+ox, 27+oy, COLOR_MID_GRAY)  # highlight
+    _set_pixel(surf, 34+ox, 27+oy, core_col)
+    _set_pixel(surf, 35+ox, 27+oy, core_col)
+    _set_pixel(surf, 36+ox, 27+oy, core_col)
+    _set_pixel(surf, 36+ox, 30+oy, COLOR_DARK_GRAY)
 
     # --- Helmet (rows 0-11) ---
     _draw_rect(surf, 11+ox, 1+oy, 18, 11, COLOR_WARDEN_ARMOR)
@@ -1346,17 +1490,17 @@ def generate_warden_sprites():
         surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
         _draw_warden_base(surf, 0, ox=ox, oy=oy)
         off = [0, 2, 0, -2][f]
-        # Clear default feet and redraw offset
-        _draw_rect(surf, 6+ox, 41+oy, 10, 8, (0, 0, 0, 0))
-        _draw_rect(surf, 24+ox, 41+oy, 10, 8, (0, 0, 0, 0))
-        _draw_rect(surf, 6+ox+off, 41+oy, 10, 7, COLOR_WARDEN_ARMOR)
-        _set_pixel(surf, 7+ox+off, 41+oy, COLOR_WARDEN_ARMOR_HI)
-        _draw_rect(surf, 6+ox+off, 41+oy, 10, 1, COLOR_WARDEN_TRIM)
-        _draw_rect(surf, 6+ox+off, 47+oy, 10, 1, COLOR_BLACK)
-        _draw_rect(surf, 24+ox-off, 41+oy, 10, 7, COLOR_WARDEN_ARMOR)
-        _set_pixel(surf, 25+ox-off, 41+oy, COLOR_WARDEN_ARMOR_HI)
-        _draw_rect(surf, 24+ox-off, 41+oy, 10, 1, COLOR_WARDEN_TRIM)
-        _draw_rect(surf, 24+ox-off, 47+oy, 10, 1, COLOR_BLACK)
+        # Clear default feet and redraw offset (wider boots)
+        _draw_rect(surf, 5+ox, 41+oy, 12, 8, (0, 0, 0, 0))
+        _draw_rect(surf, 23+ox, 41+oy, 12, 8, (0, 0, 0, 0))
+        _draw_rect(surf, 5+ox+off, 41+oy, 12, 7, COLOR_WARDEN_ARMOR)
+        _set_pixel(surf, 6+ox+off, 41+oy, COLOR_WARDEN_ARMOR_HI)
+        _draw_rect(surf, 5+ox+off, 41+oy, 12, 1, COLOR_WARDEN_TRIM)
+        _draw_rect(surf, 5+ox+off, 47+oy, 12, 1, COLOR_BLACK)
+        _draw_rect(surf, 23+ox-off, 41+oy, 12, 7, COLOR_WARDEN_ARMOR)
+        _set_pixel(surf, 24+ox-off, 41+oy, COLOR_WARDEN_ARMOR_HI)
+        _draw_rect(surf, 23+ox-off, 41+oy, 12, 1, COLOR_WARDEN_TRIM)
+        _draw_rect(surf, 23+ox-off, 47+oy, 12, 1, COLOR_BLACK)
         _draw_outline_thick(surf)
         walk_frames.append(surf)
     sprites["walk_right"] = walk_frames
@@ -1398,14 +1542,14 @@ def generate_warden_sprites():
     # SPAWN DRONES (1 frame, arms raised)
     surf = pygame.Surface((CW, CH), pygame.SRCALPHA)
     _draw_warden_base(surf, 1, ox=ox, oy=oy)
-    _draw_rect(surf, 3+ox, 5+oy, 4, 10, COLOR_WARDEN_ARMOR)
-    _set_pixel(surf, 4+ox, 5+oy, COLOR_WARDEN_ARMOR_HI)
-    _draw_rect(surf, 33+ox, 5+oy, 4, 10, COLOR_WARDEN_ARMOR)
+    _draw_rect(surf, 2+ox, 5+oy, 5, 10, COLOR_WARDEN_ARMOR)
+    _set_pixel(surf, 3+ox, 5+oy, COLOR_WARDEN_ARMOR_HI)
+    _draw_rect(surf, 33+ox, 5+oy, 5, 10, COLOR_WARDEN_ARMOR)
     _set_pixel(surf, 34+ox, 5+oy, COLOR_WARDEN_ARMOR_HI)
-    _set_pixel(surf, 2+ox, 4+oy, COLOR_RED_ALARM)
-    _set_pixel(surf, 1+ox, 3+oy, COLOR_RED_ALARM)
-    _set_pixel(surf, 37+ox, 4+oy, COLOR_RED_ALARM)
-    _set_pixel(surf, 38+ox, 3+oy, COLOR_RED_ALARM)
+    _set_pixel(surf, 1+ox, 4+oy, COLOR_RED_ALARM)
+    _set_pixel(surf, 0+ox, 3+oy, COLOR_RED_ALARM)
+    _set_pixel(surf, 38+ox, 4+oy, COLOR_RED_ALARM)
+    _set_pixel(surf, 39+ox, 3+oy, COLOR_RED_ALARM)
     _draw_outline_thick(surf)
     sprites["spawn_right"] = [surf]
     sprites["spawn_left"] = [_mirror_h(surf)]
@@ -1441,16 +1585,17 @@ def generate_warden_sprites():
                 _set_pixel(surf, 12+ox + (cy % 4), cy+oy, COLOR_BLACK)
                 _set_pixel(surf, 26+ox - (cy % 4), cy+oy, COLOR_BLACK)
             # Damaged shoulder pads (holes)
-            _draw_rect(surf, 2+ox, 12+oy, 4, 3, COLOR_BLACK)
-            _draw_rect(surf, 34+ox, 12+oy, 4, 3, COLOR_BLACK)
+            _draw_rect(surf, 1+ox, 12+oy, 4, 3, COLOR_BLACK)
+            _draw_rect(surf, 35+ox, 12+oy, 4, 3, COLOR_BLACK)
             # Exposed wiring (thin colored lines in gaps)
-            _set_pixel(surf, 4+ox, 13+oy, COLOR_NEON_BLUE)
-            _set_pixel(surf, 5+ox, 14+oy, COLOR_GREEN_HACK)
-            _set_pixel(surf, 3+ox, 12+oy, COLOR_NEON_ORANGE)
-            _set_pixel(surf, 35+ox, 13+oy, COLOR_NEON_BLUE)
-            _set_pixel(surf, 36+ox, 14+oy, COLOR_NEON_ORANGE)
-            _set_pixel(surf, 34+ox, 12+oy, COLOR_GREEN_HACK)
+            _set_pixel(surf, 3+ox, 13+oy, COLOR_NEON_BLUE)
+            _set_pixel(surf, 4+ox, 14+oy, COLOR_GREEN_HACK)
+            _set_pixel(surf, 2+ox, 12+oy, COLOR_NEON_ORANGE)
+            _set_pixel(surf, 36+ox, 13+oy, COLOR_NEON_BLUE)
+            _set_pixel(surf, 37+ox, 14+oy, COLOR_NEON_ORANGE)
+            _set_pixel(surf, 35+ox, 12+oy, COLOR_GREEN_HACK)
             # Core red + emergency glow
+            _draw_rect(surf, 16+ox, 15+oy, 8, 8, (40, 5, 10))
             _draw_rect(surf, 17+ox, 16+oy, 6, 6, (60, 10, 15))
             _draw_rect(surf, 18+ox, 17+oy, 4, 4, (180, 30, 40))
             _draw_rect(surf, 19+ox, 18+oy, 2, 2, COLOR_RED_ALARM)
