@@ -777,7 +777,7 @@ class PlayState(State):
                     surface.blit(h.sprite, (sx, sy))
                     # Indicatore hack range
                     if h == self.player.nearby_hackable:
-                        font = pygame.font.SysFont("consolas", 12)
+                        font = pygame.font.SysFont("consolas", 10)
                         txt = font.render("[E] HACK", False, COLOR_GREEN_HACK)
                         surface.blit(txt, (sx - 4, sy - 16))
 

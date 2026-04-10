@@ -11,11 +11,11 @@ class DialogBox:
     """Dialog box at bottom with pixel-art portrait, typewriter effect, and neon styling."""
 
     def __init__(self):
-        self.font = pygame.font.SysFont("consolas", 12)
-        self.font_speaker = pygame.font.SysFont("consolas", 14)
-        self.box_height = 70
-        self.box_margin = 8
-        self.portrait_size = 44
+        self.font = pygame.font.SysFont("consolas", 10)
+        self.font_speaker = pygame.font.SysFont("consolas", 12)
+        self.box_height = 60
+        self.box_margin = 6
+        self.portrait_size = 36
         self.portraits = {}
         self._blink_timer = 0
         self._generate_portraits()

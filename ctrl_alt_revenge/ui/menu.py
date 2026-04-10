@@ -15,10 +15,10 @@ class MainMenu:
     """Cyberpunk title screen with cityscape, rain, GIG character, and neon glow."""
 
     def __init__(self):
-        self.font_title = pygame.font.SysFont("consolas", 20, bold=True)
-        self.font_sub = pygame.font.SysFont("consolas", 12)
-        self.font_opt = pygame.font.SysFont("consolas", 14)
-        self.font_small = pygame.font.SysFont("consolas", 12)
+        self.font_title = pygame.font.SysFont("consolas", 14, bold=True)
+        self.font_sub = pygame.font.SysFont("consolas", 10)
+        self.font_opt = pygame.font.SysFont("consolas", 12)
+        self.font_small = pygame.font.SysFont("consolas", 10)
         self.timer = 0
         self.selected = 0
         self.options = ["INIZIA", "COMANDI", "ESCI"]
@@ -375,8 +375,8 @@ class PauseMenu:
     """Pause overlay with scanlines."""
 
     def __init__(self):
-        self.font = pygame.font.SysFont("consolas", 20, bold=True)
-        self.font_opt = pygame.font.SysFont("consolas", 16)
+        self.font = pygame.font.SysFont("consolas", 12, bold=True)
+        self.font_opt = pygame.font.SysFont("consolas", 12)
         self.selected = 0
         self.options = ["CONTINUA", "COMANDI", "MENU PRINCIPALE"]
         self.scanline_offset = 0
@@ -420,8 +420,8 @@ class ControlsScreen:
     """Controls reference screen."""
 
     def __init__(self):
-        self.font_title = pygame.font.SysFont("consolas", 16, bold=True)
-        self.font = pygame.font.SysFont("consolas", 12)
+        self.font_title = pygame.font.SysFont("consolas", 12, bold=True)
+        self.font = pygame.font.SysFont("consolas", 10)
         self.controls = [
             ("Frecce / WASD", "Movimento"),
             ("SPAZIO / Z", "Salto"),
@@ -452,8 +452,8 @@ class ControlsScreen:
             key_surf = self.font.render(key, False, COLOR_NEON_ORANGE)
             act_surf = self.font.render(action, False, COLOR_WHITE_UI)
             y = 46 + i * 14
-            surface.blit(key_surf, (60, y))
-            surface.blit(act_surf, (240, y))
+            surface.blit(key_surf, (20, y))
+            surface.blit(act_surf, (160, y))
 
         # Footer
         back = self.font.render("Premi INVIO per tornare", False, COLOR_WHITE_UI)
@@ -464,8 +464,8 @@ class GameOverScreen:
     """Game Over screen with glitch offset effect."""
 
     def __init__(self):
-        self.font = pygame.font.SysFont("consolas", 24, bold=True)
-        self.font_small = pygame.font.SysFont("consolas", 14)
+        self.font = pygame.font.SysFont("consolas", 14, bold=True)
+        self.font_small = pygame.font.SysFont("consolas", 10)
         self.timer = 0
 
     def update(self, input_mgr, dt=1.0):
@@ -504,8 +504,8 @@ class LevelCompleteScreen:
     """Level complete screen."""
 
     def __init__(self):
-        self.font = pygame.font.SysFont("consolas", 20, bold=True)
-        self.font_small = pygame.font.SysFont("consolas", 14)
+        self.font = pygame.font.SysFont("consolas", 10, bold=True)
+        self.font_small = pygame.font.SysFont("consolas", 10)
         self.timer = 0
 
     def update(self, input_mgr, dt=1.0):
@@ -516,9 +516,21 @@ class LevelCompleteScreen:
 
     def draw(self, surface):
         surface.fill(COLOR_BG_NIGHT)
-        text = self.font.render(STRINGS["level_complete"], False, COLOR_GREEN_HACK)
-        surface.blit(text, (INTERNAL_WIDTH // 2 - text.get_width() // 2,
-                            INTERNAL_HEIGHT // 2 - 20))
+        # Split long level complete text into two lines
+        full_text = STRINGS["level_complete"]
+        if ". " in full_text:
+            line1, line2 = full_text.split(". ", 1)
+            line1 += "."
+        else:
+            line1 = full_text
+            line2 = ""
+        text1 = self.font.render(line1, False, COLOR_GREEN_HACK)
+        surface.blit(text1, (INTERNAL_WIDTH // 2 - text1.get_width() // 2,
+                             INTERNAL_HEIGHT // 2 - 26))
+        if line2:
+            text2 = self.font.render(line2, False, COLOR_GREEN_HACK)
+            surface.blit(text2, (INTERNAL_WIDTH // 2 - text2.get_width() // 2,
+                                 INTERNAL_HEIGHT // 2 - 12))
         if self.timer > 90:
             cont = self.font_small.render("Premi INVIO", False, COLOR_WHITE_UI)
             surface.blit(cont, (INTERNAL_WIDTH // 2 - cont.get_width() // 2,

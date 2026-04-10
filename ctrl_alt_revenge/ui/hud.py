@@ -14,9 +14,9 @@ class HUD:
     def __init__(self, heart_full, heart_empty):
         self.heart_full = heart_full
         self.heart_empty = heart_empty
-        self.font = pygame.font.SysFont("consolas", 12, bold=False)
-        self.font_notif = pygame.font.SysFont("consolas", 14, bold=False)
-        self.font_boss = pygame.font.SysFont("consolas", 20, bold=True)
+        self.font = pygame.font.SysFont("consolas", 10, bold=False)
+        self.font_notif = pygame.font.SysFont("consolas", 10, bold=False)
+        self.font_boss = pygame.font.SysFont("consolas", 12, bold=True)
         self.show_boss_intro = False
         self.boss_intro_timer = 0
         self.boss_intro_text = ""
@@ -73,7 +73,7 @@ class HUD:
         """Heat bar below hearts."""
         x = 6
         y = 18
-        bar_w = 60
+        bar_w = 40
         bar_h = 5
 
         # Background fill

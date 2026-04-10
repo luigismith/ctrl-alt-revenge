@@ -22,7 +22,7 @@ class HackingMinigame:
         self.success = False
         self.failed = False
         self.target_entity = None
-        self.cell_size = 20
+        self.cell_size = 16
         self.grid_offset_x = 0
         self.grid_offset_y = 0
         self._calc_layout()
@@ -163,9 +163,9 @@ class HackingMinigame:
         surface.blit(overlay, (0, 0))
 
         # Titolo
-        font = pygame.font.SysFont("consolas", 14)
-        font_label = pygame.font.SysFont("consolas", 12)
-        font_result = pygame.font.SysFont("consolas", 20)
+        font = pygame.font.SysFont("consolas", 10)
+        font_label = pygame.font.SysFont("consolas", 10)
+        font_result = pygame.font.SysFont("consolas", 12)
         title = font.render("< HACK IN CORSO >", False, COLOR_GREEN_HACK)
         surface.blit(title, (INTERNAL_WIDTH // 2 - title.get_width() // 2,
                              self.grid_offset_y - 36))
