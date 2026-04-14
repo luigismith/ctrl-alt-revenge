@@ -61,7 +61,11 @@
       "Bash(echo \"exit: $?\")",
       "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe tools/sprite_studio.py)",
       "Bash(find D:/ctrlaltrevenge/ctrl_alt_revenge -name \"*.pyc\" -delete)",
-      "Bash(find D:/ctrlaltrevenge/ctrl_alt_revenge -name \"__pycache__\" -type d -exec rm -rf {} +)"
+      "Bash(find D:/ctrlaltrevenge/ctrl_alt_revenge -name \"__pycache__\" -type d -exec rm -rf {} +)",
+      "Bash(\"/c/Users/luigi.massari/.platformio/python3/python.exe\" -c \"import pygame;print\\(pygame.__version__\\)\")",
+      "Bash(/c/Users/luigi.massari/.platformio/penv/Scripts/python.exe -c \"import pygame; print\\(pygame.__version__\\)\")",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe -m pip install pygame-ce pyinstaller)",
+      "Bash(/c/Users/luigi.massari/.platformio/python3/python.exe -c \"import pygame; print\\(pygame.__version__\\)\")"
     ]
   }
 }
