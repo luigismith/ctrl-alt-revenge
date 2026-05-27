@@ -257,10 +257,17 @@ class IntroSequence:
         elif self.phase == self.PHASE_OUTRO:
             self._draw_outro(surface)
 
-        # Scanlines overlay always
-        for y in range(0, INTERNAL_HEIGHT, 3):
-            pygame.draw.line(surface, (0, 0, 0, 60), (0, y),
-                            (INTERNAL_WIDTH, y))
+        # Scanlines overlay — use a proper SRCALPHA surface so alpha works.
+        # Skip scanlines on text-heavy phases to keep text crisp.
+        if self.phase not in (self.PHASE_TEXT, self.PHASE_OUTRO):
+            if not hasattr(self, '_scanlines_overlay'):
+                self._scanlines_overlay = pygame.Surface(
+                    (INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+                for y in range(0, INTERNAL_HEIGHT, 3):
+                    pygame.draw.line(self._scanlines_overlay,
+                                     (0, 0, 0, 40), (0, y),
+                                     (INTERNAL_WIDTH, y))
+            surface.blit(self._scanlines_overlay, (0, 0))
 
         # Skip indicator
         if self.phase < self.PHASE_OUTRO:
@@ -416,15 +423,38 @@ class IntroSequence:
             self._draw_gig_silhouette(surface, gx, gy, eye_brightness)
 
     def _draw_text_crawl(self, surface):
-        """Scrolling text crawl over dark background."""
-        # Dim cityscape background
-        bg = self.city_surf.copy()
-        bg.set_alpha(80)
-        surface.blit(bg, (0, 0))
+        """Scrolling text crawl on solid dark background — no city bleed-through.
 
-        # Each line appears over time
+        The cityscape was making lit window pixels show through the text,
+        creating illegible noise. We now use a flat dark fill with a subtle
+        vignette around the text block.
+        """
+        # Solid dark fill — much cleaner than dimmed cityscape
+        surface.fill(COLOR_BG_NIGHT)
+
+        # Subtle starfield / horizon glow (sparse, NOT under the text area)
         line_height = 14
         total_height = len(self.crawl_text) * line_height
+        text_top = (INTERNAL_HEIGHT - total_height) // 2 - 4
+        text_bottom = text_top + total_height + 8
+
+        # Decorative top border
+        pygame.draw.line(surface, COLOR_NEON_BLUE,
+                        (40, text_top - 6), (INTERNAL_WIDTH - 40, text_top - 6))
+        # Decorative bottom border
+        pygame.draw.line(surface, COLOR_NEON_BLUE,
+                        (40, text_bottom + 4),
+                        (INTERNAL_WIDTH - 40, text_bottom + 4))
+
+        # Far away city silhouette only at very bottom (not behind text)
+        horizon_y = INTERNAL_HEIGHT - 24
+        if horizon_y > text_bottom + 12:
+            # Just a flat dark band, no windows
+            pygame.draw.rect(surface, (20, 18, 45),
+                            (0, horizon_y, INTERNAL_WIDTH,
+                             INTERNAL_HEIGHT - horizon_y))
+
+        # Render each line over the clean background
         start_y = (INTERNAL_HEIGHT - total_height) // 2
 
         for i, line in enumerate(self.crawl_text):
