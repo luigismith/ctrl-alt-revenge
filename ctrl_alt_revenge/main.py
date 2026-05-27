@@ -45,6 +45,7 @@ from ctrl_alt_revenge.ui.menu import (
     MainMenu, PauseMenu, ControlsScreen,
     GameOverScreen, LevelCompleteScreen
 )
+from ctrl_alt_revenge.ui.intro import IntroSequence
 from ctrl_alt_revenge.data.levels.level_01 import generate_level_01
 from ctrl_alt_revenge.data.dialogs.level_01_dialogs import DIALOG_INTRO, DIALOG_BOSS_INTRO
 
@@ -70,9 +71,10 @@ class Game:
 
         self.fsm = StateMachine()
         self._register_states()
-        self.fsm.change("menu")
+        self.fsm.change("intro")
 
     def _register_states(self):
+        self.fsm.register("intro", IntroState(self))
         self.fsm.register("menu", MenuState(self))
         self.fsm.register("controls", ControlsState(self))
         self.fsm.register("play", PlayState(self))
@@ -111,6 +113,26 @@ class Game:
 # ============================================================
 # STATI DEL GIOCO
 # ============================================================
+
+class IntroState(State):
+    """Animated cutscene shown before the main menu on first launch."""
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.intro = None
+
+    def enter(self, **kwargs):
+        # Recreate intro each time so it starts fresh
+        self.intro = IntroSequence(audio=self.game.audio)
+
+    def update(self, dt):
+        if self.intro and self.intro.update(self.game.input_mgr, dt):
+            self.game.fsm.change("menu")
+
+    def draw(self, surface):
+        if self.intro:
+            self.intro.draw(surface)
+
 
 class MenuState(State):
     def __init__(self, game):

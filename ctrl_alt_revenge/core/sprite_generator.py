@@ -1391,6 +1391,16 @@ def _draw_drone_base(surf, propeller_frame=0, eye_bright=True, ox=4, oy=2):
 
 
 def generate_drone_sprites():
+    """Generate DRONE sprites using the high-quality matrix system."""
+    from ctrl_alt_revenge.core.drone_matrix import build_drone_sprites
+    sprites = build_drone_sprites(DRONE_CANVAS_W, DRONE_CANVAS_H)
+    for key, frames in sprites.items():
+        for f in frames:
+            _draw_outline(f)
+    return sprites
+
+
+def _generate_drone_sprites_legacy():
     sprites = {}
     CW, CH = DRONE_CANVAS_W, DRONE_CANVAS_H
     ox = (CW - DRONE_WIDTH) // 2   # 4
@@ -1481,6 +1491,16 @@ def _build_warden_frame(matrix):
 
 
 def generate_warden_sprites():
+    """Generate WARDEN BOSS sprites using the high-quality matrix system."""
+    from ctrl_alt_revenge.core.warden_matrix import build_warden_sprites
+    sprites = build_warden_sprites(WARDEN_CANVAS_W, WARDEN_CANVAS_H)
+    for key, frames in sprites.items():
+        for f in frames:
+            _draw_outline(f)
+    return sprites
+
+
+def _generate_warden_sprites_legacy():
     sprites = {}
     CW, CH = WARDEN_CANVAS_W, WARDEN_CANVAS_H
     ox = (CW - WARDEN_WIDTH) // 2  # 8
