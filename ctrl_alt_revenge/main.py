@@ -666,6 +666,15 @@ class PlayState(State):
         if self.level_complete:
             return
 
+        # F1: toggle isometric render mode
+        if self.game.input_mgr.is_just_pressed("toggle_iso"):
+            if settings.CURRENT_RENDER_MODE == settings.RENDER_MODE_ISO:
+                settings.CURRENT_RENDER_MODE = settings.RENDER_MODE_SIDESCROLL
+            else:
+                settings.CURRENT_RENDER_MODE = settings.RENDER_MODE_ISO
+            self.hud.show_notification(
+                f"MODO {settings.CURRENT_RENDER_MODE.upper()}", 90)
+
         # Slow-mo
         effective_dt = dt * self.slow_mo
 
@@ -962,6 +971,15 @@ class PlayState(State):
                         self.hud.show_notification("Munizioni ricaricate.", 90)
 
     def draw(self, surface):
+        # Isometric rendering mode: delegate to IsoRenderer if active
+        if settings.CURRENT_RENDER_MODE == settings.RENDER_MODE_ISO:
+            if not hasattr(self, '_iso_renderer') or self._iso_renderer is None:
+                from ctrl_alt_revenge.systems.iso_renderer import IsoRenderer
+                self._iso_renderer = IsoRenderer()
+            cam_off = self.camera.get_offset()
+            self._iso_renderer.render(self, surface, cam_off)
+            return
+
         cam_off = list(self.camera.get_offset())
         if self.screen_shake_timer > 0:
             cam_off[0] += random.randint(-2, 2)

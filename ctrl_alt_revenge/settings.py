@@ -116,6 +116,7 @@ INPUT_MAP = {
     "implant3": [pygame.K_3],
     "implant4": [pygame.K_4],
     "pause":   [pygame.K_ESCAPE, pygame.K_p],
+    "toggle_iso": [pygame.K_F1],
     "confirm": [pygame.K_RETURN, pygame.K_SPACE],
     "crouch":  [pygame.K_DOWN, pygame.K_s],
     "slide":   [pygame.K_DOWN, pygame.K_s],  # giù + salto = slide
@@ -194,3 +195,8 @@ DIFFICULTIES = {
     },
 }
 CURRENT_DIFFICULTY = "NORMALE"
+
+# Render modes
+RENDER_MODE_SIDESCROLL = "sidescroll"
+RENDER_MODE_ISO = "iso"
+CURRENT_RENDER_MODE = RENDER_MODE_SIDESCROLL  # toggle with F1 in game
