@@ -484,10 +484,10 @@ function draw_title()
  -- subtitle
  print("iso edition", 40, 50, 9)
  -- blink
- if (frame // 20) % 2 == 0 then
-  print("press 🅾️ to start", 28, 90, 7)
+ if flr(frame / 20) % 2 == 0 then
+  print("press z to start", 28, 90, 7)
  end
- print("⬅️➡️⬆️⬇️ move  🅾️ punch  ❎ shoot",
+ print("arrows move  z punch  x shoot",
        3, 110, 13)
  print("@gigsoftware 2087", 28, 120, 5)
 end
@@ -496,21 +496,21 @@ function draw_win()
  cls(1)
  print("stage clear!", 38, 50, 11)
  print("chip earned: "..chips, 32, 64, 10)
- if (frame // 20) % 2 == 0 then
-  print("press 🅾️ for menu", 28, 90, 7)
+ if flr(frame / 20) % 2 == 0 then
+  print("press z for menu", 28, 90, 7)
  end
 end
 
 function draw_gameover()
  cls(0)
  -- glitch red text
- local off = (frame // 4) % 3 - 1
+ local off = flr(frame / 4) % 3 - 1
  print("game over", 48 + off, 50, 8)
  print("game over", 48 - off, 50, 12)
  print("game over", 48, 50, 7)
  print("reboot in corso", 32, 64, 5)
- if frame > 60 and (frame // 20) % 2 == 0 then
-  print("press 🅾️ to retry", 28, 90, 7)
+ if frame > 60 and flr(frame / 20) % 2 == 0 then
+  print("press z to retry", 28, 90, 7)
  end
 end
 
