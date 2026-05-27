@@ -11,7 +11,8 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org/)
 [![Pygame-CE](https://img.shields.io/badge/Pygame--CE-2.5.7-green?style=for-the-badge)](https://pyga.me/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-orange?style=for-the-badge)](#installazione)
-[![Game Boy Color](https://img.shields.io/badge/Port-GBC-purple?style=for-the-badge)](#porting-game-boy-color)
+[![Game Boy Color](https://img.shields.io/badge/Port-GBC-purple?style=for-the-badge)](#porting-su-altre-piattaforme)
+[![PICO-8](https://img.shields.io/badge/Port-PICO--8_ISO-magenta?style=for-the-badge)](pico8/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 [**🎮 Scarica l'eseguibile**](dist/CTRL_ALT_REVENGE.exe) •
@@ -287,7 +288,9 @@ ctrlaltrevenge/
 
 ---
 
-## 🕹️ Porting Game Boy Color
+## 🕹️ Porting su altre piattaforme
+
+### Game Boy Color
 
 Una versione ridotta del gioco gira su **hardware Game Boy Color reale**!
 
@@ -296,7 +299,17 @@ Una versione ridotta del gioco gira su **hardware Game Boy Color reale**!
 - **Compilato con**: [GBDK-2020](https://github.com/gbdk-2020/gbdk-2020)
 - **Funziona su**: BGB, mGBA, Gambatte, flashcart EverDrive GB/GBA
 
-Apri la ROM con un emulatore GBC per provare la versione "console retrò".
+### PICO-8 ISO Edition 🎲
+
+**Port completo fake-3D isometrico** per la fantasy console PICO-8.
+
+- **Cart**: [`pico8/ctrl_alt_revenge.p8`](pico8/ctrl_alt_revenge.p8) (~32 KB)
+- **Risoluzione**: 128×128 pixel, 16 colori
+- **Visuale**: isometrica top-down (8 direzioni, niente gravità)
+- **Engine**: PICO-8 (Lua)
+- **Vedi**: [`pico8/README.md`](pico8/README.md) per dettagli e istruzioni
+
+Carica con `LOAD CTRL_ALT_REVENGE` dentro PICO-8, oppure usa PICO-8 EDU online.
 
 ---
 
