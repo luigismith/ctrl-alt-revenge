@@ -39,6 +39,7 @@ from ctrl_alt_revenge.systems.hacking import HackingMinigame
 from ctrl_alt_revenge.systems.implants import ImplantSystem
 from ctrl_alt_revenge.systems.dialog import DialogSystem
 from ctrl_alt_revenge.systems.audio import AudioManager
+from ctrl_alt_revenge.systems.perks import PerkSystem, WorkshopScreen, PERK_DEFINITIONS
 from ctrl_alt_revenge.ui.hud import HUD
 from ctrl_alt_revenge.ui.dialog_box import DialogBox
 from ctrl_alt_revenge.ui.menu import (
@@ -69,6 +70,9 @@ class Game:
         except Exception:
             self.audio = None
 
+        # Persistent perk system — survives between levels and game-over
+        self.perks = PerkSystem()
+
         self.fsm = StateMachine()
         self._register_states()
         self.fsm.change("intro")
@@ -76,6 +80,7 @@ class Game:
     def _register_states(self):
         self.fsm.register("intro", IntroState(self))
         self.fsm.register("menu", MenuState(self))
+        self.fsm.register("workshop", WorkshopState(self))
         self.fsm.register("controls", ControlsState(self))
         self.fsm.register("play", PlayState(self))
         self.fsm.register("pause", PauseState(self))
@@ -134,6 +139,28 @@ class IntroState(State):
             self.intro.draw(surface)
 
 
+class WorkshopState(State):
+    """Perk shop — buy upgrades with CHIPs."""
+
+    def __init__(self, game):
+        super().__init__(game)
+        self.workshop = None
+
+    def enter(self, **kwargs):
+        self.workshop = WorkshopScreen(self.game.perks, audio=self.game.audio)
+
+    def update(self, dt):
+        if not self.workshop:
+            return
+        result = self.workshop.update(self.game.input_mgr, dt)
+        if result == "back":
+            self.game.fsm.change("menu")
+
+    def draw(self, surface):
+        if self.workshop:
+            self.workshop.draw(surface)
+
+
 class MenuState(State):
     def __init__(self, game):
         super().__init__(game)
@@ -150,6 +177,10 @@ class MenuState(State):
             if self.game.audio:
                 self.game.audio.play_sfx("menu_select")
             self.game.fsm.change("play", reload=True)
+        elif result == "OFFICINA":
+            if self.game.audio:
+                self.game.audio.play_sfx("menu_select")
+            self.game.fsm.change("workshop")
         elif result == "COMANDI":
             if self.game.audio:
                 self.game.audio.play_sfx("menu_select")
@@ -239,6 +270,18 @@ class PlayState(State):
         self.player.parry_window = diff["parry_window"]
         self.hack_time_limit = diff["hack_time_limit"]
         self.enemy_damage_mult = diff["enemy_damage_mult"]
+
+        # Apply persistent perks on top of difficulty
+        if hasattr(self.game, 'perks'):
+            self.game.perks.apply_to_player(self.player)
+            # Hacker perk: +1s per level on top of difficulty value
+            hacker_lvl = self.game.perks.get_level("hacker")
+            self.hack_time_limit += hacker_lvl
+
+        # Chip drop tracking
+        self.last_chip_drop = 0
+        self.chip_drop_timer = 0
+        self.boss_chip_awarded = False
         self.enemy_speed_mult = diff["enemy_speed_mult"]
 
         # Camera
@@ -647,6 +690,12 @@ class PlayState(State):
         self.physics.apply_gravity(self.player, effective_dt)
         self.physics.move_and_collide(self.player, effective_dt)
 
+        # Perks: regen tick + chip popup timer
+        if hasattr(self.game, 'perks'):
+            self.game.perks.update_regen(self.player, effective_dt)
+        if self.chip_drop_timer > 0:
+            self.chip_drop_timer -= effective_dt
+
         # Gun bullet spawning
         if self.player.gun_just_fired:
             bx = self.player.x + self.player.collision_width // 2
@@ -681,13 +730,28 @@ class PlayState(State):
                 ) - 1:
                     dead_enemies.append(enemy)
                     self.implants.on_enemy_killed(self.player)
+                    # CHIP drop based on enemy type
+                    from ctrl_alt_revenge.settings import (
+                        PERK_DROP_THUG, PERK_DROP_DRONE
+                    )
+                    if type(enemy).__name__ == "Drone":
+                        self.game.perks.add_chips(PERK_DROP_DRONE)
+                        self.last_chip_drop = PERK_DROP_DRONE
+                    else:
+                        self.game.perks.add_chips(PERK_DROP_THUG)
+                        self.last_chip_drop = PERK_DROP_THUG
+                    self.chip_drop_timer = 60  # display popup
 
         for de in dead_enemies:
             if de in self.enemies:
                 self.enemies.remove(de)
 
-        # Boss morto = livello completato
+        # Boss morto = livello completato + chip bonus
         if self.boss and not self.boss.alive:
+            from ctrl_alt_revenge.settings import PERK_DROP_BOSS
+            if not self.boss_chip_awarded:
+                self.game.perks.add_chips(PERK_DROP_BOSS)
+                self.boss_chip_awarded = True
             self.level_complete = True
             self.game.fsm.change("level_complete")
             return
@@ -997,7 +1061,10 @@ class PlayState(State):
 
         # HUD
         implant_info = self.implants.get_equipped_info()
-        self.hud.draw(surface, self.player, implant_info, self.player.heat)
+        chips_val = self.game.perks.chips if hasattr(self.game, 'perks') else None
+        popup = (self.last_chip_drop, self.chip_drop_timer) if self.chip_drop_timer > 0 else None
+        self.hud.draw(surface, self.player, implant_info, self.player.heat,
+                      chips=chips_val, chip_popup=popup)
 
     def _draw_background(self, surface, cam_off):
         """Sfondo parallasse cyberpunk — blit pre-generated layers."""

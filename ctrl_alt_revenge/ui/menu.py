@@ -21,7 +21,7 @@ class MainMenu:
         self.font_small = pygame.font.SysFont("consolas", 10)
         self.timer = 0
         self.selected = 0
-        self.options = ["INIZIA", "COMANDI", "ESCI"]
+        self.options = ["INIZIA", "OFFICINA", "COMANDI", "ESCI"]
         self.state = "main"  # "main" or "difficulty"
         self.diff_selected = 0
         self.diff_options = list(settings.DIFFICULTIES.keys())

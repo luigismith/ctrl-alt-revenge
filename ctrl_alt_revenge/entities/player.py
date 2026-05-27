@@ -71,8 +71,16 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         # Gun
         self.has_gun = True
         self.gun_ammo = 6
+        self.gun_ammo_max = 12
         self.gun_cooldown = 0
         self.gun_just_fired = False  # signals main.py to spawn a bullet
+
+        # Perk-driven bonuses (modified by PerkSystem.apply_to_player)
+        self.punch_damage_bonus = 0
+        self.gun_damage_bonus = 0
+        self.speed_mult = 1.0
+        self.iframes_bonus = 0
+        self.has_regen = False
 
         # Heat
         self.heat = 0.0
@@ -166,7 +174,7 @@ class Player(Entity, Health, Hitbox, Hurtbox):
         # Non muovere durante wall jump
         if self.wall_jump_timer <= 0:
             if move_x != 0:
-                self.vel_x = move_x * PLAYER_SPEED
+                self.vel_x = move_x * PLAYER_SPEED * self.speed_mult
                 self.facing = move_x
             else:
                 # Decelerazione
@@ -288,9 +296,9 @@ class Player(Entity, Health, Hitbox, Hurtbox):
             else:
                 self.combo_count = 0
             self.combo_timer = COMBO_WINDOW
-            damage = PUNCH_DAMAGE
+            damage = PUNCH_DAMAGE + self.punch_damage_bonus
             if self.combo_count == 2:
-                damage = KICK_DAMAGE  # ultimo colpo della combo fa più danno
+                damage = KICK_DAMAGE + self.punch_damage_bonus  # ultimo colpo della combo fa più danno
             self.set_anim(f"punch{self.combo_count}")
             self.activate_hitbox(self.collision_width, 4, 14, 10, damage)
         else:

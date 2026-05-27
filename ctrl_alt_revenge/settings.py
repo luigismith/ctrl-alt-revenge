@@ -65,6 +65,12 @@ GUN_AMMO_MAX = 12
 BULLET_SPEED = 6.0
 MEDIKIT_HEAL = 2
 
+# Perks / Upgrades
+PERK_DROP_THUG = 5      # CHIP guadagnati uccidendo un thug
+PERK_DROP_DRONE = 8     # CHIP da drone
+PERK_DROP_BOSS = 50     # CHIP da boss
+PERK_PICKUP_VALUE = 10  # CHIP da pickup specifici
+
 # Hacking
 HACK_SLOWMO_FACTOR = 0.25
 HACK_TIME_LIMIT = 5.0      # secondi

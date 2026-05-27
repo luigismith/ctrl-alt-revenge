@@ -44,8 +44,12 @@ class HUD:
             if self.boss_intro_timer <= 0:
                 self.show_boss_intro = False
 
-    def draw(self, surface, player, implant_info, heat):
-        """Draw the entire HUD."""
+    def draw(self, surface, player, implant_info, heat, chips=None, chip_popup=None):
+        """Draw the entire HUD.
+
+        chips: current CHIP count (int) or None to hide
+        chip_popup: (amount, frames_remaining) tuple for floating +N popup
+        """
         # Dark background strip behind HUD area
         surface.blit(self._top_strip, (0, 0))
 
@@ -56,6 +60,22 @@ class HUD:
         # Ammo counter
         if hasattr(player, 'has_gun') and player.has_gun:
             self._draw_ammo(surface, player.gun_ammo)
+
+        # CHIP counter
+        if chips is not None:
+            from ctrl_alt_revenge.settings import COLOR_YELLOW, INTERNAL_WIDTH
+            chip_text = self.font.render(f"CHIP:{chips}", False, COLOR_YELLOW)
+            surface.blit(chip_text,
+                         (INTERNAL_WIDTH - chip_text.get_width() - 4, 20))
+            # Popup
+            if chip_popup and chip_popup[1] > 0:
+                amt, frames = chip_popup
+                alpha = min(255, int(frames * 4.5))
+                pop = self.font.render(f"+{amt}", False, COLOR_YELLOW)
+                pop.set_alpha(alpha)
+                surface.blit(pop,
+                             (INTERNAL_WIDTH - pop.get_width() - 4,
+                              30 + int((60 - frames) * 0.2)))
 
         # Notification
         if self.notification_timer > 0:
