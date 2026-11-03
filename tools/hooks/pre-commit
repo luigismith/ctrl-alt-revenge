@@ -1,0 +1,4 @@
+#!/bin/sh
+# Enable once per clone (no admin rights needed):  git config core.hooksPath tools/hooks
+if command -v python >/dev/null 2>&1; then PY=python; else PY="py -3"; fi
+exec $PY -I tools/guard_assets.py --staged

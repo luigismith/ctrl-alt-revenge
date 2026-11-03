@@ -1,0 +1,16 @@
+# Fine riga LF ovunque (Godot e gli hook git), CRLF solo per gli script Windows
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binari
+*.png binary
+*.jpg binary
+*.gif binary
+*.wav binary
+*.ogg binary
+*.ttf binary
+*.otf binary
+*.glb binary
+*.blend binary

@@ -1,0 +1,37 @@
+version = 1
+
+# Quando più tabelle corrispondono a un file, vince l'ULTIMA (precedence "override").
+
+# 1) Predefinito: codice, configurazione e documentazione tecnica, MIT.
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "MIT"
+
+# 2) Asset originali del gioco: tutti i diritti riservati, niente addestramento AI.
+[[annotations]]
+path = [
+  "docs/riferimenti-estetica/**",
+  "docs/lore/**",
+  "game/assets/sprites/**",
+  "game/assets/env/**",
+  "game/assets/props/**",
+  "game/assets/fx/**",
+  "game/assets/ui/**",
+  "game/assets/sfx/**",
+  "game/data/levels/**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "LicenseRef-CAR-Assets"
+
+# 3) Script bpy della pipeline: GPL, come chiede blender.org per gli script che usano l'API di Blender.
+[[annotations]]
+path = "tools/blender/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# 4) Pack di terze parti e font: una tabella per pack, aggiunta insieme ai file
+#    (licenza copiata dal pack stesso, testo in LICENSES/, riga in THIRD-PARTY-NOTICES.md).

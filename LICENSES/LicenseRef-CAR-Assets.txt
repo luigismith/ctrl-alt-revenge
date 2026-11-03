@@ -1,0 +1,42 @@
+CTRL+ALT REVENGE - Assets Licence Notice (SPDX: LicenseRef-CAR-Assets), v1.0
+
+Copyright (c) 2026 Luigi Massari. All rights reserved.
+
+1. Scope. This notice covers every file that REUSE.toml or an SPDX header marks
+   "LicenseRef-CAR-Assets" (the "Assets"): artwork, sprites, animations,
+   tilesets, backgrounds, interface graphics, music, sound effects, video,
+   level designs, story, lore, characters, dialogue and other text of the game
+   CTRL+ALT REVENGE, to the extent that copyright, related rights, database
+   rights or other rights subsist in them. The source code in this repository
+   is licensed separately under the MIT licence (LICENSES/MIT.txt). The MIT
+   licence does NOT apply to the Assets. Third-party material keeps its own
+   licence (see REUSE.toml and THIRD-PARTY-NOTICES.md).
+
+2. No licence. Apart from what the law, or the terms of service of the
+   platform hosting this repository, already allow you to do (for example,
+   viewing the repository), no licence or other right in the Assets is granted
+   to you, expressly, by implication, by estoppel or otherwise. You may not
+   copy, modify, adapt, distribute, publicly perform or display, sell,
+   sublicense or make derivative works of the Assets without prior written
+   permission.
+
+3. No AI or machine-learning use. Without prior written permission you may not
+   use the Assets, in whole or in part, (a) to train, fine-tune, evaluate or
+   otherwise develop any artificial-intelligence or machine-learning model or
+   system, or to build a dataset for that purpose; (b) as input, prompt,
+   reference, style or conditioning material for generative AI; or (c) for
+   text and data mining. The rightsholder expressly reserves text and data
+   mining of the Assets for the purposes of Article 4(3) of Directive (EU)
+   2019/790 and Articles 70-ter, 70-quater and 70-septies of Italian Law
+   No. 633 of 22 April 1941. The SPDX identifier "LicenseRef-CAR-Assets" in
+   REUSE.toml and in file headers is the machine-readable form of this
+   reservation.
+
+4. Hosting platform. This notice does not limit the licences the copyright
+   holder has granted to the operator of the hosting platform under that
+   platform's terms of service.
+
+5. Contributions of assets are accepted only under a separate written
+   agreement (see CONTRIBUTING.md).
+
+Permission requests: open an issue at https://github.com/luigismith/ctrl-alt-revenge/issues

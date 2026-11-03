@@ -1,0 +1,4 @@
+# Audio ammesso nel repo pubblico (pattern fnmatch sul percorso).
+# Ogni voce deve avere anche la licenza in REUSE.toml.
+# Effetti sonori generati da noi con tools/audio (LicenseRef-CAR-Assets):
+game/assets/sfx/*.wav
