@@ -101,7 +101,15 @@ Scelte tecniche già fissate:
   - `air`.
 - `dx`: spostamento in avanti in px quando il fotogramma inizia (root motion), opzionale.
 
-**Mosse a coppie (presa, ginocchiate, proiezione).** I fotogrammi di GIG `grab_hold`, `knee` e `throw` hanno in più `"victim": [dx, dy, "<animazione>", <indice>]`. Significa: ancora della vittima = ancora di GIG + (dx, dy), con il personaggio rivolto a destra, e la vittima mostra quel fotogramma della sua animazione. Gli offset vengono da `author.py` e vanno ricalcolati per ogni corpo, punk e bruto.
+**Mosse a coppie (presa, ginocchiate, proiezione).** I fotogrammi di GIG `grab_hold`, `knee` e `throw` hanno in più un campo `victim` con una voce per ogni tipo di nemico:
+
+```json
+"victim": {"thug_punk": [6, 0, "kneed", 1], "thug_bruiser": [9, 0, "kneed", 1], "behind": false}
+```
+
+- Ogni voce vale: ancora della vittima = ancora di GIG + (dx, dy), con il personaggio rivolto a destra, e la vittima mostra quel fotogramma della sua animazione.
+- `behind: true` vuol dire che la vittima va disegnata dietro GIG in quel fotogramma.
+- Gli offset vengono da `author.py`, ricalcolati per ogni corpo.
 
 **Animazioni richieste**, con nomi esatti:
 
