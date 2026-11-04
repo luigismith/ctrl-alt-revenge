@@ -63,7 +63,7 @@ Scelte tecniche già fissate:
 ## 3. Scala del mondo e pseudo-profondità
 
 - **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. Le misure in guardia, dai piedi alla cima della testa:
-  - **GIG**: 89-90 px (88-92 in tutte le pose di guardia e di passo) e 47-49 px di larghezza con le braccia. Dal 4 novembre 2026 ha la figura da ex pugile di cinquant'anni: forma a V, torace largo con le braccia attaccate al busto, vita non stretta, camicia che cade dritta, pantaloni asciutti. Di spalle, a 60 px/m come nei murales: spalle 47,5 px, busto all'ascella 32,5, vita 20,8, bacino 23,2, collo 14,5. Nella vista degli sprite (48 px/m): sommità del busto 22,5 px, bacino 19,5. Testa (1,45) e mani (1,8) restano ingrandite; le proporzioni stanno in `tools/sprites/chars/gig.json`;
+  - **GIG**: 89-90 px in guardia (90-93 nel passo) e 47-49 px di larghezza con le braccia. Dal 4 novembre 2026 ha la figura da ex pugile di cinquant'anni: forma a V, torace largo con le braccia attaccate al busto, vita non stretta, camicia che cade dritta, pantaloni asciutti. Di spalle, a 60 px/m come nei murales: spalle 47,5 px, busto all'ascella 32,5, vita 20,8, bacino 23,2, collo 14,5. Nella vista degli sprite (48 px/m): sommità del busto 22,5 px, bacino 19,5. Testa (1,45) e mani (1,8) restano ingrandite; le proporzioni stanno in `tools/sprites/chars/gig.json`;
   - **punk**: circa 92 px, 44 di larghezza;
   - **bruto**, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 58 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
 - **Coordinate di ogni entità**:
