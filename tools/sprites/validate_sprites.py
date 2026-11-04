@@ -26,7 +26,8 @@ REQUIRED = {
     "thug_bruiser": ["idle", "walk", "punch", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
                      "grabbed", "kneed", "thrown"],
 }
-LOOPS = {"idle", "walk", "run"}
+# cicli: i tre dello slice più quelli delle mosse platform di prova (accovacciato, appeso alla sporgenza)
+LOOPS = {"idle", "walk", "run", "crouch", "ledge_hang"}
 # (avvio, attivo, recupero) in tick a 60 Hz, §5; None = non controllato
 TIMING = {("gig", "jab1"): (3, 2, 9), ("gig", "jab2"): (3, 2, 9), ("gig", "hook"): (6, 3, 12),
           ("gig", "kick"): (10, 3, 20), ("gig", "air_kick"): (4, 8, None), ("gig", "knee"): (4, 3, 10),
@@ -41,10 +42,13 @@ SFX = {"whoosh_light", "whoosh_heavy", "hit_light", "hit_medium", "hit_heavy", "
        "body_fall", "body_thud", "step_a", "step_b", "jump", "land", "glint", "zap", "bin_hit", "bin_break", "pickup",
        "ko", "ui_move", "ui_confirm", "ui_pause", "go_arrow"}
 FX = {"hit_spark_light", "hit_spark_heavy", "dust_land", "dust_skid", "glint", "cyber_spark", "ombra"}
-EV_RE = re.compile(r"^(sfx:[a-z_]+|fx:[a-z_]+|glint|step)$")
+# fx:<nome>@<punto>: l'effetto nasce nel punto del fotogramma (campo points), es. fx:cyber_spark@fist_l
+EV_RE = re.compile(r"^(sfx:[a-z_]+|fx:[a-z_]+(@[a-z_]+)?|glint|step)$")
+# punti del fotogramma (§4), relativi all'ancora: pugni, punte dei piedi, centro della testa, presa delle mani
+POINTS = {"fist_l", "fist_r", "foot_l", "foot_r", "head", "grip"}
 OUTLINE = (0x14, 0x0e, 0x1e)
-# 40 colori: rampe di 4-5 toni per materiale (ombra, medio, luce, luce piena, riflesso) più contorni e dettagli
-MAX_COLORS = 40
+# 30 colori (pipeline v7): rampe ridotte dentro ogni materiale, più contorni e dettagli
+MAX_COLORS = 30
 
 
 class Report:
@@ -86,6 +90,23 @@ def check_char(cid, d, R, others):
     opaque = arr[arr[..., 3] > 0][:, :3]
     if len(opaque) and ((arr[..., 3] > 0) & (arr[..., 3] < 255)).any():
         R.err(cid, ": l'atlante ha pixel semitrasparenti")
+    # atlante delle normali (luci dinamiche): stessa misura, opaco dove lo è l'atlante dei colori
+    nimg = data.get("normal_image")
+    if nimg is not None:
+        npth = os.path.join(d, str(nimg))
+        if not os.path.exists(npth):
+            R.err(cid, ": manca l'atlante delle normali", npth)
+        else:
+            nim = Image.open(npth)
+            if nim.size != im.size or nim.mode != "RGBA":
+                R.err(cid, ": l'atlante delle normali deve essere RGBA", im.size, "è", nim.mode, nim.size)
+            else:
+                na = np.asarray(nim)
+                if ((arr[..., 3] > 0) & (na[..., 3] == 0)).any():
+                    R.err(cid, ": l'atlante delle normali è trasparente dove lo sprite non lo è")
+                zz = na[..., 2][arr[..., 3] > 0]
+                if len(zz) and zz.min() < 120:
+                    R.warn(cid, ": normali rivolte all'indietro (blu < 120) in", int((zz < 120).sum()), "pixel")
     ncol = len({tuple(c) for c in opaque.tolist()})
     if ncol > MAX_COLORS:
         R.err(cid, f": {ncol} colori, il massimo è {MAX_COLORS}")
@@ -158,15 +179,30 @@ def check_char(cid, d, R, others):
                 R.err(where, ": tag sconosciuti", tags - TAGS)
             if ("active" in tags) != bool(f.get("hit")):
                 R.err(where, ": 'active' e hit non vuoto devono andare insieme")
+            pts = f.get("points", {})
+            if not isinstance(pts, dict):
+                R.err(where, ": points deve essere un oggetto")
+                pts = {}
+            for pn, pv in pts.items():
+                if pn not in POINTS:
+                    R.warn(where, ": punto sconosciuto", pn)
+                if not (isinstance(pv, list) and len(pv) == 2 and all(isinstance(v, int) for v in pv)):
+                    R.err(where, ": punto non valido", pn, pv)
+                elif not (-120 <= pv[0] <= 120 and -170 <= pv[1] <= 60):
+                    R.err(where, ": punto implausibile", pn, pv)
             for e in f.get("events", []):
                 if not EV_RE.match(e):
                     R.err(where, ": evento non valido", e)
                 elif e.startswith("sfx:") and e[4:] not in SFX:
                     R.err(where, ": suono non previsto dalla specifica", e)
-                elif e.startswith("fx:") and e[3:] not in FX:
+                elif e.startswith("fx:") and e[3:].split("@")[0] not in FX:
                     R.err(where, ": effetto non previsto dalla specifica", e)
+                elif e.startswith("fx:") and "@" in e and e.split("@")[1] not in pts:
+                    R.err(where, ": il punto dell'effetto non c'è nel fotogramma", e)
             if "dx" in f and not isinstance(f["dx"], int):
                 R.err(where, ": dx deve essere intero")
+            if "dy" in f and not isinstance(f["dy"], int):
+                R.err(where, ": dy deve essere intero")
             if cid == "gig" and name in PAIRS:
                 v = f.get("victim")
                 if not isinstance(v, dict):

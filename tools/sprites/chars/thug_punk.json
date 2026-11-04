@@ -94,26 +94,56 @@
  "proportions": {
   "Head": {
    "scale": [
-    1.12,
-    1.12,
-    1.12
+    1.28,
+    1.28,
+    1.28
    ]
   },
   "hand_l": {
    "scale": [
-    1.25,
-    1.25,
-    1.25
+    1.55,
+    1.55,
+    1.55
    ],
    "inherit": "NONE"
   },
   "hand_r": {
    "scale": [
-    1.25,
-    1.25,
-    1.25
+    1.55,
+    1.55,
+    1.55
    ],
    "inherit": "NONE"
+  },
+  "foot_l": {
+   "scale": [
+    1.1,
+    1.1,
+    1.1
+   ],
+   "inherit": "NONE"
+  },
+  "clavicle_l": {
+   "scale": [
+    1.0,
+    1.12,
+    1.0
+   ]
+  },
+  "foot_r": {
+   "scale": [
+    1.1,
+    1.1,
+    1.1
+   ],
+   "inherit": "NONE"
+  },
+  "clavicle_r": {
+   "scale": [
+    1.0,
+    1.12,
+    1.0
+   ]
   }
  },
  "outfit_cfg": {
@@ -129,12 +159,11 @@
   "pants_push": 0.006,
   "brow_bushy": 1.3,
   "boots": {
+   "style": "v7",
    "top_z": 0.31,
-   "cuff_z": 0.28,
-   "lace": true,
-   "push": 0.01,
-   "scale_x": 1.0,
-   "toe": 0.006
+   "size": 1.05,
+   "sole_t": 0.04,
+   "heel_t": 0.05
   },
   "mohawk": {
    "spikes": 7,
@@ -203,7 +232,7 @@
  "palette": {
   "outline": "#140e1e",
   "rim": "#e0559b",
-  "max_colors": 40,
+  "max_colors": 30,
   "protect": [
    "#140e1e",
    "#e0559b"
@@ -850,6 +879,18 @@
     "SKIN",
     "TOP"
    ]
-  ]
- }
+  ],
+  "selout": true,
+  "pp_lines": true,
+  "band_mode": 1,
+  "capsule_n": 0.35,
+  "pal_mode": "material",
+  "stamps": {
+   "face": true,
+   "eye": "dark"
+  }
+ },
+ "action_libs": [
+  "anim/actions_m2m.blend"
+ ]
 }

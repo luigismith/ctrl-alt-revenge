@@ -10,6 +10,9 @@ SPDX-FileCopyrightText = "2026 Luigi Massari"
 SPDX-License-Identifier = "MIT"
 
 # 2) Asset originali del gioco: tutti i diritti riservati, niente addestramento AI.
+#    Gli sprite dei personaggi (atlanti dei colori e delle normali) sono derivati da sorgenti CC0 che restano fuori
+#    dal repo: Quaternius Universal Base Characters e Universal Animation Library 1-2 (versione Standard) e
+#    Mesh2Motion (vedi THIRD-PARTY-NOTICES.md e tools/sprites/FONTI.md). Il CC0 non chiede annotazioni qui.
 #    I font CAR Pixel sono disegnati da noi (tools/fxui): sono grafica del gioco, non codice.
 [[annotations]]
 path = [

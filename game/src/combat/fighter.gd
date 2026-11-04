@@ -1,5 +1,8 @@
 class_name Fighter
 extends Entity
+
+## Maschera delle luci dinamiche: la ricevono solo gli sprite con la normal map (§4 normal_image).
+const LIGHT_MASK_ACTORS := 2
 ## Base dei combattenti (GIG e i Thug): stato in pseudo-profondità, macchina a stati,
 ## hitstop per attore, lampo bianco, tremolio dello sprite, invulnerabilità, ordinamento per y.
 ##
@@ -93,6 +96,8 @@ func setup(fighter_data: FighterData, lvl: Level, id: int, fighter_team: Team) -
 	body.centered = false
 	body.region_enabled = true
 	body.texture = sheet.texture
+	if sheet.has_normals:
+		body.light_mask = LIGHT_MASK_ACTORS
 	_mat = ShaderMaterial.new()
 	_mat.shader = _get_flash_shader()
 	body.material = _mat
@@ -100,10 +105,30 @@ func setup(fighter_data: FighterData, lvl: Level, id: int, fighter_team: Team) -
 	play_anim(&"idle")
 
 
+## Lampo bianco dei colpi e luci dinamiche. La luce è "a gradini" (3 bande di n·L, come le ombre della pixel art);
+## sul bordo della sagoma (normali di taglio) arriva il colore della luce, riflesso del neon; dentro schiarisce
+## senza cambiare tinta, così l'ocra di GIG non vira verso il colore della luce.
+const FLASH_SHADER := """shader_type canvas_item;
+uniform float flash = 0.0;
+void fragment() {
+	COLOR.rgb = mix(COLOR.rgb, vec3(1.0), flash);
+}
+void light() {
+	float d = max(dot(NORMAL, LIGHT_DIRECTION), 0.0);
+	d = floor(d * 3.0 + 0.35) / 3.0;
+	float rim = clamp((1.0 - NORMAL.z) * 1.6, 0.0, 1.0);
+	float lum = dot(LIGHT_COLOR.rgb, vec3(0.299, 0.587, 0.114));
+	vec3 inner = COLOR.rgb * lum * 0.45;
+	vec3 edge = LIGHT_COLOR.rgb * 0.6;
+	LIGHT = vec4(mix(inner, edge, rim) * LIGHT_ENERGY * d, LIGHT_COLOR.a);
+}
+"""
+
+
 static func _get_flash_shader() -> Shader:
 	if _flash_shader == null:
 		_flash_shader = Shader.new()
-		_flash_shader.code = "shader_type canvas_item;\nuniform float flash = 0.0;\nvoid fragment() {\n\tCOLOR.rgb = mix(COLOR.rgb, vec3(1.0), flash);\n}\n"
+		_flash_shader.code = FLASH_SHADER
 	return _flash_shader
 
 
@@ -275,8 +300,20 @@ func _on_anim_event(e: String) -> void:
 
 
 ## Effetto chiesto da un fotogramma: polvere ai piedi, il resto sulla hitbox (o all'altezza del petto).
+## Con "nome@punto" (§4) l'effetto nasce nel punto del fotogramma (per esempio la scarica al pugno).
 func _fx_event(fx_name: StringName) -> void:
-	if String(fx_name).begins_with("dust"):
+	var fs := String(fx_name)
+	if fs.contains("@"):
+		var point := fs.get_slice("@", 1)
+		var base := StringName(fs.get_slice("@", 0))
+		var pf := anim.frame()
+		if pf.points.has(point):
+			var pt: Vector2i = pf.points[point]
+			level.fx.spawn(base, px + pt.x * facing, py - ph + pt.y, facing, depth_z(2) + 2)
+		else:
+			_fx(base, -50)
+		return
+	if fs.begins_with("dust"):
 		_fx(fx_name, 0)
 		return
 	var f := anim.frame()

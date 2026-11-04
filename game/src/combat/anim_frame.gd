@@ -30,6 +30,11 @@ var dx: int = 0
 ## Mosse a coppie: per id di nemico, [dx, dy, animazione, fotogramma] della vittima.
 var victim: Dictionary = {}
 var victim_behind: bool = false
+## Punti del fotogramma relativi all'ancora (§4): "fist_l", "fist_r", "foot_l", "foot_r", "head", "grip".
+## Servono agli effetti agganciati (fx:<nome>@<punto>) e, nelle mosse platform, ad allineare le mani.
+var points: Dictionary[String, Vector2i] = {}
+## Spostamento verticale in px all'inizio del fotogramma (root motion, positivo = in alto), opzionale.
+var dy: int = 0
 
 
 func has_tag(tag: int) -> bool:
@@ -48,6 +53,8 @@ func copy() -> AnimFrame:
 	f.dx = dx
 	f.victim = victim.duplicate(true)
 	f.victim_behind = victim_behind
+	f.points = points.duplicate()
+	f.dy = dy
 	return f
 
 

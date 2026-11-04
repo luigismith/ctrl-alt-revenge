@@ -22,12 +22,14 @@ import os
 import numpy as np
 from scipy import ndimage
 
+import pix_v7 as V7
+
 NID = 48
 PART_BONE = {1: "spine_02", 2: "Head", 3: "upperarm_l", 4: "lowerarm_l", 5: "hand_l", 6: "upperarm_r",
              7: "lowerarm_r", 8: "hand_r", 9: "thigh_l", 10: "calf_l", 11: "foot_l", 12: "thigh_r",
              13: "calf_r", 14: "foot_r"}
 FEATURES = ("EYE_GLOW", "EYE_DARK", "BROW", "MOUTH", "EYE_SOCKET", "NOSE_SHADOW", "KNUCKLE", "BEARD_EDGE",
-            "HAIR_TIE", "STUD", "LACE")
+            "HAIR_TIE", "STUD", "LACE", "SKIN_CREASE")
 N4 = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 
@@ -298,6 +300,8 @@ def compose(lo, sh, cfg, prev=None, mv=None):
     h, w = alpha.shape
     ramp, idx, band, lam, specv = sh.bands(lo, prev, mv)
     band = sh.merge_small(ids, band, alpha, cfg["min_cluster"])
+    if cfg.get("band_mode"):
+        band = V7.band_mode(ids, band, alpha, int(cfg["band_mode"]))
     for mid in np.unique(ids):
         sp = sh.spec.get(int(mid))
         if sp is not None and sp[1] is not None:
@@ -369,6 +373,8 @@ def compose(lo, sh, cfg, prev=None, mv=None):
         for dy, dx in N4:
             touch |= ma & shifted(mb, dy, dx, False)
         line |= touch & ~noline
+    if cfg.get("pp_lines"):
+        line = V7.pixel_perfect(line)
     for y, x in zip(*np.nonzero(line)):
         rn = Rp[y, x]
         big[y, x, :3] = sh.color(rn, 0) if rn else hx(sh.pal["OUT"][0])
@@ -394,6 +400,8 @@ def compose(lo, sh, cfg, prev=None, mv=None):
     for dy, dx in N4:
         out |= ~A & shifted(A, dy, dx, False)
     big[out] = (*hx(sh.pal["OUT"][0]), 255)
+    if cfg.get("selout"):
+        V7.selout_colors(big, A, Rp, out, sh.pal, hx(sh.pal["OUT"][0]))
     prot = np.isin(Ip, [ID[k] for k in FEATURES if k in ID] + [ID["GLOW_LINE"]])
     big = fix_orphans(big, prot)
     return big[pad:pad + h, pad:pad + w], band
@@ -469,13 +477,14 @@ DEFAULT_CFG = dict(feat_frac=0.12, feat_min_hi=3, hyst=True, cov_thr=0.45, cov_k
                    min_cluster=5, ao_k=0.55, spec=True, glow_min=3)
 
 
-def pixelize_sequence(raw_anim_dir, fdata, ss, shader, cfg, loop=False):
+def pixelize_sequence(raw_anim_dir, fdata, ss, shader, cfg, loop=False, faces=None):
     """elabora i fotogrammi nell'ordine (due giri per i cicli, così l'isteresi si chiude) -> RGBA 1x."""
     order = list(range(len(fdata)))
     passes = order + order if (loop and cfg["hyst"] and len(order) > 1) else order
     prev, prev_fd = None, None
     results = {}
     labels = {}
+    normals = {}
     for step, i in enumerate(passes):
         fd = fdata[i]
         F = load_frame(os.path.join(raw_anim_dir, fd["file"]))
@@ -485,11 +494,25 @@ def pixelize_sequence(raw_anim_dir, fdata, ss, shader, cfg, loop=False):
             mvd = part_motion(prev_fd, fd)
             mv = mv_field(part_map_lo(F["part"], ss), mvd)
         lo = downsample(F, ss, cfg, shader.ID, prev if cfg["hyst"] else None, mv, occ)
+        if cfg.get("capsule_n", 0) > 0:
+            W1 = F["a"].shape[1] // ss
+            lo["n"] = V7.capsule_normals(lo, fd, cfg["p1"], W1, cfg["capsule_n"])
         sprite, band = compose(lo, shader, cfg, prev if cfg["hyst"] else None, mv)
         lo["band"] = band
         prev, prev_fd = lo, fd
+        ids_out = lo["ids"].copy()
+        st = cfg.get("stamps") or {}
+        if st.get("face") and "eye_r" in fd.get("points", {}):
+            expr = (faces[i] if faces else None) or "neutral"
+            sprite, ids_out = V7.face_stamp(sprite, ids_out, lo["part"], lo["d"], fd, shader.ID, shader.pal, expr,
+                                            st.get("eye", "cyan"))
+        if fd.get("trail") and cfg.get("smear_draw", True):
+            names = sorted({k for s_ in fd["trail"] for k in s_} - set(cfg.get("smear_skip", [])))
+            sprite = V7.draw_smear(sprite, fd["trail"], shader.pal, names, ramps=cfg.get("smear_ramps"))
         results[i] = sprite
-        labels[i] = np.stack([lo["ids"], lo["part"]], 0).astype(np.uint8)
+        labels[i] = np.stack([ids_out, lo["part"]], 0).astype(np.uint8)
+        normals[i] = V7.normal_image(sprite, lo)
+    pixelize_sequence.normals = [normals[i] for i in order]
     return [results[i] for i in order], [labels[i] for i in order]
 
 

@@ -11,6 +11,7 @@ extends RefCounted
 ##   --quit-at-end          esce quando il replay finisce o il livello termina
 ##   --print-hash           alla fine stampa l'hash dello stato della simulazione
 ##   --debug-boxes          parte con hitbox e hurtbox visibili (come F1; solo build di debug)
+##   --no-lights            parte con le luci dinamiche spente (come F5)
 
 var autostart: bool = false
 var replay_path: String = ""
@@ -22,6 +23,7 @@ var autopilot: String = ""
 var quit_at_end: bool = false
 var print_hash: bool = false
 var debug_boxes: bool = false
+var no_lights: bool = false
 var unknown: PackedStringArray = []
 
 
@@ -59,6 +61,8 @@ static func parse(args: PackedStringArray) -> SessionOptions:
 				o.print_hash = true
 			"--debug-boxes":
 				o.debug_boxes = true
+			"--no-lights":
+				o.no_lights = true
 			_:
 				# Le parole senza "--" sono argomenti di altri script (es. make_replays.gd).
 				if a.begins_with("--"):

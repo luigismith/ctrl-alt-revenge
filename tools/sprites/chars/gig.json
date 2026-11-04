@@ -10,74 +10,81 @@
  "proportions": {
   "Head": {
    "scale": [
-    1.2,
-    1.2,
-    1.2
+    1.45,
+    1.45,
+    1.45
    ]
   },
   "clavicle_l": {
    "scale": [
     1.0,
-    1.22,
+    1.34,
     1.0
    ]
   },
   "clavicle_r": {
    "scale": [
     1.0,
-    1.22,
+    1.34,
     1.0
    ]
   },
   "upperarm_l": {
    "scale": [
-    1.12,
+    1.24,
     1.0,
-    1.12
+    1.24
    ],
    "inherit": "NONE"
   },
   "upperarm_r": {
    "scale": [
-    1.12,
+    1.24,
     1.0,
-    1.12
+    1.24
    ],
    "inherit": "NONE"
   },
   "lowerarm_l": {
    "scale": [
-    1.2,
+    1.32,
     1.0,
-    1.2
+    1.32
    ],
    "inherit": "NONE"
   },
   "lowerarm_r": {
    "scale": [
-    1.2,
+    1.32,
     1.0,
-    1.2
+    1.32
    ],
    "inherit": "NONE"
   },
   "hand_l": {
    "scale": [
-    1.4,
-    1.4,
-    1.4
+    1.8,
+    1.8,
+    1.8
    ],
    "inherit": "NONE"
   },
   "hand_r": {
    "scale": [
-    1.4,
-    1.4,
-    1.4
+    1.8,
+    1.8,
+    1.8
    ],
    "inherit": "NONE"
   },
   "spine_03": {
+   "scale": [
+    1.14,
+    1.0,
+    1.08
+   ]
+  },
+  "spine_02": {
    "scale": [
     1.06,
     1.0,
@@ -87,8 +94,56 @@
   "neck_01": {
    "scale": [
     1.0,
-    1.0,
+    0.8,
     1.0
+   ],
+   "inherit": "NONE"
+  },
+  "thigh_l": {
+   "scale": [
+    1.12,
+    0.97,
+    1.12
+   ],
+   "inherit": "NONE"
+  },
+  "thigh_r": {
+   "scale": [
+    1.12,
+    0.97,
+    1.12
+   ],
+   "inherit": "NONE"
+  },
+  "calf_l": {
+   "scale": [
+    1.1,
+    0.97,
+    1.1
+   ],
+   "inherit": "NONE"
+  },
+  "calf_r": {
+   "scale": [
+    1.1,
+    0.97,
+    1.1
+   ],
+   "inherit": "NONE"
+  },
+  "foot_l": {
+   "scale": [
+    1.12,
+    1.12,
+    1.12
+   ],
+   "inherit": "NONE"
+  },
+  "foot_r": {
+   "scale": [
+    1.12,
+    1.12,
+    1.12
    ],
    "inherit": "NONE"
   }
@@ -97,7 +152,7 @@
   "eye_side": "right",
   "sleeve_l_t": 0.8,
   "sleeve_r_t": 0.2,
-  "hem_z": 0.865,
+  "hem_z": 0.96,
   "shirt_offset": 0.024,
   "beard_len": 1.15,
   "topknot": {
@@ -124,15 +179,64 @@
    "string_len": 0.1
   },
   "boots": {
-   "top_z": 0.262,
-   "cuff_z": 0.225
+   "style": "v7",
+   "top_z": 0.27,
+   "size": 1.15,
+   "sole_t": 0.04,
+   "heel_t": 0.054
   },
   "brow_bushy": 0.75,
   "hairline": {
-   "cut_y": -0.04,
-   "above_eye": 0.018
+   "mode": "band",
+   "z0": 0.014,
+   "z1": 0.05,
+   "half_w": 0.05,
+   "cut_y": -0.03
   },
-  "brow_lift": 0.009
+  "brow_lift": 0.009,
+  "shirt": {
+   "crotch_cut": true,
+   "crotch_w": 0.075,
+   "crotch_z": 0.95,
+   "crotch_nz": -0.25,
+   "hips": true,
+   "open_front": [
+    0.012,
+    0.055
+   ],
+   "hem_drop": 0.01,
+   "hem_out": 0.01,
+   "pelvis_only_below": 1.04,
+   "thigh_k": 0.3,
+   "front_dz": 0.022
+  },
+  "hand_r": {
+   "bare": true,
+   "wrist_band": true,
+   "grooves": {
+    "at": [
+     -0.0177,
+     0.0177
+    ],
+    "w": 0.004,
+    "cuts": 6,
+    "fold": {
+     "x": 0.012,
+     "w": 0.004,
+     "z1": 0.015
+    }
+   },
+   "wrist": {
+    "a": 0.02,
+    "b": 0.025,
+    "r0": 0.044,
+    "r1": 0.046,
+    "band": [
+     0.0,
+     0.5
+    ]
+   }
+  }
  },
  "authored": [
   {
@@ -212,7 +316,7 @@
  "palette": {
   "outline": "#140e1e",
   "rim": "#e0559b",
-  "max_colors": 40,
+  "max_colors": 30,
   "protect": [
    "#140e1e",
    "#e0559b",
@@ -226,40 +330,40 @@
     "vd": 0.72
    },
    "HAIR": {
-    "mid": "#a59c8f",
+    "mid": "#928d87",
     "dark_target": 15,
-    "dh_dark": 10,
-    "sd": 1.35,
+    "dh_dark": 8,
+    "sd": 1.0,
     "vd": 0.64,
-    "vl": 1.16,
-    "sl": 0.85,
+    "vl": 1.18,
+    "sl": 0.7,
     "light_target": 45,
-    "dh_light": 6
+    "dh_light": 4
    },
    "TOP": {
     "mid": "#a86c26",
     "dark_target": 10,
     "dh_dark": 10,
     "sd": 1.0,
-    "vd": 0.7,
+    "vd": 0.78,
     "vl": 1.12,
     "sl": 0.92,
     "light_target": 32,
     "dh_light": 5
    },
    "HOOD": {
-    "mid": "#5d5f6c",
-    "dark_target": 250,
-    "dh_dark": 8,
-    "vd": 0.7,
-    "vl": 1.22
+    "mid": "#55607f",
+    "dark_target": 245,
+    "dh_dark": 6,
+    "vd": 0.74,
+    "vl": 1.25
    },
    "PANTS": {
     "mid": "#5f6b34",
     "dark_target": 200,
-    "dh_dark": 14,
-    "vd": 0.68,
-    "vl": 1.22
+    "dh_dark": 12,
+    "vd": 0.8,
+    "vl": 1.2
    },
    "BELT": {
     "mid": "#4a3428",
@@ -315,6 +419,17 @@
      "#c8faff",
      "#ffffff"
     ]
+   },
+   "BEARD": {
+    "mid": "#c9c2b6",
+    "dark_target": 30,
+    "dh_dark": 8,
+    "sd": 1.1,
+    "vd": 0.74,
+    "vl": 1.1,
+    "sl": 0.7,
+    "light_target": 45,
+    "dh_light": 4
    }
   },
   "spec": {
@@ -340,15 +455,15 @@
     ]
    ],
    "BEARD": [
-    "HAIR",
+    "BEARD",
     [
-     0.08,
-     0.5,
-     0.82
+     0.05,
+     0.45,
+     0.8
     ]
    ],
    "BEARD_EDGE": [
-    "HAIR",
+    "BEARD",
     null,
     1
    ],
@@ -525,6 +640,11 @@
     "WRAP",
     null,
     1
+   ],
+   "SKIN_CREASE": [
+    "SKIN",
+    null,
+    1
    ]
   },
   "spec_mats": {
@@ -584,113 +704,412 @@
  },
  "anims": {
   "idle": {
-   "src": "guard",
+   "src": "tl:idle",
    "loop": true,
-   "bob_px": 2,
+   "period": 42,
    "frames": [
     {
-     "f": 1,
-     "t": 12
-    },
-    {
-     "f": 2,
+     "at": 0,
      "t": 8
     },
     {
-     "f": 3,
-     "t": 12
+     "at": 7,
+     "t": 6
     },
     {
-     "f": 4,
+     "at": 14,
+     "t": 7
+    },
+    {
+     "at": 21,
      "t": 8
+    },
+    {
+     "at": 28,
+     "t": 6
+    },
+    {
+     "at": 35,
+     "t": 7
     }
    ]
   },
   "walk": {
    "src": "Walk_Loop",
+   "upper": "guard",
+   "stride": 1.37,
    "loop": true,
+   "period": 40,
+   "twist_deg": 14,
+   "twist_phase": 0,
    "frames": [
     {
-     "f": 1,
-     "t": 5
-    },
-    {
-     "f": 6,
-     "t": 4
-    },
-    {
-     "f": 11,
-     "t": 5
-    },
-    {
-     "f": 16,
-     "t": 4,
+     "f": 1.0,
+     "t": 7,
      "ev": [
       "step"
      ]
     },
     {
-     "f": 21,
+     "f": 6.833,
+     "t": 7
+    },
+    {
+     "f": 12.667,
      "t": 5
     },
     {
-     "f": 26,
-     "t": 4
-    },
-    {
-     "f": 31,
+     "f": 16.833,
      "t": 5
     },
     {
-     "f": 36,
-     "t": 4,
+     "f": 21.0,
+     "t": 7,
      "ev": [
       "step"
+     ]
+    },
+    {
+     "f": 26.833,
+     "t": 7
+    },
+    {
+     "f": 32.667,
+     "t": 5
+    },
+    {
+     "f": 36.833,
+     "t": 5
+    }
+   ]
+  },
+  "jab1": {
+   "src": "tl:jab1",
+   "frames": [
+    {
+     "at": 2,
+     "t": 2,
+     "ev": [
+      "sfx:whoosh_light"
+     ]
+    },
+    {
+     "at": 3.3,
+     "t": 1,
+     "smear": [
+      "fist_l"
+     ],
+     "scale": {
+      "lowerarm_l": [
+       1.0,
+       1.15,
+       1.0
+      ]
+     }
+    },
+    {
+     "at": 4.5,
+     "t": 2,
+     "hit": "fist_l",
+     "scale": {
+      "lowerarm_l": [
+       1.0,
+       1.1,
+       1.0
+      ]
+     },
+     "smear": [
+      "fist_l"
+     ],
+     "smear_from": 2.5
+    },
+    {
+     "at": 6,
+     "t": 3
+    },
+    {
+     "at": 9,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "at": 12,
+     "t": 3,
+     "tags": [
+      "cancel"
      ]
     }
    ]
   },
-  "run": {
-   "src": "Sprint_Loop",
-   "loop": true,
+  "jab2": {
+   "src": "tl:jab2",
    "frames": [
     {
-     "f": 1,
-     "t": 5
-    },
-    {
-     "f": 3,
-     "t": 5,
+     "at": 2,
+     "t": 2,
      "ev": [
-      "step"
+      "sfx:whoosh_light"
      ]
     },
     {
+     "at": 3.3,
+     "t": 1,
+     "smear": [
+      "fist_r"
+     ],
+     "scale": {
+      "lowerarm_r": [
+       1.0,
+       1.2,
+       1.0
+      ]
+     }
+    },
+    {
+     "at": 4.5,
+     "t": 2,
+     "hit": "fist_r",
+     "scale": {
+      "lowerarm_r": [
+       1.0,
+       1.15,
+       1.0
+      ]
+     },
+     "smear": [
+      "fist_r"
+     ],
+     "smear_from": 2.5
+    },
+    {
+     "at": 6,
+     "t": 3
+    },
+    {
+     "at": 9,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "at": 12,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    }
+   ]
+  },
+  "hook": {
+   "src": "tl:hook",
+   "frames": [
+    {
+     "at": 3,
+     "t": 3,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ]
+    },
+    {
+     "at": 5.5,
+     "t": 2
+    },
+    {
+     "at": 7.5,
+     "t": 1,
+     "smear": [
+      "fist_l"
+     ]
+    },
+    {
+     "at": 10.8,
+     "t": 3,
+     "hit": "fist_l",
+     "dx": 3,
+     "face": "effort",
+     "smear": [
+      "fist_l"
+     ],
+     "smear_from": 6.0
+    },
+    {
+     "at": 15,
+     "t": 4,
+     "face": "effort"
+    },
+    {
+     "at": 18,
+     "t": 4,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "at": 23,
+     "t": 4,
+     "tags": [
+      "cancel"
+     ]
+    }
+   ]
+  },
+  "kick": {
+   "src": "M2M_KickRoundhouse",
+   "frames": [
+    {
      "f": 6,
-     "t": 5
+     "t": 3,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ]
     },
     {
-     "f": 8,
-     "t": 5
+     "f": 9,
+     "t": 4
     },
     {
-     "f": 11,
-     "t": 5
+     "f": 11.4,
+     "t": 3,
+     "smear": [
+      "toe_l"
+     ]
     },
     {
      "f": 13,
-     "t": 5,
-     "ev": [
-      "step"
-     ]
+     "t": 3,
+     "hit": "foot_l",
+     "scale": {
+      "calf_l": [
+       1.0,
+       1.3,
+       1.0
+      ]
+     },
+     "face": "effort",
+     "smear": [
+      "toe_l"
+     ],
+     "smear_from": 10.0
     },
     {
-     "f": 16,
+     "f": 14.5,
      "t": 5
     },
     {
      "f": 18,
      "t": 5
+    },
+    {
+     "f": 23,
+     "t": 5
+    },
+    {
+     "f": 30,
+     "t": 5
+    }
+   ]
+  },
+  "hurt_high": {
+   "src": "tl:hurt_high",
+   "hurt": "std",
+   "frames": [
+    {
+     "at": 0,
+     "t": 2,
+     "face": "pain"
+    },
+    {
+     "at": 4,
+     "t": 4,
+     "face": "pain"
+    },
+    {
+     "at": 8.5,
+     "t": 4,
+     "face": "pain"
+    },
+    {
+     "at": 13,
+     "t": 4,
+     "face": "neutral"
+    }
+   ]
+  },
+  "double_jump": {
+   "src": "tl:double_jump",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "at": 3,
+     "t": 3,
+     "tags": [
+      "air"
+     ],
+     "ev": []
+    },
+    {
+     "at": 5.8,
+     "t": 2,
+     "tags": [
+      "air"
+     ],
+     "smear": [
+      "fist_l"
+     ],
+     "ev": [
+      "sfx:whoosh_heavy"
+     ]
+    },
+    {
+     "at": 6.5,
+     "t": 3,
+     "tags": [
+      "air"
+     ],
+     "ev": [
+      "fx:cyber_spark@fist_l"
+     ],
+     "face": "effort",
+     "smear": [
+      "fist_l"
+     ],
+     "smear_from": 4.5
+    },
+    {
+     "at": 9,
+     "t": 4,
+     "tags": [
+      "air"
+     ],
+     "ev": []
+    },
+    {
+     "at": 13,
+     "t": 4,
+     "tags": [
+      "air"
+     ],
+     "ev": []
+    },
+    {
+     "at": 18,
+     "t": 5,
+     "tags": [
+      "air"
+     ],
+     "ev": []
+    },
+    {
+     "at": 24,
+     "t": 6,
+     "tags": [
+      "air",
+      "hold"
+     ],
+     "ev": []
     }
    ]
   },
@@ -752,186 +1171,46 @@
     }
    ]
   },
-  "jab1": {
-   "src": "Punch_Jab",
-   "frames": [
-    {
-     "f": 5,
-     "t": 3,
-     "ev": [
-      "sfx:whoosh_light"
-     ]
-    },
-    {
-     "f": 7,
-     "t": 2,
-     "hit": "fist_l",
-     "scale": {
-      "lowerarm_l": [
-       1.0,
-       1.15,
-       1.0
-      ]
-     }
-    },
-    {
-     "f": 14,
-     "t": 3
-    },
-    {
-     "f": 17,
-     "t": 3,
-     "tags": [
-      "cancel"
-     ]
-    },
-    {
-     "f": 20,
-     "t": 3,
-     "tags": [
-      "cancel"
-     ]
-    }
-   ]
-  },
-  "jab2": {
-   "src": "Punch_Cross",
-   "frames": [
-    {
-     "f": 6,
-     "t": 3,
-     "ev": [
-      "sfx:whoosh_light"
-     ]
-    },
-    {
-     "f": 10,
-     "t": 2,
-     "hit": "fist_r",
-     "scale": {
-      "lowerarm_r": [
-       1.0,
-       1.35,
-       1.0
-      ],
-      "upperarm_r": [
-       1.0,
-       1.1,
-       1.0
-      ]
-     }
-    },
-    {
-     "f": 16,
-     "t": 3
-    },
-    {
-     "f": 21,
-     "t": 3,
-     "tags": [
-      "cancel"
-     ]
-    },
-    {
-     "f": 25,
-     "t": 3,
-     "tags": [
-      "cancel"
-     ]
-    }
-   ]
-  },
-  "hook": {
-   "src": "AUTH_hook",
+  "run": {
+   "src": "Sprint_Loop",
+   "loop": true,
    "frames": [
     {
      "f": 1,
-     "t": 3,
-     "ev": [
-      "sfx:whoosh_heavy"
-     ]
-    },
-    {
-     "f": 2,
-     "t": 3
+     "t": 5
     },
     {
      "f": 3,
-     "t": 3,
-     "hit": "fist_l",
-     "dx": 3,
-     "scale": {
-      "lowerarm_l": [
-       1.0,
-       1.15,
-       1.0
-      ]
-     }
-    },
-    {
-     "f": 4,
-     "t": 4
-    },
-    {
-     "f": 5,
-     "t": 4,
-     "tags": [
-      "cancel"
+     "t": 5,
+     "ev": [
+      "step"
      ]
     },
     {
-     "f": 5,
-     "t": 4,
-     "tags": [
-      "cancel"
-     ]
-    }
-   ]
-  },
-  "kick": {
-   "src": "M2M_KickRoundhouse",
-   "frames": [
+     "f": 6,
+     "t": 5
+    },
     {
      "f": 8,
-     "t": 4,
-     "ev": [
-      "sfx:whoosh_heavy"
-     ]
-    },
-    {
-     "f": 10,
-     "t": 3
+     "t": 5
     },
     {
      "f": 11,
-     "t": 3
+     "t": 5
     },
     {
      "f": 13,
-     "t": 3,
-     "hit": "foot_l",
-     "scale": {
-      "calf_l": [
-       1.0,
-       1.4,
-       1.0
-      ]
-     }
+     "t": 5,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "f": 16,
+     "t": 5
     },
     {
      "f": 18,
-     "t": 5
-    },
-    {
-     "f": 21,
-     "t": 5
-    },
-    {
-     "f": 23,
-     "t": 5
-    },
-    {
-     "f": 26,
      "t": 5
     }
    ]
@@ -1113,23 +1392,6 @@
     }
    ]
   },
-  "hurt_high": {
-   "src": "AUTH_hurt_high",
-   "frames": [
-    {
-     "f": 1,
-     "t": 4
-    },
-    {
-     "f": 2,
-     "t": 5
-    },
-    {
-     "f": 3,
-     "t": 5
-    }
-   ]
-  },
   "hurt_low": {
    "src": "AUTH_hurt_low",
    "hurt": "low",
@@ -1263,6 +1525,135 @@
      ]
     }
    ]
+  },
+  "ledge_climb": {
+   "src": "ClimbUp_1m_RM",
+   "anchor": "first",
+   "frames": [
+    {
+     "f": 0,
+     "t": 4
+    },
+    {
+     "f": 2,
+     "t": 3
+    },
+    {
+     "f": 4,
+     "t": 3,
+     "face": "effort"
+    },
+    {
+     "f": 6,
+     "t": 3,
+     "face": "effort"
+    },
+    {
+     "f": 8,
+     "t": 3,
+     "face": "effort"
+    },
+    {
+     "f": 10,
+     "t": 3
+    },
+    {
+     "f": 12,
+     "t": 3
+    },
+    {
+     "f": 14,
+     "t": 4
+    },
+    {
+     "f": 17,
+     "t": 4
+    },
+    {
+     "f": 20,
+     "t": 8
+    }
+   ]
+  },
+  "slide": {
+   "src": "Slide_Start",
+   "anchor": "root",
+   "frames": [
+    {
+     "f": 2,
+     "t": 3
+    },
+    {
+     "f": 6,
+     "t": 3
+    },
+    {
+     "f": 10,
+     "t": 3
+    },
+    {
+     "f": 14,
+     "t": 4,
+     "smear": [
+      "heel_r"
+     ]
+    },
+    {
+     "f": 18,
+     "t": 4
+    },
+    {
+     "f": 22,
+     "t": 6
+    }
+   ]
+  },
+  "crouch": {
+   "src": "Crouch_Idle_Loop",
+   "loop": true,
+   "period": 90,
+   "frames": [
+    {
+     "f": 0,
+     "t": 12
+    },
+    {
+     "f": 22,
+     "t": 10
+    },
+    {
+     "f": 45,
+     "t": 12
+    },
+    {
+     "f": 67,
+     "t": 10
+    }
+   ]
+  },
+  "ledge_hang": {
+   "src": "tl:ledge_hang",
+   "loop": true,
+   "period": 48,
+   "anchor": "first",
+   "frames": [
+    {
+     "at": 0,
+     "t": 12
+    },
+    {
+     "at": 12,
+     "t": 12
+    },
+    {
+     "at": 24,
+     "t": 12
+    },
+    {
+     "at": 36,
+     "t": 12
+    }
+   ]
   }
  },
  "pixel_cfg": {
@@ -1287,6 +1678,26 @@
     "SKIN",
     "TOP"
    ]
-  ]
- }
+  ],
+  "selout": true,
+  "pp_lines": true,
+  "band_mode": 1,
+  "capsule_n": 0.35,
+  "pal_mode": "material",
+  "smear_skip": [
+   "toe_l",
+   "toe_r"
+  ],
+  "stamps": {
+   "face": true
+  },
+  "smear_ramps": {
+   "fist_r": [
+    "SKIN",
+    3,
+    4
+   ]
+  }
+ },
+ "topknot_spring": true
 }

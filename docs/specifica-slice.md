@@ -11,11 +11,18 @@ Decisioni di Luigi del 3 novembre 2026:
 - **Approccio C, misto, a costo zero**: tutta la grafica nasce dalla pipeline 3D → pixel e dai pack CC0 ammessi, senza ritocchi umani.
 - **GIG** ha l'aspetto della locandina (`docs/riferimenti-estetica/locandina-pixelart-chatgpt-2026-04-09.png`):
   - codino e barba grigi;
-  - camicia da lavoro ocra con le maniche arrotolate, sopra un cappuccio grigio;
-  - fasce da boxe blu, pantaloni oliva, stivali marroni.
+  - camicia da lavoro ocra aperta e fuori dai pantaloni, con le maniche arrotolate, sopra una felpa grigia con il cappuccio;
+  - pantaloni oliva con la cintura scura, stivali marroni;
+  - dal 4 novembre, su richiesta di Luigi, la mano destra è nuda, con una fascia blu sottile al polso: sulla locandina c'erano le fasce da boxe.
 
   In più ha il braccio sinistro cibernetico (metallo scuro con anelli cyan luminosi) e un occhio cyan che brilla: quello rivolto alla telecamera.
 - **Genere**: picchiaduro a scorrimento con profondità, nello stile di Streets of Rage, con elementi platform leggeri: salto sopra un ostacolo pericoloso.
+
+Direzione di Luigi del 4 novembre 2026, che vale per il gioco completo:
+
+- **Estetica retro, tecnologia di oggi**: "non deve sembrare un gioco degli anni 90 in tutto". Le regole pixel perfect del §2 valgono per lo slice così com'è e si rivedono nello step del gameplay. Sono le regole su telecamera a passi interi, interpolazione spenta e assenza di deformazioni a runtime. Sono ammesse telecamera fluida, luci dinamiche, shader, particelle e deformazioni.
+- **Genere**: platform-picchiaduro con elementi platform importanti, un mix fra Pitfall, Comix Zone, Jazz Jackrabbit e Duke Nukem 2D, con il doppio salto.
+- **Storia**: introduzione e intermezzi a fumetto a schermo intero, in pixel art. La storia è in `docs/lore/storia.md`.
 
 Scelte tecniche già fissate:
 
@@ -44,7 +51,7 @@ Scelte tecniche già fissate:
 
 ## 3. Scala del mondo e pseudo-profondità
 
-- **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. GIG in guardia misura circa 88-92 px dai piedi alla cima del codino; il punk circa 92; il bruto, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 54 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
+- **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. GIG in guardia misura circa 88-92 px dai piedi alla cima del codino; il punk circa 92; il bruto, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 58 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
 - **Coordinate di ogni entità**:
   - `x` orizzontale, in px del mondo;
   - `y` è la linea dei piedi sullo schermo, cioè la profondità;
@@ -58,9 +65,10 @@ Scelte tecniche già fissate:
 
 ## 4. Formato degli sprite
 
-È il contratto tra grafica e codice. Ogni personaggio ha una cartella `game/assets/sprites/<id>/` con due file:
+È il contratto tra grafica e codice. Ogni personaggio ha una cartella `game/assets/sprites/<id>/` con questi file:
 
-- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine.
+- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine; al massimo 30 colori (pipeline v7: rampe ridotte dentro ogni materiale).
+- `<id>_n.png` (opzionale, campo `normal_image` del JSON): atlante delle normali per le luci dinamiche, stesso impacchettamento e stessa misura di `<id>.png`. RGB = 0,5 + 0,5 × normale (x verso destra, y verso l'alto, z verso chi guarda: la convenzione delle `CanvasTexture` di Godot 4), alfa uguale a quella dell'atlante dei colori. Sul contorno la normale punta verso l'esterno (luce di taglio). La produce la pipeline dal G-buffer, a costo zero.
 - `<id>.json`, con questa struttura:
 
 ```json
@@ -108,6 +116,9 @@ Scelte tecniche già fissate:
 
   Hanno `hold` sull'ultimo fotogramma `jump_rise`, `jump_fall`, `air_kick`, `knock_air`, `knock_down`, `grab_hold` e `grabbed`; `thrown` lo ha sul fotogramma 1 (vedi sotto). `air_kick` resta sul fotogramma `hold` finché GIG è in aria; all'atterraggio il codice fa i 6 tick di recupero con `land`.
 - `dx`: spostamento in avanti in px quando il fotogramma inizia (root motion), opzionale.
+- `dy`: spostamento verso l'alto in px quando il fotogramma inizia (root motion verticale delle mosse platform, per esempio salire su una sporgenza), opzionale. Lo slice lo legge ma non lo usa ancora.
+- `points` (opzionale): punti del fotogramma relativi all'ancora, con il personaggio rivolto a destra, come le box: `fist_l`, `fist_r` (punte dei pugni), `foot_l`, `foot_r` (punte dei piedi), `head` (centro della testa), `grip` (in mezzo alle mani: serve ad allineare le mani a una sporgenza o a un cavo). Esempio: `"points": {"fist_l": [24, -70], "grip": [10, -66]}`.
+- Negli eventi, `fx:<nome>@<punto>` fa nascere l'effetto in quel punto del fotogramma (per esempio `fx:cyber_spark@fist_l`, la scarica del doppio salto al pugno cibernetico); se il punto manca vale la regola normale degli effetti.
 
 **Mosse a coppie (presa, ginocchiate, proiezione).** I fotogrammi di GIG `grab_hold`, `knee` e `throw` hanno in più un campo `victim` con una voce per ogni tipo di nemico:
 
@@ -122,6 +133,8 @@ Scelte tecniche già fissate:
 - **Proiezione.** `throw` non ha fotogrammi `active`: il rilascio avviene al tick 8 (fine dell'avvio), senza evento, all'inizio del fotogramma 2. In quel momento la vittima parte dal `dx` della sua voce (circa 30 px), dove è già disegnata con `thrown` 0, e da lì riproduce `thrown` dall'inizio.
 - **Ordine di `thrown`** nei nemici: 0 rilasciato, 1 in volo (`hold`, `air`), 2 afferrato, 3 sollevato. Dopo il rilascio si vedono solo 0 e 1; il 2 e il 3 compaiono solo durante la presa, tramite `victim`.
 - **Proiezione all'indietro** (attacco più la direzione opposta): GIG si gira quando la clip arriva al fotogramma 1, con la vittima sollevata sopra la testa, così la vittima atterra dall'altra parte senza salti.
+
+**Animazioni in più (prova delle mosse platform):** l'atlante di GIG contiene anche `double_jump`, `ledge_hang`, `ledge_climb`, `slide` e `crouch`. Il gioco dello slice non le usa: servono a provare la pipeline per lo step del gameplay. Il validatore le segnala come avvisi, non come errori.
 
 **Animazioni richieste**, con nomi esatti:
 
@@ -252,6 +265,14 @@ Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di par
 - `scroll` è il fattore di parallasse, `y` lo scostamento verticale in px dello schermo. Le posizioni sono `-round(telecamera × scroll)`: con passi interi nessun pixel trema.
 - `repeat_x` è il periodo di ripetizione in px; 0 vuol dire che il piano non si ripete.
 - `emissive` (opzionale) è una maschera disegnata in modalità additiva, per bagliori e sfarfallio dei neon (il codice fa sfarfallare tre gruppi di colonne).
+
+**Luci dinamiche** (direzione del §1: tecnologia di oggi). Il JSON del livello ha un elenco `lights`, una luce per riga: `{"kind", "x", "y", "color", "energy", "radius", "height"}` in coordinate del mondo (`height` in px, per la normal map; `lamp` ha anche `scroll`). Tipi:
+- `neon`: le insegne dello sfondo (posizioni e colori presi dai gruppi luminosi di `backdrop_emis.png`), con la stessa pulsazione lenta dei neon;
+- `lamp`: le lampade al sodio della travata `fg`, che si spostano con la sua parallasse (1,25);
+- `cable`: le scintille del cavo, accese nei fotogrammi del lampo (0 e 3 del ciclo);
+- `lightning`: il lampo del temporale sopra la vista, ogni 9 s circa, deterministico.
+
+Le luci illuminano solo gli attori con la normal map (maschera `Fighter.LIGHT_MASK_ACTORS`), mai gli sfondi, che hanno la luce già dipinta. La luce è a 3 bande (come le ombre della pixel art): sul bordo della sagoma arriva il colore della luce, dentro schiarisce senza cambiare tinta, così l'ocra di GIG non vira. Sono solo disegno e non toccano la simulazione: replay e hash non cambiano. F5 le accende e spegne (build di debug); `--no-lights` parte spento.
 - I piani a fattore 1,0 coprono tutti i 1920 px. Quelli più lenti coprono almeno `384 + 1536 × scroll` px, oppure si ripetono: far 576, mid 768, near 1152; `fg` (1,25) è largo 2304 px.
 - I piani con `z` < 0 stanno dietro agli attori, quelli con `z` ≥ 0 davanti.
 - `backdrop` (facciate, alto 149 px) e `floor` (da y 130: contiene anche la base delle cose basse davanti alle facciate) non si sovrappongono. `fg` è la travata del viadotto vista dal basso, con lampade al sodio piatte attaccate sotto: resta sopra y 26, perché le insegne del fondale stanno fra y 27 e 45 e devono leggersi a telecamera ferma, e non copre la fascia calpestabile.

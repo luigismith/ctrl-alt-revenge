@@ -41,6 +41,7 @@ Argomenti utili, da scrivere dopo `--`:
 | `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 69 s (GIG gioca da solo) |
 | `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |
+| `--no-lights` | parte con le luci dinamiche spente, come F5 |
 
 Per esempio `godot --path game -- --autostart`. Gli altri argomenti e i test sono descritti in [`game/tests/README.md`](game/tests/README.md).
 
@@ -64,7 +65,7 @@ Le mosse:
 - **Presa**: si cammina contro un nemico vicino, nella sua stessa corsia. Dalla presa, attacco dà una ginocchiata (al massimo due); il terzo attacco, oppure attacco più la direzione opposta, lo proietta. Il corpo proiettato atterra gli altri nemici.
 - **Ostacolo**: il cavo nella pozzanghera si salta; toccarlo fa 10 di danno e atterra.
 
-Avviando il gioco con Godot, come sopra, è una build di debug e funzionano anche F1 (hitbox e hurtbox), F2 (rallentatore), F3 (fermo immagine) e F4 (avanza di un fotogramma durante il fermo immagine). Nelle build esportate per i giocatori questi tasti non fanno nulla.
+Avviando il gioco con Godot, come sopra, è una build di debug e funzionano anche F1 (hitbox e hurtbox), F2 (rallentatore), F3 (fermo immagine), F4 (avanza di un fotogramma durante il fermo immagine) e F5 (accende e spegne le luci dinamiche sui personaggi). Nelle build esportate per i giocatori questi tasti non fanno nulla.
 
 ## Struttura
 

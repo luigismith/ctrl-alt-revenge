@@ -17,6 +17,7 @@ const KEYS := {
 	"debug_slow": [KEY_F2],
 	"debug_freeze": [KEY_F3],
 	"debug_step": [KEY_F4],
+	"debug_lights": [KEY_F5],
 }
 
 const PAD_BUTTONS := {

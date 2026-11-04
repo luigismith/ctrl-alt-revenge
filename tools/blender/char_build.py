@@ -44,7 +44,7 @@ IDS = dict(SKIN=1, HAIR=2, TOP=3, TOP_DARK=4, PANTS=5, BOOTS=6, METAL=7, EYE_GLO
            BOOT_SOLE=16, BOOT_CUFF=17, BEARD=18, METAL_SEAM=19, METAL_LIGHT=20, WRAP=21,
            HOOD=22, HOOD_DARK=23, BROW=24, EYE_SOCKET=25, NOSE_SHADOW=26, MOUTH=27, BEARD_EDGE=28,
            KNUCKLE=29, HAIR_TIE=30, PANTS_FOLD=31, SKIN_DARK=32, CREST=33, CREST_DARK=34, STUD=35,
-           WRAP_EDGE=36, LACE=37, PANTS_RIP=38, BRASS=39)
+           WRAP_EDGE=36, LACE=37, PANTS_RIP=38, BRASS=39, SKIN_CREASE=40)
 PARTS = dict(none=0, torso=1, head=2, upperarm_l=3, lowerarm_l=4, hand_l=5, upperarm_r=6, lowerarm_r=7,
              hand_r=8, thigh_l=9, calf_l=10, foot_l=11, thigh_r=12, calf_r=13, foot_r=14)
 FINGERS = ("index", "middle", "pinky", "ring", "thumb")
@@ -594,6 +594,11 @@ def landmarks(arm, body, eyes):
     back = max((p for p in head_pts if abs(p.x) < 0.02 and p.z > eye_l.z), key=lambda p: p.y)
     L = dict(eye_l=eye_l, eye_r=eye_r, nose=nose, chin=chin, crown_z=crown.z, crown=crown, back=back,
              mouth=Vector((0.0, nose.y + 0.012, nose.z - 0.40 * (nose.z - chin.z))))
+    # cavallo: il punto più basso del bacino al centro (per la misura "niente camicia fra le gambe")
+    crotch = [body.matrix_world @ v.co for v, b in zip(body.data.vertices, vb) if b == "pelvis" and abs(v.co.x) < 0.02]
+    if crotch:
+        L["crotch"] = min(crotch, key=lambda p: p.z)
+        L["crotch_obj"] = body                 # per il cavallo deformato (frame_data)
     for k in ("upperarm_l", "lowerarm_l", "hand_l", "upperarm_r", "lowerarm_r", "hand_r", "Head", "pelvis",
               "foot_l", "foot_r", "calf_l", "calf_r", "thigh_l", "thigh_r", "spine_01", "spine_02", "spine_03",
               "neck_01", "clavicle_l", "clavicle_r", "ball_l", "ball_r"):
@@ -884,9 +889,12 @@ def make_eyes(eyes, arm, mats, L, glow_side=None):
                         "Head", arm, ["EYE_GLOW"], mats, part="head")
 
 
-def make_fist(side, arm, mats, L, regions, name=None, size=(0.085, 0.098, 0.074)):
+def make_fist(side, arm, mats, L, regions, name=None, size=(0.085, 0.098, 0.074), grooves=None, wrist=None):
     """pugno: blocco arrotondato delle nocche + pollice; slot: 0 blocco, 1 cresta delle nocche,
-    2 dita piegate (fronte), 3 dorso, 4 solchi delle dita, 5 pollice, 6 polso (dalla v6)."""
+    2 dita piegate (fronte), 3 dorso, 4 solchi delle dita, 5 pollice, 6 polso (dalla v6).
+    grooves (v7, mano nuda): {"at": [...], "w": mezza larghezza, "cuts": n, "fold": {"x", "w", "z1"}} solchi
+    delle dita sulla faccia davanti e piega delle dita sui fianchi (il blocco si suddivide perché restino
+    stretti); wrist: {"a", "b", "r0", "r1", "band": [t0, t1]} polso, con la fascia (slot 6) solo fra t0 e t1."""
     h = L["hand_" + side]
     ht = L["hand_" + side + "_t"]
     d = (ht - h).normalized()
@@ -894,6 +902,12 @@ def make_fist(side, arm, mats, L, regions, name=None, size=(0.085, 0.098, 0.074)
     Rf = Matrix((dF, wF, uF)).transposed()
     cen = h + dF * 0.058 - uF * 0.006
     bmF = box_bm(cen, size, R=Rf, bevel=0.018, mat=0, segs=2)
+    g_at, g_w, fold = (-0.024, 0.0, 0.024), 0.006, None
+    if grooves:
+        # v7, mano nuda: tutto il blocco si suddivide, così i solchi delle dita (davanti) e la piega delle dita
+        # (sui fianchi) restano stretti; con un materiale "dettaglio" sopravvivono a 1x
+        g_at, g_w, fold = tuple(grooves.get("at", g_at)), grooves.get("w", g_w), grooves.get("fold")
+        bmesh.ops.subdivide_edges(bmF, edges=list(bmF.edges), cuts=grooves.get("cuts", 3), use_grid_fill=True)
     for f in bmF.faces:
         lc = Rf.transposed() @ (f.calc_center_median() - cen)
         if lc.x > 0.030 and lc.z > -0.005:
@@ -902,12 +916,19 @@ def make_fist(side, arm, mats, L, regions, name=None, size=(0.085, 0.098, 0.074)
             f.material_index = 2
         elif lc.z > 0.02 and lc.x < 0.02:
             f.material_index = 3
-        if lc.x > 0.038 and any(abs(lc.y - s) < 0.006 for s in (-0.024, 0.0, 0.024)):
+        if lc.x > 0.038 and any(abs(lc.y - s) < g_w for s in g_at):
             f.material_index = 4
+        if fold and abs(lc.y) > size[1] / 2 - 0.006 and abs(lc.x - fold.get("x", 0.012)) < fold.get("w", 0.005) \
+                and lc.z < fold.get("z1", 0.015):
+            f.material_index = 4                                 # piega delle dita vista di fianco
     thumb_c = h + dF * 0.055 - uF * 0.030 - Vector((0, 1, 0)) * 0.035
     tb = box_bm(thumb_c, (0.060, 0.030, 0.028), R=Rf, bevel=0.010, mat=5, segs=1)
     bmJ = join_bms([bmF, tb])
-    wrist = tube_bm(h - dF * 0.020, h + dF * 0.025, [(0, 0.047), (1, 0.050)], lambda t, a: 6, segs=14)
+    wc = wrist or {}
+    b0, b1 = wc.get("band", (0.0, 1.0))           # tratto del polso con lo slot 6 (fascia); il resto è slot 0
+    wrist = tube_bm(h - dF * wc.get("a", 0.020), h + dF * wc.get("b", 0.025),
+                    [(0, wc.get("r0", 0.047)), (1, wc.get("r1", 0.050))],
+                    lambda t, a: 6 if b0 <= t <= b1 else 0, segs=14, extra_ts=(b0, b1))
     bmJ = join_bms([bmJ, wrist])
     return rigid_object(name or ("Fist_" + side), bmJ, "hand_" + side, arm, regions, mats)
 
@@ -1147,6 +1168,14 @@ def build_gig(ctx):
     sleeve_l = cfg.get("sleeve_l_t", 0.80)       # manica sinistra: arrotolata sopra il gomito
     sleeve_r = cfg.get("sleeve_r_t", 0.20)       # manica destra: arrotolata appena sotto il gomito
     hem_z = cfg.get("hem_z", 0.865)
+    scfg = cfg.get("shirt", {})                    # v7: camicia aperta, niente cavallo, lembi separati
+
+    def open_w(z):
+        """mezza larghezza dell'apertura davanti della camicia alla quota z (stretta sotto il colletto, larga
+        all'orlo)."""
+        w0, w1 = scfg.get("open_front", (0.012, 0.05))
+        u = max(0.0, min(1.0, (1.34 - z) / max(1.34 - hem_z, 1e-3)))
+        return w0 + (w1 - w0) * u
 
     def rule(p, bone, part):
         # sotto la camicia il corpo prende il colore della camicia: se la attraversa non si vede
@@ -1157,6 +1186,8 @@ def build_gig(ctx):
             return "SKIN" if c.z > 1.545 else "HOOD"
         if part in ("hand_l", "hand_r"):
             return None
+        if part in ("foot_l", "foot_r") and cfg.get("boots", {}).get("style") == "v7":
+            return None                                         # dentro gli stivali nuovi
         if part == "upperarm_l":
             return "TOP" if arm_t(c, ua_l, la_l) < sleeve_l - 0.04 else "METAL_DARK"
         if part == "lowerarm_l":
@@ -1168,8 +1199,12 @@ def build_gig(ctx):
         if bone in ("spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r"):
             if c.y < -0.02 and abs(c.x) < 0.080 and c.z > 1.30:
                 return "HOOD"                                  # felpa nella V del colletto
+            if scfg.get("open_front") and c.y < -0.02 and abs(c.x) < open_w(c.z) + 0.02:
+                return "HOOD"                                  # felpa sotto la camicia aperta
             return "TOP"
         if bone == "pelvis":
+            if scfg.get("open_front") and c.z > 1.0:
+                return "HOOD" if c.y < 0.0 else "TOP"          # felpa davanti, sotto la camicia aperta
             return "TOP" if c.z > 1.0 else ("BELT" if c.z > 0.935 else "PANTS")
         return "PANTS"
     regions, parts, drop = body_regions(body, L, fb, rule)
@@ -1191,6 +1226,16 @@ def build_gig(ctx):
             k = True
         elif bone == "pelvis" and c.z > hem_z:
             k = True
+            # v7: niente camicia fra le gambe: via le facce del cavallo (al centro e rivolte in basso); il dietro
+            # resta intero fino all'orlo
+            if scfg.get("crotch_cut") and abs(c.x) < scfg.get("crotch_w", 0.075) \
+                    and c.z < scfg.get("crotch_z", 1.0) and p.normal.z < scfg.get("crotch_nz", -0.25):
+                k = False
+        elif scfg.get("hips") and part in ("thigh_l", "thigh_r") and c.z > hem_z:
+            # v7: la camicia scende sui fianchi fino all'orlo: fuori, davanti e dietro la coscia, mai all'interno
+            sx = 1.0 if part.endswith("_l") else -1.0
+            n = p.normal
+            k = not (sx * n.x < -0.3 or (n.z < -0.5 and sx * c.x < 0.10))
         elif bone == "neck_01" and c.z < 1.548:
             k = True
         elif part == "upperarm_r":
@@ -1204,6 +1249,9 @@ def build_gig(ctx):
             half = 0.012 + 0.060 * max(0.0, min(1.0, (c.z - 1.34) / 0.16))
             if abs(c.x) < half:
                 k = False
+        # v7: camicia aperta davanti fino all'orlo (due lembi separati, mai uniti al centro)
+        if k and scfg.get("open_front") and c.y < -0.02 and c.z < 1.34 and abs(c.x) < open_w(c.z):
+            k = False
         return k
 
     def off(v, dom):
@@ -1218,11 +1266,17 @@ def build_gig(ctx):
         return o
     shirt, bm, dl, names = shell_from_body(body, fb, keep, "Shirt", off)
     bnd = [e for e in bm.edges if e.is_boundary]
-    hem = [e for e in bnd if all(v.co.z < 1.0 and bm_dom(v, dl, names) == "pelvis" for v in e.verts)]
+    if scfg:
+        # v7: l'orlo è tutto il bordo basso, anche sui fianchi (non i lati dell'apertura davanti)
+        hem_top = hem_z + 0.03
+        hem = [e for e in bnd if all(v.co.z < hem_top for v in e.verts)]
+    else:
+        hem = [e for e in bnd if all(v.co.z < 1.0 and bm_dom(v, dl, names) == "pelvis" for v in e.verts)]
     log("camicia: orlo", len(hem))
     # bordi dritti: l'orlo a quota costante, le maniche tagliate su un piano perpendicolare al braccio
+    front_dz = scfg.get("front_dz", 0.0)            # v7: lembi davanti appena più corti (orlo appena irregolare)
     for v in {v for e in hem for v in e.verts}:
-        v.co.z = hem_z - 0.004
+        v.co.z = hem_z - 0.004 + front_dz * max(0.0, min(1.0, -v.co.y / 0.08))
     for side, a, b, t_end in (("r", la_r, ha_r, sleeve_r), ("l", ua_l, la_l, sleeve_l)):
         axis = (b - a)
         ln = axis.length
@@ -1233,7 +1287,7 @@ def build_gig(ctx):
             for v in e.verts:
                 if (bm_dom(v, dl, names) or "").endswith("arm_" + side) and abs(arm_t(v.co, a, b) - t_end) < 0.25:
                     v.co += axis * (t_end * ln - (v.co - a).dot(axis))
-    for edges, dz, dout in ((hem, -0.036, 0.016),):
+    for edges, dz, dout in ((hem, -scfg.get("hem_drop", 0.036), scfg.get("hem_out", 0.016)),):
         if not edges:
             continue
         nv = extrude_weighted(bm, edges, dl)
@@ -1267,6 +1321,32 @@ def build_gig(ctx):
             v.co += -axis * cfg.get("cuff_w", 0.040) + rad * 0.002
         cuffs += nv + nv2
     cuff_co = {tuple(round(x, 5) for x in v.co) for v in cuffs}
+    if scfg.get("pelvis_only_below"):
+        # v7: sotto questa quota la camicia segue il bacino; le cosce la spingono appena (thigh_k), così i lembi
+        # non si stirano fra le gambe nel calcio, nella guardia e nel passo
+        zlim, tk = scfg["pelvis_only_below"], scfg.get("thigh_k", 0.0)
+        pel = [k for k, n in names.items() if n == "pelvis"]
+        for v in bm.verts:
+            if v.co.z >= zlim:
+                continue
+            d = v[dl]
+            moved = 0.0                              # peso tolto alle gambe: passa al bacino
+            for k in [k for k in d.keys() if names.get(k, "").startswith(("thigh", "calf"))]:
+                w = d[k]
+                kept = w * tk if names[k].startswith("thigh") else 0.0
+                moved += w - kept
+                if kept > 0.0:
+                    d[k] = kept
+                else:
+                    del d[k]
+            if pel:
+                d[pel[0]] = d.get(pel[0], 0.0) + moved
+            tot = sum(d.values())
+            if tot <= 1e-6 and pel:
+                d[pel[0]] = 1.0
+            else:
+                for k in list(d.keys()):
+                    d[k] = d[k] / tot
     bm.normal_update()
     bm.to_mesh(shirt.data)
     bm.free()
@@ -1314,13 +1394,24 @@ def build_gig(ctx):
     sol.material_offset = 3
     sol.material_offset_rim = 3
 
-    boots = make_boots(body, arm, mats, L, **cfg.get("boots", {}))
+    bcfg = dict(cfg.get("boots", {}))
+    if bcfg.pop("style", None) == "v7":
+        import char_boots
+        boots = char_boots.make_boots_v7(body, arm, mats, L, bcfg, rigid_object, skinned_object, set_part_attr, link)
+    else:
+        boots = make_boots(body, arm, mats, L, **bcfg)
     make_beard(beard, mats, L, length=cfg.get("beard_len", 1.15), thick=0.011)
     # attaccatura dei capelli più alta, come nella locandina (capelli tirati indietro nel codino): la fronte
     # resta scoperta e il viso non sembra un elmo
     hl = cfg.get("hairline")
     cut = None
-    if hl:
+    if hl and hl.get("mode") == "band":
+        # v7: solo una fascia di fronte sopra le sopracciglia; tempie e cima della testa restano coperte
+        ez = L["eye_l"].z
+        z0, z1, hw, cy = hl.get("z0", 0.014), hl.get("z1", 0.05), hl.get("half_w", 0.05), hl.get("cut_y", -0.03)
+        cut = lambda c: (c.y < cy and ez + z0 < c.z < ez + z1 - 0.5 * max(0.0, abs(c.x) - 0.02)  # noqa: E731
+                         and abs(c.x) < hw)
+    elif hl:
         cut_y, eye_z = hl.get("cut_y", -0.045), L["eye_l"].z + hl.get("above_eye", 0.03)
         cut = lambda c: c.y < cut_y and c.z > eye_z  # noqa: E731
     make_hair_cap(hair, mats, L, push=0.006, front_cut=cut)
@@ -1331,13 +1422,29 @@ def build_gig(ctx):
     hood = make_hood_roll(arm, mats, L, cfg.get("hood", {}))
     fist_l = make_fist("l", arm, mats, L, ["METAL_LIGHT", "KNUCKLE", "METAL", "METAL_LIGHT", "METAL_SEAM", "METAL",
                                            "METAL_DARK"])
-    fist_r = make_fist("r", arm, mats, L, ["WRAP", "WRAP_EDGE", "SKIN", "WRAP", "SKIN_DARK", "WRAP", "WRAP"])
-    wrap_r = make_wrap_tube("r", arm, mats, L, t0=cfg.get("wrap_t0", 0.66), bands=3)
+    hcfg = cfg.get("hand_r", {})
+    if hcfg.get("bare"):
+        # v7: mano destra nuda (pelle, nocche e solchi delle dita); delle fasce da boxe resta solo una fascia
+        # sottile al polso, che non copre la mano
+        fist_r = make_fist("r", arm, mats, L, ["SKIN", "SKIN", "SKIN", "SKIN", "SKIN_CREASE", "SKIN",
+                                               "WRAP" if hcfg.get("wrist_band", True) else "SKIN"],
+                           grooves=hcfg.get("grooves"), wrist=hcfg.get("wrist"))
+        wrap_r = None
+    else:
+        fist_r = make_fist("r", arm, mats, L, ["WRAP", "WRAP_EDGE", "SKIN", "WRAP", "SKIN_DARK", "WRAP", "WRAP"])
+        wrap_r = make_wrap_tube("r", arm, mats, L, t0=cfg.get("wrap_t0", 0.66), bands=3)
     regions, parts = drop_faces(body, regions, parts, drop)
     assign_mats(body, regions, mats)
     set_part_attr(body, parts)
-    objs = dict(body=body, shirt=shirt, boots_l=boots[0], boots_r=boots[1], beard=beard, hair=hair, topknot=topknot,
-                brows=brows, eyes=eyes, hood=hood, fist_l=fist_l, fist_r=fist_r, wrap_r=wrap_r)
+    objs = dict(body=body, shirt=shirt, beard=beard, hair=hair, topknot=topknot,
+                brows=brows, eyes=eyes, hood=hood, fist_l=fist_l, fist_r=fist_r)
+    if wrap_r is not None:
+        objs["wrap_r"] = wrap_r
+    if len(boots) == 2:
+        objs["boots_l"], objs["boots_r"] = boots
+    else:
+        for i, o in enumerate(boots):
+            objs["boot%d" % i] = o
     if glow is not None:
         objs["glow"] = glow
     for i, o in enumerate(cyber):
@@ -1375,6 +1482,8 @@ def build_thug(ctx, kind):
             return "SKIN"
         if part in ("hand_l", "hand_r"):
             return None
+        if part in ("foot_l", "foot_r") and cfg.get("boots", {}).get("style") == "v7":
+            return None                                         # dentro gli stivali nuovi
         if part.startswith(("upperarm", "lowerarm")):
             sd = part[-1]
             if part.startswith("lowerarm") and arm_t(c, L["lowerarm_" + sd], L["hand_" + sd]) > 0.72:
@@ -1421,10 +1530,20 @@ def build_thug(ctx, kind):
             return cfg.get("top_push", 0.006)
         return 0.0
     push_body(body, push)
-    boots = make_boots(body, arm, mats, L, **cfg.get("boots", {}))
+    bcfg = dict(cfg.get("boots", {}))
+    if bcfg.pop("style", None) == "v7":
+        import char_boots
+        boots = char_boots.make_boots_v7(body, arm, mats, L, bcfg, rigid_object, skinned_object, set_part_attr, link)
+    else:
+        boots = make_boots(body, arm, mats, L, **bcfg)
     make_brows(brows, mats, L, bushy=cfg.get("brow_bushy", 1.5))
     make_eyes(eyes, arm, mats, L, glow_side=None)
-    objs = dict(body=body, boots_l=boots[0], boots_r=boots[1], brows=brows, eyes=eyes)
+    objs = dict(body=body, brows=brows, eyes=eyes)
+    if len(boots) == 2:
+        objs["boots_l"], objs["boots_r"] = boots
+    else:
+        for i, o in enumerate(boots):
+            objs["boot%d" % i] = o
     if kind == "punk":
         objs["mohawk"] = make_mohawk(arm, mats, L, cfg.get("mohawk", {}))
         objs["fist_l"] = make_fist("l", arm, mats, L, ["SKIN", "KNUCKLE", "SKIN", "SKIN", "SKIN_DARK", "SKIN", "STUD"])
@@ -1609,6 +1728,25 @@ def view_angles(cam, F, U):
     return yaw, pitch, roll
 
 
+def deformed_vertex(L, key):
+    """posizione deformata (posa corrente) del vertice del corpo più vicino al punto a riposo L[key]; None se il
+    corpo valutato non ha gli stessi vertici di quello a riposo."""
+    ob = L.get(key + "_obj")
+    if ob is None:
+        return None
+    if key + "_vi" not in L:
+        P0, mw = L[key], ob.matrix_world
+        L[key + "_vi"] = min(range(len(ob.data.vertices)), key=lambda i: ((mw @ ob.data.vertices[i].co) - P0).length)
+    bpy.context.view_layer.update()
+    oe = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
+    me = oe.to_mesh()
+    P = None
+    if len(me.vertices) == len(ob.data.vertices):
+        P = oe.matrix_world @ me.vertices[L[key + "_vi"]].co
+    oe.to_mesh_clear()
+    return P
+
+
 def frame_data(arm, cam, L, ground_z):
     fd = {"bones": {}, "shift_px": list(cam.shift)}
     for bn in EXPORT_BONES:
@@ -1640,6 +1778,18 @@ def frame_data(arm, cam, L, ground_z):
         fh, ft = bone_world(arm, "ball_" + side)
         u, v, dpt = cam.project(ft)
         fd["points"]["toe_" + side] = [round(u, 3), round(v, 3), round(dpt, 4)]
+    if "crotch" in L:
+        # cavallo, per la misura della camicia (pixel ocra fra le gambe): "crotch_pelvis" è solidale col bacino
+        # (dà l'asse del bacino), "crotch" è il vertice del corpo deformato, cioè il cavallo dei pantaloni che si vede
+        pbP = arm.pose.bones["pelvis"]
+        Mp = arm.matrix_world @ pbP.matrix @ arm.data.bones["pelvis"].matrix_local.inverted() @ \
+            arm.matrix_world.inverted()
+        Pp = Mp @ L["crotch"]
+        u, v, dpt = cam.project(Pp)
+        fd["points"]["crotch_pelvis"] = [round(u, 3), round(v, 3), round(dpt, 4)]
+        P = deformed_vertex(L, "crotch") or Pp
+        u, v, dpt = cam.project(P)
+        fd["points"]["crotch"] = [round(u, 3), round(v, 3), round(dpt, 4)]
     root_h, _ = bone_world(arm, "root")
     g = Vector((root_h.x, root_h.y, ground_z))
     u, v, _ = cam.project(g)
@@ -1833,6 +1983,17 @@ def main():
     os.makedirs(job["out"], exist_ok=True)
     t0 = time.time()
     arm, objs, L, actions, scene, mats = build(job)
+    if job.get("topknot_spring") and "topknot" in objs:
+        import char_anim
+        tk = job.get("outfit_cfg", {}).get("topknot", {})
+        hc = Vector((0.0, -0.01, L["eye_l"].z + 0.02))
+        ang = math.radians(tk.get("angle_deg", 38.0))
+        dirv = Vector((0.0, math.sin(ang), math.cos(ang)))
+        base = hc + dirv * (tk.get("head_r", 0.105) - 0.012)
+        rb = tk.get("bun_r", (0.046, 0.052, 0.044))
+        tip = hc + dirv * (tk.get("head_r", 0.105) + rb[2] * 1.95)
+        char_anim.add_topknot_bone(arm, objs["topknot"], base, tip)
+        log("codino: osso con molla aggiunto")
     camc = job["camera"]
     cam = Cam(scene, camc)
     p1 = 1.0 / camc["pixels_per_meter"]
@@ -1866,50 +2027,8 @@ def main():
     if mode == "portrait":
         render_portrait(job, scene, arm, actions, objs, cam, L, aux_mat, meta)
         return
-    idle = None
-    bones_only = job.get("bones_only", False)
-    for an in job["anims"]:
-        # ogni scelta (pick) è un render a sé, con la sua eventuale scala di "smear"
-        name = an["name"]
-        d = os.path.join(job["out"], name)
-        os.makedirs(d, exist_ok=True)
-        fdata = []
-        src = an["src"]
-        picks = an["picks"]
-        if src == "guard":
-            if idle is None:
-                idle = GuardIdle(arm, actions, scene)
-            idle.begin()
-            n = len(picks)
-            bob_px = an.get("bob_px", 2)
-            for i, pk in enumerate(picks):
-                ph = (1 - math.cos(2 * math.pi * (pk["f"] - 1) / n)) / 2
-                k = round(bob_px * ph)
-                dz = k * p1 / math.cos(math.radians(camc["pitch_deg"]))
-                idle.set(dz)
-                apply_frame_scale(arm, pk.get("scale"))
-                if not bones_only:
-                    render_gbuffer(scene, aux_mat, os.path.join(d, f"p{i:02d}"))
-                fd = frame_data(arm, cam, L, ground_z)
-                fd.update(frame=pk["f"], pick=i, file=f"p{i:02d}.npz")
-                fdata.append(fd)
-            apply_frame_scale(arm, None)
-            idle.end()
-        else:
-            for i, pk in enumerate(picks):
-                use_action(arm, find_action(actions, pk.get("src") or src))
-                scene.frame_set(int(pk["f"]))
-                apply_frame_scale(arm, pk.get("scale"))
-                if not bones_only:
-                    render_gbuffer(scene, aux_mat, os.path.join(d, f"p{i:02d}"))
-                fd = frame_data(arm, cam, L, ground_z)
-                fd.update(frame=pk["f"], pick=i, file=f"p{i:02d}.npz")
-                fdata.append(fd)
-            apply_frame_scale(arm, None)
-        with open(os.path.join(d, "frames.json"), "w") as fh:
-            json.dump(fdata, fh)
-        meta["anims"][name] = dict(src=src, picks=[pk["f"] for pk in picks])
-        log(f"animazione {name}: {len(fdata)} fotogrammi  t={time.time() - t0:.1f}s")
+    import char_render
+    char_render.run(globals(), job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, ground_z, t0)
     with open(os.path.join(job["out"], "meta.json"), "w") as fh:
         json.dump(meta, fh, indent=1)
     log("fatto in %.1fs" % (time.time() - t0))

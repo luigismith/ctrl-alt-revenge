@@ -57,6 +57,8 @@ var source: Source = Source.DEBUG
 var json_path: String = ""
 var texture: Texture2D
 var image_size: Vector2i = Vector2i.ZERO
+## La texture è una CanvasTexture con la normal map (campo normal_image): riceve le luci dinamiche.
+var has_normals: bool = false
 var pixels_per_meter: int = 48
 var animations: Dictionary[StringName, AnimClip] = {}
 ## Errori di struttura: con errori il file non si usa.
@@ -143,6 +145,20 @@ static func load_json(path: String) -> SpriteSheet:
 	if s.texture == null:
 		s.errors.append("immagine non trovata: %s" % image_name)
 		return s
+	# Atlante delle normali (§4, normal_image): colore + normali in una CanvasTexture per le luci 2D.
+	var normal_name := str(d.get("normal_image", ""))
+	if normal_name != "":
+		var nt := load_texture(path.get_base_dir().path_join(normal_name))
+		if nt == null:
+			s.warnings.append("normal_image non trovata: %s (niente luci dinamiche)" % normal_name)
+		elif nt.get_width() != s.texture.get_width() or nt.get_height() != s.texture.get_height():
+			s.warnings.append("normal_image di misura diversa dall'atlante: ignorata")
+		else:
+			var ct := CanvasTexture.new()
+			ct.diffuse_texture = s.texture
+			ct.normal_texture = nt
+			s.texture = ct
+			s.has_normals = true
 	s.image_size = Vector2i(s.texture.get_width(), s.texture.get_height())
 	var anims: Variant = d.get("animations")
 	if not (anims is Dictionary) or (anims as Dictionary).is_empty():
@@ -234,6 +250,18 @@ func _parse_frame(where: String, v: Variant) -> AnimFrame:
 				warnings.append("%s: evento sconosciuto %s" % [where, es])
 			f.events.append(es)
 	f.dx = int(d.get("dx", 0))
+	f.dy = int(d.get("dy", 0))
+	var pts: Variant = d.get("points", null)
+	if pts is Dictionary:
+		for k: Variant in pts:
+			var pv := _int_list(pts[k], 2)
+			if pv.is_empty():
+				warnings.append("%s: punto %s non valido" % [where, k])
+				continue
+			f.points[str(k)] = Vector2i(pv[0], pv[1])
+	for es in f.events:
+		if es.begins_with("fx:") and es.contains("@") and not f.points.has(es.get_slice("@", 1)):
+			warnings.append("%s: l'effetto %s chiede un punto che il fotogramma non ha" % [where, es])
 	var victim: Variant = d.get("victim", null)
 	if victim is Dictionary:
 		for k: Variant in victim:

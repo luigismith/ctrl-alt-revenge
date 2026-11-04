@@ -32,6 +32,8 @@ import review as RV  # noqa: E402
 IDS_ALL = ["gig", "thug_punk", "thug_bruiser"]
 ENEMIES = ["thug_punk", "thug_bruiser"]
 PAIRS = ("grab_hold", "knee", "throw")
+# punti del fotogramma nel JSON (§4): nome nel JSON, nome nei dati del render
+POINTS = (("fist_l", "fist_l"), ("fist_r", "fist_r"), ("foot_l", "toe_l"), ("foot_r", "toe_r"), ("head", "head_c"))
 RETARGETS = [
     # (nome azione, file JSON Mesh2Motion in sources/anim/spike-out/m2m_json)
     ("M2M_KickRoundhouse", "kick-roundhouse.json"),
@@ -82,8 +84,12 @@ def anim_jobs(cfg, only=None):
     for name, an in cfg["anims"].items():
         if only and name not in only:
             continue
-        picks = [dict(f=fr["f"], scale=fr.get("scale"), src=fr.get("src")) for fr in an["frames"]]
-        out.append(dict(name=name, src=an["src"], picks=picks, bob_px=an.get("bob_px", 2)))
+        picks = [dict(f=fr.get("f"), at=fr.get("at"), t=fr.get("t"), scale=fr.get("scale"), src=fr.get("src"),
+                      smear=fr.get("smear"), smear_from=fr.get("smear_from")) for fr in an["frames"]]
+        out.append(dict(name=name, src=an["src"], picks=picks, bob_px=an.get("bob_px", 2), upper=an.get("upper"),
+                        stride=an.get("stride"), period=an.get("period"), loop=an.get("loop", False),
+                        spring=an.get("spring", True), twist_deg=an.get("twist_deg", 0.0),
+                        twist_phase=an.get("twist_phase", 0.0)))
     return out
 
 
@@ -95,6 +101,8 @@ def step_render(cid, only=None, bones_only=False):
     job = C.base_job(cid, cfg, "frames", out)
     job["anims"] = anim_jobs(cfg, only)
     job["bones_only"] = bones_only
+    job["topknot_spring"] = cfg.get("topknot_spring", False)
+    job["spring_cfg"] = cfg.get("spring_cfg", {})
     if not only and not bones_only and os.path.isdir(out):
         shutil.rmtree(out)
     C.run_blender("char_build.py", job, timeout=3600, tag=("bones-" if bones_only else "render-") + cid)
@@ -143,6 +151,7 @@ def shader_for(cfg, meta):
     pcfg_cfg["rim_dir"] = cam["luce_di_contorno"]["camera"]
     pcfg_cfg["rim_thr"] = cam["luce_di_contorno"]["soglia"]
     pcfg_cfg["rim_mats"] = pcfg.get("rim_mats", [])
+    pcfg_cfg["p1"] = meta.get("p1", 1.0 / 48)
     sh = PX.Shader(pcfg_cfg, pcfg, meta["ids"])
     return sh, pcfg_cfg
 
@@ -159,19 +168,30 @@ def step_pixel(cid, only=None):
             continue
         d = os.path.join(raw_dir(cid), name)
         fdata = C.load_json(os.path.join(d, "frames.json"))
-        sprites, labels = PX.pixelize_sequence(d, fdata, ss, sh, pcfg, loop=an.get("loop", False))
+        faces = [fr.get("face") or ("pain" if name.startswith("hurt") else "neutral") for fr in an["frames"]]
+        sprites, labels = PX.pixelize_sequence(d, fdata, ss, sh, pcfg, loop=an.get("loop", False), faces=faces)
         od = os.path.join(out, name)
         os.makedirs(od, exist_ok=True)
-        for f in glob.glob(os.path.join(od, "*.png")):
+        for f in glob.glob(os.path.join(od, "*.png")) + glob.glob(os.path.join(od, "*.npz")):
             os.remove(f)
+        nrm = getattr(PX.pixelize_sequence, "normals", None)
         for i, sp in enumerate(sprites):
             Image.fromarray(sp, "RGBA").save(os.path.join(od, f"{i:02d}.png"))
+            np.savez_compressed(os.path.join(od, f"{i:02d}_lab.npz"), ids=labels[i][0], part=labels[i][1])
+            if nrm is not None:
+                Image.fromarray(nrm[i], "RGBA").save(os.path.join(od, f"{i:02d}_n.png"))
         C.say(f"  pixel {cid}/{name}: {len(sprites)} fotogrammi")
 
 
 def load_pix(cid, name):
     od = os.path.join(pix_dir(cid), name)
-    files = sorted(glob.glob(os.path.join(od, "*.png")))
+    files = sorted(glob.glob(os.path.join(od, "[0-9][0-9].png")))
+    return [np.asarray(Image.open(f).convert("RGBA")).copy() for f in files]
+
+
+def load_pix_normals(cid, name):
+    od = os.path.join(pix_dir(cid), name)
+    files = sorted(glob.glob(os.path.join(od, "[0-9][0-9]_n.png")))
     return [np.asarray(Image.open(f).convert("RGBA")).copy() for f in files]
 
 
@@ -292,6 +312,8 @@ def victim_offsets(gig_cfg, gig_fdata, gig_anchor, enemy_fdata):
     con GIG rivolto a destra. Restituisce {anim: [ {nemico: [dx, dy, anim, fotogramma]} ]} e gli scarti verticali."""
     res, errs = {}, []
     for name in PAIRS:
+        if name not in gig_cfg["anims"]:
+            continue
         an = gig_cfg["anims"][name]
         rows = []
         for i, fr in enumerate(an["frames"]):
@@ -342,7 +364,12 @@ def step_assemble(cid):
     # riduzione della tavolozza su tutti i fotogrammi insieme
     allim = [s for n in names for s in sprites[n]]
     pal = cfg["palette"]
-    remap, colors = PX.reduce_palette(allim, pal.get("max_colors", 32), pal.get("protect", []))
+    if cfg.get("pixel_cfg", {}).get("pal_mode") == "material":
+        import pix_v7
+        sh_, _ = shader_for(cfg, meta)
+        remap, colors = pix_v7.reduce_by_ramp(allim, pal.get("max_colors", 32), sh_.pal, pal.get("protect", []))
+    else:
+        remap, colors = PX.reduce_palette(allim, pal.get("max_colors", 32), pal.get("protect", []))
     for n in names:
         sprites[n] = [PX.apply_remap(s, remap) for s in sprites[n]]
     C.say(f"  tavolozza {cid}: {len(colors)} colori")
@@ -353,7 +380,11 @@ def step_assemble(cid):
         mode = an.get("anchor", "root")
         if mode == "root":
             inplace.append(n)
-        anchors[n] = [anchor_of(fd, mode, guard_pelvis_h(cid, fdata)) for fd in fdata[n]]
+        if mode == "first":
+            a0 = anchor_of(fdata[n][0], "root", guard_pelvis_h(cid, fdata))
+            anchors[n] = [a0 for _ in fdata[n]]
+        else:
+            anchors[n] = [anchor_of(fd, mode, guard_pelvis_h(cid, fdata)) for fd in fdata[n]]
     # offset delle vittime (solo GIG)
     victims, vlog = {}, []
     if cid == "gig":
@@ -375,21 +406,31 @@ def step_assemble(cid):
     # ritaglio, deduplica, impacchettamento
     uniq, keys = [], {}
     ref = {}
+    first_of = []
+    normals_all = {n: load_pix_normals(cid, n) for n in names}
     for n in names:
         ref[n] = []
         origins[n] = []
-        for sp in sprites[n]:
+        for fi, sp in enumerate(sprites[n]):
             c, o = crop(sp)
             h = hashlib.sha1(c.tobytes() + str(c.shape).encode()).hexdigest()
             if h not in keys:
                 keys[h] = len(uniq)
                 uniq.append(c)
+                first_of.append((n, fi, o))
             ref[n].append(keys[h])
             origins[n].append(o)
     W, H, pos = pack([(c.shape[1], c.shape[0]) for c in uniq])
     atlas = np.zeros((H, W, 4), np.uint8)
     for c, (x, y) in zip(uniq, pos):
         atlas[y:y + c.shape[0], x:x + c.shape[1]] = c
+    natlas = None
+    if all(len(normals_all[n]) == len(sprites[n]) for n in names):
+        natlas = np.zeros((H, W, 4), np.uint8)
+        natlas[..., :3] = (128, 128, 255)
+        for c, (x, y), (n, fi, (ox, oy)) in zip(uniq, pos, first_of):
+            nm = normals_all[n][fi][oy:oy + c.shape[0], ox:ox + c.shape[1]]
+            natlas[y:y + c.shape[0], x:x + c.shape[1]] = nm
     out_anims = {}
     for n in names:
         an = cfg["anims"][n]
@@ -409,6 +450,15 @@ def step_assemble(cid):
             rec = {"rect": [int(x), int(y), int(c.shape[1]), int(c.shape[0])], "anchor": [ax - ox, ay - oy],
                    "ticks": int(fr["t"]), "hurt": hurt, "hit": hit, "events": list(fr.get("ev", [])), "tags": tags,
                    "dx": int(fr.get("dx", 0))}
+            pts = fd.get("points", {})
+            rp = {}
+            for key, src_name in POINTS:
+                if src_name in pts:
+                    rp[key] = [int(round(pts[src_name][0] - ax)), int(round(pts[src_name][1] - ay))]
+            if "fist_l" in rp and "fist_r" in rp:
+                rp["grip"] = [(rp["fist_l"][0] + rp["fist_r"][0]) // 2, (rp["fist_l"][1] + rp["fist_r"][1]) // 2]
+            if rp:
+                rec["points"] = rp
             if cid == "gig" and n in PAIRS:
                 rec["victim"] = victims[n][i]
             frs.append(rec)
@@ -418,6 +468,9 @@ def step_assemble(cid):
     fdir = final_dir(cid)
     os.makedirs(fdir, exist_ok=True)
     Image.fromarray(atlas, "RGBA").save(os.path.join(fdir, cid + ".png"), optimize=True)
+    if natlas is not None:
+        Image.fromarray(natlas, "RGBA").save(os.path.join(fdir, cid + "_n.png"), optimize=True)
+        data["normal_image"] = cid + "_n.png"
     write_sprite_json(os.path.join(fdir, cid + ".json"), data)
     # piedi rispetto all'ancora (controllo della deriva: un piede che resta a terra non deve scivolare)
     feet = {}
@@ -441,8 +494,10 @@ def step_assemble(cid):
 
 def write_sprite_json(path, data):
     """JSON compatto e leggibile: un fotogramma per riga."""
-    lines = ["{", f'  "id": "{data["id"]}",', '  "format": 1,', f'  "image": "{data["image"]}",',
-             '  "pixels_per_meter": 48,', '  "animations": {']
+    lines = ["{", f'  "id": "{data["id"]}",', '  "format": 1,', f'  "image": "{data["image"]}",']
+    if data.get("normal_image"):
+        lines.append(f'  "normal_image": "{data["normal_image"]}",')
+    lines += ['  "pixels_per_meter": 48,', '  "animations": {']
     names = list(data["animations"].keys())
     for k, n in enumerate(names):
         an = data["animations"][n]
@@ -663,7 +718,10 @@ def step_publish(ids):
         src = final_dir(cid)
         dst = os.path.join(C.ASSETS, "sprites", cid)
         os.makedirs(dst, exist_ok=True)
-        for fn in (cid + ".png", cid + ".json"):
+        names = [cid + ".png", cid + ".json"]
+        if os.path.exists(os.path.join(src, cid + "_n.png")):
+            names.insert(1, cid + "_n.png")
+        for fn in names:
             tmp = os.path.join(dst, "." + fn + ".tmp")
             shutil.copyfile(os.path.join(src, fn), tmp)
             os.replace(tmp, os.path.join(dst, fn))

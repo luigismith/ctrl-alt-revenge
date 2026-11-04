@@ -22,7 +22,7 @@ I file di queste sorgenti non sono in questo repository: restano nel laboratorio
 - **Quaternius**: Universal Base Characters, Universal Animation Library 1 e 2 (versione Standard).
   - Licenza CC0 1.0, credito facoltativo.
   - https://quaternius.com
-  - Gli sprite di GIG, del punk e del bruto derivano da questi modelli e animazioni.
+  - Gli sprite di GIG, del punk e del bruto derivano da questi modelli e animazioni (dalla Universal Animation Library anche le mosse platform di prova: ClimbUp_1m, Slide, Crouch).
 - **Mesh2Motion** (animazioni: il calcio circolare di GIG).
   - Licenza CC0 1.0.
   - https://github.com/Mesh2Motion/mesh2motion-app
@@ -35,7 +35,8 @@ I file di queste sorgenti non sono in questo repository: restano nel laboratorio
 - **CMU Graphics Lab Motion Capture Database**: la pipeline sa leggerne i file (`tools/blender/char_asfamc.py`), ma gli sprite attuali non ne usano. Se un giorno si useranno, il credito richiesto è: "I dati usati in questo progetto provengono da mocap.cs.cmu.edu. Il database è stato creato con il finanziamento NSF EIA-0196217."
 
 Il resto è nostro:
-- le mosse scritte a mano (presa, ginocchiate, proiezione, gancio cyber, calcio volante, reazioni ai colpi) e le pose delle vittime, in `tools/blender/char_poses.py`;
+- le mosse scritte a mano (presa, ginocchiate, proiezione, gancio cyber, calcio volante, reazioni ai colpi) e le pose delle vittime, in `tools/blender/char_poses.py`, e le pose chiave della pipeline v7 (guardia, jab, gancio, colpo subito, doppio salto, appeso alla sporgenza) in `tools/blender/char_anim.py`;
+- gli stivali, il codino con la molla, i timbri del viso, le normal map e le luci dinamiche (`tools/blender/char_boots.py`, `tools/sprites/pix_v7.py`, `game/src/stage/level.gd`);
 - gli sfondi oltre ai pezzi citati (edifici, insegne, caratteri pixel delle scritte, travata, piloni) e gli oggetti di scena, geometria e disegno procedurale di `tools/env/` e `tools/blender/env_gbuffer.py`.
 
 Non sono usati Mixamo, Reallusion, CraftPix, Oonquil, Shapeforms, Sonniss, i file grezzi Rokoko né altro materiale che non si può ridistribuire.

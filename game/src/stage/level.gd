@@ -188,6 +188,7 @@ func _build_nodes() -> void:
 	debug_overlay.z_index = 3000
 	debug_overlay.visible = OS.is_debug_build() and Game.options.debug_boxes
 	world.add_child(debug_overlay)
+	_build_lights()
 
 	backdrop = Backdrop.new()
 	var env_path := str(data.get("env", "res://assets/env/sotto_la_linea/layers.json"))
@@ -650,6 +651,8 @@ func _debug_keys() -> void:
 		_debug_freeze = not _debug_freeze
 	if Input.is_action_just_pressed(&"debug_step") and _debug_freeze:
 		_debug_step = true
+	if Input.is_action_just_pressed(&"debug_lights"):
+		set_lights(not lights_on)
 
 
 # --- Servizi per gli attori ---------------------------------------------------------------------
@@ -750,6 +753,7 @@ func _sync_all() -> void:
 	_back_layer.offset = Vector2(camera.shake)
 	_front_layer.offset = Vector2(camera.shake)
 	backdrop.update(camera.x, tick)
+	_update_lights()
 	shadows.queue_redraw()
 	if debug_overlay.visible:
 		debug_overlay.queue_redraw()
@@ -788,3 +792,103 @@ func _save_recording() -> void:
 func _exit_tree() -> void:
 	if phase != Phase.DONE:
 		_save_recording()
+
+
+# --- Luci dinamiche ------------------------------------------------------------------------------
+
+## Luci del livello (campo "lights" del JSON): illuminano solo gli attori con la normal map (maschera
+## Fighter.LIGHT_MASK_ACTORS), mai gli sfondi, che hanno la luce già dipinta. Sono solo disegno: non toccano la
+## simulazione (i replay non cambiano). F5 (build di debug) o --no-lights le spengono.
+## Tipi: "neon" (insegna dello sfondo, pulsa con i neon), "lamp" (lampada sulla travata del primo piano: si
+## sposta con la sua parallasse), "cable" (scintille del cavo: si accende nei fotogrammi del lampo), "lightning"
+## (lampo del temporale, sopra la vista, raro e deterministico).
+var lights_on: bool = true
+var _lights: Array[Dictionary] = []
+var _lights_root: Node2D
+
+
+func _build_lights() -> void:
+	_lights_root = Node2D.new()
+	_lights_root.name = "Luci"
+	world.add_child(_lights_root)
+	var tex := GradientTexture2D.new()
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 128
+	tex.height = 128
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	tex.gradient = g
+	var i := 0
+	for v: Variant in data.get("lights", []):
+		if not (v is Dictionary):
+			continue
+		var d: Dictionary = v
+		var l := PointLight2D.new()
+		l.texture = tex
+		l.color = Color.html(str(d.get("color", "#ffffff")))
+		l.energy = float(d.get("energy", 0.5))
+		l.texture_scale = float(d.get("radius", 100)) / 64.0
+		l.height = float(d.get("height", 30))
+		l.range_item_cull_mask = Fighter.LIGHT_MASK_ACTORS
+		l.blend_mode = Light2D.BLEND_MODE_ADD
+		l.position = Vector2(float(d.get("x", 0)), float(d.get("y", 0)))
+		_lights_root.add_child(l)
+		_lights.append({"light": l, "kind": str(d.get("kind", "neon")), "energy": l.energy,
+			"x": l.position.x, "scroll": float(d.get("scroll", 1.0)), "phase": float(i) * 1.7})
+		i += 1
+	set_lights(not Game.options.no_lights)
+
+
+func set_lights(on: bool) -> void:
+	lights_on = on
+	for e in _lights:
+		(e["light"] as PointLight2D).enabled = on
+
+
+func _update_lights() -> void:
+	if not lights_on:
+		return
+	for e in _lights:
+		var l: PointLight2D = e["light"]
+		var base: float = e["energy"]
+		match String(e["kind"]):
+			"neon":
+				# stessa pulsazione lenta dei neon dello sfondo (Backdrop._levels)
+				l.energy = base * (0.9 + 0.1 * sin(tick * 0.035 + float(e["phase"])))
+			"lamp":
+				# la lampada sta sulla travata con parallasse "scroll": nel mondo si sposta con la telecamera
+				l.position.x = float(e["x"]) - (float(e["scroll"]) - 1.0) * camera.x
+			"cable":
+				l.energy = base * _cable_flash()
+			"lightning":
+				l.position.x = camera.x + 192.0
+				l.energy = base * _lightning(tick)
+
+
+## 1 nei fotogrammi del lampo del cavo (0 e 3 del ciclo di 6), poco nel resto.
+func _cable_flash() -> float:
+	for p in props:
+		if p is PropCable:
+			var k := p.anim.index % 6
+			return 1.0 if k == 0 or k == 3 else 0.12
+	return 0.0
+
+
+## Lampo del temporale: ogni 9 s circa (deterministico, dal tick) due bagliori ravvicinati.
+func _lightning(t: int) -> float:
+	var period := 540
+	var k := t % period
+	var start := 120 + (t / period * 197) % 240
+	var u := k - start
+	if u < 0 or u > 14:
+		return 0.0
+	if u < 3:
+		return 1.0
+	if u < 6:
+		return 0.2
+	if u < 9:
+		return 0.75
+	return 0.75 * float(14 - u) / 5.0
