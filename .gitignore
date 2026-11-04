@@ -11,6 +11,8 @@ export_credentials.cfg
 *.zip
 
 # --- asset privati: mai nel repo pubblico ---
+# le locandine di riferimento sono generate con ChatGPT: stanno solo in ctrlaltrevenge-lab-condiviso
+/docs/riferimenti-estetica/
 /assets_private/**
 !/assets_private/README.md
 !/assets_private/manifest.json

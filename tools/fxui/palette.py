@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: MIT
 """Tavolozza di effetti e interfaccia.
 
-I colori del logo vengono dalla locandina (docs/riferimenti-estetica/
-locandina-pixelart-chatgpt-2026-04-09.png), misurati come mediana dei pixel:
+I colori del logo vengono dalla locandina di riferimento, generata con ChatGPT e
+tenuta fuori dal repo (cartella privata ctrlaltrevenge-lab-condiviso, file
+riferimenti-estetica/locandina-pixelart-chatgpt-2026-04-09.png), misurati come
+mediana dei pixel:
 crema #f7e8bd, rosso del bordo #7a170f e #5e0f06, arancio del sottotitolo #c7772b
 (qui schiarito per la leggibilità a 1x), giallo di "AGOSTO 2026" #e2a510.
 """

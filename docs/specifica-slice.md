@@ -9,7 +9,7 @@ Uno slice giocabile del livello 1, "Sotto la Linea": un tratto di strada notturn
 Decisioni di Luigi del 3 novembre 2026:
 
 - **Approccio C, misto, a costo zero**: tutta la grafica nasce dalla pipeline 3D → pixel e dai pack CC0 ammessi, senza ritocchi umani.
-- **GIG** ha l'aspetto della locandina (`docs/riferimenti-estetica/locandina-pixelart-chatgpt-2026-04-09.png`):
+- **GIG** parte dall'aspetto della locandina di riferimento, che è generata con ChatGPT e quindi sta fuori dal repo, nella cartella privata (`ctrlaltrevenge-lab-condiviso/riferimenti-estetica/locandina-pixelart-chatgpt-2026-04-09.png`):
   - codino e barba grigi;
   - camicia da lavoro ocra aperta e fuori dai pantaloni, con le maniche arrotolate, sopra una felpa grigia con il cappuccio;
   - pantaloni oliva con la cintura scura, stivali marroni;

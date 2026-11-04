@@ -16,7 +16,6 @@ SPDX-License-Identifier = "MIT"
 #    I font CAR Pixel sono disegnati da noi (tools/fxui): sono grafica del gioco, non codice.
 [[annotations]]
 path = [
-  "docs/riferimenti-estetica/**",
   "docs/lore/**",
   "game/assets/sprites/**",
   "game/assets/env/**",
