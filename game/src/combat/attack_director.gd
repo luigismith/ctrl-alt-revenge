@@ -1,7 +1,7 @@
 extends Node
 ## AttackDirector (autoload): dà il turno d'attacco a un solo nemico alla volta (§5).
 ## - Fra due attacchi nemici qualsiasi passano almeno 0,35 s (21 tick).
-## - Fra due attacchi dello stesso nemico 1,2-2,0 s: il recupero lo fissa il nemico con set_cooldown().
+## - Fra due attacchi dello stesso nemico 0,6-1,0 s (cooldown_ticks nei dati del nemico): il recupero lo fissa il nemico con set_cooldown().
 ## Usa solo i tick della simulazione del livello: niente tempo reale, niente casualità propria.
 
 const GLOBAL_GAP := 21

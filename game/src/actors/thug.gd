@@ -2,11 +2,14 @@ class_name Thug
 extends Fighter
 ## Nemico (punk o bruto) con intelligenza semplice e prevedibile:
 ## - entra da fuori schermo;
-## - senza turno d'attacco aspetta a 60-90 px da GIG, fuori dalla sua corsia, e si sposta di lato;
-## - con il turno (concesso dall'AttackDirector) si allinea, si avvicina e attacca;
+## - senza turno d'attacco aspetta a 40-66 px da GIG (wait_distance nei dati), fuori dalla sua corsia, e si sposta di lato;
+## - con il turno (concesso dall'AttackDirector) si allinea, si avvicina con passo deciso e attacca;
 ## - il punk annuncia il gancio caricato con il lampo; il bruto ha l'armatura durante l'avvio.
 
 enum Mind { ENTER, WAIT, APPROACH }
+
+## Passo di chi ha il turno, rispetto alla camminata d'attesa.
+const APPROACH_SPEED := 1.7
 
 var mind: Mind = Mind.WAIT
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -22,6 +25,8 @@ var _lane_sign: int = 1
 var _lane_timer: int = 0
 var _wait_frac: float = 0.5
 var _side: int = 1
+## Il colpo in corso ha già avuto la hitbox attiva (per lasciare il turno quando si spegne).
+var _hit_was_active: bool = false
 
 
 func setup_thug(type_id: StringName, lvl: Level, id: int, rng_seed: int) -> void:
@@ -46,6 +51,13 @@ func _think() -> void:
 	if state == State.ENTER:
 		_think_enter()
 		return
+	# Il turno si lascia appena il colpo smette di poter colpire, non a fine recupero: così il
+	# prossimo nemico si muove prima, e due colpi attivi insieme restano impossibili.
+	if state == State.ATTACK and level.director.is_holder(self):
+		if not active_hitboxes().is_empty():
+			_hit_was_active = true
+		elif _hit_was_active:
+			_release_token()
 	if not is_free():
 		return
 	var p := level.player
@@ -137,9 +149,12 @@ func _think_approach(p: Fighter) -> void:
 		vy = 0.0
 		facing = -side
 		level.director.on_attack_start(self, level.tick)
+		_hit_was_active = false
 		start_attack(_chosen, level.next_attack_serial())
 		return
-	_walk_towards(tx, p.py, 0.5)
+	# Chi ha il turno si avvicina con passo deciso: la camminata d'attesa era troppo lenta e
+	# allungava il turno (Luigi, 4 novembre 2026: nemici molto più aggressivi).
+	_walk_towards(tx, p.py, 0.5, APPROACH_SPEED)
 
 
 ## Distanza a cui attaccare: la punta della hitbox poco dentro la hurtbox di GIG.
@@ -169,11 +184,13 @@ func _weight(i: int) -> float:
 	return data.attack_weights[i] if i < data.attack_weights.size() else 1.0
 
 
-func _walk_towards(tx: float, ty: float, tolerance: float) -> void:
+func _walk_towards(tx: float, ty: float, tolerance: float, speed: float = 1.0) -> void:
 	var dx := tx - px
 	var dy := ty - py
-	vx = clampf(dx, -data.walk_speed.x, data.walk_speed.x) if absf(dx) > tolerance else 0.0
-	vy = clampf(dy, -data.walk_speed.y, data.walk_speed.y) if absf(dy) > tolerance else 0.0
+	var sx := data.walk_speed.x * speed
+	var sy := data.walk_speed.y * speed
+	vx = clampf(dx, -sx, sx) if absf(dx) > tolerance else 0.0
+	vy = clampf(dy, -sy, sy) if absf(dy) > tolerance else 0.0
 	if vx == 0.0 and vy == 0.0:
 		if state != State.IDLE:
 			set_state(State.IDLE)
@@ -203,7 +220,7 @@ func _on_grabbed() -> void:
 func _interrupt() -> void:
 	if level.director.is_holder(self):
 		_release_token()
-		# Anche un attacco interrotto conta: il prossimo arriva dopo 1,2-2,0 s.
+		# Anche un attacco interrotto conta: il prossimo arriva dopo 0,6-1,0 s.
 		level.director.set_cooldown(self, level.tick + rng.randi_range(data.cooldown_ticks.x, data.cooldown_ticks.y))
 	mind = Mind.WAIT
 

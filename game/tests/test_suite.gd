@@ -508,7 +508,7 @@ func _test_attack_director() -> void:
 			attacks_seen += 1
 			min_gap = mini(min_gap, tick - last_start)
 			last_start = tick
-			if releases.has(id) and tick - int(releases[id]) < 72:
+			if releases.has(id) and tick - int(releases[id]) < 36:
 				same_ok = false
 			starts[id] = tick
 		elif e[2] == "release":
@@ -516,7 +516,7 @@ func _test_attack_director() -> void:
 	check(attacks_seen >= 6, "AttackDirector: i nemici attaccano davvero", str(attacks_seen))
 	check(worst <= 1, "AttackDirector: mai due nemici in attacco attivo insieme", str(worst))
 	check(min_gap >= AttackDirector.GLOBAL_GAP, "AttackDirector: almeno 0,35 s fra due attacchi nemici", str(min_gap))
-	check(same_ok, "AttackDirector: almeno 1,2 s fra due attacchi dello stesso nemico")
+	check(same_ok, "AttackDirector: almeno 0,6 s fra due attacchi dello stesso nemico")
 	AttackDirector.keep_log = false
 	Harness.free_level(lvl)
 

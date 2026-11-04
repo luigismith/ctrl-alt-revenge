@@ -93,8 +93,11 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 		if t.state == Fighter.State.ATTACK and t.attack != null and t.attack_tick < t.attack.startup \
 				and absf(t.py - g.py) < 14.0 and absf(t.px - g.px) < 80.0 and g.is_free():
 			return U if g.py > (level.band_top + level.band_bottom) * 0.5 else D
-	if grabs and not _grab_done.has(e.uid) and e.is_free() and not e.is_attacking():
-		# Presa: stessa corsia, poi cammina contro il nemico.
+	# Presa: stessa corsia, poi cammina contro il nemico. Da quando i nemici sono più aggressivi
+	# un nemico libero non resta fermo vicino a GIG: la presa si cerca sul nemico stordito da un
+	# colpo (HURT), oppure su quello libero già a portata, e altrimenti si combatte.
+	var grabbable := e.state == Fighter.State.HURT or (e.is_free() and absf(dx) < 30.0)
+	if grabs and not _grab_done.has(e.uid) and grabbable and not e.is_attacking():
 		if absf(dy) > 2.0:
 			return (D if dy > 0.0 else U) | (toward if absf(dx) > 30.0 else 0)
 		return toward

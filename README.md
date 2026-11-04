@@ -87,7 +87,7 @@ Argomenti utili, da scrivere dopo `--`:
 | Argomento | Effetto |
 |---|---|
 | `--autostart` | salta il titolo e parte dal livello |
-| `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 69 s (GIG gioca da solo) |
+| `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 67 s (GIG gioca da solo) |
 | `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |
 | `--no-lights` | parte con le luci dinamiche spente, come F5 |

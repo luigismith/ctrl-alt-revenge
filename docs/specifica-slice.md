@@ -226,7 +226,7 @@ Tick a 60 Hz. Sono valori di partenza: si tarano con le prove di Luigi. Stanno i
 - **Fine di un'ondata**: quando l'ultimo nemico è sparito, cioè dopo la caduta e il lampeggio, non appena va KO. Solo allora compaiono "VAI ▶" o "ZONA LIBERATA". Dopo l'ultima ondata la telecamera resta ferma sull'arena.
 
 **Intelligenza dei nemici:**
-- Un `AttackDirector` (autoload) dà il permesso di attaccare a un solo nemico alla volta, con almeno 0,35 s fra due attacchi nemici qualsiasi e 1,2-2,0 s fra due attacchi dello stesso nemico.
+- Un `AttackDirector` (autoload) dà il permesso di attaccare a un solo nemico alla volta, con almeno 0,35 s fra due attacchi nemici qualsiasi e 0,6-1,0 s fra due attacchi dello stesso nemico (erano 1,2-2,0 s: Luigi, 4 novembre 2026, li ha voluti molto più aggressivi).
 - Chi aspetta resta a 60-90 px da GIG, fuori dalla sua corsia, e si sposta di lato.
 - Il gancio caricato del punk si annuncia con il lampo (`glint`).
 - Il bruto è lento e pesante: non si ferma per i jab durante l'avvio del pugno e tiene il turno d'attacco finché il pugno non finisce. Il pugno avanza con il corpo (dx dei fotogrammi): la distanza d'attacco dell'IA ne tiene conto.
