@@ -1107,7 +1107,7 @@ def make_hood_roll(arm, mats, L, cfg):
         th = 2 * math.pi * i / segs                  # 0 = davanti (-Y), pi = dietro
         dirv = Vector((math.sin(th), -math.cos(th), 0.0))
         back = max(0.0, -math.cos(th))               # 1 dietro
-        R = R0 + 0.012 * back
+        R = R0 + cfg.get("back_r", 0.012) * back
         r = r0 * (0.75 + 0.75 * back)
         cc = c + dirv * R + Vector((0, 0, -0.010 * back))
         ring = []
@@ -1127,9 +1127,10 @@ def make_hood_roll(arm, mats, L, cfg):
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     parts = [bm]
     # stoffa del cappuccio tra le scapole
-    hb = c + Vector((0.0, R0 + 0.028, -0.055))
-    parts.append(sphere_bm(hb, (0.088, 0.034, 0.075), mat=0, segs=14, rings=8))
-    parts.append(sphere_bm(hb + Vector((0, 0.010, 0.020)), (0.050, 0.020, 0.040), mat=1, segs=10, rings=6))
+    pk = cfg.get("pad_k", 1.0)                       # scala della stoffa fra le scapole (1 = com'era nella v7)
+    hb = c + Vector((0.0, R0 + 0.028 * pk, -0.055))
+    parts.append(sphere_bm(hb, (0.088 * pk, 0.034 * pk, 0.075 * pk), mat=0, segs=14, rings=8))
+    parts.append(sphere_bm(hb + Vector((0, 0.010, 0.020)), (0.050 * pk, 0.020 * pk, 0.040 * pk), mat=1, segs=10, rings=6))
     # cordini
     for sx in (-1, 1):
         p0 = c + Vector((sx * 0.030, -R0 + 0.006, -0.010))
@@ -1209,11 +1210,23 @@ def build_gig(ctx):
         return "PANTS"
     regions, parts, drop = body_regions(body, L, fb, rule)
 
+    pcfg = cfg.get("push_body", {})            # spinte lungo la normale, prima della camicia (default = valori v7)
+    push_legs, push_pelvis = pcfg.get("legs", 0.016), pcfg.get("pelvis", 0.012)
+    belly = pcfg.get("belly", 0.0)              # un filo di pancia: spinta davanti (y < 0) fra belly_z[0] e [1]
+    bz0, bz1 = pcfg.get("belly_z", (1.00, 1.18))
+    belly_hw = pcfg.get("belly_hw", 0.14)       # mezza larghezza della pancia: ai fianchi la spinta si spegne
+    push_neck = pcfg.get("neck", 0.0)           # collo da pugile nella mesh: la scala di neck_01 passerebbe alla testa
+
     def legs(b, co):
         if b and b.startswith(("thigh", "calf")):
-            return 0.016
+            return push_legs
         if b == "pelvis" and co.z < 0.95:
-            return 0.012
+            return push_pelvis
+        if belly and b in ("pelvis", "spine_01", "spine_02") and co.y < -0.03 and bz0 < co.z < bz1:
+            u = (co.z - bz0) / (bz1 - bz0)
+            return belly * math.sin(math.pi * u) * max(0.0, 1.0 - abs(co.x) / belly_hw)
+        if push_neck and b == "neck_01":
+            return push_neck
         return 0.0
     push_body(body, legs)
 
@@ -1254,17 +1267,20 @@ def build_gig(ctx):
             k = False
         return k
 
+    flare, flare_z, flare_h = scfg.get("flare", 0.020), scfg.get("flare_z", 1.08), scfg.get("flare_h", 0.18)
+    sleeve_gap = scfg.get("sleeve_gap", -0.004)   # distanza della manica dal braccio, oltre a shirt_offset
+
     def off(v, dom):
         z = v.co.z
         o = cfg.get("shirt_offset", 0.024)
-        if z < 1.08:
-            o += 0.020 * max(0.0, min(1.0, (1.08 - z) / 0.18))   # orlo largo, camicia fuori dai pantaloni
+        if flare and z < flare_z:
+            o += flare * max(0.0, min(1.0, (flare_z - z) / flare_h))   # orlo largo, camicia fuori dai pantaloni
         if dom == "neck_01":
             o += 0.010
         if dom and dom.startswith(("upperarm", "lowerarm")):
-            o -= 0.004
+            o += sleeve_gap
         return o
-    shirt, bm, dl, names = shell_from_body(body, fb, keep, "Shirt", off)
+    shirt, bm, dl, names = shell_from_body(body, fb, keep, "Shirt", off, smooth_iters=scfg.get("smooth_iters", 12))
     bnd = [e for e in bm.edges if e.is_boundary]
     if scfg:
         # v7: l'orlo è tutto il bordo basso, anche sui fianchi (non i lati dell'apertura davanti)
@@ -1311,7 +1327,7 @@ def build_gig(ctx):
             ctr = a + axis * (v.co - a).dot(axis)
             rad = (v.co - ctr)
             rad = rad.normalized() if rad.length > 1e-6 else Vector((0, 0, 1))
-            v.co += rad * 0.013 - axis * 0.004
+            v.co += rad * scfg.get("cuff_roll", 0.013) - axis * 0.004
         nvs = set(nv)
         nv2 = extrude_weighted(bm, [e for e in bm.edges if e.is_boundary and all(v in nvs for v in e.verts)], dl)
         for v in nv2:

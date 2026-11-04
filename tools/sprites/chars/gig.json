@@ -18,46 +18,46 @@
   "clavicle_l": {
    "scale": [
     1.0,
-    1.34,
+    0.88,
     1.0
    ]
   },
   "clavicle_r": {
    "scale": [
     1.0,
-    1.34,
+    0.88,
     1.0
    ]
   },
   "upperarm_l": {
    "scale": [
-    1.24,
+    1.18,
     1.0,
-    1.24
+    1.18
    ],
    "inherit": "NONE"
   },
   "upperarm_r": {
    "scale": [
-    1.24,
+    1.18,
     1.0,
-    1.24
+    1.18
    ],
    "inherit": "NONE"
   },
   "lowerarm_l": {
    "scale": [
-    1.32,
+    1.2,
     1.0,
-    1.32
+    1.2
    ],
    "inherit": "NONE"
   },
   "lowerarm_r": {
    "scale": [
-    1.32,
+    1.2,
     1.0,
-    1.32
+    1.2
    ],
    "inherit": "NONE"
   },
@@ -79,16 +79,16 @@
   },
   "spine_03": {
    "scale": [
-    1.14,
+    1.46,
     1.0,
-    1.08
+    1.16
    ]
   },
   "spine_02": {
    "scale": [
-    1.06,
     1.0,
-    1.04
+    1.0,
+    1.1
    ]
   },
   "neck_01": {
@@ -101,33 +101,33 @@
   },
   "thigh_l": {
    "scale": [
-    1.12,
+    1.06,
     0.97,
-    1.12
+    1.06
    ],
    "inherit": "NONE"
   },
   "thigh_r": {
    "scale": [
-    1.12,
+    1.06,
     0.97,
-    1.12
+    1.06
    ],
    "inherit": "NONE"
   },
   "calf_l": {
    "scale": [
-    1.1,
+    1.05,
     0.97,
-    1.1
+    1.05
    ],
    "inherit": "NONE"
   },
   "calf_r": {
    "scale": [
-    1.1,
+    1.05,
     0.97,
-    1.1
+    1.05
    ],
    "inherit": "NONE"
   },
@@ -146,6 +146,14 @@
     1.12
    ],
    "inherit": "NONE"
+  },
+  "spine_01": {
+   "scale": [
+    1.2,
+    1.0,
+    1.0
+   ],
+   "inherit": "NONE"
   }
  },
  "outfit_cfg": {
@@ -153,7 +161,7 @@
   "sleeve_l_t": 0.8,
   "sleeve_r_t": 0.2,
   "hem_z": 0.96,
-  "shirt_offset": 0.024,
+  "shirt_offset": 0.016,
   "beard_len": 1.15,
   "topknot": {
    "angle_deg": 40,
@@ -173,10 +181,11 @@
    ]
   },
   "hood": {
-   "ring_r": 0.1,
-   "tube_r": 0.034,
+   "ring_r": 0.075,
+   "tube_r": 0.027,
    "dz": 0.024,
-   "string_len": 0.1
+   "string_len": 0.1,
+   "pad_k": 0.9
   },
   "boots": {
    "style": "v7",
@@ -204,11 +213,15 @@
     0.012,
     0.055
    ],
-   "hem_drop": 0.01,
-   "hem_out": 0.01,
+   "hem_drop": 0.004,
+   "hem_out": 0.0,
    "pelvis_only_below": 1.04,
-   "thigh_k": 0.3,
-   "front_dz": 0.022
+   "thigh_k": 0.15,
+   "front_dz": 0.022,
+   "flare": 0.0,
+   "smooth_iters": 8,
+   "cuff_roll": 0.007,
+   "sleeve_gap": -0.004
   },
   "hand_r": {
    "bare": true,
@@ -236,6 +249,18 @@
      0.5
     ]
    }
+  },
+  "cuff_w": 0.028,
+  "push_body": {
+   "legs": 0.012,
+   "pelvis": 0.01,
+   "belly": 0.02,
+   "belly_z": [
+    1.0,
+    1.2
+   ],
+   "belly_hw": 0.14,
+   "neck": 0.014
   }
  },
  "authored": [
