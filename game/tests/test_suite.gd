@@ -752,6 +752,17 @@ func _test_credits_glyphs() -> void:
 	for l: Array in c._lines:
 		has_logo = has_logo or l[3] != null
 	check(has_logo, "Crediti: il titolo è il logo, non testo a scala 2")
+	var texts := PackedStringArray()
+	for l: Array in c._lines:
+		texts.append(str(l[0]))
+	var expected := Music.credit_lines()
+	var music_ok := texts.has("MUSICA")
+	if expected.is_empty():
+		music_ok = music_ok and texts.has(CreditsScreen.NO_MUSIC)
+	else:
+		for t in expected:
+			music_ok = music_ok and texts.has(t)
+	check(music_ok, "Crediti: la sezione MUSICA elenca i brani caricati", "%d brani" % expected.size())
 	c.free()
 
 

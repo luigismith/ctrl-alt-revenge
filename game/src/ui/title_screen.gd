@@ -1,6 +1,6 @@
 class_name TitleScreen
 extends Node2D
-## Titolo: lo sfondo del livello che scorre piano sotto la pioggia, GIG in guardia, il logo,
+## Titolo: lo sfondo del livello fermo sotto la pioggia (GIG è in guardia: la strada non deve scorrere), il logo,
 ## il sottotitolo e il menu (GIOCA, CREDITI, ESCI; nel browser senza ESCI). Musica "title".
 
 signal start_game
@@ -25,7 +25,8 @@ var _gig_anim: FrameAnim
 var _shadow: Node2D
 var _index: int = 0
 var _t: int = 0
-var _cam: float = 220.0
+## Punto del livello inquadrato: fisso, perché GIG è fermo e la strada sotto i piedi non deve scorrere.
+const TITLE_CAM := 220
 ## Tick in cui il menu ignora i tasti: almeno quanto la dissolvenza d'entrata di Main (16 tick).
 var _locked: int = 18
 var _text := Color8(247, 232, 189)
@@ -95,11 +96,8 @@ func _draw_shadow() -> void:
 
 func _physics_process(_delta: float) -> void:
 	_t += 1
-	_cam += 0.25
-	if _cam > 1400.0:
-		_cam = 220.0
-	_backdrop.update(int(_cam), _t)
-	_rain.tick(int(_cam))
+	_backdrop.update(TITLE_CAM, _t)
+	_rain.tick(TITLE_CAM)
 	_gig_anim.advance()
 	var f := _gig_anim.frame()
 	_gig.region_rect = Rect2(f.rect)

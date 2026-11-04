@@ -13,9 +13,10 @@ const MAX_CHARS := 58
 ## Testo dei crediti, modificabile senza toccare il codice: una riga per voce,
 ## le righe che iniziano con "# " sono titoli.
 const CREDITS_TXT := "res://data/credits.txt"
-## Nel browser la demo è muta (la musica non è pubblica e la build web non la contiene): al posto del
-## testo della sezione MUSICA di credits.txt, che parla della musica segnaposto delle build per computer.
-const WEB_MUSIC := "Nella demo web non c'è musica: i brani non sono pubblici. I brani definitivi saranno generati con Suno per Luigi Massari e distribuiti solo con le build del gioco."
+## In fondo alla sezione MUSICA di credits.txt vanno i brani che Music ha davvero caricato (titolo e
+## licenza da music.json): così i crediti sono giusti nella demo web, nelle build e con la musica
+## segnaposto di un laboratorio. Senza musica, questa riga.
+const NO_MUSIC := "In questa copia del gioco non c'è musica."
 
 var _lines: Array[Array] = []  # [testo, colore, regolare, immagine o null]
 var _scroll: float = -200.0
@@ -25,6 +26,10 @@ var _t: int = 0
 func _ready() -> void:
 	size = Vector2(384, 216)
 	_build()
+	# Il tema del titolo: dal titolo continua senza ripartire, dopo la fine della demo riparte
+	# (prima i crediti erano muti, dopo il jingle di ZONA LIBERATA).
+	Music.duck(false)
+	Music.play(&"title")
 
 
 ## Titoli in grassetto giallo, testo normale nel font regolare; tutto a 1x (niente pixel 2x2
@@ -48,17 +53,17 @@ func _build() -> void:
 	_add_image("logo", "CTRL+ALT REVENGE!")
 	_add("")
 	if FileAccess.file_exists(CREDITS_TXT):
-		var web := OS.has_feature("web")
 		var music := false
 		for l in FileAccess.get_file_as_string(CREDITS_TXT).split("\n"):
 			if l.begins_with("# "):
+				if music:
+					_add_music()
 				music = l.substr(2).strip_edges() == "MUSICA"
 				_add(l.substr(2), YELLOW)
-				if web and music:
-					_add(WEB_MUSIC)
-					_add("")
-			elif not (web and music):
+			else:
 				_add(l)
+		if music:
+			_add_music()
 	_add("")
 	_add("LICENZE", YELLOW)
 	_add("")
@@ -81,6 +86,17 @@ func _build() -> void:
 
 ## Componenti di terze parti compilati dentro Godot, con copyright e testo delle licenze,
 ## come chiede la loro licenza: li fornisce l'eseguibile stesso.
+func _add_music() -> void:
+	var tracks := Music.credit_lines()
+	if tracks.is_empty():
+		_add(NO_MUSIC)
+	else:
+		_add("In questa copia del gioco:")
+		for t in tracks:
+			_add(t)
+	_add("")
+
+
 func _add_engine_components() -> void:
 	_add("Componenti di terze parti inclusi in Godot Engine", YELLOW)
 	for info: Dictionary in Engine.get_copyright_info():

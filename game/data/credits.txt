@@ -10,7 +10,7 @@ Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da s
 Font CAR Pixel, effetti e interfaccia disegnati per CTRL+ALT REVENGE.
 
 # MUSICA
-In questa demo: musica segnaposto CC0 di Safety Stoat Studios ("Free VGMs"). I brani definitivi saranno generati con Suno per Luigi Massari e distribuiti solo con le build del gioco.
+I brani di CTRL+ALT REVENGE li crea Luigi Massari con Suno (piano Pro). Non sono nel repository del gioco.
 
 # MOTORE
 Godot Engine

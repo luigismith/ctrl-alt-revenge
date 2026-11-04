@@ -279,6 +279,8 @@ func _parse_manifest(text: String, base_dir: String) -> Dictionary:
 			"bar_beats": int(_num(d.get("bar_beats", 4))),
 			"gain_db": _num(d.get("gain_db", 0.0)),
 			"placeholder": _bool(d.get("placeholder", false), false),
+			"title": str(d.get("title", "")),
+			"license": str(d.get("license", "")),
 			"layers": layers,
 		}
 	return out
@@ -291,6 +293,20 @@ func _num(v: Variant) -> float:
 # in GDScript confrontare tipi diversi con == è un errore: i valori non booleani danno il predefinito
 func _bool(v: Variant, default: bool) -> bool:
 	return v if v is bool else default
+
+
+## Righe per i crediti: un brano per riga, "titolo" (licenza), solo quelli il cui file c'è.
+## Vuoto se non c'è musica.
+func credit_lines() -> PackedStringArray:
+	var out := PackedStringArray()
+	for id: StringName in _tracks:
+		var t: Dictionary = _tracks[id]
+		if not _file_ok(str(t["path"])):
+			continue
+		var title := str(t["title"]) if not str(t["title"]).is_empty() else String(id)
+		var lic := str(t["license"])
+		out.append("\"%s\"%s" % [title, "" if lic.is_empty() else " (%s)" % lic])
+	return out
 
 
 func _file_ok(path: String) -> bool:
