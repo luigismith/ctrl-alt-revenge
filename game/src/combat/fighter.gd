@@ -107,9 +107,15 @@ func setup(fighter_data: FighterData, lvl: Level, id: int, fighter_team: Team) -
 
 ## Lampo bianco dei colpi e luci dinamiche. La luce è "a gradini" (3 bande di n·L, come le ombre della pixel art);
 ## sul bordo della sagoma (normali di taglio) arriva il colore della luce, riflesso del neon; dentro schiarisce
-## senza cambiare tinta, così l'ocra di GIG non vira verso il colore della luce.
+## senza cambiare tinta, così l'ocra di GIG non vira verso il colore della luce. Dalla prova del cel shading
+## (4 novembre 2026): un tetto ai toni chiari (la luce conta 1 - 0,6 × la luminanza del colore, così barba,
+## capelli e scintille non bruciano i chiari) e il contorno scuro escluso dalla luce, come l'inchiostro: resta
+## scuro anche sotto un neon (vale anche per le linee interne, che hanno lo stesso colore). Solo disegno: la
+## simulazione non lo vede.
 const FLASH_SHADER := """shader_type canvas_item;
 uniform float flash = 0.0;
+// colore del contorno degli sprite (palette.outline nei JSON dei personaggi, #140e1e)
+const vec3 OUTLINE = vec3(0.0784, 0.0549, 0.1176);
 void fragment() {
 	COLOR.rgb = mix(COLOR.rgb, vec3(1.0), flash);
 }
@@ -120,7 +126,9 @@ void light() {
 	float lum = dot(LIGHT_COLOR.rgb, vec3(0.299, 0.587, 0.114));
 	vec3 inner = COLOR.rgb * lum * 0.45;
 	vec3 edge = LIGHT_COLOR.rgb * 0.6;
-	LIGHT = vec4(mix(inner, edge, rim) * LIGHT_ENERGY * d, LIGHT_COLOR.a);
+	float reserve = 1.0 - 0.6 * dot(COLOR.rgb, vec3(0.299, 0.587, 0.114));
+	float ink = 1.0 - step(distance(COLOR.rgb, OUTLINE), 0.02);
+	LIGHT = vec4(mix(inner, edge, rim) * LIGHT_ENERGY * d * reserve * ink, LIGHT_COLOR.a);
 }
 """
 
