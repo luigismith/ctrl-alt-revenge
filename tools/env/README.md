@@ -36,10 +36,20 @@ Un giro completo dura circa 75 secondi.
 3. **`paint.py`** fa da "shader differito" in Python, in quest'ordine:
    1. inclinazione 1:8 (la strada diventa orizzontale) e riduzione a 1x per voto di maggioranza;
    2. motivi per materiale: intonaco, mattoni, serrande, lastre, asfalto;
-   3. operazioni di pittura: insegne al neon col carattere pixel di `pixfont.py`, manifesti, graffiti, targhe, interni delle vetrine, reti con test di profondità, pozzanghere, crepe, rifiuti;
+   3. operazioni di pittura: insegne al neon col carattere pixel di `pixfont.py`, manifesti, graffiti, targhe, interni delle vetrine, reti con test di profondità, pozzanghere, crepe, rifiuti, coni di luce delle lampade a muro;
    4. luce: luce chiave a bande nella direzione dei personaggi, ambiente notturno, luce dei neon e riflessi sull'asfalto bagnato;
    5. palette: rampe di `materials.py`, colore più vicino in OKLab, retinatura 4x4;
    6. contorni di 1 px (`#140e1e` come i personaggi) e maschere emissive.
+
+   Dal 4 novembre 2026 i piani `street`, `near` e `fg` sono in cel shading a 3 toni (chiave `cel` nelle loro configurazioni, valori in `paint.CEL_3TONI`), dalla prova del laboratorio `prove-cel-shading`:
+   - la luce chiave ha tre toni con le stesse soglie per tutti i materiali;
+   - la luce dei neon e i riflessi sul bagnato vanno a zone con il bordo netto;
+   - gli aloni delle maschere emissive sono anelli netti, e dentro la cornice delle insegne l'alone è pieno;
+   - sotto le lampade a muro c'è un cono di luce a due bande: il colore sale di uno o due toni dentro la sua rampa;
+   - nella fascia calpestabile i riflessi sono più scuri (`wet_lane`), per non confondersi con gli stivali dei personaggi;
+   - la retinatura è spenta.
+
+   Gli oggetti di scena (`props.py`) restano con la luce sfumata.
 4. **`street.py`** e **`near_fg.py`** producono i piani. `warped.py` ricolora Warped City (CC0) nei piani `sky`, `far` e `mid` e aggiunge la torre cyan, l'unico cyan del livello.
 5. **`props.py`** produce gli oggetti di scena nel formato sprite della specifica §4:
    - `bin`: render 3D, `idle`, `hit`, `break` (l'ultimo fotogramma è `hold`);

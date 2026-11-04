@@ -12,6 +12,9 @@ Passi, nell'ordine:
      4x4 solo sulle superfici grandi;
   5. contorni: 1 px esterno (#140e1e come i personaggi) e linee interne dove la profondità salta;
   6. maschera emissiva per Godot (aloni additivi dei neon, delle lampade e delle vetrine).
+Cel shading (dal 4 novembre 2026, piani con la chiave "cel" nella configurazione: street, near, fg): la luce chiave
+ha toni con soglie uguali per tutti i materiali, la luce dei neon e i riflessi sul bagnato vanno a zone con il bordo
+netto, gli aloni sono anelli netti e la retinatura è spenta. Gli oggetti di scena (props.py) restano come prima.
 Tutto è deterministico: rumori e scelte da semi fissi.
 """
 from __future__ import annotations
@@ -33,6 +36,9 @@ from materials import MATERIALS, RAMPS  # noqa: E402
 C = E.CLS
 AMB = np.array([0.36, 0.36, 0.56], np.float32)      # ambiente notturno blu-viola (lineare)
 KEYC = np.array([0.62, 0.66, 0.92], np.float32)     # luce chiave fredda (cielo/luna)
+# cel shading a 3 toni (prova del 4 novembre 2026): soglie su n·L della luce chiave, sull'intensità della luce dei neon
+# e su quella dei riflessi sul bagnato
+CEL_3TONI = dict(key_thr=(0.4, 0.7), spill_thr=(0.15, 0.6), wet_thr=(0.006, 0.03), wet_lane=0.6)
 
 
 # ------------------------------------------------------------------ rumore e utilità
@@ -102,6 +108,8 @@ class Canvas:
         self.force_ramp = np.full((self.H, self.W), -1, np.int32)
         self.noline = np.zeros((self.H, self.W), bool)  # niente linee di contorno interne
         self.glow = np.zeros((self.H, self.W, 3), np.float32)   # contributo alla maschera emissiva (lineare)
+        self.halo_fill = np.zeros((self.H, self.W), bool)       # alone pieno (cel): dentro la cornice delle insegne
+        self.cone = np.zeros((self.H, self.W), np.int32)        # coni delle lampade a muro (cel): 0, 1 lontano, 2 vicino
         self.neon = self.A & np.isin(self.cls, [E.CLS["NEON"], E.CLS["LAMP"]]) & self.is_em
         self.wet = np.zeros((self.H, self.W), np.float32)       # 0..1 bagnato (riflessi)
         yy, xx = np.mgrid[0:self.H, 0:self.W]
@@ -373,6 +381,11 @@ def op_neon_text(cv: Canvas, o):
         fr[fm] = rgb(r[4])
         fe = fr * 0.8
         cv.paste(x0, y0, fr, fm, where, fe, neon=True)
+        # dentro la cornice l'alone del cel è pieno: senza, fra le lettere e i lati corti della cassetta restano due
+        # dischi scuri, dove gli aloni sommati non arrivano alla soglia
+        inner = np.zeros((cv.H, cv.W), bool)
+        inner[max(y0 + 3, 0):max(y1 - 3, 0), max(x0 + 3, 0):max(x1 - 3, 0)] = True
+        cv.halo_fill |= inner & where
 
 
 def op_neon_vertical(cv: Canvas, o):
@@ -991,18 +1004,37 @@ def op_menu_board(cv: Canvas, o):
     pass
 
 
+def op_lamp_cone(cv: Canvas, o):
+    """Cono di luce di una lampada a muro, per i piani a toni (cel): sulla facciata sotto la lampada due bande a bordo
+    netto, la vicina più stretta e corta, la lontana più larga e lunga, che si allargano verso il basso e finiscono
+    tonde. Segna cv.cone (1 lontana, 2 vicina): nel cono quantize alza il colore di altrettanti toni della sua rampa."""
+    Yf = o["Yf"]
+    xc = cv.sx(o["X"], Yf)
+    yt = cv.sy(Yf, o["z"])
+    hw = 0.5 * o.get("w", 0.14) * cv.kx
+    dy = (cv.yy - cv.y0 + 0.5) - yt
+    dx = np.abs((cv.xx - cv.x0 + 0.5) - xc)
+    wall = cv.A & ~cv.is_em & (np.abs(cv.pos[..., 1] - Yf) < 0.25) & (cv.pos[..., 2] > 0.02)
+    for band, (ang, length) in ((1, (o.get("ang_far", 34.0), o.get("len_far", 1.5))),
+                                (2, (o.get("ang_near", 22.0), o.get("len_near", 0.8)))):
+        L = length * cv.kz
+        side = np.maximum(dx - hw, 0.0)
+        inside = (dy >= 0) & (side <= dy * math.tan(math.radians(ang))) & (dy * dy + side * side <= L * L) & wall
+        cv.cone = np.where(inside, np.maximum(cv.cone, band), cv.cone)
+
+
 OPS = dict(neon_text=op_neon_text, neon_vertical=op_neon_vertical, cross_blade=op_cross_blade, plate=op_plate,
            posters=op_posters, graffiti=op_graffiti, tabacchi_t=op_tabacchi_t, interior=op_interior,
            door_panels=op_door_panels, window_neon=op_window_neon, fence=op_fence, barbed=op_barbed, rivets=op_rivets, puddle=op_puddle,
            patch=op_patch, crack=op_crack, litter=op_litter, lane=op_lane, grate=op_grate,
-           awning_text=op_awning_text, menu_board=op_menu_board)
+           awning_text=op_awning_text, menu_board=op_menu_board, lamp_cone=op_lamp_cone)
 
 
 def run_ops(cv: Canvas):
     # ordine: suolo e superfici, poi decorazioni, poi insegne (sopra a tutto), poi reti (test di profondità)
     order = ["patch", "crack", "lane", "grate", "puddle", "litter", "posters", "graffiti", "door_panels",
              "interior", "window_neon", "plate", "tabacchi_t", "awning_text", "neon_text", "neon_vertical", "cross_blade",
-             "menu_board", "rivets", "fence", "barbed"]
+             "menu_board", "rivets", "fence", "barbed", "lamp_cone"]
     for kind in order:
         for o in cv.ops:
             if o["kind"] == kind:
@@ -1017,6 +1049,8 @@ def blur(img, sigma):
 
 
 def shade(cv: Canvas, layer_cfg):
+    if layer_cfg.get("cel"):
+        return shade_cel(cv, layer_cfg)
     A = cv.A
     nL = (cv.n * E.KEY_CAM).sum(-1)
     light = np.zeros((cv.H, cv.W, 3), np.float32)
@@ -1085,6 +1119,81 @@ def wet_reflections(cv: Canvas, E_lin, cfg):
     return out
 
 
+# ------------------------------------------------------------------ 3-4 bis. cel shading (piani con "cel")
+def zone_levels(I, valid, thr, how="media"):
+    """Zone di I con il bordo netto: 0 sotto la prima soglia, poi 1, 2...; in ogni zona vale la media (o la
+    mediana) di I sui pixel validi della zona; una zona vuota vale la sua soglia."""
+    z = np.zeros(I.shape, np.int32)
+    for t in thr:
+        z += I > t
+    lev = [0.0]
+    for k in range(1, len(thr) + 1):
+        m = valid & (z == k)
+        if not m.any():
+            lev.append(float(thr[k - 1]))
+        else:
+            lev.append(float(np.mean(I[m]) if how == "media" else np.median(I[m])))
+    return np.asarray(lev, np.float32)[z]
+
+
+def key_bands_cel(cv: Canvas, nL, key_thr):
+    """Luce chiave a toni: il tono viene da soglie su n·L uguali per tutti i materiali (key_thr); il livello di ogni
+    tono, per materiale, è la banda che le soglie del materiale danno alla mediana di n·L dei pixel di quel tono.
+    Così una faccia piatta resta com'era e cambiano solo le superfici curve e i materiali con più toni."""
+    idx = np.zeros(nL.shape, np.int32)
+    for t in key_thr:
+        idx += nL > t
+    band = np.zeros(nL.shape, np.float32)
+    for mid, m in MATERIALS.items():
+        sel = cv.A & (cv.mat == mid)
+        if not sel.any():
+            continue
+        thr = m["bands"]
+        for k in range(len(key_thr) + 1):
+            s = sel & (idx == k)
+            if s.any():
+                med = float(np.median(nL[s]))
+                band[s] = sum(med > t for t in thr) / max(len(thr), 1)
+    return band
+
+
+def shade_cel(cv: Canvas, layer_cfg):
+    """Come shade, ma a toni: luce chiave a toni (key_bands_cel), luce dei neon e riflessi sul bagnato a zone con il
+    bordo netto (soglie cel.spill_thr e cel.wet_thr sull'intensità, livello = media della zona, tinta invariata)."""
+    cel = layer_cfg["cel"]
+    A = cv.A
+    nL = (cv.n * E.KEY_CAM).sum(-1)
+    band = key_bands_cel(cv, nL, cel["key_thr"])
+    amb = layer_cfg.get("amb", 0.62)
+    key = layer_cfg.get("key", 0.62)
+    light = AMB[None, None] * amb + KEYC[None, None] * (key * band)[..., None]
+    # neon: la stessa sfocatura dell'emissivo della luce sfumata, poi l'intensità a zone
+    E_lin = np.where(cv.is_em[..., None], lin(cv.emi), 0)
+    s1, s2 = layer_cfg.get("spill_sigma", (3.0, 11.0))
+    S = blur(E_lin, s1) * 3.0 + blur(E_lin, s2) * 1.8
+    spill_k = np.vectorize(lambda m: MATERIALS.get(int(m), {}).get("spill", 1.0), otypes=[np.float32])(cv.mat)
+    Se = S * (spill_k * layer_cfg.get("spill", 1.0))[..., None]
+    I = Se.max(-1)
+    hue = Se / np.maximum(I, 1e-6)[..., None]
+    how = cel.get("zone", "media")
+    Iq = zone_levels(I, A & ~cv.is_em, cel["spill_thr"], how)
+    light = light + hue * Iq[..., None]
+    out = lin(cv.col) * light
+    if layer_cfg.get("wet", 0) > 0:
+        R = wet_reflections(cv, E_lin, layer_cfg)
+        IR = R.max(-1)
+        hR = R / np.maximum(IR, 1e-6)[..., None]
+        IRq = zone_levels(IR, A & ~cv.is_em & (IR > 0), cel["wet_thr"], how)
+        # nella corsia dove si cammina i riflessi sono più scuri: le strisce arancio delle insegne non devono
+        # confondersi con gli stivali dei personaggi
+        lane = (cv.yy >= E.BAND[0]) & (cv.yy <= E.BAND[1])
+        IRq = np.where(lane, IRq * cel.get("wet_lane", 1.0), IRq)
+        out = out + hR * IRq[..., None]
+    out = np.where(cv.is_em[..., None], lin(cv.emi), out)
+    out = np.where(cv.final[..., None] & ~cv.is_em[..., None], lin(cv.col) * np.maximum(light, 0.55), out)
+    return E.lin_to_srgb(np.clip(out, 0, 1)), S
+
+
 def quantize(cv: Canvas, rgb01, layer_cfg):
     """Colore più vicino nella rampa del materiale (+ rampe dei neon per i pixel illuminati)."""
     out = np.zeros_like(rgb01)
@@ -1098,16 +1207,20 @@ def quantize(cv: Canvas, rgb01, layer_cfg):
             continue
         names = [m["ramp"]] + list(m.get("tint") or []) if m else ["wall_grey"]
         names = names + ["paper", "graffiti", "white"] if mid == 25 else names
-        pal = []
+        if layer_cfg.get("extra_ramps"):
+            names = names + list(layer_cfg["extra_ramps"])
+        pal, seg_end = [], []
         for nm in names:
             pal += RAMPS[nm]
-        if layer_cfg.get("extra_ramps"):
-            for nm in layer_cfg["extra_ramps"]:
-                pal += RAMPS[nm]
+            seg_end += [len(pal) - 1] * len(RAMPS[nm])
         c = rgb01[sel].copy()
         if m and m.get("dither") and dith > 0:
             c = np.clip(c * (1 + dith * (cv.bay[sel] - 0.47) * 2)[:, None], 0, 1)
         idx = E.nearest(c, pal, weights=(1.0, 1.3, 1.3))
+        if layer_cfg.get("cel") and cv.cone.any():
+            # coni delle lampade a muro (op_lamp_cone): il colore sale di 1 tono (banda lontana) o di 2 (banda
+            # vicina) dentro la sua rampa; così il motivo della superficie resta pulito, senza puntini
+            idx = np.minimum(idx + cv.cone[sel], np.asarray(seg_end)[idx])
         palv = np.array([E.hx(p) for p in pal], np.float32) / 255.0
         out[sel] = palv[idx]
     # emissivi: rampe dei neon, delle luci calde e del cyan
@@ -1153,9 +1266,10 @@ def outlines(cv: Canvas, rgb01, layer_cfg):
 
 
 # ------------------------------------------------------------------ 6. maschera emissiva
-def emissive_mask(cv: Canvas, rgb01, alpha, strength=0.55):
+def emissive_mask(cv: Canvas, rgb01, alpha, strength=0.55, cel=False):
     """Aloni additivi per Godot: attorno a neon e lampade un alone a due livelli retinato e il nucleo a metà
-    intensità; le vetrine accese danno solo un alone debole (il loro interno resta com'è)."""
+    intensità; le vetrine accese danno solo un alone debole (il loro interno resta com'è). Con cel i due anelli
+    hanno il bordo netto (niente soglia retinata con la matrice di Bayer)."""
     neon = cv.neon & cv.is_em
     E_n = np.where(neon[..., None], lin(cv.emi), 0)
     E_w = np.where((cv.is_em & ~neon)[..., None], lin(cv.emi), 0) * 0.35
@@ -1165,8 +1279,11 @@ def emissive_mask(cv: Canvas, rgb01, alpha, strength=0.55):
     I2 = far.max(-1)
     hue1 = near / np.maximum(I1, 1e-6)[..., None]
     hue2 = far / np.maximum(I2, 1e-6)[..., None]
-    lv1 = (I1 + (cv.bay - 0.5) * 0.12) > 0.22
-    lv2 = (I2 + (cv.bay - 0.5) * 0.1) > 0.12
+    dith = 0.0 if cel else 1.0
+    lv1 = (I1 + (cv.bay - 0.5) * 0.12 * dith) > 0.22
+    lv2 = (I2 + (cv.bay - 0.5) * 0.1 * dith) > 0.12
+    if cel:
+        lv2 |= cv.halo_fill & (I2 > 0.01)
     em = np.zeros((cv.H, cv.W, 3), np.float32)
     em[lv2] = hue2[lv2] * 0.16
     em[lv1] = hue1[lv1] * 0.3

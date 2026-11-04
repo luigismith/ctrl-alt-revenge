@@ -17,11 +17,11 @@ import envlib as E  # noqa: E402
 import paint as P  # noqa: E402
 from materials import RAMPS  # noqa: E402
 
-NEAR_CFG = dict(amb=0.72, key=0.6, spill=0.9, spill_sigma=(1.5, 6.0), wet=0, dither=0.03, inner=True,
-                depth_thr=1.2, outline=True, fog=0.12, fogcol="#1c1f4e")
+NEAR_CFG = dict(amb=0.72, key=0.6, spill=0.9, spill_sigma=(1.5, 6.0), wet=0, dither=0.0, inner=True,
+                depth_thr=1.2, outline=True, fog=0.12, fogcol="#1c1f4e", cel=P.CEL_3TONI)
 FG_MAX_Y = 26
 FG_CFG = dict(amb=0.45, key=0.35, spill=1.2, spill_sigma=(2.0, 8.0), wet=0, dither=0.0, inner=True,
-              depth_thr=0.25, outline=True)
+              depth_thr=0.25, outline=True, cel=P.CEL_3TONI)
 
 
 def windows_near(cv: P.Canvas):
@@ -97,7 +97,7 @@ def build_near(out_dir=None):
     cfg = dict(NEAR_CFG, extra_ramps=["night"])
     q = P.quantize(cv, rgb_lit, cfg)
     res, alpha = P.outlines(cv, q, cfg)
-    em = P.emissive_mask(cv, res, alpha, strength=0.45)
+    em = P.emissive_mask(cv, res, alpha, strength=0.45, cel=bool(NEAR_CFG.get("cel")))
     rgba = P.to_rgba(res, alpha)
     rows = np.nonzero(rgba[..., 3].any(1))[0]
     y0 = int(rows.min())
@@ -117,7 +117,7 @@ def build_fg(out_dir=None):
     rgb_lit, S = P.shade(cv, FG_CFG)
     q = P.quantize(cv, rgb_lit, FG_CFG)
     res, alpha = P.outlines(cv, q, FG_CFG)
-    em = P.emissive_mask(cv, res, alpha, strength=0.6)
+    em = P.emissive_mask(cv, res, alpha, strength=0.6, cel=bool(FG_CFG.get("cel")))
     rgba = P.to_rgba(res, alpha)
     rows = np.nonzero(rgba[..., 3].any(1))[0]
     # il primo piano resta sopra FG_MAX_Y: sotto cominciano le insegne del fondale, che devono leggersi

@@ -208,7 +208,10 @@ def blade_sign(S, Xc, z0, z1, depth=0.72, thick=0.14, col=None):
 
 def wall_lamp(S, Xc, z, col=NEON["warm"]):
     S.box(Xc - 0.09, YF - 0.12, z, Xc + 0.09, YF + 0.02, z + 0.05, "METAL", M_METAL, "#262c3c")
-    return S.box(Xc - 0.07, YF - 0.11, z - 0.12, Xc + 0.07, YF - 0.01, z, "LAMP", M_LAMP, col, emi=col)
+    oid = S.box(Xc - 0.07, YF - 0.11, z - 0.12, Xc + 0.07, YF - 0.01, z, "LAMP", M_LAMP, col, emi=col)
+    # cono di luce sul muro sotto la lampada, a bande (lo dipinge paint.op_lamp_cone nei piani a toni)
+    S.op("lamp_cone", X=Xc, z=z - 0.12, Yf=YF, w=0.14, col=col)
+    return oid
 
 
 def downpipe(S, Xc, z1=8.0, col="#3a4256", y=None):
