@@ -4,7 +4,8 @@
 
 (c) pixelatura: normali a capsula (volumi delle ossa al posto delle sfaccettature), filtro di moda sulle bande,
     linee interne pixel-perfect (niente angoli a L), contorno selettivo (selout) sul lato in luce,
-    riduzione della tavolozza dentro le rampe di ogni materiale.
+    riduzione della tavolozza dentro le rampe di ogni materiale; per il cel shading (prova del 4 novembre 2026)
+    normali a sfera sulla testa e riduzione della tavolozza "a ruoli" (reduce_cel).
 (d) timbri: occhio cyan, sopracciglio, bocca disegnati a pixel e posati sui punti del viso proiettati dalle ossa,
     con tre espressioni (normale, sforzo, dolore); solo sopra i pixel della testa (rispetta chi sta davanti).
 (b) scie (smear): nastro che si assottiglia lungo i sotto-istanti del pugno o del piede, dietro lo sprite.
@@ -66,6 +67,31 @@ def capsule_normals(lo, fd, p1, W1, alpha_w):
         mix = (1 - alpha_w) * n[m] + alpha_w * nc
         mix /= np.maximum(np.linalg.norm(mix, axis=-1, keepdims=True), 1e-6)
         n[m] = mix
+    return n
+
+
+def head_normals(lo, fd, p1, W1, alpha_w, dz=0.0, mats=None):
+    """cel shading: mescola alla normale del render quella di una sfera attorno al centro della testa (punto head_c),
+    solo sui pixel della testa (e, con mats, solo di quei materiali): luce e ombra seguono il volume della testa,
+    non i dettagli del modello."""
+    if alpha_w <= 0 or fd is None or "head_c" not in fd.get("points", {}):
+        return lo["n"]
+    m = lo["alpha"] & (lo["part"] == 2)
+    if mats is not None:
+        m &= np.isin(lo["ids"], mats)
+    if not m.any():
+        return lo["n"]
+    h, w = lo["alpha"].shape
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    P = np.stack([(xx + 0.5 - W1 / 2) * p1, (W1 / 2 - yy - 0.5) * p1, -lo["d"]], -1)
+    hc = fd["points"]["head_c"]
+    c = np.array([(hc[0] - W1 / 2) * p1, (W1 / 2 - hc[1]) * p1, -(hc[2] + dz)], np.float32)
+    n = lo["n"].copy()
+    nc = P[m] - c
+    nc /= np.maximum(np.linalg.norm(nc, axis=-1, keepdims=True), 1e-6)
+    mix = (1 - alpha_w) * n[m] + alpha_w * nc
+    mix /= np.maximum(np.linalg.norm(mix, axis=-1, keepdims=True), 1e-6)
+    n[m] = mix
     return n
 
 
@@ -195,6 +221,145 @@ def reduce_by_ramp(images, max_colors, pal, protect=()):
         for k, v in remap.items():
             if v == drop:
                 remap[k] = keep
+    return remap, sorted(live.keys(), key=lambda k: -live[k])
+
+
+def _lab1(k):
+    rgb = np.array([[(k >> 16) & 255, (k >> 8) & 255, k & 255]], np.float64) / 255.0
+    c = np.where(rgb > 0.04045, ((rgb + 0.055) / 1.055) ** 2.4, rgb / 12.92)
+    M = np.array([[0.4124, 0.3576, 0.1805], [0.2126, 0.7152, 0.0722], [0.0193, 0.1192, 0.9505]])
+    xyz = c @ M.T / np.array([0.95047, 1.0, 1.08883])
+    f = np.where(xyz > 0.008856, np.cbrt(xyz), 7.787 * xyz + 16 / 116)
+    return np.array([116 * f[0, 1] - 16, 500 * (f[0, 0] - f[0, 1]), 200 * (f[0, 1] - f[0, 2])])
+
+
+def _hue_diff(a, b):
+    """differenza di tinta (gradi) fra due colori CIELAB: 0 fra due grigi (croma < 12), 180 fra un grigio e un
+    colore deciso (croma >= 20), altrimenti l'angolo fra le due tinte."""
+    ca, cb = math.hypot(a[1], a[2]), math.hypot(b[1], b[2])
+    if ca < 12 and cb < 12:
+        return 0.0
+    if min(ca, cb) < 12:
+        return 0.0 if max(ca, cb) < 20 else 180.0
+    d = abs(math.degrees(math.atan2(a[2], a[1]) - math.atan2(b[2], b[1]))) % 360
+    return min(d, 360 - d)
+
+
+def reduce_cel(images, max_colors, pal, protect=(), band_idx=(1, 3), k_line=0.6, k_same=3.0, k_cross=1.0,
+               near_dE=10.0, line_dE=25.0, hue_max=30.0, spec_idx=(5,), line_shadow=True):
+    """riduzione della tavolozza per il cel shading, con i ruoli dei colori. Il costo di una fusione è distanza
+    CIELAB x radice dei pixel del colore che sparisce x un peso; si fa sempre la fusione che costa meno, finché i
+    colori sono più di max_colors o finché ce n'è una ammessa:
+      * linee (indice 0 della rampa): nel contorno, in un'altra linea più vicina di line_dE o nell'ombra della
+        stessa rampa (peso k_line, le più economiche);
+      * toni dei materiali (band_idx): nel tono vicino della stessa rampa (peso k_same, alto: toglie un tono al
+        materiale) oppure in un tono di un altro materiale più vicino di near_dE e con tinta entro hue_max gradi
+        (peso k_cross): così grigi e marroni simili si condividono, ma barba e capelli restano diversi;
+      * riflessi (spec_idx) e toni fissi: nel colore più vicino della stessa rampa, o di un altro materiale più
+        vicino di near_dE con la stessa tinta.
+    Mai un tono di materiale o un riflesso dentro una linea o nel contorno. I colori protetti e quelli fuori dalle
+    rampe (bagliore, contorno, riflesso magenta) non spariscono. Restituisce (mappa, colori)."""
+    def key(c):
+        c = c.lstrip("#")
+        return int(c[0:2], 16) * 65536 + int(c[2:4], 16) * 256 + int(c[4:6], 16)
+    owners = {}
+    for rn, ramp in pal.items():
+        if rn in ("OUT", "RIM", "GLOW"):
+            continue
+        for i, c in enumerate(ramp):
+            owners.setdefault(key(c), set()).add((rn, i))
+    prot = {key(c) for c in protect}
+    out_k = key(pal["OUT"][0])
+    counts = {}
+    for im in images:
+        a = im[..., 3] > 0
+        px = im[a][:, :3].astype(np.int64) @ np.array([65536, 256, 1])
+        k, n = np.unique(px, return_counts=True)
+        for kk, nn in zip(k.tolist(), n.tolist()):
+            counts[kk] = counts.get(kk, 0) + nn
+    remap = {k: k for k in counts}
+    live = dict(counts)
+    LAB = {k: _lab1(k) for k in live}
+    band_idx = set(band_idx)
+    spec_idx = set(spec_idx)
+
+    def role(k):
+        if k in prot or k not in owners:
+            return "fixed"
+        idx = {i for _, i in owners[k]}
+        if idx & band_idx:
+            return "band"
+        if idx == {0}:
+            return "line"
+        if idx <= spec_idx:
+            return "spec"
+        return "other"
+
+    def ramps(k):
+        return {rn for rn, _ in owners.get(k, ())}
+
+    # rampa "di casa" di ogni colore (quella che l'ha generato): resta anche dopo le fusioni, così una catena di
+    # fusioni non porta un materiale dentro un altro (barba -> capelli -> ...)
+    home = {}
+    for k in live:
+        if k in owners:
+            home[k] = sorted(owners[k], key=lambda t: (t[1], t[0]))[0][0]
+
+    while len(live) > max_colors:
+        best = None
+        ks = sorted(live)
+        for drop in ks:
+            r = role(drop)
+            if r == "fixed":
+                continue
+            n_drop = live[drop]
+            for keep in ks:
+                if keep == drop:
+                    continue
+                rk = role(keep)
+                d = float(np.linalg.norm(LAB[keep] - LAB[drop]))
+                same = home.get(keep) is not None and home.get(keep) == home.get(drop)
+                hue_ok = _hue_diff(LAB[keep], LAB[drop]) <= hue_max
+                if r == "line":
+                    if keep == out_k:
+                        w = k_line
+                    elif rk == "line":
+                        if d > line_dE or not hue_ok or n_drop > live[keep]:
+                            continue
+                        w = k_line
+                    elif line_shadow and same and len(ramps(drop)) == 1 and rk == "band" and \
+                            (home[keep], 1) in owners[keep]:
+                        w = k_line
+                    else:
+                        continue
+                else:
+                    if rk in ("line", "fixed"):
+                        continue
+                    if same:
+                        if r == "band" and rk == "band":
+                            if n_drop > live[keep]:
+                                continue
+                            w = k_same
+                        else:
+                            w = 1.0
+                    else:
+                        if d > near_dE or not hue_ok:
+                            continue
+                        if r == "band" and rk == "band" and n_drop > live[keep]:
+                            continue
+                        w = k_cross
+                cost = d * math.sqrt(n_drop) * w
+                if best is None or cost < best[0]:
+                    best = (cost, keep, drop)
+        if best is None:
+            break
+        _, keep, drop = best
+        live[keep] += live.pop(drop)
+        for k, v in remap.items():
+            if v == drop:
+                remap[k] = keep
+        if role(keep) != "fixed":
+            owners.setdefault(keep, set()).update(owners.get(drop, set()))
     return remap, sorted(live.keys(), key=lambda k: -live[k])
 
 

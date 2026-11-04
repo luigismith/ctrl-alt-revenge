@@ -14,6 +14,12 @@ Cosa fa, per ogni fotogramma (blocchi ss x ss -> 1 pixel):
     cambiamento è minimo): niente pixel che "friggono" da un fotogramma all'altro.
 La tavolozza di ogni personaggio sta nel suo JSON (tools/sprites/chars/<id>.json); reduce_palette()
 la porta a non più di max_colors (40) colori su tutti i fotogrammi insieme.
+
+Cel shading (blocco pixel_cfg.cel del JSON, dal 4 novembre 2026): al posto delle 4 bande ogni materiale ha toni
+fissi, cioè soglie su n·L e l'indice della rampa per ogni tono (cel.thr e cel.idx, per materiale cel.mat_thr e
+cel.mat_idx: due toni quasi ovunque, un terzo solo dove serve ai volumi). L'occlusione resta solo nei contatti
+(ascelle, fra le gambe, sotto il mento), le normali si lisciano dentro ogni parte del corpo, le pieghe stampate
+tornano nel loro materiale e linee, contorno colorato e isole troppo piccoli si tolgono.
 """
 import colorsys
 import math
@@ -135,7 +141,71 @@ def ao_hi(F, ss, r_px=(1.5, 3.0), eps=0.03):
     return occ
 
 
-def downsample(F, ss, cfg, ID, prev=None, mv=None, occ_hi=None):
+def contact_ao(F, ss, pairs, r_px=(1.0, 2.0), eps=0.03):
+    """occlusione solo fra coppie di parti del corpo scelte: quota dei campioni vicini che stanno davanti al pixel
+    E appartengono a una parte "di contatto" della sua (ascelle: busto-braccio; fra le gambe: coscia-coscia; sotto
+    il mento: busto sotto la testa). pairs = [[parte del pixel, parte davanti], ...]."""
+    a, d, part = F["a"], F["d"], F["part"]
+    T = np.zeros((16, 16), bool)
+    for p, q in pairs:
+        T[int(p), int(q)] = True
+    dd = np.where(a, d, 1e9)
+    occ = np.zeros(a.shape, np.float32)
+    nsamp = 0
+    for r in r_px:
+        R = int(round(r * ss))
+        for k in range(8):
+            ang = 2 * math.pi * k / 8 + (0.39 if R > ss * 2 else 0)
+            dy, dx = int(round(R * math.sin(ang))), int(round(R * math.cos(ang)))
+            sh = shifted(dd, dy, dx, 1e9)
+            sp = shifted(part, dy, dx, 0)
+            occ += ((sh < dd - eps) & T[part, sp]).astype(np.float32)
+            nsamp += 1
+    occ /= nsamp
+    occ[~a] = 0
+    return occ
+
+
+def smooth_normals(lo, sigma, by="part"):
+    """normali lisciate a 1x dentro ogni parte del corpo (o materiale): le ombre seguono i volumi grandi e non le
+    sfaccettature del modello."""
+    n, a = lo["n"], lo["alpha"]
+    grp = lo["part"] if by == "part" else lo["ids"]
+    out = n.copy()
+    for g in np.unique(grp[a]):
+        m = (grp == g) & a
+        w = ndimage.gaussian_filter(m.astype(np.float32), sigma, mode="constant")
+        for c in range(3):
+            s = ndimage.gaussian_filter(np.where(m, n[..., c], 0).astype(np.float32), sigma, mode="constant")
+            out[..., c] = np.where(m, s / np.maximum(w, 1e-6), out[..., c])
+    out /= np.maximum(np.linalg.norm(out, axis=-1, keepdims=True), 1e-6)
+    return out
+
+
+def clean_islands(ids, alpha, mats, min_px):
+    """isole di un materiale dell'elenco più piccole di min_px (4-connesse) prendono il materiale più comune
+    intorno: niente puntini di fodera o di cappuccio sulla camicia."""
+    ids = ids.copy()
+    h, w = ids.shape
+    for mid in mats:
+        lab, nlab = ndimage.label(ids == mid)
+        if not nlab:
+            continue
+        sizes = ndimage.sum(np.ones_like(lab), lab, index=np.arange(1, nlab + 1))
+        for ci in np.nonzero(sizes < min_px)[0] + 1:
+            ys, xs = np.nonzero(lab == ci)
+            votes = {}
+            for y, x in zip(ys, xs):
+                for dy, dx in N4:
+                    yy, xx = y + dy, x + dx
+                    if 0 <= yy < h and 0 <= xx < w and alpha[yy, xx] and ids[yy, xx] not in (0, mid):
+                        votes[int(ids[yy, xx])] = votes.get(int(ids[yy, xx]), 0) + 1
+            if votes:
+                ids[ys, xs] = max(votes, key=votes.get)
+    return ids
+
+
+def downsample(F, ss, cfg, ID, prev=None, mv=None, occ_hi=None, occ_c_hi=None):
     ab, ib, nb, db, pb = (blocks(F[k], ss) for k in ("a", "ids", "n", "d", "part"))
     nsub = ss * ss
     cov = ab.mean(-1)
@@ -185,6 +255,9 @@ def downsample(F, ss, cfg, ID, prev=None, mv=None, occ_hi=None):
         out["occ"] = (ob * sel).sum(-1) / wsum
     else:
         out["occ"] = np.zeros_like(dd)
+    if occ_c_hi is not None:
+        ob = blocks(occ_c_hi, ss)
+        out["occ_c"] = (ob * sel).sum(-1) / wsum
     # almeno 1 px per ogni dettaglio presente nel render
     for k in feat_ids:
         tot = int((F["ids"] == k).sum())
@@ -214,6 +287,30 @@ class Shader:
         self.big = {ID[k] for k in pcfg.get("big_mats", []) if k in ID}
         self.L = np.array(cfg["key"], np.float32)
         self.L /= np.linalg.norm(self.L)
+        # cel shading: toni fissi per materiale (soglie su n·L e indici della rampa per ogni tono)
+        self.cel = cfg.get("cel") or None
+        self.idxmap = {}
+        if self.cel and self.cel.get("shadow_mix"):
+            # ombra più chiara: l'indice 1 della rampa si sposta verso il medio (0 = com'è, 1 = il medio); un numero
+            # vale per tutte le rampe, un dizionario per rampa ("*" = le altre)
+            sm = self.cel["shadow_mix"]
+            for name, r in pcfg["ramps"].items():
+                if "list" in r:
+                    continue
+                t = float(sm.get(name, sm.get("*", 0.0)) if isinstance(sm, dict) else sm)
+                if t > 0:
+                    c1, c2 = hx(self.pal[name][1]), hx(self.pal[name][2])
+                    self.pal[name][1] = tohex(tuple((1 - t) * a + t * b for a, b in zip(c1, c2)))
+
+    def cel_bands(self, mid):
+        """(soglie, indici della rampa per tono) del materiale nel cel shading."""
+        name = self.NAME.get(int(mid), "")
+        c = self.cel
+        thr = (c.get("mat_thr") or {}).get(name, c["thr"])
+        idx = (c.get("mat_idx") or {}).get(name, c["idx"])
+        if len(idx) != len(thr) + 1:
+            raise ValueError(f"cel: {name} ha {len(thr)} soglie ma {len(idx)} indici")
+        return thr, idx
 
     def color(self, rname, idx):
         r = self.pal[rname]
@@ -249,6 +346,9 @@ class Shader:
                 idx[m] = sp[2]
                 continue
             thr = sp[1]
+            if self.cel:
+                thr, imap = self.cel_bands(mid)
+                self.idxmap[int(mid)] = np.asarray(imap, np.int32)
             b = np.zeros((h, w), np.int32)
             for t in thr:
                 b += (lam_eff > t).astype(np.int32)
@@ -258,8 +358,13 @@ class Shader:
                 for t in thr:
                     near |= np.abs(lam_eff - t) < self.cfg["band_hyst"]
                 b = np.where(same & near & (np.abs(pb_all - b) == 1), pb_all, b)
+            if self.cel and "contact_m" in lo:
+                # nei contatti (ascelle, fra le gambe, sotto il mento) il tono più scuro del materiale
+                skip = {self.ID[k] for k in self.cel.get("contact_skip", []) if k in self.ID}
+                if int(mid) not in skip:
+                    b = np.where(lo["contact_m"], 0, b)
             ramp[m] = sp[0]
-            idx[m] = 1 + b[m]
+            idx[m] = self.idxmap[int(mid)][b[m]] if self.cel else 1 + b[m]
             band[m] = b[m]
         return ramp, idx, band, lam_eff, specv
 
@@ -306,16 +411,19 @@ def compose(lo, sh, cfg, prev=None, mv=None):
         sp = sh.spec.get(int(mid))
         if sp is not None and sp[1] is not None:
             m = (ids == mid) & (band >= 0)
-            idx[m] = 1 + band[m]
+            idx[m] = sh.idxmap[int(mid)][band[m]] if sh.cel else 1 + band[m]
     rgba = np.zeros((h, w, 4), np.uint8)
     for rn in set(ramp[alpha].tolist()):
         m = alpha & (ramp == rn)
         for k in np.unique(idx[m]):
             rgba[m & (idx == k)] = (*sh.color(rn, int(k)), 255)
-    # riflessi di 1-2 px
+    # riflessi di 1-2 px (nel cel, con spec_top, solo sul tono più chiaro del materiale)
     if cfg["spec"]:
         for mid, thr in sh.spec_mats.items():
-            mm = alpha & (ids == mid) & (band >= 1)
+            top = 1
+            if sh.cel and sh.cel.get("spec_top") and int(mid) in sh.idxmap:
+                top = len(sh.idxmap[int(mid)]) - 1
+            mm = alpha & (ids == mid) & (band >= top)
             if not mm.any():
                 continue
             lab, nlab = ndimage.label(mm)
@@ -375,6 +483,12 @@ def compose(lo, sh, cfg, prev=None, mv=None):
         line |= touch & ~noline
     if cfg.get("pp_lines"):
         line = V7.pixel_perfect(line)
+    if sh.cel and sh.cel.get("line_min", 0) > 1:
+        # niente frammenti di linea interna più corti di line_min px (8-connessi): a 1x sono macchie
+        lab, nlab = ndimage.label(line, structure=np.ones((3, 3)))
+        if nlab:
+            sizes = ndimage.sum(np.ones_like(lab), lab, index=np.arange(1, nlab + 1))
+            line = np.isin(lab, np.nonzero(sizes >= sh.cel["line_min"])[0] + 1)
     for y, x in zip(*np.nonzero(line)):
         rn = Rp[y, x]
         big[y, x, :3] = sh.color(rn, 0) if rn else hx(sh.pal["OUT"][0])
@@ -383,7 +497,7 @@ def compose(lo, sh, cfg, prev=None, mv=None):
         Lr = np.array(cfg["rim_dir"], np.float32)
         Lr /= np.linalg.norm(Lr)
         npad = np.zeros((H, W, 3), np.float32)
-        npad[pad:pad + h, pad:pad + w] = n
+        npad[pad:pad + h, pad:pad + w] = lo.get("n_rim", n)
         rimv = (npad * Lr).sum(-1)
         edge = np.zeros((H, W), bool)
         for dy, dx in [(0, -1), (-1, 0), (-1, -1)]:
@@ -402,13 +516,26 @@ def compose(lo, sh, cfg, prev=None, mv=None):
     big[out] = (*hx(sh.pal["OUT"][0]), 255)
     if cfg.get("selout"):
         V7.selout_colors(big, A, Rp, out, sh.pal, hx(sh.pal["OUT"][0]))
+        if sh.cel and sh.cel.get("selout_min", 0) > 1:
+            # tratti di contorno colorato più corti di selout_min px tornano al contorno scuro
+            oc = np.array(hx(sh.pal["OUT"][0]), np.uint8)
+            col = out & (big[..., :3] != oc).any(-1)
+            kk = (big[..., 0].astype(np.int64) << 16) | (big[..., 1].astype(np.int64) << 8) | big[..., 2]
+            for v in np.unique(kk[col]):
+                lab, nlab = ndimage.label(col & (kk == v), structure=np.ones((3, 3)))
+                sizes = ndimage.sum(np.ones_like(lab), lab, index=np.arange(1, nlab + 1))
+                short = np.isin(lab, np.nonzero(sizes < sh.cel["selout_min"])[0] + 1)
+                big[short, :3] = oc
     prot = np.isin(Ip, [ID[k] for k in FEATURES if k in ID] + [ID["GLOW_LINE"]])
     big = fix_orphans(big, prot)
     return big[pad:pad + h, pad:pad + w], band
 
 
 def fix_orphans(big, protect):
-    """pixel isolati di un colore non di dettaglio prendono il colore dei vicini più frequente."""
+    """pixel isolati di un colore non di dettaglio prendono il colore dei vicini più frequente. Si copia solo il
+    colore, dal vicino che ce l'ha: l'alfa non cambia, quindi la sagoma resta quella del G-buffer. (Fino alla v7 si
+    copiava il pixel opposto a quel vicino, a volte di un altro colore e a volte vuoto: da lì le tacche di 1 px sul
+    contorno.)"""
     H, W = big.shape[:2]
     key = (big[..., 0].astype(np.int64) << 16) | (big[..., 1].astype(np.int64) << 8) | big[..., 2]
     key[big[..., 3] == 0] = -1
@@ -421,7 +548,7 @@ def fix_orphans(big, protect):
         if vals.count(best) >= 2:
             k = [i for i in range(4) if nb[i, y, x] == best][0]
             dy, dx = N4[k]
-            out[y, x] = big[y - dy, x - dx]
+            out[y, x, :3] = big[y + dy, x + dx, :3]
     return out
 
 
@@ -485,18 +612,60 @@ def pixelize_sequence(raw_anim_dir, fdata, ss, shader, cfg, loop=False, faces=No
     results = {}
     labels = {}
     normals = {}
+    cel = cfg.get("cel") or {}
+    relabel = None
+    if cel.get("relabel"):
+        # pieghe stampate (TOP_FOLD, PANTS_FOLD) rimesse nel loro materiale: nel cel non fanno macchie
+        relabel = np.arange(256, dtype=np.int32)
+        for src, dst in cel["relabel"].items():
+            if src in shader.ID and dst in shader.ID:
+                relabel[shader.ID[src]] = shader.ID[dst]
+    contact = cel.get("contact")
+    W1 = None
     for step, i in enumerate(passes):
         fd = fdata[i]
         F = load_frame(os.path.join(raw_anim_dir, fd["file"]))
+        W1 = F["a"].shape[1] // ss
+        if relabel is not None:
+            F["ids"] = relabel[F["ids"]]
         occ = ao_hi(F, ss) if cfg["ao_k"] > 0 else None
+        occ_c = None
+        if contact:
+            occ_c = contact_ao(F, ss, contact["pairs"], tuple(contact.get("r_px", (1.0, 2.0))),
+                               contact.get("eps", 0.03))
         mv = None
         if prev is not None and cfg["hyst"]:
             mvd = part_motion(prev_fd, fd)
             mv = mv_field(part_map_lo(F["part"], ss), mvd)
-        lo = downsample(F, ss, cfg, shader.ID, prev if cfg["hyst"] else None, mv, occ)
+        lo = downsample(F, ss, cfg, shader.ID, prev if cfg["hyst"] else None, mv, occ, occ_c)
+        if cel.get("islands"):
+            isl = cel["islands"]
+            lo["ids"] = clean_islands(lo["ids"], lo["alpha"], [shader.ID[k] for k in isl["mats"] if k in shader.ID],
+                                      isl.get("min_px", 4))
+        if cel.get("rim_capsule") is not None:
+            # riflesso magenta calcolato con le normali di prima (render + capsule leggere): le normali lisciate del
+            # cel lo spegnerebbero sui bordi
+            lo["n_rim"] = V7.capsule_normals(dict(lo), fd, cfg["p1"], W1, cel["rim_capsule"])
         if cfg.get("capsule_n", 0) > 0:
-            W1 = F["a"].shape[1] // ss
             lo["n"] = V7.capsule_normals(lo, fd, cfg["p1"], W1, cfg["capsule_n"])
+        if cel.get("head_n", 0) > 0:
+            hm = [shader.ID[k] for k in cel["head_mats"] if k in shader.ID] if cel.get("head_mats") else None
+            lo["n"] = V7.head_normals(lo, fd, cfg["p1"], W1, cel["head_n"], cel.get("head_c_dz", 0.0), hm)
+        if cel.get("n_smooth", 0) > 0:
+            lo["n"] = smooth_normals(lo, cel["n_smooth"], cel.get("n_smooth_by", "part"))
+        if contact:
+            # maschera dei contatti, con isteresi compensata dal moto delle ossa: un pixel che era in contatto ci
+            # resta finché l'occlusione supera contact.keep
+            cm = lo["occ_c"] > contact.get("thr", 0.2)
+            keep_thr = contact.get("keep")
+            if prev is not None and cfg["hyst"] and "contact_m" in prev and keep_thr is not None:
+                h_, w_ = cm.shape
+                yy, xx = np.mgrid[0:h_, 0:w_]
+                qy = np.clip(yy - mv[..., 1], 0, h_ - 1)
+                qx = np.clip(xx - mv[..., 0], 0, w_ - 1)
+                pcm = prev["contact_m"][qy, qx]
+                cm = np.where(pcm, lo["occ_c"] > keep_thr, cm)
+            lo["contact_m"] = cm & lo["alpha"]
         sprite, band = compose(lo, shader, cfg, prev if cfg["hyst"] else None, mv)
         lo["band"] = band
         prev, prev_fd = lo, fd

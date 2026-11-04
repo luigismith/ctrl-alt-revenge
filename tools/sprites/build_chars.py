@@ -354,6 +354,31 @@ def victim_offsets(gig_cfg, gig_fdata, gig_anchor, enemy_fdata):
 
 
 # ============================================================== assemblaggio
+def palette_remap(cfg, meta, allim):
+    """riduzione della tavolozza su un insieme di fotogrammi -> (mappa, colori). pixel_cfg.pal_mode: "material"
+    fonde solo toni vicini della stessa rampa (v7), "cel" fonde con i ruoli dei colori (pix_v7.reduce_cel),
+    altrimenti riduzione globale in CIELAB."""
+    pal = cfg["palette"]
+    pm = cfg.get("pixel_cfg", {}).get("pal_mode")
+    if pm == "material":
+        import pix_v7
+        sh_, _ = shader_for(cfg, meta)
+        return pix_v7.reduce_by_ramp(allim, pal.get("max_colors", 32), sh_.pal, pal.get("protect", []))
+    if pm == "cel":
+        import pix_v7
+        sh_, _ = shader_for(cfg, meta)
+        cel = cfg.get("pixel_cfg", {}).get("cel") or {}
+        pc = dict(cel.get("pal") or {})
+        if "band_idx" not in pc:
+            # i toni dei materiali sono gli indici della rampa usati dal cel
+            bi = set(cel.get("idx", [1, 3]))
+            for v in (cel.get("mat_idx") or {}).values():
+                bi |= set(v)
+            pc["band_idx"] = sorted(bi)
+        return pix_v7.reduce_cel(allim, pal.get("max_colors", 32), sh_.pal, pal.get("protect", []), **pc)
+    return PX.reduce_palette(allim, pal.get("max_colors", 32), pal.get("protect", []))
+
+
 def step_assemble(cid):
     cfg = C.char_cfg(cid)
     meta = C.load_json(os.path.join(raw_dir(cid), "meta.json"))
@@ -363,13 +388,7 @@ def step_assemble(cid):
     fdata = {n: C.load_json(os.path.join(raw_dir(cid), n, "frames.json")) for n in names}
     # riduzione della tavolozza su tutti i fotogrammi insieme
     allim = [s for n in names for s in sprites[n]]
-    pal = cfg["palette"]
-    if cfg.get("pixel_cfg", {}).get("pal_mode") == "material":
-        import pix_v7
-        sh_, _ = shader_for(cfg, meta)
-        remap, colors = pix_v7.reduce_by_ramp(allim, pal.get("max_colors", 32), sh_.pal, pal.get("protect", []))
-    else:
-        remap, colors = PX.reduce_palette(allim, pal.get("max_colors", 32), pal.get("protect", []))
+    remap, colors = palette_remap(cfg, meta, allim)
     for n in names:
         sprites[n] = [PX.apply_remap(s, remap) for s in sprites[n]]
     C.say(f"  tavolozza {cid}: {len(colors)} colori")

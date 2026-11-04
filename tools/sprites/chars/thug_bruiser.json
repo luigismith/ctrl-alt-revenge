@@ -217,7 +217,7 @@
  "palette": {
   "outline": "#140e1e",
   "rim": "#e0559b",
-  "max_colors": 30,
+  "max_colors": 20,
   "protect": [
    "#140e1e",
    "#e0559b"
@@ -432,8 +432,7 @@
   "spec_mats": {
    "BRASS": 0.75,
    "BOOTS": 0.86,
-   "BELT": 0.85,
-   "SKIN": 0.93
+   "BELT": 0.85
   },
   "big_mats": [
    "SKIN",
@@ -844,12 +843,138 @@
   ],
   "selout": true,
   "pp_lines": true,
-  "band_mode": 1,
-  "capsule_n": 0.35,
-  "pal_mode": "material",
+  "band_mode": 2,
+  "capsule_n": 0.85,
+  "pal_mode": "cel",
   "stamps": {
    "face": true,
    "eye": "dark"
+  },
+  "ao_k": 0,
+  "min_cluster": 18,
+  "cel": {
+   "thr": [
+    0.22
+   ],
+   "idx": [
+    1,
+    3
+   ],
+   "contact": {
+    "pairs": [
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      6,
+      1
+     ],
+     [
+      9,
+      12
+     ],
+     [
+      12,
+      9
+     ],
+     [
+      1,
+      2
+     ]
+    ],
+    "thr": 0.25,
+    "keep": 0.15,
+    "r_px": [
+     1.0,
+     2.0
+    ]
+   },
+   "n_smooth": 2.0,
+   "head_n": 0,
+   "spec_top": true,
+   "relabel": {
+    "TOP_FOLD": "TOP",
+    "PANTS_FOLD": "PANTS"
+   },
+   "pal": {},
+   "shadow_mix": {
+    "*": 0.35,
+    "TOP": 0.0,
+    "SKIN": 0.0
+   },
+   "islands": {
+    "mats": [
+     "TOP_LINING",
+     "HOOD",
+     "HOOD_DARK",
+     "TOP_SEAM",
+     "TOP_DARK"
+    ],
+    "min_px": 4
+   },
+   "head_mats": [
+    "SKIN",
+    "HAIR",
+    "SKIN_DARK"
+   ],
+   "mat_thr": {
+    "HOOD": [],
+    "TOP_LINING": [],
+    "BOOT_SOLE": [
+     0.22
+    ],
+    "TOP": [
+     -0.1,
+     0.3
+    ],
+    "PANTS": [
+     0.18,
+     0.6
+    ],
+    "SKIN": [
+     -0.05,
+     0.45
+    ]
+   },
+   "mat_idx": {
+    "HOOD": [
+     2
+    ],
+    "TOP_LINING": [
+     1
+    ],
+    "BOOT_SOLE": [
+     1,
+     2
+    ],
+    "TOP": [
+     1,
+     2,
+     3
+    ],
+    "SKIN": [
+     1,
+     2,
+     3
+    ],
+    "PANTS": [
+     1,
+     3,
+     4
+    ]
+   },
+   "line_min": 3,
+   "selout_min": 3,
+   "rim_capsule": 0.35
   }
  },
  "action_libs": [
