@@ -1,0 +1,72 @@
+{
+  "format": 1,
+  "level_width": 1920,
+  "floor_band": [
+    150,
+    208
+  ],
+  "layers": [
+    {
+      "name": "sky",
+      "image": "sky.png",
+      "scroll": 0.0,
+      "y": 0,
+      "repeat_x": 0,
+      "z": -100
+    },
+    {
+      "name": "far",
+      "image": "far.png",
+      "scroll": 0.125,
+      "y": 26,
+      "repeat_x": 0,
+      "z": -90,
+      "emissive": "far_emis.png"
+    },
+    {
+      "name": "mid",
+      "image": "mid.png",
+      "scroll": 0.25,
+      "y": 14,
+      "repeat_x": 0,
+      "z": -80,
+      "emissive": "mid_emis.png"
+    },
+    {
+      "name": "near",
+      "image": "near.png",
+      "scroll": 0.5,
+      "y": 0,
+      "repeat_x": 0,
+      "z": -70,
+      "emissive": "near_emis.png"
+    },
+    {
+      "name": "backdrop",
+      "image": "backdrop.png",
+      "scroll": 1.0,
+      "y": 0,
+      "repeat_x": 0,
+      "z": -20,
+      "emissive": "backdrop_emis.png"
+    },
+    {
+      "name": "floor",
+      "image": "floor.png",
+      "scroll": 1.0,
+      "y": 130,
+      "repeat_x": 0,
+      "z": -10,
+      "emissive": "floor_emis.png"
+    },
+    {
+      "name": "fg",
+      "image": "fg.png",
+      "scroll": 1.25,
+      "y": 0,
+      "repeat_x": 0,
+      "z": 100,
+      "emissive": "fg_emis.png"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "seed": 7,
+  "start": {"x":780.0,"y":178.0},
+  "note": "GIG afferra il punk, due ginocchiate e la proiezione.",
+  "length": 265,
+  "input": [
+    [0,"R"],
+    [98,"L"],
+    [112,"A"],
+    [113,""],
+    [136,"A"],
+    [137,""],
+    [160,"A"],
+    [161,""],
+    [182,"L"]
+  ]
+}

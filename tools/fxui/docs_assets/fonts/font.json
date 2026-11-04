@@ -1,0 +1,10 @@
+{
+  "file": "car_pixel_bold.ttf",
+  "size": 12,
+  "note": "Font predefinito dell'interfaccia (letto da src/ui/ui_font.gd). 'size' è la dimensione esatta: 12 = un pixel del font per pixel del gioco; per ingrandire solo multipli (24, 36, 48). Vedi README.md.",
+  "fonts": {
+    "bold": {"file": "car_pixel_bold.ttf", "size": 12, "use": "nomi, punteggio, vite, menu, avvisi brevi"},
+    "regular": {"file": "car_pixel_regular.ttf", "size": 12, "use": "testi lunghi con minuscole, crediti, licenze"}
+  },
+  "metrics": {"ascent": 10, "descent": 2, "line_height": 12, "cap_height": 7, "x_height": 5}
+}

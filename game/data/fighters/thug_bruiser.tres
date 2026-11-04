@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/fighter_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"thug_bruiser"
+display_name = "BRUTO"
+sprite_id = &"thug_bruiser"
+max_hp = 110
+walk_speed = Vector2(0.8, 0.5)
+run_speed = 1.5
+jump_velocity = 3.5
+gravity = 0.26
+getup_invuln = 20
+down_ticks = 46
+ko_score = 1000
+shadow_width = 36
+attacks = PackedStringArray("thug_bruiser_punch")
+attack_weights = PackedFloat32Array(1)
+wait_distance = Vector2(62, 90)
+wait_lane_offset = Vector2(14, 24)
+cooldown_ticks = Vector2i(72, 120)
+approach_timeout = 200

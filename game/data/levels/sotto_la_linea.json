@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "id": "sotto_la_linea",
+  "title": "1 · SOTTO LA LINEA",
+  "width": 1920,
+  "floor_band": [150, 208],
+  "player_start": [56, 184],
+  "env": "res://assets/env/sotto_la_linea/layers.json",
+  "waves": [
+    {
+      "id": "ondata_1",
+      "camera_x": 576,
+      "spawns": [
+        {"type": "thug_punk", "delay": 20, "side": 1, "y": 176}
+      ]
+    },
+    {
+      "id": "arena",
+      "camera_x": 1536,
+      "final": true,
+      "music_layer": "arena",
+      "spawns": [
+        {"type": "thug_punk", "delay": 20, "side": 1, "y": 170},
+        {"type": "thug_bruiser", "delay": 200, "side": -1, "y": 194}
+      ]
+    }
+  ],
+  "props": [
+    {"type": "bin", "x": 1050, "y": 160},
+    {"type": "cable", "x0": 1230, "x1": 1270}
+  ]
+}

@@ -1,5 +1,6 @@
 extends Node
-## Crea le azioni di input da codice (più affidabile che scriverle a mano in project.godot).
+## Crea le azioni di input da codice (più affidabile che scriverle a mano in project.godot)
+## e campiona gli ingressi di gioco in un InputFrame una volta per tick.
 ## Nessuna azione usa Shift: in Godot 4.7.2 può restare "premuto" (bug #122554).
 
 const KEYS := {
@@ -10,6 +11,12 @@ const KEYS := {
 	"attack": [KEY_J, KEY_Z],
 	"jump": [KEY_K, KEY_X],
 	"pause": [KEY_ESCAPE, KEY_ENTER],
+	"menu_confirm": [KEY_ENTER, KEY_SPACE, KEY_J, KEY_Z],
+	"menu_back": [KEY_ESCAPE, KEY_BACKSPACE],
+	"debug_boxes": [KEY_F1],
+	"debug_slow": [KEY_F2],
+	"debug_freeze": [KEY_F3],
+	"debug_step": [KEY_F4],
 }
 
 const PAD_BUTTONS := {
@@ -20,6 +27,8 @@ const PAD_BUTTONS := {
 	"attack": [JOY_BUTTON_X, JOY_BUTTON_Y],
 	"jump": [JOY_BUTTON_A, JOY_BUTTON_B],
 	"pause": [JOY_BUTTON_START],
+	"menu_confirm": [JOY_BUTTON_A, JOY_BUTTON_START],
+	"menu_back": [JOY_BUTTON_B],
 }
 
 const PAD_AXES := {
@@ -28,6 +37,9 @@ const PAD_AXES := {
 	"move_up": [JOY_AXIS_LEFT_Y, -1.0],
 	"move_down": [JOY_AXIS_LEFT_Y, 1.0],
 }
+
+## Azioni di gioco nello stesso ordine dei bit di InputFrame.
+const GAME_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down", &"attack", &"jump"]
 
 
 func _ready() -> void:
@@ -49,3 +61,21 @@ func _ready() -> void:
 			jm.axis = PAD_AXES[action][0]
 			jm.axis_value = PAD_AXES[action][1]
 			InputMap.action_add_event(action, jm)
+
+
+## Tasti di gioco tenuti adesso, come bit di InputFrame. Un tocco più breve di un tick conta come tenuto.
+func sample_held() -> int:
+	var bits := 0
+	for i in GAME_ACTIONS.size():
+		if Input.is_action_pressed(GAME_ACTIONS[i]) or Input.is_action_just_pressed(GAME_ACTIONS[i]):
+			bits |= 1 << i
+	return bits
+
+
+## Tasti di gioco premuti in questo tick di fisica.
+func sample_just_pressed() -> int:
+	var bits := 0
+	for i in GAME_ACTIONS.size():
+		if Input.is_action_just_pressed(GAME_ACTIONS[i]):
+			bits |= 1 << i
+	return bits

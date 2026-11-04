@@ -4,7 +4,8 @@
 """Tiene fuori dal repository PUBBLICO i media che non si possono ridistribuire.
 
   python -I tools/guard_assets.py --staged   # hook pre-commit (contenuto dell'indice)
-  python -I tools/guard_assets.py --all      # controllo completo (tutti i file tracciati)
+  python -I tools/guard_assets.py --all      # controllo completo: file tracciati e file nuovi
+                                             # non ignorati (quelli che un "git add" prenderebbe)
 
 Blocca:
   * tutto ciò che sta in assets_private/ tranne manifest.json e README.md
@@ -52,8 +53,9 @@ def sniff(head: bytes) -> str | None:
     return None
 
 
-def entries(staged: bool) -> list[tuple[str, str]]:
-    """Coppie (percorso, id del blob) prese dall'indice."""
+def entries(staged: bool) -> list[tuple[str, str | None]]:
+    """Coppie (percorso, id del blob) prese dall'indice; con --all anche i file non ancora
+    tracciati e non ignorati, con id None (si leggono dal disco)."""
     if staged:
         names = git("diff", "--cached", "--name-only", "-z", "--diff-filter=ACMR").split(b"\0")
         names = [n for n in names if n]
@@ -62,15 +64,24 @@ def entries(staged: bool) -> list[tuple[str, str]]:
         raw = git("ls-files", "-s", "-z", "--", *[n.decode() for n in names])
     else:
         raw = git("ls-files", "-s", "-z")
-    out = []
+    out: list[tuple[str, str | None]] = []
     for rec in raw.split(b"\0"):
         if rec:
             meta, path = rec.split(b"\t", 1)
             out.append((path.decode("utf-8", "surrogateescape"), meta.split()[1].decode()))
+    if not staged:
+        for rec in git("ls-files", "--others", "--exclude-standard", "-z").split(b"\0"):
+            if rec:
+                out.append((rec.decode("utf-8", "surrogateescape"), None))
     return out
 
 
-def head_of(blob: str) -> tuple[int, bytes]:
+def head_of(blob: str | None, path: str) -> tuple[int, bytes]:
+    """Dimensione e primi 16 byte: dal blob dell'indice o, per i file nuovi, dal disco."""
+    if blob is None:
+        p = ROOT / path
+        with open(p, "rb") as fh:
+            return p.stat().st_size, fh.read(16)
     size = int(git("cat-file", "-s", blob))
     p = subprocess.Popen(["git", "cat-file", "blob", blob], cwd=ROOT,
                          stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -99,7 +110,7 @@ def main() -> int:
         elif Path(path).suffix.lower() in AUDIO_EXT:
             reason = "estensione di file audio"
         else:
-            size, head = head_of(blob)
+            size, head = head_of(blob, path)
             kind = sniff(head)
             if kind:
                 reason = f"il contenuto sembra {kind}"

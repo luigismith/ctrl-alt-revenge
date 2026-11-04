@@ -1,0 +1,186 @@
+{
+  "hit_spark_light": {
+    "image": "hit_spark_light.png",
+    "frame": [
+      24,
+      24
+    ],
+    "count": 4,
+    "ticks": 2,
+    "anchor": [
+      12,
+      12
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Colpo leggero (jab, ginocchiata): stella bianca, gialla e arancio. Simmetrica."
+  },
+  "hit_spark_heavy": {
+    "image": "hit_spark_heavy.png",
+    "frame": [
+      40,
+      40
+    ],
+    "count": 5,
+    "ticks": 2,
+    "anchor": [
+      20,
+      20
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Colpo pesante (calcio finale, proiezione, haymaker): stella grande con anello d'urto."
+  },
+  "dust_land": {
+    "image": "dust_land.png",
+    "frame": [
+      64,
+      24
+    ],
+    "count": 6,
+    "ticks": 3,
+    "anchor": [
+      32,
+      22
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Atterraggio e corpo che cade: due nuvole che si allargano ai lati. Ancora = punto a terra."
+  },
+  "dust_skid": {
+    "image": "dust_skid.png",
+    "frame": [
+      32,
+      20
+    ],
+    "count": 5,
+    "ticks": 3,
+    "anchor": [
+      24,
+      18
+    ],
+    "loop": false,
+    "mode": "anim",
+    "flip": true,
+    "note": "Sbuffo dai piedi (frenata, spinta all'indietro). Disegnato per chi guarda a destra: il pennacchio va verso -x. Specchiare per chi guarda a sinistra."
+  },
+  "glint": {
+    "image": "glint.png",
+    "frame": [
+      25,
+      25
+    ],
+    "count": 6,
+    "ticks": 2,
+    "anchor": [
+      12,
+      12
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Lampo a stella che annuncia l'haymaker del punk: 6 x 2 = 12 tick, dal tick 20 dell'avvio."
+  },
+  "cyber_spark": {
+    "image": "cyber_spark.png",
+    "frame": [
+      40,
+      40
+    ],
+    "count": 5,
+    "ticks": 2,
+    "anchor": [
+      20,
+      20
+    ],
+    "loop": false,
+    "mode": "anim",
+    "flip": true,
+    "note": "Scarica cyan del gancio cyber. Gli archi vanno un po' più verso +x: specchiare se il colpo va verso sinistra."
+  },
+  "ombra": {
+    "image": "ombra.png",
+    "frame": [
+      48,
+      12
+    ],
+    "count": 3,
+    "ticks": 0,
+    "anchor": [
+      24,
+      6
+    ],
+    "loop": false,
+    "mode": "variants",
+    "variants": [
+      "grande",
+      "media",
+      "piccola"
+    ],
+    "note": "Non è un'animazione: fotogramma 0 = ombra grande (46x10, riempie il fotogramma: bruto, corpi a terra; è anche quella da stirare se si vuole una larghezza qualsiasi), 1 = media (36x8: GIG e punk), 2 = piccola (24x6: oggetti, personaggi in alto nel salto). Ellisse semitrasparente centrata sull'ancora, da disegnare in (x, y) prima dello sprite; a 1x resta perfetta al pixel."
+  },
+  "rain_streak": {
+    "image": "rain_streak.png",
+    "frame": [
+      6,
+      16
+    ],
+    "count": 4,
+    "ticks": 0,
+    "anchor": [
+      1,
+      15
+    ],
+    "loop": false,
+    "mode": "variants",
+    "note": "Quattro gocce di lunghezza diversa (7, 10, 13, 16 px), semitrasparenti. Non è un'animazione: ogni goccia sceglie un fotogramma e si muove scendendo di 4 px per ogni px verso sinistra (pendenza 0,25); l'ancora è la testa (il punto più basso)."
+  },
+  "rain_sheet": {
+    "image": "rain_sheet.png",
+    "frame": [
+      128,
+      128
+    ],
+    "count": 1,
+    "ticks": 0,
+    "anchor": [
+      0,
+      0
+    ],
+    "loop": false,
+    "mode": "variants",
+    "tile": true,
+    "note": "Facoltativo: tessera di pioggia 128x128 ripetibile, da far scorrere (per esempio 6 px in basso e 1,5 px a sinistra per tick) al posto delle gocce singole."
+  },
+  "rain_splash": {
+    "image": "rain_splash.png",
+    "frame": [
+      12,
+      8
+    ],
+    "count": 4,
+    "ticks": 3,
+    "anchor": [
+      6,
+      7
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Schizzo a terra di una goccia. Ancora = punto d'impatto sul suolo."
+  },
+  "ko_flash": {
+    "image": "ko_flash.png",
+    "frame": [
+      64,
+      64
+    ],
+    "count": 6,
+    "ticks": 3,
+    "anchor": [
+      32,
+      32
+    ],
+    "loop": false,
+    "mode": "anim",
+    "note": "Facoltativo: lampo del KO finale dell'ondata (durante il congelamento di 26 tick). 6 x 3 = 18 tick."
+  }
+}

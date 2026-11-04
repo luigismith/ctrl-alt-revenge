@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="AttackData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/attack_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"gig_knee"
+anim = &"knee"
+startup = 4
+active = 3
+recovery = 10
+damage = 6
+hitstop_attacker = 6
+hitstop_victim = 8
+stun = 0
+weight = 1
+push = 0.0
+juggle_cost = 1
+depth_tolerance = 10.0
+points = 30
+sfx_whoosh = &"whoosh_light"
+sfx_hit = &"knee"
+fx_hit = &"hit_spark_light"
+hitbox = Rect2i(6, -48, 18, 14)

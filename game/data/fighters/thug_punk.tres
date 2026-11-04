@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/fighter_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"thug_punk"
+display_name = "PUNK"
+sprite_id = &"thug_punk"
+max_hp = 48
+walk_speed = Vector2(1.1, 0.7)
+run_speed = 2.0
+jump_velocity = 4.0
+gravity = 0.26
+getup_invuln = 20
+down_ticks = 40
+ko_score = 500
+shadow_width = 26
+attacks = PackedStringArray("thug_punk_jab", "thug_punk_haymaker")
+attack_weights = PackedFloat32Array(0.65, 0.35)
+wait_distance = Vector2(60, 90)
+wait_lane_offset = Vector2(14, 26)
+cooldown_ticks = Vector2i(72, 120)
+approach_timeout = 150

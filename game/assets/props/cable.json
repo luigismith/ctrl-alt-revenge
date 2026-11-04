@@ -1,0 +1,177 @@
+{
+ "id": "cable",
+ "format": 1,
+ "image": "cable.png",
+ "pixels_per_meter": 48,
+ "animations": {
+  "idle": {
+   "loop": true,
+   "frames": [
+    {
+     "rect": [
+      1,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 3,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [
+      "sfx:zap"
+     ],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    },
+    {
+     "rect": [
+      98,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 4,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    },
+    {
+     "rect": [
+      195,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 4,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    },
+    {
+     "rect": [
+      292,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 3,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    },
+    {
+     "rect": [
+      389,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 4,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    },
+    {
+     "rect": [
+      486,
+      1,
+      96,
+      74
+     ],
+     "anchor": [
+      46,
+      10
+     ],
+     "ticks": 4,
+     "hurt": [],
+     "hit": [
+      [
+       -22,
+       -6,
+       44,
+       6
+      ]
+     ],
+     "events": [],
+     "tags": [
+      "active"
+     ],
+     "dx": 0
+    }
+   ]
+  }
+ }
+}

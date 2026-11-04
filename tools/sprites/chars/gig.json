@@ -1,0 +1,1292 @@
+{
+ "id": "gig",
+ "outfit": "gig",
+ "hair_meshes": [
+  "Hair_Buzzed",
+  "Hair_Beard"
+ ],
+ "normals": "proxy",
+ "frame_px": 208,
+ "proportions": {
+  "Head": {
+   "scale": [
+    1.2,
+    1.2,
+    1.2
+   ]
+  },
+  "clavicle_l": {
+   "scale": [
+    1.0,
+    1.22,
+    1.0
+   ]
+  },
+  "clavicle_r": {
+   "scale": [
+    1.0,
+    1.22,
+    1.0
+   ]
+  },
+  "upperarm_l": {
+   "scale": [
+    1.12,
+    1.0,
+    1.12
+   ],
+   "inherit": "NONE"
+  },
+  "upperarm_r": {
+   "scale": [
+    1.12,
+    1.0,
+    1.12
+   ],
+   "inherit": "NONE"
+  },
+  "lowerarm_l": {
+   "scale": [
+    1.2,
+    1.0,
+    1.2
+   ],
+   "inherit": "NONE"
+  },
+  "lowerarm_r": {
+   "scale": [
+    1.2,
+    1.0,
+    1.2
+   ],
+   "inherit": "NONE"
+  },
+  "hand_l": {
+   "scale": [
+    1.4,
+    1.4,
+    1.4
+   ],
+   "inherit": "NONE"
+  },
+  "hand_r": {
+   "scale": [
+    1.4,
+    1.4,
+    1.4
+   ],
+   "inherit": "NONE"
+  },
+  "spine_03": {
+   "scale": [
+    1.06,
+    1.0,
+    1.04
+   ]
+  },
+  "neck_01": {
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "inherit": "NONE"
+  }
+ },
+ "outfit_cfg": {
+  "eye_side": "right",
+  "sleeve_l_t": 0.8,
+  "sleeve_r_t": 0.2,
+  "hem_z": 0.865,
+  "shirt_offset": 0.024,
+  "beard_len": 1.15,
+  "topknot": {
+   "angle_deg": 40,
+   "head_r": 0.104,
+   "bun_r": [
+    0.046,
+    0.05,
+    0.046
+   ],
+   "tuft": 0.0
+  },
+  "cyber": {
+   "upper_from": 0.55,
+   "rings": [
+    0.3,
+    0.62
+   ]
+  },
+  "hood": {
+   "ring_r": 0.1,
+   "tube_r": 0.034,
+   "dz": 0.024,
+   "string_len": 0.1
+  },
+  "boots": {
+   "top_z": 0.262,
+   "cuff_z": 0.225
+  },
+  "brow_bushy": 0.75,
+  "hairline": {
+   "cut_y": -0.04,
+   "above_eye": 0.018
+  },
+  "brow_lift": 0.009
+ },
+ "authored": [
+  {
+   "set": "gig_air_kick",
+   "name": "AUTH_air_kick"
+  },
+  {
+   "set": "gig_hook",
+   "name": "AUTH_hook"
+  },
+  {
+   "set": "gig_grab",
+   "name": "AUTH_grab"
+  },
+  {
+   "set": "gig_knee",
+   "name": "AUTH_knee"
+  },
+  {
+   "set": "gig_throw",
+   "name": "AUTH_throw"
+  },
+  {
+   "set": "hurt_high",
+   "name": "AUTH_hurt_high"
+  },
+  {
+   "set": "hurt_low",
+   "name": "AUTH_hurt_low"
+  },
+  {
+   "set": "knock_recoil",
+   "name": "AUTH_knock"
+  }
+ ],
+ "beauty_cols": {
+  "SKIN": "#c98466",
+  "SKIN_DARK": "#9a5a44",
+  "HAIR": "#a59c8f",
+  "HAIR_TIE": "#2a2a30",
+  "TOP": "#b8802c",
+  "TOP_FOLD": "#7a4f1a",
+  "TOP_SEAM": "#6a4416",
+  "TOP_LINING": "#d09a4c",
+  "TOP_DARK": "#7a4f1a",
+  "HOOD": "#5d5f6c",
+  "HOOD_DARK": "#3c3e48",
+  "PANTS": "#5d6634",
+  "PANTS_FOLD": "#3f4622",
+  "PANTS_RIP": "#c98466",
+  "BELT": "#3a2a20",
+  "BOOTS": "#7a4a30",
+  "BOOT_SOLE": "#2a2228",
+  "BOOT_CUFF": "#5a3422",
+  "LACE": "#3a2a20",
+  "BEARD": "#b0a89c",
+  "BEARD_EDGE": "#7a7064",
+  "BROW": "#4a3e34",
+  "EYE_GLOW": "#33e4ff",
+  "EYE_DARK": "#101010",
+  "EYE_SOCKET": "#8a4a3a",
+  "NOSE_SHADOW": "#9a5a44",
+  "MOUTH": "#4a1c26",
+  "METAL": "#4a5466",
+  "METAL_DARK": "#2a303c",
+  "METAL_LIGHT": "#6a7690",
+  "METAL_SEAM": "#1a1e26",
+  "GLOW_LINE": "#33e4ff",
+  "KNUCKLE": "#5a6478",
+  "WRAP": "#2f5fa8",
+  "WRAP_EDGE": "#224680",
+  "CREST": "#ff00ff",
+  "CREST_DARK": "#800080",
+  "STUD": "#a0a0a0",
+  "BRASS": "#b08a3a"
+ },
+ "palette": {
+  "outline": "#140e1e",
+  "rim": "#e0559b",
+  "max_colors": 40,
+  "protect": [
+   "#140e1e",
+   "#e0559b",
+   "#33e4ff",
+   "#1fb0d0"
+  ],
+  "ramps": {
+   "SKIN": {
+    "mid": "#c98466",
+    "dh_dark": 16,
+    "vd": 0.72
+   },
+   "HAIR": {
+    "mid": "#a59c8f",
+    "dark_target": 15,
+    "dh_dark": 10,
+    "sd": 1.35,
+    "vd": 0.64,
+    "vl": 1.16,
+    "sl": 0.85,
+    "light_target": 45,
+    "dh_light": 6
+   },
+   "TOP": {
+    "mid": "#a86c26",
+    "dark_target": 10,
+    "dh_dark": 10,
+    "sd": 1.0,
+    "vd": 0.7,
+    "vl": 1.12,
+    "sl": 0.92,
+    "light_target": 32,
+    "dh_light": 5
+   },
+   "HOOD": {
+    "mid": "#5d5f6c",
+    "dark_target": 250,
+    "dh_dark": 8,
+    "vd": 0.7,
+    "vl": 1.22
+   },
+   "PANTS": {
+    "mid": "#5f6b34",
+    "dark_target": 200,
+    "dh_dark": 14,
+    "vd": 0.68,
+    "vl": 1.22
+   },
+   "BELT": {
+    "mid": "#4a3428",
+    "vd": 0.75,
+    "vl": 1.3
+   },
+   "BOOTS": {
+    "mid": "#86563e",
+    "dark_target": 330,
+    "dh_dark": 12,
+    "sd": 1.0,
+    "vd": 0.72,
+    "vl": 1.14,
+    "sl": 0.92
+   },
+   "SOLE": {
+    "mid": "#4a3f4e",
+    "vd": 0.75,
+    "vl": 1.3
+   },
+   "METAL": {
+    "mid": "#5d687e",
+    "dark_target": 250,
+    "dh_dark": 10,
+    "vd": 0.62,
+    "vl": 1.16
+   },
+   "DMETAL": {
+    "mid": "#3f4758",
+    "dark_target": 255,
+    "vd": 0.72,
+    "vl": 1.25
+   },
+   "WRAP": {
+    "mid": "#3a6cb8",
+    "vd": 0.72,
+    "vl": 1.18
+   },
+   "MOUTH": {
+    "list": [
+     "#4a1c26",
+     "#4a1c26",
+     "#6a2c34",
+     "#6a2c34",
+     "#6a2c34"
+    ]
+   },
+   "GLOW": {
+    "list": [
+     "#0e5a6a",
+     "#1fb0d0",
+     "#33e4ff",
+     "#c8faff",
+     "#ffffff"
+    ]
+   }
+  },
+  "spec": {
+   "SKIN": [
+    "SKIN",
+    [
+     -0.02,
+     0.44,
+     0.82
+    ]
+   ],
+   "SKIN_DARK": [
+    "SKIN",
+    null,
+    1
+   ],
+   "HAIR": [
+    "HAIR",
+    [
+     0.05,
+     0.48,
+     0.8
+    ]
+   ],
+   "BEARD": [
+    "HAIR",
+    [
+     0.08,
+     0.5,
+     0.82
+    ]
+   ],
+   "BEARD_EDGE": [
+    "HAIR",
+    null,
+    1
+   ],
+   "HAIR_TIE": [
+    "SOLE",
+    null,
+    1
+   ],
+   "BROW": [
+    "HAIR",
+    null,
+    0
+   ],
+   "EYE_SOCKET": [
+    "SKIN",
+    null,
+    2
+   ],
+   "NOSE_SHADOW": [
+    "SKIN",
+    null,
+    1
+   ],
+   "MOUTH": [
+    "MOUTH",
+    null,
+    0
+   ],
+   "EYE_DARK": [
+    "SKIN",
+    null,
+    1
+   ],
+   "EYE_GLOW": [
+    "GLOW",
+    null,
+    2
+   ],
+   "TOP": [
+    "TOP",
+    [
+     0.0,
+     0.42,
+     0.84
+    ]
+   ],
+   "TOP_FOLD": [
+    "TOP",
+    null,
+    1
+   ],
+   "TOP_SEAM": [
+    "TOP",
+    null,
+    0
+   ],
+   "TOP_LINING": [
+    "TOP",
+    [
+     -0.2,
+     0.32,
+     0.8
+    ]
+   ],
+   "TOP_DARK": [
+    "TOP",
+    null,
+    1
+   ],
+   "HOOD": [
+    "HOOD",
+    [
+     -0.05,
+     0.45,
+     0.8
+    ]
+   ],
+   "HOOD_DARK": [
+    "HOOD",
+    null,
+    1
+   ],
+   "PANTS": [
+    "PANTS",
+    [
+     -0.08,
+     0.38,
+     0.8
+    ]
+   ],
+   "PANTS_FOLD": [
+    "PANTS",
+    null,
+    1
+   ],
+   "BELT": [
+    "BELT",
+    [
+     0.5
+    ]
+   ],
+   "BOOTS": [
+    "BOOTS",
+    [
+     -0.1,
+     0.38,
+     0.76
+    ]
+   ],
+   "BOOT_CUFF": [
+    "BOOTS",
+    null,
+    1
+   ],
+   "BOOT_SOLE": [
+    "SOLE",
+    [
+     0.45
+    ]
+   ],
+   "LACE": [
+    "BOOTS",
+    null,
+    0
+   ],
+   "METAL": [
+    "METAL",
+    [
+     0.0,
+     0.5,
+     0.82
+    ]
+   ],
+   "METAL_LIGHT": [
+    "METAL",
+    [
+     -0.22,
+     0.35,
+     0.75
+    ]
+   ],
+   "METAL_DARK": [
+    "DMETAL",
+    [
+     0.0,
+     0.5,
+     0.82
+    ]
+   ],
+   "METAL_SEAM": [
+    "METAL",
+    null,
+    0
+   ],
+   "KNUCKLE": [
+    "METAL",
+    null,
+    1
+   ],
+   "GLOW_LINE": [
+    "GLOW",
+    null,
+    2
+   ],
+   "WRAP": [
+    "WRAP",
+    [
+     -0.02,
+     0.42,
+     0.78
+    ]
+   ],
+   "WRAP_EDGE": [
+    "WRAP",
+    null,
+    1
+   ]
+  },
+  "spec_mats": {
+   "HAIR": 0.8,
+   "METAL": 0.8,
+   "METAL_LIGHT": 0.8,
+   "BELT": 0.85
+  },
+  "big_mats": [
+   "SKIN",
+   "HAIR",
+   "TOP",
+   "HOOD",
+   "PANTS",
+   "BOOTS",
+   "METAL",
+   "METAL_DARK",
+   "METAL_LIGHT",
+   "BEARD",
+   "WRAP",
+   "TOP_LINING",
+   "BOOT_SOLE"
+  ],
+  "rim_mats": [
+   "TOP",
+   "HAIR",
+   "SKIN",
+   "BEARD",
+   "TOP_FOLD",
+   "HOOD",
+   "METAL_LIGHT",
+   "METAL"
+  ]
+ },
+ "action_libs": [
+  "anim/actions_m2m.blend"
+ ],
+ "boxes": {
+  "head_r": [
+   7,
+   8
+  ],
+  "torso_pad": 4
+ },
+ "portrait": {
+  "action": "Idle_Loop",
+  "frame": 1,
+  "pixels_per_meter": 70,
+  "frame_px": 48,
+  "yaw_deg": 58,
+  "pitch_deg": 6,
+  "dz": 0.0,
+  "shift": [
+   1,
+   -3
+  ]
+ },
+ "anims": {
+  "idle": {
+   "src": "guard",
+   "loop": true,
+   "bob_px": 2,
+   "frames": [
+    {
+     "f": 1,
+     "t": 12
+    },
+    {
+     "f": 2,
+     "t": 8
+    },
+    {
+     "f": 3,
+     "t": 12
+    },
+    {
+     "f": 4,
+     "t": 8
+    }
+   ]
+  },
+  "walk": {
+   "src": "Walk_Loop",
+   "loop": true,
+   "frames": [
+    {
+     "f": 1,
+     "t": 5
+    },
+    {
+     "f": 6,
+     "t": 4
+    },
+    {
+     "f": 11,
+     "t": 5
+    },
+    {
+     "f": 16,
+     "t": 4,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "f": 21,
+     "t": 5
+    },
+    {
+     "f": 26,
+     "t": 4
+    },
+    {
+     "f": 31,
+     "t": 5
+    },
+    {
+     "f": 36,
+     "t": 4,
+     "ev": [
+      "step"
+     ]
+    }
+   ]
+  },
+  "run": {
+   "src": "Sprint_Loop",
+   "loop": true,
+   "frames": [
+    {
+     "f": 1,
+     "t": 5
+    },
+    {
+     "f": 3,
+     "t": 5,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "f": 6,
+     "t": 5
+    },
+    {
+     "f": 8,
+     "t": 5
+    },
+    {
+     "f": 11,
+     "t": 5
+    },
+    {
+     "f": 13,
+     "t": 5,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "f": 16,
+     "t": 5
+    },
+    {
+     "f": 18,
+     "t": 5
+    }
+   ]
+  },
+  "jump_rise": {
+   "src": "NinjaJump_Start",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "f": 3,
+     "t": 4,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 6,
+     "t": 8,
+     "tags": [
+      "air",
+      "hold"
+     ]
+    }
+   ]
+  },
+  "jump_fall": {
+   "src": "NinjaJump_Land",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "f": 0,
+     "t": 4,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 1,
+     "t": 8,
+     "tags": [
+      "air",
+      "hold"
+     ]
+    }
+   ]
+  },
+  "land": {
+   "src": "NinjaJump_Land",
+   "frames": [
+    {
+     "f": 4,
+     "t": 3,
+     "ev": [
+      "sfx:land"
+     ]
+    },
+    {
+     "f": 14,
+     "t": 3
+    }
+   ]
+  },
+  "jab1": {
+   "src": "Punch_Jab",
+   "frames": [
+    {
+     "f": 5,
+     "t": 3,
+     "ev": [
+      "sfx:whoosh_light"
+     ]
+    },
+    {
+     "f": 7,
+     "t": 2,
+     "hit": "fist_l",
+     "scale": {
+      "lowerarm_l": [
+       1.0,
+       1.15,
+       1.0
+      ]
+     }
+    },
+    {
+     "f": 14,
+     "t": 3
+    },
+    {
+     "f": 17,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "f": 20,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    }
+   ]
+  },
+  "jab2": {
+   "src": "Punch_Cross",
+   "frames": [
+    {
+     "f": 6,
+     "t": 3,
+     "ev": [
+      "sfx:whoosh_light"
+     ]
+    },
+    {
+     "f": 10,
+     "t": 2,
+     "hit": "fist_r",
+     "scale": {
+      "lowerarm_r": [
+       1.0,
+       1.35,
+       1.0
+      ],
+      "upperarm_r": [
+       1.0,
+       1.1,
+       1.0
+      ]
+     }
+    },
+    {
+     "f": 16,
+     "t": 3
+    },
+    {
+     "f": 21,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "f": 25,
+     "t": 3,
+     "tags": [
+      "cancel"
+     ]
+    }
+   ]
+  },
+  "hook": {
+   "src": "AUTH_hook",
+   "frames": [
+    {
+     "f": 1,
+     "t": 3,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ]
+    },
+    {
+     "f": 2,
+     "t": 3
+    },
+    {
+     "f": 3,
+     "t": 3,
+     "hit": "fist_l",
+     "dx": 3,
+     "scale": {
+      "lowerarm_l": [
+       1.0,
+       1.15,
+       1.0
+      ]
+     }
+    },
+    {
+     "f": 4,
+     "t": 4
+    },
+    {
+     "f": 5,
+     "t": 4,
+     "tags": [
+      "cancel"
+     ]
+    },
+    {
+     "f": 5,
+     "t": 4,
+     "tags": [
+      "cancel"
+     ]
+    }
+   ]
+  },
+  "kick": {
+   "src": "M2M_KickRoundhouse",
+   "frames": [
+    {
+     "f": 8,
+     "t": 4,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ]
+    },
+    {
+     "f": 10,
+     "t": 3
+    },
+    {
+     "f": 11,
+     "t": 3
+    },
+    {
+     "f": 13,
+     "t": 3,
+     "hit": "foot_l",
+     "scale": {
+      "calf_l": [
+       1.0,
+       1.4,
+       1.0
+      ]
+     }
+    },
+    {
+     "f": 18,
+     "t": 5
+    },
+    {
+     "f": 21,
+     "t": 5
+    },
+    {
+     "f": 23,
+     "t": 5
+    },
+    {
+     "f": 26,
+     "t": 5
+    }
+   ]
+  },
+  "air_kick": {
+   "src": "AUTH_air_kick",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ],
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 2,
+     "t": 8,
+     "hit": "foot_r",
+     "tags": [
+      "air"
+     ],
+     "scale": {
+      "calf_r": [
+       1.0,
+       1.25,
+       1.0
+      ]
+     }
+    },
+    {
+     "f": 3,
+     "t": 6,
+     "tags": [
+      "air",
+      "hold"
+     ]
+    }
+   ]
+  },
+  "grab_hold": {
+   "src": "AUTH_grab",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4,
+     "victim": {
+      "anim": "grabbed",
+      "frame": 0,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    },
+    {
+     "f": 2,
+     "t": 8,
+     "tags": [
+      "hold"
+     ],
+     "victim": {
+      "anim": "grabbed",
+      "frame": 1,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    }
+   ]
+  },
+  "knee": {
+   "src": "AUTH_knee",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4,
+     "ev": [
+      "sfx:whoosh_light"
+     ],
+     "victim": {
+      "anim": "kneed",
+      "frame": 0,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    },
+    {
+     "f": 2,
+     "t": 3,
+     "hit": "knee_r",
+     "victim": {
+      "anim": "kneed",
+      "frame": 1,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    },
+    {
+     "f": 3,
+     "t": 5,
+     "victim": {
+      "anim": "kneed",
+      "frame": 2,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    },
+    {
+     "f": 4,
+     "t": 5,
+     "victim": {
+      "anim": "grabbed",
+      "frame": 1,
+      "grip": "neck",
+      "dy": 2,
+      "behind": true
+     }
+    }
+   ]
+  },
+  "throw": {
+   "src": "AUTH_throw",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4,
+     "ev": [
+      "sfx:whoosh_heavy"
+     ],
+     "victim": {
+      "anim": "thrown",
+      "frame": 2,
+      "grip": "chest",
+      "dy": 2,
+      "behind": true,
+      "dx_adj": 3
+     }
+    },
+    {
+     "f": 2,
+     "t": 4,
+     "victim": {
+      "anim": "thrown",
+      "frame": 3,
+      "grip": "chest",
+      "dy": 2,
+      "behind": true
+     }
+    },
+    {
+     "f": 3,
+     "t": 6,
+     "victim": {
+      "anim": "thrown",
+      "frame": 0,
+      "grip": "pelvis",
+      "dy": 2,
+      "behind": false,
+      "dx_adj": 8
+     }
+    },
+    {
+     "f": 4,
+     "t": 8,
+     "victim": {
+      "anim": "thrown",
+      "frame": 1,
+      "grip": "pelvis",
+      "dy": 2,
+      "behind": false,
+      "dx_adj": 20
+     }
+    }
+   ]
+  },
+  "hurt_high": {
+   "src": "AUTH_hurt_high",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4
+    },
+    {
+     "f": 2,
+     "t": 5
+    },
+    {
+     "f": 3,
+     "t": 5
+    }
+   ]
+  },
+  "hurt_low": {
+   "src": "AUTH_hurt_low",
+   "hurt": "low",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4
+    },
+    {
+     "f": 2,
+     "t": 5
+    },
+    {
+     "f": 3,
+     "t": 5
+    }
+   ]
+  },
+  "knock_air": {
+   "src": "Hit_Knockback",
+   "anchor": "pelvis",
+   "frames": [
+    {
+     "f": 1,
+     "t": 4,
+     "tags": [
+      "air"
+     ],
+     "src": "AUTH_knock"
+    },
+    {
+     "f": 3,
+     "t": 4,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 5,
+     "t": 6,
+     "tags": [
+      "air",
+      "hold"
+     ]
+    }
+   ]
+  },
+  "knock_down": {
+   "src": "Hit_Knockback",
+   "anchor": "pelvis",
+   "hurt": "lying",
+   "frames": [
+    {
+     "f": 8,
+     "t": 4,
+     "tags": [
+      "invuln"
+     ]
+    },
+    {
+     "f": 11,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ]
+    },
+    {
+     "f": 20,
+     "t": 12,
+     "tags": [
+      "invuln",
+      "hold"
+     ]
+    }
+   ]
+  },
+  "getup": {
+   "src": "LayToIdle",
+   "anchor": "pelvis",
+   "frames": [
+    {
+     "f": 3,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ],
+     "hurt": "lying"
+    },
+    {
+     "f": 9,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ],
+     "hurt": "lying"
+    },
+    {
+     "f": 15,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ],
+     "hurt": "lying"
+    },
+    {
+     "f": 21,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ]
+    },
+    {
+     "f": 28,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ]
+    },
+    {
+     "f": 36,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ]
+    },
+    {
+     "f": 44,
+     "t": 6,
+     "tags": [
+      "invuln"
+     ]
+    }
+   ]
+  }
+ },
+ "pixel_cfg": {
+  "mat_lines": [
+   [
+    "PANTS",
+    "TOP"
+   ],
+   [
+    "BOOTS",
+    "PANTS"
+   ],
+   [
+    "SKIN",
+    "WRAP"
+   ],
+   [
+    "SKIN",
+    "TOP_LINING"
+   ],
+   [
+    "SKIN",
+    "TOP"
+   ]
+  ]
+ }
+}

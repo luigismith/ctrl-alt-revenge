@@ -1,0 +1,329 @@
+{
+  "format": 1,
+  "note": "Elementi d'interfaccia di CTRL+ALT REVENGE, in px del gioco (384x216). Ogni chiave è un elemento con 'image' e 'size'; nine_slice = margini [sinistra, sopra, destra, sotto] da non stirare; frame/count/ticks = striscia orizzontale di fotogrammi da 'frame' px, ognuno per 'ticks' tick a 60 Hz. Le chiavi 'fonts', 'colors' e 'hud_layout' non sono immagini. Le scritte variabili usano i font di res://assets/fonts/ (vedi il README lì).",
+  "logo": {
+    "image": "title_logo.png",
+    "size": [
+      248,
+      89
+    ],
+    "note": "Logo del titolo come sulla locandina; bordo, estrusione e ombra compresi."
+  },
+  "subtitle": {
+    "image": "title_subtitle.png",
+    "size": [
+      223,
+      13
+    ],
+    "note": "Sottotitolo arancio, da centrare sotto il logo (2-4 px sotto)."
+  },
+  "stage_card_1": {
+    "image": "stage_card_1.png",
+    "size": [
+      293,
+      27
+    ],
+    "note": "Cartello d'inizio del livello 1 ('1' oro, punto arancio), da centrare sullo schermo."
+  },
+  "msg_zone_clear": {
+    "image": "msg_zone_clear.png",
+    "size": [
+      276,
+      31
+    ],
+    "note": "Fine del livello."
+  },
+  "msg_pause": {
+    "image": "msg_pause.png",
+    "size": [
+      115,
+      31
+    ],
+    "note": "Pausa (sopra al menu)."
+  },
+  "msg_continue": {
+    "image": "msg_continue.png",
+    "size": [
+      197,
+      31
+    ],
+    "note": "Dopo l'ultima vita."
+  },
+  "msg_game_over": {
+    "image": "msg_game_over.png",
+    "size": [
+      202,
+      31
+    ],
+    "note": "Facoltativo: se il conto alla rovescia di CONTINUA? arriva a zero."
+  },
+  "msg_demo_end": {
+    "image": "msg_demo_end.png",
+    "size": [
+      307,
+      31
+    ],
+    "note": "Schermata finale."
+  },
+  "big_digits": {
+    "image": "big_digits.png",
+    "size": [
+      230,
+      31
+    ],
+    "frame": [
+      23,
+      31
+    ],
+    "count": 10,
+    "ticks": 1,
+    "note": "Cifre 0-9 grandi in oro, stesso stile di msg_*: striscia di 10 fotogrammi, il fotogramma k è la cifra k (non un'animazione). Conto alla rovescia di CONTINUA?, centrato a 1x."
+  },
+  "go_arrow": {
+    "image": "go_arrow.png",
+    "size": [
+      168,
+      24
+    ],
+    "frame": [
+      56,
+      24
+    ],
+    "count": 3,
+    "ticks": 8,
+    "loop": true,
+    "note": "Freccia VAI: fotogrammi 0 = accesa, 1 = triangolo spinto avanti di 3 px, 2 = spenta (scurita). In ciclo 0-1-2, 8 tick ciascuno. Bordo destro dello schermo, nella parte alta del campo (vedi hud_layout)."
+  },
+  "portrait_frame": {
+    "image": "portrait_frame.png",
+    "size": [
+      34,
+      34
+    ],
+    "inner": [
+      1,
+      1,
+      32,
+      32
+    ],
+    "note": "Cornice 34x34 di GIG: va SOPRA al ritratto 32x32, che sta in (1, 1) rispetto alla cornice. Le staffe agli angoli coprono 3 px di ogni angolo del ritratto."
+  },
+  "portrait_frame_enemy": {
+    "image": "portrait_frame_enemy.png",
+    "size": [
+      34,
+      34
+    ],
+    "inner": [
+      1,
+      1,
+      32,
+      32
+    ],
+    "note": "Come portrait_frame, nei rossi dei nemici (facoltativa)."
+  },
+  "portrait_back": {
+    "image": "portrait_back.png",
+    "size": [
+      34,
+      34
+    ],
+    "inner": [
+      1,
+      1,
+      32,
+      32
+    ],
+    "note": "Fondo 'schermo' da disegnare DIETRO al ritratto, se il ritratto ha parti trasparenti."
+  },
+  "bar_back": {
+    "image": "bar_back.png",
+    "size": [
+      104,
+      6
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Barra di GIG, fondo vuoto 104x6. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_ghost": {
+    "image": "bar_ghost.png",
+    "size": [
+      104,
+      6
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Scia del danno appena subito (scende in ritardo), sotto a bar_fill. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_fill": {
+    "image": "bar_fill.png",
+    "size": [
+      104,
+      6
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Vita di GIG, giallo-ocra. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_frame": {
+    "image": "bar_frame.png",
+    "size": [
+      108,
+      10
+    ],
+    "nine_slice": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "inner": [
+      2,
+      2,
+      104,
+      6
+    ],
+    "note": "Cornice della barra di GIG, 108x10 con l'interno trasparente: va SOPRA ai pezzi, in (x - 2, y - 2) se la barra sta in (x, y). Per altre lunghezze: 9-slice."
+  },
+  "bar_back_enemy": {
+    "image": "bar_back_enemy.png",
+    "size": [
+      104,
+      4
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Barra del nemico, fondo vuoto 104x4. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_ghost_enemy": {
+    "image": "bar_ghost_enemy.png",
+    "size": [
+      104,
+      4
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Scia del danno del nemico. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_fill_enemy": {
+    "image": "bar_fill_enemy.png",
+    "size": [
+      104,
+      4
+    ],
+    "nine_slice": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "note": "Vita del nemico, rossa. Striscia uniforme in orizzontale: si disegna la parte sinistra larga quanto la vita (regione (0, 0, larghezza, altezza)), oppure la si stira in larghezza."
+  },
+  "bar_frame_enemy": {
+    "image": "bar_frame_enemy.png",
+    "size": [
+      108,
+      8
+    ],
+    "nine_slice": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "inner": [
+      2,
+      2,
+      104,
+      4
+    ],
+    "note": "Cornice della barra del nemico, 108x8, come bar_frame."
+  },
+  "fonts": {
+    "bold": {
+      "file": "res://assets/fonts/car_pixel_bold.ttf",
+      "size": 12,
+      "use": "nomi, punteggio, vite, voci dei menu, avvisi brevi"
+    },
+    "regular": {
+      "file": "res://assets/fonts/car_pixel_regular.ttf",
+      "size": 12,
+      "use": "testi lunghi e con le minuscole, crediti, licenze"
+    }
+  },
+  "colors": {
+    "text": "#f7e8bd",
+    "text_dim": "#cfae74",
+    "score": "#ffe27a",
+    "lives": "#ffe27a",
+    "menu_selected": "#ffe27a",
+    "menu_other": "#f7e8bd",
+    "accent_orange": "#e48a2e",
+    "accent_red": "#7a170f",
+    "shadow": "#0b0816"
+  },
+  "hud_layout": {
+    "note": "Disposizione del mockup (tools/fxui/out/check/hud_mockup_*.png), in coordinate dello schermo. Testi: angolo in alto a sinistra della riga del font a 12 px (le maiuscole occupano le righe 3-9), con ombra di 1 px in basso a destra; '_right' = testo allineato a destra su quella x. Barre: (x, y, larghezza, altezza) dell'area colorata; la cornice va in (x - 2, y - 2).",
+    "portrait_frame": [
+      6,
+      4
+    ],
+    "portrait": [
+      7,
+      5
+    ],
+    "gig_name": [
+      44,
+      2
+    ],
+    "gig_lives_right": [
+      152,
+      2
+    ],
+    "gig_bar": [
+      46,
+      15,
+      104,
+      6
+    ],
+    "enemy_name": [
+      44,
+      21
+    ],
+    "enemy_bar": [
+      46,
+      34,
+      104,
+      4
+    ],
+    "score_right": [
+      378,
+      2
+    ],
+    "go_arrow_right_center_y": [
+      381,
+      64
+    ]
+  }
+}

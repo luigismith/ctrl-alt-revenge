@@ -1,0 +1,201 @@
+{
+ "id": "bin",
+ "format": 1,
+ "image": "bin.png",
+ "pixels_per_meter": 48,
+ "animations": {
+  "idle": {
+   "loop": true,
+   "frames": [
+    {
+     "rect": [
+      1,
+      1,
+      30,
+      46
+     ],
+     "anchor": [
+      15,
+      42
+     ],
+     "ticks": 60,
+     "hurt": [
+      [
+       -12,
+       -38,
+       24,
+       38
+      ]
+     ],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    }
+   ]
+  },
+  "hit": {
+   "loop": false,
+   "frames": [
+    {
+     "rect": [
+      32,
+      1,
+      32,
+      49
+     ],
+     "anchor": [
+      18,
+      45
+     ],
+     "ticks": 4,
+     "hurt": [
+      [
+       -12,
+       -38,
+       24,
+       38
+      ]
+     ],
+     "hit": [],
+     "events": [
+      "sfx:bin_hit"
+     ],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      65,
+      1,
+      30,
+      46
+     ],
+     "anchor": [
+      14,
+      42
+     ],
+     "ticks": 6,
+     "hurt": [
+      [
+       -12,
+       -38,
+       24,
+       38
+      ]
+     ],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      1,
+      1,
+      30,
+      46
+     ],
+     "anchor": [
+      15,
+      42
+     ],
+     "ticks": 4,
+     "hurt": [
+      [
+       -12,
+       -38,
+       24,
+       38
+      ]
+     ],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    }
+   ]
+  },
+  "break": {
+   "loop": false,
+   "frames": [
+    {
+     "rect": [
+      96,
+      1,
+      41,
+      64
+     ],
+     "anchor": [
+      22,
+      60
+     ],
+     "ticks": 4,
+     "hurt": [],
+     "hit": [],
+     "events": [
+      "sfx:bin_break"
+     ],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      138,
+      1,
+      62,
+      37
+     ],
+     "anchor": [
+      32,
+      30
+     ],
+     "ticks": 5,
+     "hurt": [],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      201,
+      1,
+      48,
+      33
+     ],
+     "anchor": [
+      6,
+      25
+     ],
+     "ticks": 6,
+     "hurt": [],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      250,
+      1,
+      48,
+      33
+     ],
+     "anchor": [
+      5,
+      25
+     ],
+     "ticks": 1,
+     "hurt": [],
+     "hit": [],
+     "events": [],
+     "tags": [
+      "hold"
+     ],
+     "dx": 0
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,38 @@
+{
+  "format": 1,
+  "descrizione": "Telecamera di tre quarti e luci della pipeline personaggi (v6, prova spike2-chars). Valgono per tutti gli sprite dei personaggi; gli sfondi le usano per avere la stessa vista e la stessa luce.",
+  "sistema_di_riferimento": "Blender, metri, Z in alto. Il personaggio a riposo guarda verso -Y; il suo lato sinistro è +X. Nello sprite guarda a DESTRA.",
+  "proiezione": "ortografica",
+  "yaw_deg": 30.0,
+  "pitch_deg": 12.0,
+  "yaw_pitch_spiegazione": "La telecamera sta a (-cos(yaw)cos(pitch), -sin(yaw)cos(pitch), sin(pitch)) x 10 m dal bersaglio: vede il lato destro del personaggio, ruotata di 30 gradi verso il suo davanti, e guarda in basso di 12 gradi.",
+  "target_z_m": 1.12,
+  "distanza_m": 10.0,
+  "pixels_per_meter": 48,
+  "pixel_m": 0.020833333,
+  "scala_spiegazione": "1 px dello sprite = 1/48 m sull'asse orizzontale dello schermo. In verticale 1 m reale = 48*cos(12°) = 46.95 px; 1 m di profondità sul pavimento (lungo la vista) = 48*sin(12°) = 9.98 px in verticale sullo schermo.",
+  "supersampling": 4,
+  "assi_mondo": {
+    "schermo_destra": [0.5, -0.866, 0.0],
+    "schermo_su": [0.1801, 0.104, 0.9781],
+    "verso_la_telecamera": [-0.8471, -0.4891, 0.2079]
+  },
+  "luce_chiave": {
+    "descrizione": "Direzione verso la luce (lambert n·L), dall'alto a destra e davanti. Spazio telecamera: x destra, y su, z verso chi guarda.",
+    "camera": [0.3811, 0.702, 0.6017],
+    "mondo": [-0.1928, -0.5513, 0.8117],
+    "bande": "al massimo 3 bande per materiale, soglie su n·L meno occlusione (ao_k 0.55)"
+  },
+  "luce_di_contorno": {
+    "descrizione": "Riflesso magenta del neon sul bordo SINISTRO della sagoma (da dietro a sinistra), solo a tratti continui di almeno 5 px.",
+    "camera": [-0.8479, 0.3491, -0.399],
+    "mondo": [-0.0231, 0.9657, 0.2585],
+    "colore": "#e0559b",
+    "soglia": 0.3
+  },
+  "contorno": {
+    "colore": "#140e1e",
+    "descrizione": "contorno esterno di 1 px (4-connesso), comune a tutti i personaggi"
+  },
+  "ancora": "punto a terra tra i piedi: proiezione del punto (root.x, root.y, -0.024 m) del rig, cioè la suola"
+}

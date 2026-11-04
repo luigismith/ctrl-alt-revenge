@@ -16,14 +16,13 @@ export_credentials.cfg
 !/assets_private/manifest.json
 /game/assets_private/
 
-# --- audio bloccato ovunque, tranne gli effetti sonori nostri e i pack CC0 registrati ---
+# --- audio bloccato ovunque, tranne gli effetti sonori ammessi (solo in game/assets/sfx/) ---
 *.wav
 *.ogg
 *.mp3
 *.flac
 *.opus
 !/game/assets/sfx/*.wav
-!/game/assets/third_party/**
 
 # --- output di lavoro delle pipeline ---
 /tools/**/out/

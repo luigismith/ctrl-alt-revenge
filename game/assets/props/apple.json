@@ -1,0 +1,63 @@
+{
+ "id": "apple",
+ "format": 1,
+ "image": "apple.png",
+ "pixels_per_meter": 48,
+ "animations": {
+  "idle": {
+   "loop": true,
+   "frames": [
+    {
+     "rect": [
+      1,
+      1,
+      14,
+      17
+     ],
+     "anchor": [
+      7,
+      16
+     ],
+     "ticks": 50,
+     "hurt": [
+      [
+       -8,
+       -14,
+       16,
+       14
+      ]
+     ],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    },
+    {
+     "rect": [
+      16,
+      1,
+      14,
+      17
+     ],
+     "anchor": [
+      7,
+      16
+     ],
+     "ticks": 8,
+     "hurt": [
+      [
+       -8,
+       -14,
+       16,
+       14
+      ]
+     ],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    }
+   ]
+  }
+ }
+}

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Esegue Godot 4.7.2 (eseguibile console) sul progetto game/ con timeout e file di log,
-# poi controlla il log. Fallisce se:
+# poi controlla il log. Il progetto si cambia con la variabile GODOT_PROJECT (cartella con
+# project.godot, assoluta o relativa alla radice del repository; predefinita: game/), mai con
+# un secondo --path. Fallisce se:
 #   - il codice d'uscita non è 0 (124 = timeout);
 #   - il log contiene SCRIPT ERROR, Parse Error o righe che iniziano con ERROR:
 #     (salvo quelle che corrispondono alla regex in GODOT_ERR_ALLOW);
@@ -11,15 +13,26 @@
 #   tools/run_godot.sh 120 --headless --import
 #   REQUIRE_DONE=1 tools/run_godot.sh 120 --headless -s res://tests/run_tests.gd
 #   tools/run_godot.sh 90 --write-movie "C:/percorso/assoluto/f.png" --fixed-fps 60 --quit-after 300
+#   GODOT_PROJECT=tools/fxui/out/godot_check tools/run_godot.sh 60 --headless --import
 set -u
 
 LAB_WIN="${CAR_LAB:-${USERPROFILE}\\ctrlaltrevenge-lab}"
 LAB="$(cygpath -u "$LAB_WIN")"
 GODOT="$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_win64_console.exe"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT="${GODOT_PROJECT:-$ROOT/game}"
+case "$PROJECT" in
+  /*|[A-Za-z]:*) ;;
+  *) PROJECT="$ROOT/$PROJECT" ;;
+esac
+PROJECT="$(cygpath -u "$PROJECT")"
 
 if [ ! -x "$GODOT" ]; then
   echo "Godot non trovato: $GODOT" >&2
+  exit 3
+fi
+if [ ! -f "$PROJECT/project.godot" ]; then
+  echo "Progetto Godot non trovato: $PROJECT" >&2
   exit 3
 fi
 
@@ -32,7 +45,7 @@ STAMP="$(date +%Y%m%d-%H%M%S)-$$"
 LOG="$LOGDIR/godot-$STAMP.log"
 OUT="$LOGDIR/godot-$STAMP.out"
 
-timeout --kill-after=10 "$SECS" "$GODOT" --path "$(cygpath -w "$ROOT/game")" \
+timeout --kill-after=10 "$SECS" "$GODOT" --path "$(cygpath -w "$PROJECT")" \
   --log-file "$(cygpath -w "$LOG")" "$@" >"$OUT" 2>&1
 CODE=$?
 

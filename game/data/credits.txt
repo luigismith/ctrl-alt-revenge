@@ -1,0 +1,16 @@
+Demo del livello 1: Sotto la Linea
+
+# PROGETTO E DIREZIONE
+Luigi Massari
+
+# CODICE, GRAFICA ED EFFETTI SONORI
+Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney, sfondi Warped City di Luis Zuno (ansimuz).
+
+# FONT, EFFETTI E INTERFACCIA
+Font CAR Pixel, effetti e interfaccia disegnati per CTRL+ALT REVENGE.
+
+# MUSICA
+In questa demo: musica segnaposto CC0 di Safety Stoat Studios ("Free VGMs"). I brani definitivi saranno generati con Suno per Luigi Massari e distribuiti solo con le build del gioco.
+
+# MOTORE
+Godot Engine

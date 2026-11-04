@@ -10,6 +10,7 @@ SPDX-FileCopyrightText = "2026 Luigi Massari"
 SPDX-License-Identifier = "MIT"
 
 # 2) Asset originali del gioco: tutti i diritti riservati, niente addestramento AI.
+#    I font CAR Pixel sono disegnati da noi (tools/fxui): sono grafica del gioco, non codice.
 [[annotations]]
 path = [
   "docs/riferimenti-estetica/**",
@@ -19,11 +20,26 @@ path = [
   "game/assets/props/**",
   "game/assets/fx/**",
   "game/assets/ui/**",
+  "game/assets/fonts/**",
   "game/assets/sfx/**",
   "game/data/levels/**",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "LicenseRef-CAR-Assets"
+
+# 2b) Piani di "Sotto la Linea" ricolorati e ricomposti dai PNG CC0 di Warped City
+#     (la torre cyan di far.png è disegnata da noi): restano asset del gioco, con l'origine indicata.
+[[annotations]]
+path = [
+  "game/assets/env/sotto_la_linea/sky.png",
+  "game/assets/env/sotto_la_linea/far.png",
+  "game/assets/env/sotto_la_linea/far_emis.png",
+  "game/assets/env/sotto_la_linea/mid.png",
+  "game/assets/env/sotto_la_linea/mid_emis.png",
+]
+precedence = "override"
+SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]
 SPDX-License-Identifier = "LicenseRef-CAR-Assets"
 
 # 3) Script bpy della pipeline: GPL, come chiede blender.org per gli script che usano l'API di Blender.
@@ -35,3 +51,17 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 
 # 4) Pack di terze parti e font: una tabella per pack, aggiunta insieme ai file
 #    (licenza copiata dal pack stesso, testo in LICENSES/, riga in THIRD-PARTY-NOTICES.md).
+
+# Warped City di Luis Zuno (ansimuz), OpenGameArt: solo i 4 PNG usati, così come sono nello zip.
+[[annotations]]
+path = "game/assets/third_party/ansimuz-warped-city/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2019 Luis Zuno (ansimuz)"
+SPDX-License-Identifier = "CC0-1.0"
+
+# La scheda della fonte, dentro la cartella del pack, è documentazione nostra.
+[[annotations]]
+path = "game/assets/third_party/ansimuz-warped-city/SOURCE.md"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "MIT"

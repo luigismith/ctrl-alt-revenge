@@ -1,0 +1,31 @@
+{
+ "format": 1,
+ "comment": "Guadagno di missaggio in dB per ogni effetto (generato da tools/audio/sfx_gen.py).",
+ "gain_db": {
+  "whoosh_light": -5.5,
+  "whoosh_heavy": -7.0,
+  "hit_light": 0.0,
+  "hit_medium": 0.0,
+  "hit_heavy": -2.0,
+  "hit_kick": -1.0,
+  "knee": -1.0,
+  "grab": -1.0,
+  "throw": -6.5,
+  "body_fall": -0.5,
+  "body_thud": -2.0,
+  "step_a": -6.5,
+  "step_b": -6.5,
+  "jump": -8.0,
+  "land": -2.0,
+  "glint": -7.5,
+  "zap": -0.5,
+  "bin_hit": -3.5,
+  "bin_break": -3.5,
+  "pickup": -7.0,
+  "ko": 0.0,
+  "ui_move": -7.5,
+  "ui_confirm": -7.0,
+  "ui_pause": -8.0,
+  "go_arrow": -7.0
+ }
+}

@@ -1,0 +1,10 @@
+{
+  "format": 1,
+  "seed": 7,
+  "start": {"x":1150.0,"y":182.0},
+  "note": "GIG cammina dentro il cavo: 10 di danno e atterramento.",
+  "length": 190,
+  "input": [
+    [0,"R"]
+  ]
+}

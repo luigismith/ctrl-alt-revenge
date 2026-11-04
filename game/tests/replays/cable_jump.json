@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "seed": 7,
+  "start": {"x":1150.0,"y":182.0},
+  "note": "GIG salta il cavo e passa indenne.",
+  "length": 190,
+  "input": [
+    [0,"R"],
+    [48,"RJ"],
+    [49,"R"]
+  ]
+}
