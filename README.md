@@ -65,7 +65,7 @@ In sviluppo, novembre 2026. Il gioco si sta rifacendo da zero in Godot 4.7.2, pr
 | Il prologo (il cimitero di San Brunone e il garage) e il capitolo 1, «I tetti dei Tamburi» | poi |
 | La prova di stile dei murales e la colonna sonora (i primi due brani sono già nella demo) | in parallelo |
 
-Lo slice è una prova tecnica: la sua strada è ancora generica, e la rifaremo perché racconti i Tamburi la sera del Giovedì Santo del 2087. Nessuna data di uscita, per ora. La specifica dello slice è in [`docs/specifica-slice.md`](docs/specifica-slice.md).
+Lo slice è una prova tecnica: la sua strada è ancora generica, e la rifaremo perché racconti i Tamburi la sera del Giovedì Santo del 2087. Nessuna data di uscita, per ora: tappe, stime in ore e cosa blocca cosa sono nel [piano](docs/piano.md). La specifica dello slice è in [`docs/specifica-slice.md`](docs/specifica-slice.md).
 
 ## Come provarlo
 
@@ -147,7 +147,7 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 | `game/` | Progetto Godot: scene, script, dati, asset, test e replay |
 | `tools/` | Pipeline per sprite e sfondi (dal 3D alla pixel art), effetti visivi, interfaccia e font, effetti sonori e musica, controlli sugli asset, il sito |
 | `site/` | Il sito: testi, modello, stile, script e media presi dal gioco |
-| `docs/` | Specifica dello slice, media del README, guida per lavorare da più PC |
+| `docs/` | Piano, specifica dello slice, media del README, guida per lavorare da più PC |
 | `.github/workflows/` | La pubblicazione del sito e della demo |
 
 ## Crediti
