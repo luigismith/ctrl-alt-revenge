@@ -13,6 +13,9 @@
 #            diversa da sito/godot, che usa tools/site/media.py, così i due script non si
 #            cancellano la copia a vicenda)
 #   CAR_LAB  cartella del laboratorio (predefinita: %USERPROFILE%\ctrlaltrevenge-lab)
+#   CAR_MUSIC_DIR  cartella con music.json e gli OGG della demo (per esempio gli allegati della release
+#            "musica-demo"): se c'è, la musica entra nella build in res://assets_private/music/;
+#            se manca, la demo esce senza musica, come prima
 #
 # Passi:
 #   1. copia game/ in WORK senza .godot/, così l'importazione riparte da zero come su GitHub, e senza
@@ -77,6 +80,18 @@ mkdir -p "$WORK"
 cp "$ROOT/THIRD-PARTY-NOTICES.md" "$WORK/"
 # i file che iniziano con il punto Godot non li vede: il segno resta fuori dal gioco
 touch "$WORK/$MARK"
+# La musica della demo, solo se è stata data: va in assets_private/music, dove la cerca Music, e il
+# preset della copia smette di escludere assets_private (nel repo il preset resta com'è).
+MUSIC=0
+if [ -n "${CAR_MUSIC_DIR:-}" ] && [ -f "$CAR_MUSIC_DIR/music.json" ]; then
+  mkdir -p "$WORK/assets_private/music"
+  cp "$CAR_MUSIC_DIR/music.json" "$WORK/assets_private/music/"
+  cp "$CAR_MUSIC_DIR"/*.ogg "$WORK/assets_private/music/"
+  sed -i 's|^exclude_filter="tests/\*, assets_private/\*"$|exclude_filter="tests/*"|' "$WORK/export_presets.cfg"
+  MUSIC=1
+  echo "Musica della demo da $CAR_MUSIC_DIR:"
+  ls -l "$WORK/assets_private/music"
+fi
 
 # --- 2. pagina della demo -------------------------------------------------------------------
 cp "$ROOT/tools/site/web_shell.html" "$WORK/web_shell.html"
@@ -152,10 +167,15 @@ cp "$ROOT/game/assets/fonts/car_pixel_bold.ttf" "$OUT/car_pixel_bold.ttf"
 # l'immagine d'avvio di Godot serve solo alla sua pagina predefinita
 rm -f "$OUT/index.png"
 
-# --- 5. niente musica, e peso dei file -------------------------------------------------------
+# --- 5. musica solo se data, e peso dei file -------------------------------------------------
 # Nel pacchetto i percorsi sono in chiaro: la musica importata sarebbe .oggvorbisstr o .mp3str.
-if LC_ALL=C grep -a -q -E 'assets_private|\.oggvorbisstr|\.mp3str' "$OUT/index.pck"; then
-  echo "Nella build c'è della musica (assets_private, OGG o MP3): non si pubblica." >&2
+if [ "$MUSIC" = 1 ]; then
+  if ! LC_ALL=C grep -a -q 'assets_private/music/music.json' "$OUT/index.pck"; then
+    echo "La musica della demo era data, ma nella build non c'è." >&2
+    exit 1
+  fi
+elif LC_ALL=C grep -a -q -E 'assets_private|\.oggvorbisstr|\.mp3str' "$OUT/index.pck"; then
+  echo "Nella build c'è della musica (assets_private, OGG o MP3) che nessuno ha dato: non si pubblica." >&2
   exit 1
 fi
 

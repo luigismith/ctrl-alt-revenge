@@ -193,7 +193,7 @@
   ],
   "demo": {
    "titolo": "Play it in your browser",
-   "testo": "The “Sotto la Linea” (“Under the Line”) slice plays in your browser, with a keyboard or a gamepad: from the title screen to the end of the demo, GIG against the punk and the brute. It has no music, because the tracks aren’t public.",
+   "testo": "The “Sotto la Linea” (“Under the Line”) slice plays in your browser, with a keyboard or a gamepad: from the title screen to the end of the demo, GIG against the punk and the brute, with the demo’s music.",
    "onesta": "It’s the 2026 technical slice: the art, the text and the levels will change, the game’s own text is in Italian, and in the browser all sounds come from the centre. The first load downloads about [[demo_mb]] MB.",
    "bottone": "Play the demo"
   },
@@ -316,7 +316,7 @@
     {"nome": "Python 3.14", "cosa": "with NumPy (BSD-3-Clause), Pillow (MIT-CMU) and SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
    ]
   },
-  "musica": "Music: the final soundtrack will be generated with Suno and will ship only with game builds. It isn’t in the repository, on this site or in the web demo."
+  "musica": "Music: the demo tracks were made by Luigi Massari with Suno (Pro plan). They aren’t in the repository: the web demo fetches them from a project release."
  },
  "piede": {
   "finzione": "CTRL+ALT REVENGE is a work of fiction, set in a Taranto of 2087 imagined from the real city. SIDERA, ARIA+, MANODOPERA and all the characters are invented, Ignazio included; the MiniBar sign is used with the owner’s permission. Any other resemblance to real people or companies is coincidental. The city’s places and rituals are real, and we portray them with respect.",

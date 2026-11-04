@@ -193,7 +193,7 @@
   ],
   "demo": {
    "titolo": "Prova lo slice",
-   "testo": "Lo slice «Sotto la Linea» si gioca nel browser, con la tastiera o con un controller: dal titolo alla fine della demo, GIG contro il punk e il bruto. È senza musica, perché i brani non sono pubblici.",
+   "testo": "Lo slice «Sotto la Linea» si gioca nel browser, con la tastiera o con un controller: dal titolo alla fine della demo, GIG contro il punk e il bruto, con la musica della demo.",
    "onesta": "È lo slice tecnico del 2026: grafica, testi e livelli cambieranno, e nel browser i suoni arrivano tutti dal centro. Il primo caricamento scarica circa [[demo_mb]] MB.",
    "bottone": "Gioca la demo"
   },
@@ -316,7 +316,7 @@
     {"nome": "Python 3.14", "cosa": "con NumPy (BSD-3-Clause), Pillow (MIT-CMU) e SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
    ]
   },
-  "musica": "Musica: la colonna sonora definitiva sarà generata con Suno e uscirà solo con le build del gioco. Non è nel repository, non è in questo sito e non è nella demo web."
+  "musica": "Musica: i brani della demo li ha creati Luigi Massari con Suno (piano Pro). Non sono nel repository: la demo web li prende dagli allegati di una release del progetto."
  },
  "piede": {
   "finzione": "CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, Ignazio compreso; l’insegna del MiniBar è usata con il permesso del titolare. Ogni altra somiglianza con persone o aziende reali è casuale. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.",

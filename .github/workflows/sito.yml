@@ -115,8 +115,23 @@ jobs:
           (cd "$HOME/godot" && sha512sum -c --quiet estratti.sha512)
           "$HOME/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --headless --version
 
-      # Copia game/ in una cartella temporanea, importa, esporta in release e controlla che nella
-      # build non ci sia musica (vedi i commenti in tools/site/export_web.sh).
+      # La musica della demo non è nel repo: sta negli allegati della release "musica-demo" (brani di
+      # Luigi fatti con Suno, piano Pro). Se la release non c'è, la demo esce senza musica.
+      - name: Scarica la musica della demo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/musica"
+          if gh release download musica-demo -R "$GITHUB_REPOSITORY" -D "$RUNNER_TEMP/musica" -p 'music.json' -p '*.ogg'; then
+            echo "CAR_MUSIC_DIR=$RUNNER_TEMP/musica" >> "$GITHUB_ENV"
+            ls -la "$RUNNER_TEMP/musica"
+          else
+            echo "::warning::Release musica-demo non trovata: la demo esce senza musica."
+          fi
+
+      # Copia game/ in una cartella temporanea, importa, esporta in release e controlla la musica
+      # (c'è solo se è stata scaricata qui sopra: vedi i commenti in tools/site/export_web.sh).
       - name: Esporta la demo web
         run: |
           set -euo pipefail
