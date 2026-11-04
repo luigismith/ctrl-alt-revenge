@@ -57,7 +57,7 @@ Luigi ha deciso il 4 novembre 2026 che la storia completa non va nel repo pubbli
 
 - **Il repo** sta nell'OneDrive di lavoro e si sincronizza fra il PC di lavoro e quello di casa. Niente nomi di aziende, di PC o di utenti nei file pubblici: il repo è pubblico.
 - **GitHub** fa da copia di sicurezza:
-  - il ramo `rewrite-godot` del repo pubblico per codice e asset;
+  - il ramo `master` del repo pubblico per codice e asset (dal 4 novembre 2026; il prototipo Pygame è nel ramo `legacy-pygame`);
   - il repo privato `ctrl-alt-revenge-storia` per la storia.
 - **Il laboratorio** (strumenti, modelli 3D, musica segnaposto) sta su ogni PC in `%USERPROFILE%\ctrlaltrevenge-lab` e si crea con `tools/setup/prepara_laboratorio.ps1`. La guida è `docs/lavorare-da-casa.md`.
 - **Le cose private** stanno nella cartella sorella del repo `ctrlaltrevenge-lab-condiviso`: modelli CC0, note, ricerca, locandine di riferimento. Non vanno mai nel repo.
@@ -93,6 +93,7 @@ Le skill sono sotto licenza LGPL-3.0, il nostro codice è MIT. Non copiare il lo
 ## Licenze e file
 
 - Gli asset del gioco sono sotto LicenseRef-CAR-Assets, il codice è MIT, gli script bpy sono GPL (vedi `REUSE.toml`).
-- Nel repo non vanno musica né immagini generate con AI.
+- Nel repo non va la musica.
+- **Immagini generate con AI.** Dal 4 novembre 2026 Luigi le ammette come base dei volti dei murales, con i tool migliori che troviamo; vanno dichiarate nei crediti. Il resto della grafica nasce dalla nostra pipeline. Le due locandine fatte con ChatGPT restano fuori dal repo.
 - Prima di ogni commit gira `tools/guard_assets.py`, tramite l'hook in `tools/hooks`.
 - Sono ammessi anche strumenti gratuiti per uso non commerciale. Annota la licenza di ognuno e cosa servirebbe per vendere il gioco.

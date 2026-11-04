@@ -21,13 +21,24 @@ Decisioni di Luigi del 3 novembre 2026:
 Direzione di Luigi del 4 novembre 2026, che vale per il gioco completo:
 
 - **Estetica retro, tecnologia di oggi**: "non deve sembrare un gioco degli anni 90 in tutto". Le regole pixel perfect del §2 valgono per lo slice così com'è e si rivedono nello step del gameplay. Sono le regole su telecamera a passi interi, interpolazione spenta e assenza di deformazioni a runtime. Sono ammesse telecamera fluida, luci dinamiche, shader, particelle e deformazioni.
-- **Genere**: platform-picchiaduro con elementi platform importanti, un mix fra Pitfall, Comix Zone, Jazz Jackrabbit e Duke Nukem 2D, con il doppio salto.
-- **Storia**: introduzione e intermezzi a fumetto a schermo intero, in pixel art. La storia è in `docs/lore/storia.md`.
+- **Genere:** un platform d'azione in 2D, mix fra Pitfall, Comix Zone, Jazz Jackrabbit e Duke Nukem 2D, con il doppio salto. Ha tre ingredienti:
+  - il platform, che è la spina dorsale;
+  - le arene di combattimento quando arrivano gli Esattori;
+  - i puzzle di hacking con il braccio cyber.
+
+  Luigi: "non è più un picchiaduro".
+- **Storia:** introduzione e intermezzi a fumetto a schermo intero, in pixel art: i murales di Totò. La storia è privata e sta fuori dal repo pubblico.
+- **Grafica, dopo la prova del cel shading.** La prova è nel laboratorio, in `prove-cel-shading`: tre giudici ciechi, voto medio 6,1 contro 5,5 della v7.
+  - **Sprite:** cel a 2 toni, con un terzo tono solo dove serve ai volumi.
+  - **Sfondi:** a 3 toni, senza retino.
+  - **Luci:** restano quelle morbide di oggi, con un tetto ai toni chiari e il contorno scuro escluso dalla luce.
+  - **Quando:** si integra insieme alla figura nuova di GIG, da ex pugile a V, in una sola rigenerazione.
+  - **Il passo dopo:** volti e pugni disegnati a pixel e agganciati alle ossa, pieghe disegnate sui vestiti, pose chiave più spinte. L'effetto "render 3D" viene da lì, non dall'ombra.
 
 Scelte tecniche già fissate:
 
 - risoluzione 384×216;
-- GIG specchiato quando guarda a sinistra;
+- GIG non si specchia mai (decisione del 4 novembre 2026): braccio cyber sempre a sinistra e occhio cyber a destra, e le animazioni si rendono dal 3D per i due versi. Lo slice di oggi lo specchia ancora;
 - prima Windows;
 - un solo giocatore;
 - musica fuori dal repo.
