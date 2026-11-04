@@ -1,0 +1,765 @@
+{
+ "formato": 1,
+ "nota": "Generato da tools/site/media.py: non modificare a mano. I percorsi delle voci sono relativi a site/media/, quelli dell'elenco 'file' e della GIF alla radice del repository.",
+ "cattura": {
+  "replay": "game/tests/replays/demo.json",
+  "godot": "4.7.2.stable.official.ed1daf0bf",
+  "punteggio": 2840,
+  "tick_fine": 4092,
+  "hash": "230ba2c05f5ea3de59da62eafa3d73a81389a96dd622b9c1b0912eb2acbc31cf",
+  "fotogrammi": 4101
+ },
+ "controllo": {
+  "zone": [
+   {
+    "piano": "backdrop",
+    "riquadro": [
+     0,
+     98,
+     52,
+     134
+    ],
+    "cosa": "il graffito GIG",
+    "azione": "vieta"
+   },
+   {
+    "piano": "backdrop",
+    "riquadro": [
+     994,
+     16,
+     1147,
+     60
+    ],
+    "cosa": "la FARMACIA con la croce rossa (emblema protetto)",
+    "azione": "vieta"
+   },
+   {
+    "piano": "backdrop",
+    "riquadro": [
+     1478,
+     22,
+     1548,
+     140
+    ],
+    "cosa": "l'insegna HOTEL",
+    "azione": "vieta"
+   },
+   {
+    "piano": "near",
+    "riquadro": [
+     470,
+     24,
+     568,
+     68
+    ],
+    "cosa": "il cartellone HOTEL",
+    "azione": "vieta"
+   },
+   {
+    "piano": "near",
+    "riquadro": [
+     998,
+     16,
+     1109,
+     47
+    ],
+    "cosa": "il cartellone CINEMA",
+    "azione": "vieta"
+   },
+   {
+    "piano": "near",
+    "riquadro": [
+     450,
+     138,
+     472,
+     168
+    ],
+    "cosa": "l'insegna rossa verticale dei tetti",
+    "azione": "vieta"
+   },
+   {
+    "piano": "mid",
+    "riquadro": [
+     578,
+     50,
+     614,
+     122
+    ],
+    "cosa": "le insegne HOTEL e BAR del piano medio",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     192,
+     18,
+     232,
+     60
+    ],
+    "cosa": "la luna",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     59,
+     36,
+     68,
+     46
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     169,
+     37,
+     178,
+     47
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     315,
+     36,
+     324,
+     46
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     242,
+     2,
+     251,
+     11
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     223,
+     2,
+     232,
+     11
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "far",
+    "riquadro": [
+     136,
+     0,
+     166,
+     124
+    ],
+    "cosa": "le luci cyan della torre lontana (il cyan è solo di GIG)",
+    "azione": "spegni"
+   }
+  ],
+  "fotogrammi_controllati": 366,
+  "luci_spente_in": 363,
+  "confronto_minimo": 0.847
+ },
+ "eroe": {
+  "video": [
+   {
+    "file": "eroe-2x.webm",
+    "media": "(max-width: 699px)",
+    "type": "video/webm; codecs=\"vp09.01.30.08.03.01.01.01.00\"",
+    "nota": "Lo stesso loop a 2x, per i telefoni: va per primo, con l'attributo media."
+   },
+   {
+    "file": "eroe.webm",
+    "type": "video/webm; codecs=\"vp09.01.40.08.03.01.01.01.00\"",
+    "nota": "VP9 profilo 1 in 4:4:4: il colore non si dimezza e i bordi dei pixel restano netti. Va messo per primo, con questo tipo: chi non sa decodificarlo passa da solo all'MP4."
+   },
+   {
+    "file": "eroe.mp4",
+    "type": "video/mp4; codecs=\"avc1.640029\"",
+    "nota": "H.264 High, 4:2:0: per tutti gli altri (Safari)."
+   }
+  ],
+  "poster": "eroe-poster.png",
+  "larghezza": 1152,
+  "altezza": 648,
+  "fps": 60,
+  "fotogrammi": 363,
+  "durata_s": 6.05,
+  "audio": false,
+  "segmenti": [
+   [
+    696,
+    780
+   ],
+   [
+    1140,
+    1283
+   ],
+   [
+    560,
+    696
+   ]
+  ],
+  "alt_poster": {
+   "it": "GIG colpisce il punk con il gancio del braccio cyber, sotto la pioggia, davanti all'insegna KEBAB.",
+   "en": "GIG lands a cyber-arm hook on the punk in the rain, under the KEBAB neon sign."
+  },
+  "descrizione": {
+   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù; poi compare VAI.",
+   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down; then VAI (“GO”) flashes up."
+  },
+  "nota": "Loop continuo: l'ultimo fotogramma precede il primo. Il poster è il primo fotogramma."
+ },
+ "gif": {
+  "file": "docs/media/demo.gif",
+  "larghezza": 768,
+  "altezza": 432,
+  "fps": 20,
+  "fotogrammi": 122,
+  "durata_s": 6.1,
+  "segmenti": [
+   [
+    696,
+    780
+   ],
+   [
+    1140,
+    1283
+   ],
+   [
+    560,
+    696
+   ]
+  ],
+  "alt": {
+   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù; poi compare VAI.",
+   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down; then VAI (“GO”) flashes up."
+  }
+ },
+ "schermate": [
+  {
+   "file": "schermate/combo.png",
+   "larghezza": 224,
+   "altezza": 190,
+   "scala": 1,
+   "fotogramma": 720,
+   "ritaglio": [
+    160,
+    26,
+    384,
+    216
+   ],
+   "alt": {
+    "it": "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
+    "en": "In the slice: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."
+   }
+  },
+  {
+   "file": "schermate/cavo.png",
+   "larghezza": 264,
+   "altezza": 176,
+   "scala": 1,
+   "fotogramma": 1762,
+   "ritaglio": [
+    120,
+    40,
+    384,
+    216
+   ],
+   "alt": {
+    "it": "Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
+    "en": "In the slice: GIG leaps over a live power cable sparking in a puddle."
+   }
+  },
+  {
+   "file": "schermate/arena.png",
+   "larghezza": 368,
+   "altezza": 156,
+   "scala": 1,
+   "fotogramma": 2744,
+   "ritaglio": [
+    16,
+    60,
+    384,
+    216
+   ],
+   "alt": {
+    "it": "Nello slice, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
+    "en": "In the slice, in the arena: GIG's kick sends the punk crashing into the brute."
+   }
+  },
+  {
+   "file": "schermate/presa.png",
+   "larghezza": 368,
+   "altezza": 156,
+   "scala": 1,
+   "fotogramma": 2914,
+   "ritaglio": [
+    16,
+    60,
+    384,
+    216
+   ],
+   "alt": {
+    "it": "Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
+    "en": "In the slice: GIG holds the brute in a grab and drives a knee into him."
+   }
+  }
+ ],
+ "social": {
+  "file": "social.png",
+  "larghezza": 1280,
+  "altezza": 640,
+  "fotogramma": 696,
+  "alt": {
+   "it": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa.",
+   "en": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street."
+  }
+ },
+ "sprite": [
+  {
+   "file": "sprite/gig.png",
+   "json": "sprite/gig.json",
+   "personaggio": "GIG",
+   "cella": [
+    79,
+    102
+   ],
+   "animazioni": [
+    "guardia",
+    "camminata",
+    "gancio"
+   ],
+   "spento": "sprite/gig-spento.png",
+   "normali": "sprite/gig-normali.png"
+  },
+  {
+   "file": "sprite/punk.png",
+   "json": "sprite/punk.json",
+   "personaggio": "Punk",
+   "cella": [
+    74,
+    105
+   ],
+   "animazioni": [
+    "guardia",
+    "camminata",
+    "gancio_caricato"
+   ]
+  },
+  {
+   "file": "sprite/bruto.png",
+   "json": "sprite/bruto.json",
+   "personaggio": "Bruto",
+   "cella": [
+    93,
+    115
+   ],
+   "animazioni": [
+    "guardia",
+    "camminata",
+    "pugno"
+   ]
+  }
+ ],
+ "ritratti": [
+  {
+   "file": "ui/ritratto-gig.png",
+   "larghezza": 34,
+   "altezza": 34
+  },
+  {
+   "file": "ui/ritratto-gig-spento.png",
+   "larghezza": 34,
+   "altezza": 34,
+   "nota": "occhio spento: 13 pixel cyan diventano metallo scuro"
+  },
+  {
+   "file": "ui/ritratto-punk.png",
+   "larghezza": 34,
+   "altezza": 34
+  },
+  {
+   "file": "ui/ritratto-bruto.png",
+   "larghezza": 34,
+   "altezza": 34
+  }
+ ],
+ "ui": [
+  {
+   "file": "ui/barra-cornice.png",
+   "larghezza": 108,
+   "altezza": 10,
+   "fonte": "game/assets/ui/bar_frame.png"
+  },
+  {
+   "file": "ui/barra-piena.png",
+   "larghezza": 104,
+   "altezza": 6,
+   "fonte": "game/assets/ui/bar_fill.png"
+  },
+  {
+   "file": "ui/barra-vuota.png",
+   "larghezza": 104,
+   "altezza": 6,
+   "fonte": "game/assets/ui/bar_back.png"
+  },
+  {
+   "file": "ui/barra-cornice-nemico.png",
+   "larghezza": 108,
+   "altezza": 8,
+   "fonte": "game/assets/ui/bar_frame_enemy.png"
+  },
+  {
+   "file": "ui/barra-piena-nemico.png",
+   "larghezza": 104,
+   "altezza": 4,
+   "fonte": "game/assets/ui/bar_fill_enemy.png"
+  },
+  {
+   "file": "ui/barra-vuota-nemico.png",
+   "larghezza": 104,
+   "altezza": 4,
+   "fonte": "game/assets/ui/bar_back_enemy.png"
+  },
+  {
+   "file": "ui/vai.png",
+   "larghezza": 168,
+   "altezza": 24,
+   "fonte": "game/assets/ui/go_arrow.png"
+  },
+  {
+   "file": "ui/zona-liberata.png",
+   "larghezza": 276,
+   "altezza": 31,
+   "fonte": "game/assets/ui/msg_zone_clear.png"
+  },
+  {
+   "file": "ui/continua.png",
+   "larghezza": 197,
+   "altezza": 31,
+   "fonte": "game/assets/ui/msg_continue.png"
+  },
+  {
+   "file": "ui/cifre.png",
+   "larghezza": 230,
+   "altezza": 31,
+   "fonte": "game/assets/ui/big_digits.png"
+  },
+  {
+   "file": "ui/cartello-livello-1.png",
+   "larghezza": 293,
+   "altezza": 27,
+   "fonte": "game/assets/ui/stage_card_1.png"
+  }
+ ],
+ "livello": [
+  {
+   "file": "livello/tetti.png",
+   "larghezza": 1152,
+   "altezza": 168,
+   "fonte": "game/assets/env/sotto_la_linea/near.png"
+  },
+  {
+   "file": "livello/tetti-luce.png",
+   "larghezza": 1152,
+   "altezza": 168,
+   "fonte": "game/assets/env/sotto_la_linea/near_emis.png"
+  },
+  {
+   "file": "livello/strada.png",
+   "larghezza": 940,
+   "altezza": 216,
+   "x_nel_livello": [
+    52,
+    992
+   ]
+  },
+  {
+   "file": "livello/strada-luce.png",
+   "larghezza": 940,
+   "altezza": 216,
+   "x_nel_livello": [
+    52,
+    992
+   ]
+  },
+  {
+   "file": "livello/revenge.png",
+   "larghezza": 92,
+   "altezza": 24,
+   "riquadro_nel_livello": [
+    626,
+    110,
+    718,
+    134
+   ]
+  }
+ ],
+ "logo": [
+  {
+   "file": "logo/logo-1x.png",
+   "larghezza": 248,
+   "altezza": 89,
+   "scala": 1,
+   "alt": {
+    "it": "CTRL+ALT REVENGE!",
+    "en": "CTRL+ALT REVENGE!"
+   }
+  },
+  {
+   "file": "logo/logo-2x.png",
+   "larghezza": 496,
+   "altezza": 178,
+   "scala": 2,
+   "alt": {
+    "it": "CTRL+ALT REVENGE!",
+    "en": "CTRL+ALT REVENGE!"
+   }
+  },
+  {
+   "file": "logo/logo-4x.png",
+   "larghezza": 992,
+   "altezza": 356,
+   "scala": 4,
+   "alt": {
+    "it": "CTRL+ALT REVENGE!",
+    "en": "CTRL+ALT REVENGE!"
+   }
+  }
+ ],
+ "font": [
+  {
+   "file": "font/car-pixel-bold.woff2",
+   "famiglia": "CAR Pixel",
+   "peso": 700,
+   "fonte": "game/assets/fonts/car_pixel_bold.ttf"
+  },
+  {
+   "file": "font/car-pixel-regular.woff2",
+   "famiglia": "CAR Pixel",
+   "peso": 400,
+   "fonte": "game/assets/fonts/car_pixel_regular.ttf"
+  }
+ ],
+ "font_nota": "Un pixel del font è un pixel del gioco a 12 px: per lettere nette usare solo multipli di 12 px (24, 36, 48...). Glifi: ASCII, accentate italiane, « » “ ” ‘ ’ … – — ▶ ◀ ▲ ▼ ♥ × · ° ©.",
+ "icone": [
+  {
+   "file": "icone/favicon-16.png",
+   "misura": 16
+  },
+  {
+   "file": "icone/favicon-32.png",
+   "misura": 32
+  },
+  {
+   "file": "icone/apple-touch-icon.png",
+   "misura": 180
+  },
+  {
+   "file": "icone/favicon.ico",
+   "misura": "16 e 32"
+  }
+ ],
+ "file": [
+  {
+   "file": "site/media/eroe-2x.webm",
+   "byte": 1078545
+  },
+  {
+   "file": "site/media/eroe.webm",
+   "byte": 2130336
+  },
+  {
+   "file": "site/media/eroe.mp4",
+   "byte": 2277533
+  },
+  {
+   "file": "site/media/eroe-poster.png",
+   "byte": 54625
+  },
+  {
+   "file": "site/media/schermate/combo.png",
+   "byte": 25350
+  },
+  {
+   "file": "site/media/schermate/cavo.png",
+   "byte": 21595
+  },
+  {
+   "file": "site/media/schermate/arena.png",
+   "byte": 25647
+  },
+  {
+   "file": "site/media/schermate/presa.png",
+   "byte": 22915
+  },
+  {
+   "file": "site/media/ui/ritratto-gig.png",
+   "byte": 1038
+  },
+  {
+   "file": "site/media/ui/ritratto-gig-spento.png",
+   "byte": 1034
+  },
+  {
+   "file": "site/media/ui/ritratto-punk.png",
+   "byte": 936
+  },
+  {
+   "file": "site/media/ui/ritratto-bruto.png",
+   "byte": 975
+  },
+  {
+   "file": "site/media/ui/barra-cornice.png",
+   "byte": 157
+  },
+  {
+   "file": "site/media/ui/barra-piena.png",
+   "byte": 117
+  },
+  {
+   "file": "site/media/ui/barra-vuota.png",
+   "byte": 111
+  },
+  {
+   "file": "site/media/ui/barra-cornice-nemico.png",
+   "byte": 149
+  },
+  {
+   "file": "site/media/ui/barra-piena-nemico.png",
+   "byte": 102
+  },
+  {
+   "file": "site/media/ui/barra-vuota-nemico.png",
+   "byte": 98
+  },
+  {
+   "file": "site/media/ui/vai.png",
+   "byte": 1229
+  },
+  {
+   "file": "site/media/ui/zona-liberata.png",
+   "byte": 1248
+  },
+  {
+   "file": "site/media/ui/continua.png",
+   "byte": 995
+  },
+  {
+   "file": "site/media/ui/cifre.png",
+   "byte": 1064
+  },
+  {
+   "file": "site/media/ui/cartello-livello-1.png",
+   "byte": 1178
+  },
+  {
+   "file": "site/media/livello/tetti.png",
+   "byte": 20471
+  },
+  {
+   "file": "site/media/livello/tetti-luce.png",
+   "byte": 5216
+  },
+  {
+   "file": "site/media/livello/strada.png",
+   "byte": 57639
+  },
+  {
+   "file": "site/media/livello/strada-luce.png",
+   "byte": 7568
+  },
+  {
+   "file": "site/media/livello/revenge.png",
+   "byte": 946
+  },
+  {
+   "file": "site/media/logo/logo-1x.png",
+   "byte": 2178
+  },
+  {
+   "file": "site/media/logo/logo-2x.png",
+   "byte": 2851
+  },
+  {
+   "file": "site/media/logo/logo-4x.png",
+   "byte": 4410
+  },
+  {
+   "file": "site/media/font/car-pixel-bold.woff2",
+   "byte": 2252
+  },
+  {
+   "file": "site/media/font/car-pixel-regular.woff2",
+   "byte": 2276
+  },
+  {
+   "file": "site/media/icone/favicon-16.png",
+   "byte": 464
+  },
+  {
+   "file": "site/media/icone/favicon-32.png",
+   "byte": 884
+  },
+  {
+   "file": "site/media/icone/apple-touch-icon.png",
+   "byte": 1476
+  },
+  {
+   "file": "site/media/icone/favicon.ico",
+   "byte": 1386
+  },
+  {
+   "file": "site/media/sprite/gig.png",
+   "byte": 26272
+  },
+  {
+   "file": "site/media/sprite/gig.json",
+   "byte": 2850
+  },
+  {
+   "file": "site/media/sprite/gig-normali.png",
+   "byte": 107302
+  },
+  {
+   "file": "site/media/sprite/gig-spento.png",
+   "byte": 26328
+  },
+  {
+   "file": "site/media/sprite/punk.png",
+   "byte": 24907
+  },
+  {
+   "file": "site/media/sprite/punk.json",
+   "byte": 2555
+  },
+  {
+   "file": "site/media/sprite/bruto.png",
+   "byte": 29910
+  },
+  {
+   "file": "site/media/sprite/bruto.json",
+   "byte": 2629
+  },
+  {
+   "file": "site/media/social.png",
+   "byte": 56832
+  },
+  {
+   "file": "docs/media/demo.gif",
+   "byte": 1713821
+  }
+ ],
+ "totale_byte": 7750400
+}

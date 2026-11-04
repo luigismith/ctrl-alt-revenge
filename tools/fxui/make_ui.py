@@ -46,7 +46,7 @@ def make_logo() -> np.ndarray:
 
 
 def make_subtitle() -> np.ndarray:
-    return title.render(["PICCHIA DURO A SCORRIMENTO"], bigfont.metrics(10, 2), SUB, gap=2)
+    return title.render(["TARANTO · 2087"], bigfont.metrics(10, 2), SUB, gap=2)
 
 
 def make_stage_card() -> np.ndarray:

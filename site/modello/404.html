@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+	CTRL+ALT REVENGE! · pagina 404, in italiano e in inglese.
+	SPDX-FileCopyrightText: 2026 Luigi Massari
+	Generata da tools/site/build.py con site/modello/404.html. GitHub Pages la usa per ogni indirizzo che non
+	esiste, a qualunque profondità: per questo i percorsi sono assoluti ({{ pagina.assoluta }}).
+-->
+<html lang="it" data-movimento="si">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Security-Policy" content="{{ gen.csp }}">
+	<title>{{ it.p404.titolo }}</title>
+	<meta name="robots" content="noindex">
+	<meta name="description" content="{{ it.p404.testo }} · {{ en.p404.testo }}">
+	<meta name="color-scheme" content="dark">
+	<meta name="theme-color" content="#0a0b24">
+	<link rel="icon" href="{{ pagina.assoluta }}media/icone/favicon.ico" sizes="any">
+	<link rel="icon" href="{{ pagina.assoluta }}media/icone/favicon-32.png" type="image/png" sizes="32x32">
+	<link rel="preload" href="{{ pagina.assoluta }}media/font/car-pixel-bold.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="stylesheet" href="{{ pagina.assoluta }}css/sito.css">
+	<style>{{ gen.sprite_css | crudo }}</style>
+	<script>{{ gen.scala_js | crudo }}</script>
+	<script src="{{ pagina.assoluta }}js/sito.js" defer></script>
+</head>
+<body class="pagina-404">
+	<main class="continua">
+		<p class="continua__logo"><a href="{{ pagina.assoluta }}"><img class="px" src="{{ pagina.assoluta }}media/logo/logo-1x.png" width="248" height="89" alt="CTRL+ALT REVENGE!" data-pixel-w="248" data-pixel-scala="nl"></a></p>
+		<h1 class="continua__titolo" data-pixel-w="228" data-pixel-scala="ni">
+			<img class="px continua__scritta" src="{{ pagina.assoluta }}media/ui/continua.png" width="197" height="31" alt="{{ it.p404.alt }}">
+			<span class="continua__cifra px" aria-hidden="true"></span>
+		</h1>
+		<div class="continua__testi">
+			<p lang="it">{{ it.p404.testo }}</p>
+			<p lang="en">{{ en.p404.testo }}</p>
+		</div>
+		<p class="bottoni continua__bottoni">
+			<a class="bottone bottone--oro" href="{{ pagina.assoluta }}" lang="it"><span aria-hidden="true">▶ </span>{{ it.p404.bottone | pixel }}</a>
+			<a class="bottone" href="{{ pagina.assoluta }}en/" lang="en"><span aria-hidden="true">▶ </span>{{ en.p404.bottone | pixel }}</a>
+		</p>
+		<p class="continua__gig"><span class="sprite" data-sprite="gig" data-scala="2"></span></p>
+	</main>
+</body>
+</html>

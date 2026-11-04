@@ -155,7 +155,7 @@ def capture(scene: str, png: Path, secs: int = 60) -> np.ndarray:
 # ------------------------------------------------------------------------------------
 
 PHRASES = [
-    "CTRL+ALT REVENGE! PICCHIA DURO A SCORRIMENTO",
+    "CTRL+ALT REVENGE! TARANTO · 2087",
     "GIG \u00d73  PUNK  BRUTO  004200  999999  VAI \u25b6",
     "Citt\u00e0, pi\u00f9, perch\u00e9, cos\u00ec, per\u00f2, \u00e8 l\u2019arena. \u00c8 COS\u00cc!",
     "\u00c0\u00c8\u00c9\u00cc\u00d2\u00d9 \u00e0\u00e8\u00e9\u00ec\u00f2\u00f9 \u00c1\u00cd\u00d3\u00da \u00e1\u00ed\u00f3\u00fa",

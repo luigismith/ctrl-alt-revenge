@@ -40,7 +40,7 @@ FONTS = {
 }
 
 PHRASES = [
-    "CTRL+ALT REVENGE! PICCHIA DURO A SCORRIMENTO",
+    "CTRL+ALT REVENGE! TARANTO · 2087",
     "GIG ×3  PUNK  BRUTO  004200  999999  VAI ▶",
     "Città, più, perché, così, però, è l’arena. È COSÌ!",
     "ÀÈÉÌÒÙ àèéìòù ÁÍÓÚ áíóú",

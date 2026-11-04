@@ -67,3 +67,31 @@ path = "game/assets/third_party/ansimuz-warped-city/SOURCE.md"
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Luigi Massari"
 SPDX-License-Identifier = "MIT"
+
+# 5) Media del sito e del README, rifatti da tools/site/media.py con la grafica vera del gioco:
+#    catture, strisce degli sprite, logo, font CAR Pixel in WOFF2, icone e i loro JSON.
+#    Sono asset del gioco come gli originali. Queste tabelle vanno lasciate dopo quelle più
+#    generali su site/, perché vince l'ultima.
+[[annotations]]
+path = [
+  "site/media/**",
+  "docs/media/**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Luigi Massari"
+SPDX-License-Identifier = "LicenseRef-CAR-Assets"
+
+# 5b) Le catture del gioco mostrano anche i piani di "Sotto la Linea" ricolorati da Warped City (vedi 2b).
+[[annotations]]
+path = [
+  "site/media/eroe.webm",
+  "site/media/eroe-2x.webm",
+  "site/media/eroe.mp4",
+  "site/media/eroe-poster.png",
+  "site/media/schermate/**",
+  "site/media/social.png",
+  "docs/media/demo.gif",
+]
+precedence = "override"
+SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]
+SPDX-License-Identifier = "LicenseRef-CAR-Assets"

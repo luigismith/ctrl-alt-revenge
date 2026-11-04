@@ -1,0 +1,171 @@
+{
+ "formato": 1,
+ "nota": "Generato da tools/site/media.py dagli atlanti del gioco: non modificare a mano.",
+ "personaggio": "Punk",
+ "immagine": "punk.png",
+ "dimensioni": [
+  592,
+  315
+ ],
+ "cella": [
+  74,
+  105
+ ],
+ "piedi": [
+  30,
+  98
+ ],
+ "guarda": "destra",
+ "scala": 1,
+ "tick_al_secondo": 60,
+ "fonte": "game/assets/sprites/thug_punk/thug_punk.json",
+ "animazioni": {
+  "guardia": {
+   "riga": 0,
+   "ciclo": true,
+   "animazione_nel_gioco": "idle",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 0,
+     "tick": 12,
+     "ms": 200.0
+    },
+    {
+     "x": 74,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 148,
+     "y": 0,
+     "tick": 12,
+     "ms": 200.0
+    },
+    {
+     "x": 222,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    }
+   ],
+   "tick_totali": 40,
+   "durata_ms": 666.67
+  },
+  "camminata": {
+   "riga": 1,
+   "ciclo": true,
+   "animazione_nel_gioco": "walk",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 105,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 74,
+     "y": 105,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 148,
+     "y": 105,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 222,
+     "y": 105,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 296,
+     "y": 105,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 370,
+     "y": 105,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 444,
+     "y": 105,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 518,
+     "y": 105,
+     "tick": 5,
+     "ms": 83.33
+    }
+   ],
+   "tick_totali": 44,
+   "durata_ms": 733.33
+  },
+  "gancio_caricato": {
+   "riga": 2,
+   "ciclo": false,
+   "animazione_nel_gioco": "haymaker",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 210,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 74,
+     "y": 210,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 148,
+     "y": 210,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 222,
+     "y": 210,
+     "tick": 13,
+     "ms": 216.67
+    },
+    {
+     "x": 296,
+     "y": 210,
+     "tick": 4,
+     "ms": 66.67
+    },
+    {
+     "x": 370,
+     "y": 210,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 444,
+     "y": 210,
+     "tick": 10,
+     "ms": 166.67
+    },
+    {
+     "x": 518,
+     "y": 210,
+     "tick": 10,
+     "ms": 166.67
+    }
+   ],
+   "tick_totali": 65,
+   "durata_ms": 1083.33
+  }
+ }
+}

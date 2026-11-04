@@ -1,0 +1,182 @@
+{
+ "formato": 1,
+ "nota": "Generato da tools/site/media.py dagli atlanti del gioco: non modificare a mano.",
+ "personaggio": "GIG",
+ "immagine": "gig.png",
+ "dimensioni": [
+  632,
+  306
+ ],
+ "cella": [
+  79,
+  102
+ ],
+ "piedi": [
+  33,
+  93
+ ],
+ "guarda": "destra",
+ "scala": 1,
+ "tick_al_secondo": 60,
+ "fonte": "game/assets/sprites/gig/gig.json",
+ "animazioni": {
+  "guardia": {
+   "riga": 0,
+   "ciclo": true,
+   "animazione_nel_gioco": "idle",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 79,
+     "y": 0,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 158,
+     "y": 0,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 237,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 316,
+     "y": 0,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 395,
+     "y": 0,
+     "tick": 7,
+     "ms": 116.67
+    }
+   ],
+   "tick_totali": 42,
+   "durata_ms": 700.0
+  },
+  "camminata": {
+   "riga": 1,
+   "ciclo": true,
+   "animazione_nel_gioco": "walk",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 102,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 79,
+     "y": 102,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 158,
+     "y": 102,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 237,
+     "y": 102,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 316,
+     "y": 102,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 395,
+     "y": 102,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 474,
+     "y": 102,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 553,
+     "y": 102,
+     "tick": 5,
+     "ms": 83.33
+    }
+   ],
+   "tick_totali": 48,
+   "durata_ms": 800.0
+  },
+  "gancio": {
+   "riga": 2,
+   "ciclo": false,
+   "animazione_nel_gioco": "hook",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 204,
+     "tick": 3,
+     "ms": 50.0
+    },
+    {
+     "x": 79,
+     "y": 204,
+     "tick": 2,
+     "ms": 33.33
+    },
+    {
+     "x": 158,
+     "y": 204,
+     "tick": 1,
+     "ms": 16.67
+    },
+    {
+     "x": 237,
+     "y": 204,
+     "tick": 3,
+     "ms": 50.0
+    },
+    {
+     "x": 316,
+     "y": 204,
+     "tick": 4,
+     "ms": 66.67
+    },
+    {
+     "x": 395,
+     "y": 204,
+     "tick": 4,
+     "ms": 66.67
+    },
+    {
+     "x": 474,
+     "y": 204,
+     "tick": 4,
+     "ms": 66.67
+    }
+   ],
+   "tick_totali": 21,
+   "durata_ms": 350.0
+  }
+ },
+ "varianti": {
+  "spento": "gig-spento.png"
+ },
+ "normali": "gig-normali.png",
+ "normali_nota": "Normal map dell'atlante, stessa disposizione della striscia: R = x verso destra, G = y verso l'alto, B = verso chi guarda (128, 128, 255 = di fronte)."
+}

@@ -1,0 +1,177 @@
+{
+ "formato": 1,
+ "nota": "Generato da tools/site/media.py dagli atlanti del gioco: non modificare a mano.",
+ "personaggio": "Bruto",
+ "immagine": "bruto.png",
+ "dimensioni": [
+  837,
+  345
+ ],
+ "cella": [
+  93,
+  115
+ ],
+ "piedi": [
+  36,
+  107
+ ],
+ "guarda": "destra",
+ "scala": 1,
+ "tick_al_secondo": 60,
+ "fonte": "game/assets/sprites/thug_bruiser/thug_bruiser.json",
+ "animazioni": {
+  "guardia": {
+   "riga": 0,
+   "ciclo": true,
+   "animazione_nel_gioco": "idle",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 0,
+     "tick": 12,
+     "ms": 200.0
+    },
+    {
+     "x": 93,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 186,
+     "y": 0,
+     "tick": 12,
+     "ms": 200.0
+    },
+    {
+     "x": 279,
+     "y": 0,
+     "tick": 8,
+     "ms": 133.33
+    }
+   ],
+   "tick_totali": 40,
+   "durata_ms": 666.67
+  },
+  "camminata": {
+   "riga": 1,
+   "ciclo": true,
+   "animazione_nel_gioco": "walk",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 115,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 93,
+     "y": 115,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 186,
+     "y": 115,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 279,
+     "y": 115,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 372,
+     "y": 115,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 465,
+     "y": 115,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 558,
+     "y": 115,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 651,
+     "y": 115,
+     "tick": 6,
+     "ms": 100.0
+    }
+   ],
+   "tick_totali": 52,
+   "durata_ms": 866.67
+  },
+  "pugno": {
+   "riga": 2,
+   "ciclo": false,
+   "animazione_nel_gioco": "punch",
+   "fotogrammi": [
+    {
+     "x": 0,
+     "y": 230,
+     "tick": 8,
+     "ms": 133.33
+    },
+    {
+     "x": 93,
+     "y": 230,
+     "tick": 9,
+     "ms": 150.0
+    },
+    {
+     "x": 186,
+     "y": 230,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 279,
+     "y": 230,
+     "tick": 4,
+     "ms": 66.67
+    },
+    {
+     "x": 372,
+     "y": 230,
+     "tick": 5,
+     "ms": 83.33
+    },
+    {
+     "x": 465,
+     "y": 230,
+     "tick": 6,
+     "ms": 100.0
+    },
+    {
+     "x": 558,
+     "y": 230,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 651,
+     "y": 230,
+     "tick": 7,
+     "ms": 116.67
+    },
+    {
+     "x": 744,
+     "y": 230,
+     "tick": 6,
+     "ms": 100.0
+    }
+   ],
+   "tick_totali": 57,
+   "durata_ms": 950.0
+  }
+ }
+}

@@ -6,6 +6,8 @@ export_credentials.cfg
 # --- build ed export: contengono la musica privata ---
 /build/
 /export/
+# il sito costruito da tools/site/build.py (lo rifà il workflow .github/workflows/sito.yml)
+/_site/
 *.pck
 *.exe
 *.zip

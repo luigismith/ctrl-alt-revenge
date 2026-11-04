@@ -1,0 +1,340 @@
+{
+ "meta": {
+  "commento": "site in English",
+  "codice": "en",
+  "e_italiano": false,
+  "titolo": "CTRL+ALT REVENGE! · Taranto, 2087",
+  "descrizione": "A pixel-art action platformer, in development. Taranto, 2087: the arm comes with a subscription, revenge doesn’t. Play the demo in your browser.",
+  "og_locale": "en_GB",
+  "og_alt": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street, under the KEBAB sign."
+ },
+ "ui": {
+  "salta": "Skip to content",
+  "su": "Back to the top",
+  "su_breve": "back to top",
+  "menu": "Menu",
+  "sezioni": "Site sections",
+  "lingua": "Lingua · Language",
+  "animazioni": "Animations",
+  "animazioni_si": ": on",
+  "animazioni_no": ": off",
+  "gioca": "Play",
+  "leggi": "Read more"
+ },
+ "nav": [
+  {"id": "storia", "testo": "Story"},
+  {"id": "mondo", "testo": "The world"},
+  {"id": "personaggi", "testo": "Characters"},
+  {"id": "gioco", "testo": "Gameplay"},
+  {"id": "tecnica", "testo": "Art"},
+  {"id": "tappe", "testo": "Roadmap"}
+ ],
+ "eroe": {
+  "genere": "Pixel-art action platformer",
+  "sviluppo": "in development",
+  "motto": "Taranto, 2087. The arm comes with a subscription. Revenge doesn’t.",
+  "gioca": "Play the demo",
+  "codice": "The code on GitHub",
+  "tocco": "Play it on a computer: keyboard or gamepad.",
+  "video": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down.",
+  "didascalia": "The “Sotto la Linea” slice, November 2026: a technical test. The street, the rain and the signs are placeholders; the art and the levels will change."
+ },
+ "storia": {
+  "titolo": "A single night",
+  "sotto": "Taranto, Holy Thursday, 17 April 2087",
+  "epigrafe": "“I was eleven that night.”",
+  "epigrafe_firma": "Totò",
+  "nota": "In the game, the story is told by Totò’s murals. These panels are illustrations made for the site with the game’s real art: the mural style is still being tested.",
+  "salta": "Skip the story",
+  "maxischermo": "The air you deserve",
+  "braccio_didascalia": "MANODOPERA",
+  "cartelloni": [
+   {"titolo": "Taranto, 2087", "testo": "White domes cover the old steelworks: beneath them, so they say, <b class=\"sidera\">SIDERA</b>’s great clean-up is under way, and by Easter the city will finally be pure."},
+   {"titolo": "The arm", "testo": "Cataldo Gigante, GIG to everyone, is the engineer from the Tamburi district who designed MANODOPERA, the cybernetic arm that gave injured workers back the arm they had lost on the job, and which <b class=\"sidera\">SIDERA</b> now rents out by subscription."},
+   {"titolo": "Two words", "testo": "After the death of Mimmo, his oldest friend, GIG asked too many questions: within a week he had lost his job, his home and his name on the patents, and his arm was locked remotely with two words: <b class=\"sidera\">“Subscription expired.”</b>"},
+   {"titolo": "Holy Thursday, 3 p.m.", "testo": "As the <i lang=\"it\">perdoni</i>, hooded and barefoot, file out of the Carmine church, two Esattori, SIDERA’s repo men, track him down at Mimmo’s grave in San Brunone cemetery to repossess the arm."},
+   {"titolo": "The garage", "testo": "GIG escapes to his mother’s garage, plugs his father’s old keyboard into the arm and hits <kbd>CTRL</kbd>+<kbd>ALT</kbd>+<kbd>CANC</kbd> (CANC is Delete on Italian keyboards), two keys with his one good hand and the third with his nose:"},
+   {"titolo": "The reboot", "testo": "the arm reboots and starts to talk, his eye turns <span class=\"occhio\">cyan</span>, and with his first double jump his single night begins, that afternoon, on the rooftops of the Tamburi, where his guide is Totò, eleven years old, who sprays REVENGE on the walls."}
+  ],
+  "errore": "SUBSCRIPTION EXPIRED",
+  "errore_label": "The MANODOPERA window: subscription expired. Next to it, GIG’s portrait with his cyber eye switched off.",
+  "tasti_label": "The three reboot keys",
+  "tasti_aiuto": "Press all three, like GIG: two with your good hand, the third with your nose.",
+  "stato_bloccato": "ARM LOCKED",
+  "stato_riavvio": "REBOOTING…",
+  "stato_acceso": "ARM REBOOTED",
+  "ritratto_spento": "GIG, his cyber eye switched off.",
+  "ritratto_acceso": "GIG, his cyber eye switched on: it’s cyan.",
+  "riavvia": "Reboot the arm",
+  "muro_label": "The story panels",
+  "prec": "Previous panel",
+  "succ": "Next panel",
+  "scorri": "Scroll along the wall"
+ },
+ "mondo": {
+  "titolo": "Under the red cloud",
+  "sotto": "Taranto, 2087: the world of the game",
+  "paragrafi": [
+   "Since 2041 the old steelworks has been sealed under white domes marked “Construction site, no entry”. <b class=\"sidera\">SIDERA</b> calls it the clean-up, and has given it a name that sounds like a streaming service: ARIA+, “The air you deserve” (<i lang=\"it\">aria</i> means air), with ARIA+ Premium for those who can pay. A red cloud hangs over the city: the smoke, they say, is “clean-up steam”, the dust a “temporary inconvenience”. The Colombe (“doves”), white drones carrying the ARIA+ logo, measure the air and spray a fresh, clean scent; they are named after the wooden dove that tradition credits to Archytas, the engineer-philosopher of Greek Taranto. On the big screens, the Easter celebration is already being advertised: “Taranto is pure”.",
+   "The Tamburi is the working-class district pressed up against the steelworks: public housing blocks with small terraces, washing hung out to dry and turned red by the dust, windows stopped up with wet towels whenever the north-west wind blows the dust in. Everything that was once pale wears a red film, even the tombs of San Brunone cemetery. Above the streets runs the Linea (“the Line”): conveyor belts on concrete pylons that disappear under the domes. At the foot of the pylons stands Ignazio’s MiniBar, GIG’s local. Plenty of people here wear a MANODOPERA arm (the word means “workforce”, literally “the work of the hand”) with red rings, on a monthly subscription; miss a payment and the Esattori come knocking."
+  ],
+  "aria": {
+   "label": "A SIDERA advert, in the world of the game",
+   "slogan": "“The air you deserve.”",
+   "testo": "Taranto’s clean-up. By subscription.",
+   "colombe": "They measure the air. They smell squeaky clean. Here come the Colombe.",
+   "clausola": "ARIA+ Premium for those who can pay.",
+   "nota": "A made-up advert, like SIDERA."
+  },
+  "strada": {
+   "label": "The slice’s street, from the bar to the kebab shop: as you scroll, GIG walks along it towards two Esattori waiting for him.",
+   "didascalia": "A stretch of the slice’s street, with its own art and lights: scroll and GIG walks. It’s still a generic street, and we’ll rebuild it so it tells the story of the Tamburi."
+  },
+  "notte": {
+   "titolo": "The oldest night",
+   "testo": "It all happens in a single night, from Holy Thursday into Good Friday, 17–18 April 2087, which is also the city’s oldest night.",
+   "orari": [
+    {"ora": "3 p.m.", "cosa": "the <i lang=\"it\">perdoni</i>, barefoot and hooded, leave the Carmine church and walk from church to church to pray at the Altars of Repose, with the slow, rocking step called the <i lang=\"it\">nazzicata</i>;"},
+    {"ora": "Midnight", "cosa": "from San Domenico in the Old Town, the procession of Our Lady of Sorrows (the <i lang=\"it\">Addolorata</i>) sets out, led by the <i lang=\"it\">troccolante</i> and his wooden clapper, the <i lang=\"it\">troccola</i>."}
+   ],
+   "chiusa": "By 2087 almost everything in Taranto has changed, except this."
+  }
+ },
+ "personaggi": {
+  "titolo": "Who’s out that night",
+  "sotto": "These are the game’s real sprites, with their real timing: tap them and they make their move.",
+  "gig_parte": "On GIG’s side",
+  "sidera_parte": "On SIDERA’s payroll",
+  "gig": {
+   "vero": "(Cataldo Gigante)",
+   "testo": "50, the Tamburi engineer who designed MANODOPERA. Gruff, wry and stubborn: he can fix anything except his own life.",
+   "mossa": "Tap him: he throws the cyber hook.",
+   "label": "Make GIG throw the cyber hook"
+  },
+  "tere": {"testo": "The arm’s voice. After the reboot it talks: advice, wisecracks, and keeping GIG honest."},
+  "toto": {
+   "testo": "11, sprays REVENGE on the neighbourhood walls and guides GIG across the rooftops of the Tamburi.",
+   "nota": "The tag shown here comes from the slice: we’ll redo it in his style.",
+   "alt": "The REVENGE tag on a building-site hoarding, in the slice’s street."
+  },
+  "madre": {"testo": "GIG’s mother: a seamstress devoted to Our Lady of Sorrows, who calls her son “Catà”. At fifty, he’s back sleeping under her roof."},
+  "esattori": {
+   "titolo": "The Esattori",
+   "testo": "<b class=\"sidera\">SIDERA</b>’s repo men, seizing arms from anyone who falls behind on payments.",
+   "punk": {"testo": "A temp, paid by the hour.", "label": "Make the punk wind up his haymaker"},
+   "bruto": {"nome": "BRUTO", "testo": "The brute: a career debt collector, bigger than GIG, who throws punches with his whole body.", "label": "Make the brute throw a punch"},
+   "mossa": "Tap them: they attack.",
+   "nota": "In the game their look will change: the punk gets a rider’s backpack, the brute a reflective ESATTORE vest, and both of them dust goggles."
+  },
+  "colombe": {
+   "nome": "The Colombe",
+   "testo": "White drones bearing the ARIA+ logo: they measure the air and spray a fresh, clean scent.",
+   "nota": "We haven’t drawn them yet."
+  }
+ },
+ "gioco": {
+  "titolo": "How it plays",
+  "intro": "A pixel-art action platformer, with combat arenas and hacking puzzles. This is the game we’re making: each pillar says what you can already try in the slice and what is still in development.",
+  "etichetta_slice": "In the slice",
+  "etichetta_sviluppo": "In development",
+  "etichetta_carta": "On paper",
+  "pilastri": [
+   {
+    "titolo": "Platforming and fights, in one night",
+    "slice": "running, a live cable to jump, and an arena fight that ends with ZONA LIBERATA (“zone cleared”).",
+    "sviluppo": "the double jump, and the camera tilting as the Esattori turn up.",
+    "testo": "You run and jump side-on in 2D, with a double jump from the moment the arm reboots, early in the prologue; when the Esattori turn up the camera tilts, the floor opens out and the fight moves into depth, like the side-scrolling arcade classics. When it’s over, VAI (“GO”) flashes up and you’re back to jumping.",
+    "schermate": [
+     {"nome": "cavo", "didascalia": "A live cable to jump."},
+     {"nome": "arena", "didascalia": "The arena, until ZONA LIBERATA."}
+    ]
+   },
+   {
+    "titolo": "Hits that land with weight",
+    "slice": "jab, jab, cyber hook and kick; grabs with knee strikes and throws; the flying kick.",
+    "sviluppo": "a dodge into depth, a timed parry, the Scarica and things to throw.",
+    "testo": "The combo only continues if the blow connects: jab, jab, cyber hook, kick. Grabs with knee strikes and throws, where a thrown body bowls over anyone in the way, plus a flying kick. Coming next: a dodge into depth, a timed parry with the cyber arm that opens up a counter, the Scarica (an electric punch), and bins, pipes and crates to throw.",
+    "schermate": [
+     {"nome": "combo", "didascalia": "Jab, jab, hook, kick."},
+     {"nome": "presa", "didascalia": "A grab and knee strikes."}
+    ]
+   },
+   {
+    "titolo": "Old-school acrobatics, modern comfort",
+    "largo": true,
+    "slice": "running and jumping.",
+    "sviluppo": "the Spinta, ledge grabs, slides, wall jumps, air dashes, wall runs and the Rampino.",
+    "testo": "Run, variable-height jump and Spinta, a double jump kicked off by a downward blast from the arm; ledge grabs, slides, wall jumps, air dashes and wall runs. Later on, the Rampino, a grapple to swing from cables and chains like Pitfall’s vines. And the forgiving jump timing players expect today."
+   },
+   {
+    "titolo": "The arm plugs in",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "GIG plugs his arm into the <b class=\"sidera\">SIDERA</b> panels that his cyan eye, the Vista, reveals: he reverses the Linea’s belts, opens gates, reprograms the Colombe and switches off lasers. They’re timed hacking puzzles inside the level, Comix Zone style; the few biggest hacks get a full-screen mini-game, a data stream to route through a grid."
+   },
+   {
+    "titolo": "The Vista and the secrets",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "The Vista cuts through the red dust of the Wind Days, when the north-west wind blows hard over Taranto, to reveal fake walls, invisible platforms and ARIA+ billboards that, looked at properly, point the way. Every act hides arm logs, secret-hunting in the Duke Nukem and Jazz Jackrabbit tradition: each tells a worker’s story, and the more you find, the richer the epilogue. On the walls, Totò’s tags to collect."
+   },
+   {
+    "titolo": "Revenge or justice",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "At certain moments you choose what GIG says. There’s no meter on screen, but the story remembers, right up to the ending."
+   },
+   {
+    "titolo": "Taranto you can play, with today’s rules",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "Real places, from San Brunone cemetery to the rooftops of the Tamburi, and the city’s own food as pick-ups: <i lang=\"it\">taralli</i>, coffee from the MiniBar, <i lang=\"it\">panzerotti</i> and the rare Easter <i lang=\"it\">scarcella</i>, which pushes your health past the maximum. Three acts in a single night, a prologue and [[capitoli]] chapters, replayable for missed secrets; frequent checkpoints, unlimited retries and no GAME OVER, and for a thrill, an optional arcade mode with three lives and a CONTINUA? (“continue?”) screen."
+   }
+  ],
+  "demo": {
+   "titolo": "Play it in your browser",
+   "testo": "The “Sotto la Linea” (“Under the Line”) slice plays in your browser, with a keyboard or a gamepad: from the title screen to the end of the demo, GIG against the punk and the brute. It has no music, because the tracks aren’t public.",
+   "onesta": "It’s the 2026 technical slice: the art, the text and the levels will change, the game’s own text is in Italian, and in the browser all sounds come from the centre. The first load downloads about [[demo_mb]] MB.",
+   "bottone": "Play the demo"
+  },
+  "comandi": {
+   "titolo": "Controls",
+   "o": "or",
+   "righe": [
+    {"azione": "Move", "gruppi": [
+     [{"testo": "◀", "codice": "ArrowLeft", "nome": "left arrow"}, {"testo": "▲", "codice": "ArrowUp", "nome": "up arrow"}, {"testo": "▼", "codice": "ArrowDown", "nome": "down arrow"}, {"testo": "▶", "codice": "ArrowRight", "nome": "right arrow"}],
+     [{"testo": "W", "codice": "KeyW", "nome": ""}, {"testo": "A", "codice": "KeyA", "nome": ""}, {"testo": "S", "codice": "KeyS", "nome": ""}, {"testo": "D", "codice": "KeyD", "nome": ""}]
+    ]},
+    {"azione": "Attack", "gruppi": [[{"testo": "Z", "codice": "KeyZ", "nome": ""}], [{"testo": "J", "codice": "KeyJ", "nome": ""}]]},
+    {"azione": "Jump", "gruppi": [[{"testo": "X", "codice": "KeyX", "nome": ""}], [{"testo": "K", "codice": "KeyK", "nome": ""}]]},
+    {"azione": "Pause", "gruppi": [[{"testo": "ENTER", "codice": "Enter", "nome": ""}], [{"testo": "ESC", "codice": "Escape", "nome": ""}]]}
+   ],
+   "nota": "A gamepad works too. Try pressing the keys: they light up here."
+  }
+ },
+ "tecnica": {
+  "titolo": "Retro, with today’s technology",
+  "sotto": "Pixel art is the style, not a period limitation.",
+  "paragrafi": [
+   "The game runs at 384×216 pixels, scaled up by whole multiples, and uses modern techniques wherever they look better. The slice already has dynamic lights with normal maps on the characters, sparks and particles, hit-stop on impacts and slow motion on the final KO; the full game can also use a smooth camera, shaders and deformation.",
+   "The comic-book scenes, meaning the intro and the interludes, are Totò’s murals: pixel art in a street-art style, with spray-can gradients, drips, thick outlines and neon colours. The camera pans along the wall and the panels come alive with parallax, lights and particles. The mural style is still being tested, and the look of the sprites may change too: everything here is work in progress.",
+   "This site follows the same rules: every pixel of the art is a game pixel, scaled up by a whole number of your screen’s pixels, and the cloud and the dust are drawn by the page’s own code, with old-school Bayer dithering."
+  ],
+  "luce": {
+   "titolo": "Try the lighting here.",
+   "didascalia": "GIG’s real sprite, with its normal map: move the pointer over the box, or use the arrow keys when it’s selected, and the light follows. Your browser computes it, the way Godot does in the game.",
+   "label": "GIG on guard, lit by a moving light: move it with the pointer or the arrow keys.",
+   "gruppo": "What to show",
+   "viste": [
+    {"id": "luce", "testo": "Light"},
+    {"id": "piatto", "testo": "No lights"},
+    {"id": "normali", "testo": "Normal map"}
+   ]
+  },
+  "catena": {
+   "titolo": "How the art is made, at zero cost",
+   "passi": [
+    {"titolo": "CC0 models", "testo": "The characters start from free 3D models and animations released under CC0, by Quaternius and Mesh2Motion."},
+    {"titolo": "Blender", "testo": "Blender animates and renders them. The key moves, meaning the grab, knee strikes, throw, cyber hook and flying kick, are poses written into the scripts."},
+    {"titolo": "Python", "testo": "Python scripts turn them into pixel art, with a palette for each material, stamps for facial details, a springy ponytail, procedurally built boots and a normal map for every sprite sheet."},
+    {"titolo": "Backgrounds, fonts and sounds", "testo": "Backgrounds are procedural geometry and painting, with a handful of recoloured CC0 pieces and our own pixel typeface for the shop signs. Fonts, effects, interface and sound effects come from scripts too, with no samples or asset packs."},
+    {"titolo": "Godot", "testo": "Godot puts it all together, with dynamic lights and fixed-tick logic."}
+   ],
+   "chiusa": "No hand retouching, and no image generated by an AI: the scripts, written by AI agents for Luigi Massari, are deterministic, use fixed seeds and can all be read in the repository."
+  },
+  "colori": {
+   "titolo": "Colours say whose scene it is",
+   "voci": [
+    {"nome": "Blue-violet night", "testo": "the sky under the cloud, and the shadows.", "c1": "#06061a", "c2": "#0f1131", "c3": "#1a1230", "ritratto": ""},
+    {"nome": "Violet asphalt", "testo": "the street and the walls of the district.", "c1": "#110c1b", "c2": "#261c39", "c3": "#2b1f3e", "ritratto": ""},
+    {"nome": "Red and orange neon", "testo": "the signs of the Tamburi; gold is for the controls.", "c1": "#f06a1e", "c2": "#ff9440", "c3": "#ffe27a", "ritratto": ""},
+    {"nome": "Red", "testo": "belongs to SIDERA, like the Esattori’s frame.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
+    {"nome": "Cyan", "testo": "belongs to GIG alone: his eye and his arm.", "c1": "", "c2": "", "c3": "", "ritratto": "gig"}
+   ]
+  }
+ },
+ "tappe": {
+  "titolo": "Where we are",
+  "sotto": "In development, November 2026. CTRL+ALT REVENGE is being rebuilt from scratch in Godot [[godot]], Windows first; the old Python/Pygame prototype is archived in the legacy-pygame branch.",
+  "prova": "The score above is real: it comes from the demo replay the tests play back. With this version it always ends on tick [[tick]] with [[punteggio]] points and the same hash, <span class=\"data\">[[hash]]…</span>: the logic runs on fixed ticks and is deterministic, and the tests check it by playing the same replays twice. There are [[test]] groups of automated tests.",
+  "righe": [
+   {"tipo": "fatto", "stato": "DONE", "titolo": "The story", "testo": "Written and approved from start to finish: prologue, three acts, ending and epilogue, with the comic-book intro and interludes."},
+   {"tipo": "fatto", "stato": "DONE", "titolo": "The gameplay foundations", "testo": "Decided and written down: platforming and arenas, moves, combat, hacking puzzles, health and checkpoints, pick-ups, secrets, chapters and hazards."},
+   {"tipo": "fatto", "stato": "DONE", "titolo": "Taranto, with sources", "testo": "Sourced research on Taranto, and a timeline that keeps places, dates, times, weather and even that night’s moon consistent."},
+   {"tipo": "fatto", "stato": "DONE", "titolo": "The “Sotto la Linea” slice", "testo": "Playable from the title screen to the end of the demo: GIG against the punk and the brute, with combos, grabs, knee strikes, throws, a flying kick, a live cable to jump and an arena that ends with ZONA LIBERATA. Version 7 sprites with normal maps and dynamic lights, synthesised sound effects, and fixed-tick game logic checked by automated tests and deterministic replays."},
+   {"tipo": "prossima", "stato": "▶ NEXT", "titolo": "The test room", "testo": "Plain grey, to fine-tune the moves: jumps, double jump, walls, dash, grapple and the switch to the arena with the tilting camera."},
+   {"tipo": "poi", "stato": "THEN", "titolo": "The prologue", "testo": "San Brunone cemetery and the garage, with the arm’s reboot."},
+   {"tipo": "poi", "stato": "THEN", "titolo": "Chapter 1, “I tetti dei Tamburi”", "testo": "“The Rooftops of the Tamburi”, with the first arm log, food pick-ups and the mural intro."},
+   {"tipo": "parallelo", "stato": "IN PARALLEL", "titolo": "Murals and soundtrack", "testo": "The style test for the murals, and the soundtrack, with a ’90s sound but not necessarily chiptune."}
+  ],
+  "uscita": "RELEASE DATE: NONE YET",
+  "slice": "The slice is a technical test, and its street is still generic. We’ll rebuild it so it shows Taranto on the evening of Holy Thursday 2087: the red cloud instead of a starry sky, wind and red dust instead of rain, the Linea’s conveyor belts instead of a railway, neighbourhood shop signs instead of anywhere-metropolis neon."
+ },
+ "crediti": {
+  "titolo": "Credits and licences",
+  "chi": {
+   "titolo": "Who makes it",
+   "voci": [
+    {"ruolo": "Project and direction", "testo": "Luigi Massari.", "mostra": true},
+    {"ruolo": "Code, graphics and sound effects", "testo": "produced with AI agents for Luigi Massari, starting from CC0 sources. It’s the same line as in the game’s credits.", "mostra": true},
+    {"ruolo": "Story", "testo": "co-written by Luigi Massari and Claude, an AI assistant: Claude proposes, Luigi decides.", "mostra": false},
+    {"ruolo": "CAR Pixel fonts, effects and interface", "testo": "drawn by scripts for CTRL+ALT REVENGE.", "mostra": true},
+    {"ruolo": "Engine", "testo": "Godot Engine.", "mostra": true}
+   ]
+  },
+  "ai": "No image on this site is generated by an AI: there’s the game’s own art, made by deterministic scripts from the CC0 sources listed below, and what the page’s own code draws, like the cloud and the dust. The scripts, on the other hand, are written by AI agents for Luigi Massari, and you can read them all in the repository.",
+  "licenze": {
+   "titolo": "Licences",
+   "voci": [
+    "Code (GDScript, Python, shaders, configuration and this website’s code): <b>MIT</b>.",
+    "Original assets (art, animation, backgrounds, CAR Pixel fonts, interface, sound effects, levels, story and characters, including the images on this site): <b>LicenseRef-CAR-Assets</b>, all rights reserved.",
+    "They may not be used to train or fine-tune AI systems, as input or style reference for generative AI, or for text and data mining: rights expressly reserved under Art. 4(3) of Directive (EU) 2019/790 and Arts. 70-ter, 70-quater and 70-septies of Italian Law 633/1941.",
+    "Blender scripts (tools/blender/): <b>GPL-3.0-or-later</b>.",
+    "Third-party material: <a href=\"[[github_terze_parti]]\">THIRD-PARTY-NOTICES.md</a>. Per-file licences: <a href=\"[[github_reuse]]\">REUSE.toml</a>. Permission requests: <a href=\"[[github_issues]]\">GitHub issues</a>."
+   ]
+  },
+  "cc0": {
+   "titolo": "CC0 sources",
+   "intro": "Credit isn’t required: we give it gladly.",
+   "voci": [
+    {"nome": "Quaternius · Universal Base Characters (Standard)", "cosa": "the models GIG, the punk and the brute are built from.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalbasecharacters.html"},
+    {"nome": "Quaternius · Universal Animation Library (Standard)", "cosa": "their animations.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary.html"},
+    {"nome": "Quaternius · Universal Animation Library 2 (Standard)", "cosa": "more animations.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary2.html"},
+    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "the wall-mounted air conditioner in the backgrounds.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
+    {"nome": "Mesh2Motion", "cosa": "the animations of GIG’s roundhouse kick.", "licenza": "CC0 1.0", "url": "https://github.com/Mesh2Motion/mesh2motion-app"},
+    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "the bin in the alley.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
+    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "the sky and far layers of “Sotto la Linea” are a recoloured, recomposed version of it.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"}
+   ],
+   "resto": "Everything else is ours: poses and moves written into the scripts, boots, ponytail, facial stamps, normal maps and lights; buildings, signs, the lettering’s pixel typeface, the girder, pylons and props; fonts, effects, interface and sound effects. We don’t use Mixamo, Reallusion, CraftPix or anything that can’t be redistributed."
+  },
+  "strumenti": {
+   "titolo": "Tools, all free and open source",
+   "voci": [
+    {"nome": "Godot Engine 4.7.2", "cosa": "© 2014-present Godot Engine contributors; © 2007-2014 Juan Linietsky, Ariel Manzur.", "licenza": "MIT", "url": "https://godotengine.org"},
+    {"nome": "Blender 4.5 LTS", "cosa": "animates and renders the models.", "licenza": "GPL-3.0-or-later", "url": "https://www.blender.org"},
+    {"nome": "FFmpeg 9.0 (gyan.dev build)", "cosa": "captures and video only.", "licenza": "GPL-3.0", "url": "https://ffmpeg.org"},
+    {"nome": "Python 3.14", "cosa": "with NumPy (BSD-3-Clause), Pillow (MIT-CMU) and SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
+   ]
+  },
+  "musica": "Music: the final soundtrack will be generated with Suno and will ship only with game builds. It isn’t in the repository, on this site or in the web demo."
+ },
+ "piede": {
+  "finzione": "CTRL+ALT REVENGE is a work of fiction, set in a Taranto of 2087 imagined from the real city. SIDERA, ARIA+, MANODOPERA and all the characters are invented, Ignazio included; the MiniBar sign is used with the owner’s permission. Any other resemblance to real people or companies is coincidental. The city’s places and rituals are real, and we portray them with respect.",
+  "contesto": [
+   {"testo": "The story was written in November 2026, in the days when Taranto’s blast furnaces began to be shut down. The game doesn’t retell the news: it imagines Taranto sixty years on, and takes aim at those in power, never at the people who live there, work there or have fallen ill.", "mostra": false}
+  ],
+  "link": [
+   {"testo": "The code on GitHub", "url": "[[github_codice]]"},
+   {"testo": "Third-party licences", "url": "[[github_terze_parti]]"},
+   {"testo": "Per-file licences", "url": "[[github_reuse]]"},
+   {"testo": "Permission requests", "url": "[[github_issues]]"}
+  ],
+  "copyright": "CTRL+ALT REVENGE! © 2026 Luigi Massari. No cookies and no tracking: this page collects no data."
+ },
+ "p404": {
+  "titolo": "Page not found · CTRL+ALT REVENGE!",
+  "testo": "This page doesn’t exist. No GAME OVER, though: here you retry as often as you like.",
+  "bottone": "Back to the start",
+  "alt": "CONTINUA? (continue?)"
+ }
+}

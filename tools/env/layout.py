@@ -345,7 +345,7 @@ def build_street():
     S.box(X(1078), YF + 0.1, 0.0, X(1084), YF + 0.2, LINTEL, "METAL", M_METAL, "#262c3c")
     sb = sign_box(S, X(1000), X(1130))
     S.op("neon_text", oid=sb, face="front", X0=X(1000), X1=X(1130), z0=SIGN_Z0, z1=SIGN_Z1, Yf=YF - 0.14,
-         text="FARMACIA", ramp="neon_red", font="med", frame=False, cross=True)
+         text="FARMACIA", ramp="neon_green", font="med", frame=False, cross=True)
     S.op("interior", oid=g_far, style="farmacia", X0=X(1004), X1=X(1078), z0=0.4, z1=1.92)
     S.op("interior", oid=d_far, style="door", X0=X(1084), X1=X(1122), z0=0.05, z1=1.98)
     cr, cy0 = blade_sign(S, X(1136), 2.05, 2.62, depth=0.55, thick=0.12, col="#1a1424")

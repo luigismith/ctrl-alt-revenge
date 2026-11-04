@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<!--
+	CTRL+ALT REVENGE! · {{ t.meta.commento }}
+	SPDX-FileCopyrightText: 2026 Luigi Massari
+	Pagina generata da tools/site/build.py con site/modello/pagina.html e site/content/{{ pagina.lingua }}.json:
+	non modificarla a mano. Codice: MIT. Grafica, font, personaggi e storia: LicenseRef-CAR-Assets.
+	Niente risorse esterne, niente cookie, niente tracciamenti: font, script e immagini stanno tutti qui.
+-->
+<html lang="{{ pagina.lingua }}" data-movimento="si">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Security-Policy" content="{{ gen.csp }}">
+	<title>{{ t.meta.titolo }}</title>
+	<meta name="description" content="{{ t.meta.descrizione }}">
+	<meta name="color-scheme" content="dark">
+	<meta name="theme-color" content="#0a0b24">
+	<meta name="tdm-reservation" content="1">
+	<link rel="canonical" href="{{ pagina.url }}">
+	<link rel="alternate" hreflang="it" href="{{ pagina.url_it }}">
+	<link rel="alternate" hreflang="en" href="{{ pagina.url_en }}">
+	<link rel="alternate" hreflang="x-default" href="{{ pagina.url_it }}">
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="CTRL+ALT REVENGE!">
+	<meta property="og:title" content="{{ t.meta.titolo }}">
+	<meta property="og:description" content="{{ t.meta.descrizione }}">
+	<meta property="og:url" content="{{ pagina.url }}">
+	<meta property="og:locale" content="{{ t.meta.og_locale }}">
+	<meta property="og:locale:alternate" content="{{ altra_t.meta.og_locale }}">
+	<meta property="og:image" content="{{ pagina.og_immagine }}">
+	<meta property="og:image:type" content="image/png">
+	<meta property="og:image:width" content="{{ m.social.larghezza }}">
+	<meta property="og:image:height" content="{{ m.social.altezza }}">
+	<meta property="og:image:alt" content="{{ t.meta.og_alt }}">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="{{ t.meta.titolo }}">
+	<meta name="twitter:description" content="{{ t.meta.descrizione }}">
+	<meta name="twitter:image" content="{{ pagina.og_immagine }}">
+	<meta name="twitter:image:alt" content="{{ t.meta.og_alt }}">
+	<link rel="icon" href="{{ pagina.radice }}media/icone/favicon.ico" sizes="any">
+	<link rel="icon" href="{{ pagina.radice }}media/icone/favicon-32.png" type="image/png" sizes="32x32">
+	<link rel="icon" href="{{ pagina.radice }}media/icone/favicon-16.png" type="image/png" sizes="16x16">
+	<link rel="apple-touch-icon" href="{{ pagina.radice }}media/icone/apple-touch-icon.png">
+	<link rel="preload" href="{{ pagina.radice }}media/font/car-pixel-bold.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="preload" href="{{ pagina.radice }}media/font/car-pixel-regular.woff2" as="font" type="font/woff2" crossorigin>
+	<link rel="preload" href="{{ pagina.radice }}media/{{ m.eroe.poster }}" as="image" fetchpriority="high">
+	<link rel="stylesheet" href="{{ pagina.radice }}css/sito.css">
+	<style>{{ gen.sprite_css | crudo }}</style>
+	<script>{{ gen.scala_js | crudo }}</script>
+	<script src="{{ pagina.radice }}js/sito.js" defer></script>
+</head>
+<body>
+	<a class="salta" href="#inizio">{{ t.ui.salta }}</a>
+
+	<!-- Polvere rossa portata dal maestrale: è sera, c'è il Wind Day (cronologia). Solo decorazione. -->
+	<canvas class="polvere px" aria-hidden="true"></canvas>
+
+	<header class="hud" id="hud">
+		<a class="hud__gig" href="#inizio">
+			<img class="px hud__ritratto" src="{{ pagina.radice }}media/ui/ritratto-gig.png" width="34" height="34" alt="">
+			<span class="hud__nome">CTRL+ALT REVENGE!</span><span class="sr">, {{ t.ui.su_breve }}</span>
+		</a>
+		<button type="button" class="hud__menu" aria-expanded="false" aria-controls="sezioni">
+			<span class="hud__menu-icona" aria-hidden="true"></span>{{ t.ui.menu | pixel }}
+		</button>
+		<nav class="hud__nav" id="sezioni" aria-label="{{ t.ui.sezioni }}">
+			<ul>
+				{% for v in t.nav %}<li><a href="#{{ v.id }}">{{ v.testo | pixel }}</a></li>
+				{% endfor %}
+			</ul>
+		</nav>
+		<div class="hud__comandi">
+			<button type="button" class="moto" aria-pressed="true" data-nome="{{ t.ui.animazioni }}" data-si="{{ t.ui.animazioni_si | pixel }}" data-no="{{ t.ui.animazioni_no | pixel }}" title="{{ t.ui.animazioni }}{{ t.ui.animazioni_si }}">
+				<span class="moto__luce" aria-hidden="true"></span><span class="moto__testo">{{ t.ui.animazioni | pixel }}<span class="moto__stato" aria-hidden="true">{{ t.ui.animazioni_si | pixel }}</span></span>
+			</button>
+			<nav class="lingue" aria-label="{{ t.ui.lingua }}">
+				<a href="{% if pagina.radice %}{{ pagina.radice }}{% else %}./{% endif %}" hreflang="it" lang="it"{% if t.meta.e_italiano %} aria-current="page"{% endif %}>IT</a>
+				<a href="{% if pagina.radice %}./{% else %}en/{% endif %}" hreflang="en" lang="en"{% if not t.meta.e_italiano %} aria-current="page"{% endif %}>EN</a>
+			</nav>
+			<a class="bottone bottone--oro hud__gioca" href="{{ pagina.gioca }}"><span aria-hidden="true">▶ </span>{{ t.ui.gioca | pixel }}</a>
+		</div>
+	</header>
+
+	<main>
+		<!-- EROE: la nube rossa sopra i tetti dei Tamburi, e sotto il gioco vero -->
+		<section class="eroe" id="inizio" aria-labelledby="titolo">
+			<div class="eroe__cielo" aria-hidden="true"><canvas class="eroe__nube px"></canvas></div>
+			<div class="eroe__griglia">
+				<div class="eroe__testa">
+					<h1 class="eroe__logo" id="titolo">
+						<img class="px" src="{{ pagina.radice }}media/logo/logo-1x.png" width="248" height="89" alt="CTRL+ALT REVENGE!">
+					</h1>
+					<div class="eroe__azioni">
+						<p class="eroe__motto">{{ t.eroe.motto | pixel }}</p>
+						<p class="genere">{{ t.eroe.genere | pixel }} <span class="chip chip--sviluppo">{{ t.eroe.sviluppo | pixel }}</span></p>
+						<p class="bottoni">
+							<a class="bottone bottone--oro" href="{{ pagina.gioca }}"><span aria-hidden="true">▶ </span>{{ t.eroe.gioca | pixel }}</a>
+							<a class="bottone" href="{{ d.github_codice }}">{{ t.eroe.codice | pixel }}<span class="esterno" aria-hidden="true"> ↗</span></a>
+						</p>
+						<p class="solo-tocco">{{ t.eroe.tocco }}</p>
+					</div>
+				</div>
+
+				<figure class="eroe__gioco">
+					<div class="eroe__tetti" aria-hidden="true"><div class="tetti"></div><div class="tetti tetti--luce"></div></div>
+					<video class="eroe__video px" muted loop playsinline preload="metadata"
+						width="{{ m.eroe.larghezza }}" height="{{ m.eroe.altezza }}"
+						poster="{{ pagina.radice }}media/{{ m.eroe.poster }}" aria-label="{{ t.eroe.video }}">
+						{% for v in m.eroe.video %}<source src="{{ pagina.radice }}media/{{ v.file }}" type="{{ v.type }}"{% if v.media %} media="{{ v.media }}"{% endif %}>
+						{% endfor %}
+					</video>
+					<figcaption class="eroe__didascalia">{{ t.eroe.didascalia }}</figcaption>
+				</figure>
+			</div>
+		</section>
+
+		<!-- STORIA: la premessa come i murales di Totò, cartelloni dipinti su un muro dei Tamburi.
+		     Con le animazioni e lo schermo largo la telecamera scorre lungo il muro; altrimenti è un fumetto in colonna. -->
+		<section class="storia" id="storia" aria-labelledby="storia-t" tabindex="-1">
+			<div class="sezione__testa">
+				<h2 class="neon" id="storia-t">{{ t.storia.titolo | pixel }}</h2>
+				<p class="sotto">{{ t.storia.sotto }}</p>
+				<figure class="epigrafe">
+					<blockquote><p>{{ t.storia.epigrafe }}</p></blockquote>
+					<figcaption>{{ t.storia.epigrafe_firma }}</figcaption>
+				</figure>
+				<p class="nota-sezione">{{ t.storia.nota }} <a href="#mondo" class="salta-avanti">{{ t.storia.salta }}<span aria-hidden="true"> ▼</span></a></p>
+			</div>
+
+			<div class="muro">
+				<div class="muro__vista">
+					<ol class="muro__striscia" tabindex="0" aria-label="{{ t.storia.muro_label }}">
+						<li class="cartellone cartellone--nube">
+							<div class="cartellone__arte" aria-hidden="true">
+								<div class="arte-citta">
+									<canvas class="arte-nube px" width="160" height="96"></canvas>
+									<div class="arte-citta__tetti"><div class="tetti"></div><div class="tetti tetti--luce"></div></div>
+								</div>
+								<p class="maxischermo"><span class="maxischermo__marchio">ARIA<span>+</span></span> {{ t.storia.maxischermo }}</p>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">01</p>
+								<h3>{{ t.storia.cartelloni.0.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.0.testo | html }}</p>
+							</div>
+						</li>
+						<li class="cartellone cartellone--braccio">
+							<div class="cartellone__arte">
+								<p class="cartellone__didascalia">{{ t.storia.braccio_didascalia }}</p>
+								<div class="palchetto"><span class="sprite" data-sprite="gig" data-variante="spento" data-scala="2"></span></div>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">02</p>
+								<h3>{{ t.storia.cartelloni.1.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.1.testo | html }}</p>
+							</div>
+						</li>
+						<li class="cartellone cartellone--bloccato">
+							<div class="cartellone__arte">
+								<div class="finestra-errore" role="img" aria-label="{{ t.storia.errore_label }}">
+									<p class="finestra-errore__barra">MANODOPERA</p>
+									<div class="finestra-errore__corpo">
+										<img class="px ritratto-grande" src="{{ pagina.radice }}media/ui/ritratto-gig-spento.png" width="34" height="34" alt="">
+										<p class="finestra-errore__testo">{{ t.storia.errore | pixel }}</p>
+									</div>
+								</div>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">03</p>
+								<h3>{{ t.storia.cartelloni.2.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.2.testo | html }}</p>
+							</div>
+						</li>
+						<li class="cartellone cartellone--esattori">
+							<div class="cartellone__arte" aria-hidden="true">
+								<div class="palchetto palchetto--due">
+									<span class="sprite specchio" data-sprite="punk" data-anim="camminata" data-scala="2"></span>
+									<span class="sprite specchio" data-sprite="bruto" data-anim="camminata" data-scala="2"></span>
+								</div>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">04</p>
+								<h3>{{ t.storia.cartelloni.3.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.3.testo | html }}</p>
+							</div>
+						</li>
+						<li class="cartellone cartellone--tastiera">
+							<div class="cartellone__arte">
+								<div class="riavvio" data-stato="bloccato">
+									<div class="riavvio__tasti" role="group" aria-label="{{ t.storia.tasti_label }}">
+										<button type="button" class="tasto" data-tasto="ctrl" aria-pressed="false">CTRL</button>
+										<button type="button" class="tasto" data-tasto="alt" aria-pressed="false">ALT</button>
+										<button type="button" class="tasto tasto--canc" data-tasto="canc" aria-pressed="false">CANC</button>
+									</div>
+									<p class="riavvio__aiuto">{{ t.storia.tasti_aiuto | html }}</p>
+									<p class="riavvio__stato" aria-live="polite" data-bloccato="{{ t.storia.stato_bloccato | pixel }}" data-riavvio="{{ t.storia.stato_riavvio | pixel }}" data-acceso="{{ t.storia.stato_acceso | pixel }}">{{ t.storia.stato_bloccato | pixel }}</p>
+								</div>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">05</p>
+								<h3>{{ t.storia.cartelloni.4.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.4.testo | html }}</p>
+							</div>
+						</li>
+						<li class="cartellone cartellone--riavvio" data-stato="bloccato">
+							<div class="cartellone__arte">
+								<div class="risveglio">
+									<div class="risveglio__sx">
+										<img class="px ritratto-grande risveglio__ritratto" src="{{ pagina.radice }}media/ui/ritratto-gig-spento.png" width="34" height="34"
+											data-acceso="{{ pagina.radice }}media/ui/ritratto-gig.png" data-spento="{{ pagina.radice }}media/ui/ritratto-gig-spento.png"
+											data-alt-acceso="{{ t.storia.ritratto_acceso }}" data-alt-spento="{{ t.storia.ritratto_spento }}" alt="{{ t.storia.ritratto_spento }}">
+										<div class="tere" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+									</div>
+									<div class="palchetto"><span class="sprite" data-sprite="gig" data-variante="spento" data-scala="2"></span></div>
+								</div>
+								<button type="button" class="bottone bottone--piccolo risveglio__bottone"><span aria-hidden="true">▶ </span>{{ t.storia.riavvia | pixel }}</button>
+							</div>
+							<div class="cartellone__testo">
+								<p class="cartellone__num" aria-hidden="true">06</p>
+								<h3 id="riavvio-t">{{ t.storia.cartelloni.5.titolo | pixel }}</h3>
+								<p>{{ t.storia.cartelloni.5.testo | html }}</p>
+							</div>
+						</li>
+					</ol>
+				</div>
+				<p class="muro__frecce">
+					<button type="button" class="bottone bottone--piccolo" data-dir="-1" aria-label="{{ t.storia.prec }}"><span aria-hidden="true">◀</span></button>
+					<span class="muro__aiuto">{{ t.storia.scorri }}</span>
+					<button type="button" class="bottone bottone--piccolo" data-dir="1" aria-label="{{ t.storia.succ }}"><span aria-hidden="true">▶</span></button>
+				</p>
+			</div>
+		</section>
+
+		<!-- IL MONDO: Taranto nel 2087, la strada dello slice, e la notte più antica della città -->
+		<section class="mondo" id="mondo" aria-labelledby="mondo-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="mondo-t">{{ t.mondo.titolo | pixel }}</h2>
+				<p class="sotto">{{ t.mondo.sotto }}</p>
+			</div>
+			<div class="mondo__griglia">
+				<div class="testo">
+					{% for p in t.mondo.paragrafi %}<p>{{ p | html }}</p>
+					{% endfor %}
+				</div>
+				<aside class="aria" aria-label="{{ t.mondo.aria.label }}">
+					<p class="aria__marchio" aria-hidden="true">ARIA<span>+</span></p>
+					<p class="aria__slogan">{{ t.mondo.aria.slogan }}</p>
+					<p class="aria__testo">{{ t.mondo.aria.testo }}</p>
+					<p class="aria__colombe">{{ t.mondo.aria.colombe }}</p>
+					<p class="aria__clausola">{{ t.mondo.aria.clausola }}</p>
+					<p class="aria__nota">{{ t.mondo.aria.nota }}</p>
+				</aside>
+			</div>
+		</section>
+
+		<!-- LA STRADA: scorrendo, GIG cammina lungo il tratto dello slice fra il bar e il kebab -->
+		<figure class="strada" id="strada">
+			<div class="strada__scena" role="img" aria-label="{{ t.mondo.strada.label }}">
+				<div class="strada__cielo"></div>
+				<div class="strada__tetti"><div class="tetti"></div><div class="tetti tetti--luce"></div></div>
+				<div class="strada__via">
+					<img class="px" src="{{ pagina.radice }}media/livello/strada.png" width="940" height="216" alt="" loading="lazy" decoding="async">
+					<img class="px strada__luce" src="{{ pagina.radice }}media/livello/strada-luce.png" width="940" height="216" alt="" loading="lazy" decoding="async">
+					<span class="sprite specchio" data-sprite="punk" data-x="790" data-y="178" style="--x:790;--y:178"></span>
+					<span class="sprite specchio" data-sprite="bruto" data-x="850" data-y="192" style="--x:850;--y:192"></span>
+				</div>
+				<span class="sprite strada__gig" data-sprite="gig" data-y="188"></span>
+				<span class="vai px"></span>
+			</div>
+			<figcaption class="strada__didascalia">{{ t.mondo.strada.didascalia }}</figcaption>
+		</figure>
+
+		<section class="notte" aria-labelledby="notte-t">
+			<div class="notte__colonna">
+				<h3 class="notte__titolo" id="notte-t">{{ t.mondo.notte.titolo | pixel }}</h3>
+				<p>{{ t.mondo.notte.testo | html }}</p>
+				<ol class="orari">
+					{% for o in t.mondo.notte.orari %}<li><span class="orari__ora">{{ o.ora | pixel }}</span> <span class="orari__cosa">{{ o.cosa | html }}</span></li>
+					{% endfor %}
+				</ol>
+				<p class="notte__chiusa">{{ t.mondo.notte.chiusa }}</p>
+			</div>
+		</section>
+
+		<!-- PERSONAGGI: da una parte GIG e i suoi, dall'altra chi lavora per SIDERA -->
+		<section class="personaggi" id="personaggi" aria-labelledby="pers-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="pers-t">{{ t.personaggi.titolo | pixel }}</h2>
+				<p class="sotto">{{ t.personaggi.sotto }}</p>
+			</div>
+			<div class="schieramenti">
+				<div class="schieramento schieramento--gig">
+					<h3 class="schieramento__t">{{ t.personaggi.gig_parte | pixel }}</h3>
+
+					<article class="palco palco--gig" aria-labelledby="p-gig">
+						<div class="palco__scena">
+							<div class="palco__luce" aria-hidden="true"></div>
+							<button type="button" class="palco__sprite" data-azione="gig" aria-label="{{ t.personaggi.gig.label }}">
+								<span class="sprite" data-sprite="gig" data-scala="palco"></span>
+							</button>
+						</div>
+						<div class="palco__testo">
+							<h4 id="p-gig"><img class="px ritratto" src="{{ pagina.radice }}media/ui/ritratto-gig.png" width="34" height="34" alt=""> <span>GIG</span> <span class="palco__vero">{{ t.personaggi.gig.vero }}</span></h4>
+							<span class="barra barra--gig" aria-hidden="true"></span>
+							<p>{{ t.personaggi.gig.testo | html }}</p>
+							<p class="palco__mossa">{{ t.personaggi.gig.mossa }}</p>
+						</div>
+					</article>
+
+					<ul class="voci">
+						<li class="voce voce--tere">
+							<div class="voce__segno"><div class="tere tere--grande" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+							<h4>Tere</h4>
+							<p>{{ t.personaggi.tere.testo | html }}</p>
+						</li>
+						<li class="voce voce--toto">
+							<div class="voce__segno"><img class="px toto" src="{{ pagina.radice }}media/livello/revenge.png" width="92" height="24" alt="{{ t.personaggi.toto.alt }}"></div>
+							<h4>Totò</h4>
+							<p>{{ t.personaggi.toto.testo | html }}</p>
+							<p class="voce__nota">{{ t.personaggi.toto.nota }}</p>
+						</li>
+						<li class="voce voce--madre">
+							<div class="voce__segno"><p class="cata" aria-hidden="true">«Catà»</p></div>
+							<h4>Addolorata</h4>
+							<p>{{ t.personaggi.madre.testo | html }}</p>
+						</li>
+					</ul>
+				</div>
+
+				<div class="schieramento schieramento--sidera">
+					<h3 class="schieramento__t">{{ t.personaggi.sidera_parte | pixel }}</h3>
+
+					<article class="palco palco--esattori" aria-labelledby="p-esattori">
+						<div class="palco__scena">
+							<div class="palco__luce" aria-hidden="true"></div>
+							<button type="button" class="palco__sprite palco__sprite--punk" data-azione="punk" aria-label="{{ t.personaggi.esattori.punk.label }}">
+								<span class="sprite specchio" data-sprite="punk" data-scala="palco"></span>
+							</button>
+							<button type="button" class="palco__sprite palco__sprite--bruto" data-azione="bruto" aria-label="{{ t.personaggi.esattori.bruto.label }}">
+								<span class="sprite specchio" data-sprite="bruto" data-scala="palco"></span>
+							</button>
+						</div>
+						<div class="palco__testo">
+							<h4 id="p-esattori">{{ t.personaggi.esattori.titolo }}</h4>
+							<p>{{ t.personaggi.esattori.testo | html }}</p>
+							<dl class="esattori">
+								<dt><img class="px ritratto" src="{{ pagina.radice }}media/ui/ritratto-punk.png" width="34" height="34" alt=""> <span>PUNK</span> <span class="barra barra--nemico" aria-hidden="true"></span></dt>
+								<dd>{{ t.personaggi.esattori.punk.testo }}</dd>
+								<dt><img class="px ritratto" src="{{ pagina.radice }}media/ui/ritratto-bruto.png" width="34" height="34" alt=""> <span>{{ t.personaggi.esattori.bruto.nome }}</span> <span class="barra barra--nemico" aria-hidden="true"></span></dt>
+								<dd>{{ t.personaggi.esattori.bruto.testo }}</dd>
+							</dl>
+							<p class="palco__mossa">{{ t.personaggi.esattori.mossa }}</p>
+							<p class="voce__nota">{{ t.personaggi.esattori.nota }}</p>
+						</div>
+					</article>
+
+					<article class="voce voce--colombe" aria-labelledby="p-colombe">
+						<div class="voce__segno"><p class="colombe__marchio" aria-hidden="true">ARIA<span>+</span></p></div>
+						<h4 id="p-colombe">{{ t.personaggi.colombe.nome }}</h4>
+						<p>{{ t.personaggi.colombe.testo | html }}</p>
+						<p class="voce__nota">{{ t.personaggi.colombe.nota }}</p>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<!-- IL GIOCO: i pilastri, con quello che c'è già nello slice e quello che è ancora in sviluppo -->
+		<section class="gioco" id="gioco" aria-labelledby="gioco-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="gioco-t">{{ t.gioco.titolo | pixel }}</h2>
+				<p class="sotto sotto--largo">{{ t.gioco.intro | html }}</p>
+			</div>
+			<ol class="pilastri">
+				{% for p in t.gioco.pilastri %}<li class="pilastro{% if p.schermate %} pilastro--largo{% endif %}{% if p.largo %} pilastro--largo{% endif %}{% if not p.slice %} pilastro--carta{% endif %}">
+					<div class="pilastro__testo">
+						<div class="pilastro__testa"><h3>{{ p.titolo | pixel }}</h3>{% if not p.slice %}<span class="chip chip--carta">{{ t.gioco.etichetta_carta | pixel }}</span>{% endif %}</div>
+						{% if p.slice %}<ul class="stato-mosse">
+							<li class="chip-riga"><span class="chip chip--slice">{{ t.gioco.etichetta_slice | pixel }}</span><span class="chip-riga__testo">{{ p.slice }}</span></li>
+							{% if p.sviluppo %}<li class="chip-riga"><span class="chip chip--sviluppo">{{ t.gioco.etichetta_sviluppo | pixel }}</span><span class="chip-riga__testo">{{ p.sviluppo }}</span></li>{% endif %}
+						</ul>{% endif %}
+						<details class="pieghevole" open><summary>{{ t.ui.leggi }}<span class="sr">: {{ p.titolo }}</span></summary><p>{{ p.testo | html }}</p></details>
+					</div>
+					{% if p.schermate %}<div class="schermate">
+						{% for s in p.schermate %}<figure class="schermata">
+							<img class="px" src="{{ pagina.radice }}media/schermate/{{ s.nome }}.png" width="{{ s.w }}" height="{{ s.h }}" loading="lazy" alt="{{ s.alt }}" style="--w:{{ s.w }};--h:{{ s.h }}">
+							<figcaption>{{ s.didascalia }}</figcaption>
+						</figure>
+						{% endfor %}
+					</div>{% endif %}
+				</li>
+				{% endfor %}
+			</ol>
+
+			<div class="demo" id="demo">
+				<div class="demo__testo">
+					<h3 class="neon neon--oro">{{ t.gioco.demo.titolo | pixel }}</h3>
+					<p>{{ t.gioco.demo.testo | html }}</p>
+					<p class="demo__onesta">{{ t.gioco.demo.onesta }}</p>
+					<p><a class="bottone bottone--oro" href="{{ pagina.gioca }}"><span aria-hidden="true">▶ </span>{{ t.gioco.demo.bottone | pixel }}</a></p>
+					<p class="solo-tocco">{{ t.eroe.tocco }}</p>
+				</div>
+				<div class="comandi" aria-labelledby="comandi-t">
+					<h4 id="comandi-t">{{ t.gioco.comandi.titolo | pixel }}</h4>
+					<dl>
+						{% for c in t.gioco.comandi.righe %}<dt>{{ c.azione | pixel }}</dt>
+						<dd>{% for g in c.gruppi %}{% if not loop.first %} <span class="o">{{ t.gioco.comandi.o }}</span> {% endif %}<span class="tasti">{% for k in g %}<kbd data-tasto="{{ k.codice }}">{% if k.nome %}<span aria-hidden="true">{{ k.testo | pixel }}</span><span class="sr">{{ k.nome }}</span>{% else %}{{ k.testo | pixel }}{% endif %}</kbd>{% endfor %}</span>{% endfor %}</dd>
+						{% endfor %}
+					</dl>
+					<p class="comandi__nota">{{ t.gioco.comandi.nota }}</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- RETRO, CON LA TECNOLOGIA DI OGGI: come nasce la grafica, e la luce provata nel browser -->
+		<section class="tecnica" id="tecnica" aria-labelledby="tecnica-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="tecnica-t">{{ t.tecnica.titolo | pixel }}</h2>
+				<p class="sotto sotto--largo">{{ t.tecnica.sotto }}</p>
+			</div>
+			<div class="tecnica__griglia">
+				<div class="testo">
+					<p>{{ t.tecnica.paragrafi.0 | html }}</p>
+					<details class="pieghevole" open><summary>{{ t.ui.leggi }}<span class="sr">: {{ t.tecnica.titolo }}</span></summary>
+						<p>{{ t.tecnica.paragrafi.1 | html }}</p>
+						<p>{{ t.tecnica.paragrafi.2 | html }}</p>
+					</details>
+				</div>
+				<figure class="luce" aria-labelledby="luce-t">
+					<div class="luce__palco">
+						<canvas class="luce__tela px" width="120" height="120" role="img" aria-label="{{ t.tecnica.luce.label }}" aria-describedby="luce-t"></canvas>
+					</div>
+					<div class="luce__comandi" role="group" aria-label="{{ t.tecnica.luce.gruppo }}">
+						{% for v in t.tecnica.luce.viste %}<button type="button" class="bottone bottone--piccolo" data-vista="{{ v.id }}" aria-pressed="{% if loop.first %}true{% else %}false{% endif %}">{{ v.testo | pixel }}</button>
+						{% endfor %}
+					</div>
+					<figcaption id="luce-t"><strong>{{ t.tecnica.luce.titolo }}</strong> {{ t.tecnica.luce.didascalia }}</figcaption>
+				</figure>
+			</div>
+
+			<div class="tecnica__strisce">
+				<div class="catena">
+					<h3>{{ t.tecnica.catena.titolo | pixel }}</h3>
+					<ol>
+						{% for p in t.tecnica.catena.passi %}<li><span class="catena__n" aria-hidden="true">{{ loop.index }}</span><div><h4>{{ p.titolo }}</h4><p>{{ p.testo | html }}</p></div></li>
+						{% endfor %}
+					</ol>
+					<p class="catena__chiusa">{{ t.tecnica.catena.chiusa }}</p>
+				</div>
+				<div class="tavolozza">
+					<h3>{{ t.tecnica.colori.titolo | pixel }}</h3>
+					<ul>
+						{% for c in t.tecnica.colori.voci %}<li>{% if c.ritratto %}<img class="px campione campione--ritratto" src="{{ pagina.radice }}media/ui/ritratto-{{ c.ritratto }}.png" width="34" height="34" alt="">{% else %}<span class="campione" style="--c1:{{ c.c1 }};--c2:{{ c.c2 }};--c3:{{ c.c3 }}" aria-hidden="true"></span>{% endif %}<span><strong>{{ c.nome }}</strong> {{ c.testo }}</span></li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- STATO E TAPPE: la tabella dei record, con il punteggio vero del replay dei test -->
+		<section class="tappe" id="tappe" aria-labelledby="tappe-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="tappe-t">{{ t.tappe.titolo | pixel }}</h2>
+				<p class="sotto sotto--largo">{{ t.tappe.sotto }}</p>
+			</div>
+			<div class="classifica">
+				<p class="classifica__hi"><span class="classifica__hi-l">HI</span> <span class="classifica__hi-n">{{ n.punteggio | zeri6 }}</span></p>
+				<p class="classifica__prova">{{ t.tappe.prova | html }}</p>
+				<ol class="classifica__righe">
+					{% for r in t.tappe.righe %}<li class="riga riga--{{ r.tipo }}">
+						<span class="riga__n" aria-hidden="true">{{ loop.index }}</span>
+						<div class="riga__corpo"><h3>{{ r.titolo | pixel }}</h3><p>{{ r.testo | html }}</p></div>
+						<span class="riga__stato">{{ r.stato | pixel }}</span>
+					</li>
+					{% endfor %}
+				</ol>
+				<p class="classifica__uscita">{{ t.tappe.uscita | pixel }}</p>
+			</div>
+			<p class="tappe__slice">{{ t.tappe.slice | html }}</p>
+		</section>
+
+		<!-- CREDITI E LICENZE -->
+		<section class="crediti" id="crediti" aria-labelledby="crediti-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="crediti-t">{{ t.crediti.titolo | pixel }}</h2>
+			</div>
+			<div class="crediti__griglia">
+				<div>
+					<h3>{{ t.crediti.chi.titolo | pixel }}</h3>
+					<dl class="chi">
+						{% for c in t.crediti.chi.voci %}<dt>{{ c.ruolo }}</dt><dd>{{ c.testo | html }}</dd>
+						{% endfor %}
+					</dl>
+					<p class="crediti__ai">{{ t.crediti.ai | html }}</p>
+				</div>
+				<div>
+					<h3>{{ t.crediti.licenze.titolo | pixel }}</h3>
+					<ul class="licenze">
+						<li>{{ t.crediti.licenze.voci.0 | html }}</li>
+						<li>{{ t.crediti.licenze.voci.1 | html }}</li>
+					</ul>
+					<details class="pieghevole" open><summary>{{ t.ui.leggi }}<span class="sr">: {{ t.crediti.licenze.titolo }}</span></summary>
+						<ul class="licenze">
+							<li>{{ t.crediti.licenze.voci.2 | html }}</li>
+							<li>{{ t.crediti.licenze.voci.3 | html }}</li>
+							<li>{{ t.crediti.licenze.voci.4 | html }}</li>
+						</ul>
+					</details>
+				</div>
+			</div>
+			<details class="fonti">
+				<summary>{{ t.crediti.cc0.titolo }}</summary>
+				<p>{{ t.crediti.cc0.intro }}</p>
+				<ul>
+					{% for f in t.crediti.cc0.voci %}<li><a href="{{ f.url }}">{{ f.nome }}</a> · {{ f.cosa }} <span class="licenza">{{ f.licenza }}</span></li>
+					{% endfor %}
+				</ul>
+				<p>{{ t.crediti.cc0.resto }}</p>
+			</details>
+			<details class="fonti">
+				<summary>{{ t.crediti.strumenti.titolo }}</summary>
+				<ul>
+					{% for f in t.crediti.strumenti.voci %}<li><a href="{{ f.url }}">{{ f.nome }}</a> · {{ f.cosa }} <span class="licenza">{{ f.licenza }}</span></li>
+					{% endfor %}
+				</ul>
+			</details>
+			<p class="crediti__musica">{{ t.crediti.musica }}</p>
+		</section>
+	</main>
+
+	<footer class="piede">
+		<img class="px piede__fine" src="{{ pagina.radice }}media/ui/zona-liberata.png" width="276" height="31" alt="ZONA LIBERATA" data-pixel-w="276" data-pixel-scala="ni">
+		<p class="piede__finzione">{{ t.piede.finzione }}</p>
+		{% for c in t.piede.contesto %}<p class="piede__contesto">{{ c.testo }}</p>
+		{% endfor %}
+		<p class="piede__link">
+			{% for l in t.piede.link %}<a href="{{ l.url }}">{{ l.testo }}</a>
+			{% endfor %}
+		</p>
+		<p class="piede__copyright">{{ t.piede.copyright }}</p>
+		<p><a class="piede__su" href="#inizio"><span aria-hidden="true">▲ </span>{{ t.ui.su | pixel }}</a></p>
+	</footer>
+
+</body>
+</html>

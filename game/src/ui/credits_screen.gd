@@ -3,7 +3,7 @@ extends Control
 ## Crediti e licenze: chi ha fatto cosa, la licenza di Godot (Engine.get_license_text()),
 ## THIRD-PARTY-NOTICES.md e i componenti di terze parti del motore con le loro licenze
 ## (Engine.get_copyright_info() e get_license_info()). Scorre da solo; su e giù per scorrere,
-## ATTACCO o ESC per uscire.
+## ATTACCO o ESC per uscire. Nel browser la sezione MUSICA dice che la demo web è muta.
 
 signal done
 
@@ -13,6 +13,9 @@ const MAX_CHARS := 58
 ## Testo dei crediti, modificabile senza toccare il codice: una riga per voce,
 ## le righe che iniziano con "# " sono titoli.
 const CREDITS_TXT := "res://data/credits.txt"
+## Nel browser la demo è muta (la musica non è pubblica e la build web non la contiene): al posto del
+## testo della sezione MUSICA di credits.txt, che parla della musica segnaposto delle build per computer.
+const WEB_MUSIC := "Nella demo web non c'è musica: i brani non sono pubblici. I brani definitivi saranno generati con Suno per Luigi Massari e distribuiti solo con le build del gioco."
 
 var _lines: Array[Array] = []  # [testo, colore, regolare, immagine o null]
 var _scroll: float = -200.0
@@ -45,10 +48,16 @@ func _build() -> void:
 	_add_image("logo", "CTRL+ALT REVENGE!")
 	_add("")
 	if FileAccess.file_exists(CREDITS_TXT):
+		var web := OS.has_feature("web")
+		var music := false
 		for l in FileAccess.get_file_as_string(CREDITS_TXT).split("\n"):
 			if l.begins_with("# "):
+				music = l.substr(2).strip_edges() == "MUSICA"
 				_add(l.substr(2), YELLOW)
-			else:
+				if web and music:
+					_add(WEB_MUSIC)
+					_add("")
+			elif not (web and music):
 				_add(l)
 	_add("")
 	_add("LICENZE", YELLOW)

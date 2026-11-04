@@ -1,0 +1,340 @@
+{
+ "meta": {
+  "commento": "sito in italiano",
+  "codice": "it",
+  "e_italiano": true,
+  "titolo": "CTRL+ALT REVENGE! · Taranto, 2087",
+  "descrizione": "Platform d’azione in pixel art, in sviluppo. Taranto, 2087: il braccio è in abbonamento, la vendetta no. Lo slice si prova nel browser.",
+  "og_locale": "it_IT",
+  "og_alt": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa, davanti all’insegna KEBAB."
+ },
+ "ui": {
+  "salta": "Vai al contenuto",
+  "su": "Torna su",
+  "su_breve": "torna su",
+  "menu": "Menu",
+  "sezioni": "Sezioni del sito",
+  "lingua": "Lingua · Language",
+  "animazioni": "Animazioni",
+  "animazioni_si": ": sì",
+  "animazioni_no": ": no",
+  "gioca": "Gioca",
+  "leggi": "Leggi tutto"
+ },
+ "nav": [
+  {"id": "storia", "testo": "Storia"},
+  {"id": "mondo", "testo": "Il mondo"},
+  {"id": "personaggi", "testo": "Personaggi"},
+  {"id": "gioco", "testo": "Il gioco"},
+  {"id": "tecnica", "testo": "Grafica"},
+  {"id": "tappe", "testo": "Tappe"}
+ ],
+ "eroe": {
+  "genere": "Platform d’azione in pixel art",
+  "sviluppo": "in sviluppo",
+  "motto": "Taranto, 2087. Il braccio è in abbonamento. La vendetta no.",
+  "gioca": "Gioca la demo",
+  "codice": "Il codice su GitHub",
+  "tocco": "Si gioca da computer: tastiera o controller.",
+  "video": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.",
+  "didascalia": "Lo slice «Sotto la Linea», novembre 2026: una prova tecnica. La strada, la pioggia e le insegne sono provvisorie; grafica e livelli cambieranno."
+ },
+ "storia": {
+  "titolo": "Una notte sola",
+  "sotto": "Taranto, Giovedì Santo, 17 aprile 2087",
+  "epigrafe": "«Quella notte avevo undici anni.»",
+  "epigrafe_firma": "Totò",
+  "nota": "Nel gioco la storia la raccontano i murales di Totò. Questi cartelloni sono illustrazioni del sito, fatte con la grafica vera del gioco: lo stile dei murales è ancora in prova.",
+  "salta": "Salta la storia",
+  "maxischermo": "L’aria che meriti",
+  "braccio_didascalia": "MANODOPERA",
+  "cartelloni": [
+   {"titolo": "Taranto, 2087", "testo": "Sopra la vecchia fabbrica ci sono le cupole bianche di <b class=\"sidera\">SIDERA</b>: sotto, dicono, c’è la bonifica, e a Pasqua la città sarà finalmente pura."},
+   {"titolo": "Il braccio", "testo": "Cataldo Gigante, per tutti GIG, è l’ingegnere dei Tamburi che ha progettato MANODOPERA, il braccio cibernetico che ridava un braccio agli operai che l’avevano perso sul lavoro, e che oggi <b class=\"sidera\">SIDERA</b> dà in abbonamento."},
+   {"titolo": "Due parole", "testo": "Dopo la morte di Mimmo, il suo amico di sempre, GIG ha fatto troppe domande: in una settimana ha perso lavoro, casa e nome sui brevetti, e il suo braccio è stato bloccato a distanza con due parole: <b class=\"sidera\">«Abbonamento scaduto»</b>."},
+   {"titolo": "Giovedì Santo, ore 15", "testo": "Mentre i perdoni escono dal Carmine, due Esattori lo raggiungono al cimitero di San Brunone, sulla tomba di Mimmo, per pignorargli il braccio."},
+   {"titolo": "Il garage", "testo": "GIG scappa nel garage della madre, collega al braccio la vecchia tastiera del padre e preme <kbd>CTRL</kbd>+<kbd>ALT</kbd>+<kbd>CANC</kbd>, due tasti con l’unica mano buona e il terzo col naso:"},
+   {"titolo": "Il riavvio", "testo": "il braccio si riavvia e parla, l’occhio diventa <span class=\"occhio\">cyan</span>, e con il primo doppio salto comincia la sua notte sola, dal pomeriggio sui tetti dei Tamburi, dove gli fa da guida Totò, undici anni, che dipinge REVENGE sui muri."}
+  ],
+  "errore": "ABBONAMENTO SCADUTO",
+  "errore_label": "La finestra di MANODOPERA: abbonamento scaduto. Accanto, il ritratto di GIG con l’occhio cyber spento.",
+  "tasti_label": "I tre tasti del riavvio",
+  "tasti_aiuto": "Premili tutti e tre, come GIG: due con la mano buona, il terzo col naso.",
+  "stato_bloccato": "BRACCIO BLOCCATO",
+  "stato_riavvio": "RIAVVIO IN CORSO…",
+  "stato_acceso": "BRACCIO RIAVVIATO",
+  "ritratto_spento": "GIG, con l’occhio cyber spento.",
+  "ritratto_acceso": "GIG, con l’occhio cyber acceso: è cyan.",
+  "riavvia": "Riavvia il braccio",
+  "muro_label": "I cartelloni della storia",
+  "prec": "Cartellone precedente",
+  "succ": "Cartellone successivo",
+  "scorri": "Scorri lungo il muro"
+ },
+ "mondo": {
+  "titolo": "Sotto la nube rossa",
+  "sotto": "Taranto, 2087: il mondo del gioco",
+  "paragrafi": [
+   "Dal 2041 la vecchia fabbrica è chiusa sotto cupole bianche, sigillate, con la scritta «Cantiere, accesso vietato». <b class=\"sidera\">SIDERA</b> lo chiama bonifica e gli ha dato un nome da abbonamento in streaming: ARIA+, «L’aria che meriti»; per chi può pagare c’è ARIA+ Premium. Sopra la città resta una nube rossa: il fumo, dicono, è «vapore di bonifica», la polvere un «disagio temporaneo». Le Colombe, droni bianchi con il logo ARIA+, misurano l’aria e spruzzano profumo di pulito; si chiamano così per la colomba di legno che la tradizione attribuisce ad Archita, l’ingegnere-filosofo della Taranto greca. Sui maxischermi passa la pubblicità della festa di Pasqua: «Taranto è pura».",
+   "I Tamburi sono il quartiere operaio a ridosso della fabbrica: palazzine popolari con i terrazzini, panni stesi rossi di polvere, finestre tappate con l’asciugamano bagnato quando il maestrale porta la polvere sul quartiere. Tutto quello che era chiaro ha addosso una patina rossa, perfino le tombe del cimitero di San Brunone. Sopra le strade corre la Linea: i nastri trasportatori sui piloni di cemento, che spariscono sotto le cupole. Ai piedi dei piloni c’è il MiniBar di Ignazio, il bar di GIG. Molti qui portano un braccio MANODOPERA con gli anelli rossi, in abbonamento mensile; chi salta una rata riceve la visita degli Esattori."
+  ],
+  "aria": {
+   "label": "Una pubblicità di SIDERA, nel mondo del gioco",
+   "slogan": "«L’aria che meriti.»",
+   "testo": "La bonifica di Taranto. In abbonamento.",
+   "colombe": "Misurano l’aria. Profumano di pulito. Arrivano le Colombe.",
+   "clausola": "ARIA+ Premium per chi può pagare.",
+   "nota": "Pubblicità inventata, come SIDERA."
+  },
+  "strada": {
+   "label": "La strada dello slice, dal bar al kebab: scorrendo la pagina GIG ci cammina, verso due Esattori che lo aspettano.",
+   "didascalia": "Un tratto della strada dello slice, con la sua grafica e le sue luci: scorri e GIG cammina. È ancora una strada qualunque, e la rifaremo perché racconti i Tamburi."
+  },
+  "notte": {
+   "titolo": "La notte più antica",
+   "testo": "Tutto succede in una notte sola, fra il Giovedì e il Venerdì Santo, 17–18 aprile 2087, che è anche la notte più antica della città.",
+   "orari": [
+    {"ora": "Ore 15", "cosa": "i perdoni, scalzi e incappucciati, escono dal Carmine e vanno di chiesa in chiesa a pregare davanti ai sepolcri, con il passo lento della nazzicata;"},
+    {"ora": "Mezzanotte", "cosa": "da San Domenico, nella Città Vecchia, esce la processione dell’Addolorata, aperta dal troccolante con la sua troccola di legno."}
+   ],
+   "chiusa": "Nel 2087 a Taranto è cambiato quasi tutto, tranne questo."
+  }
+ },
+ "personaggi": {
+  "titolo": "Chi c’è, quella notte",
+  "sotto": "Gli sprite sono quelli veri del gioco, con i loro tempi: toccali e fanno la loro mossa.",
+  "gig_parte": "Dalla parte di GIG",
+  "sidera_parte": "Per conto di SIDERA",
+  "gig": {
+   "vero": "(Cataldo Gigante)",
+   "testo": "50 anni, l’ingegnere dei Tamburi che ha progettato MANODOPERA. Burbero, ironico e testardo: aggiusta tutto tranne la sua vita.",
+   "mossa": "Toccalo: tira il gancio cyber.",
+   "label": "Fai tirare a GIG il gancio cyber"
+  },
+  "tere": {"testo": "La voce del braccio. Dopo il riavvio parla: dà consigli, fa battute e tiene GIG onesto."},
+  "toto": {
+   "testo": "11 anni, dipinge REVENGE sui muri del quartiere e sui tetti dei Tamburi fa da guida a GIG.",
+   "nota": "La firma qui accanto viene dallo slice: la rifaremo nel suo stile.",
+   "alt": "La firma REVENGE su un tavolato di cantiere, nella strada dello slice."
+  },
+  "madre": {"testo": "La madre di GIG: sarta, devota dell’Addolorata, chiama il figlio «Catà». A cinquant’anni lui è tornato a dormire da lei."},
+  "esattori": {
+   "titolo": "Gli Esattori",
+   "testo": "Recuperacrediti di <b class=\"sidera\">SIDERA</b>: pignorano le braccia a chi non paga.",
+   "punk": {"testo": "Un precario pagato a ore.", "label": "Fai caricare il gancio al punk"},
+   "bruto": {"nome": "BRUTO", "testo": "Recuperacrediti di professione, più grosso di GIG, con un pugno che parte da tutto il corpo.", "label": "Fai tirare un pugno al bruto"},
+   "mossa": "Toccali: attaccano.",
+   "nota": "Nel gioco cambieranno aspetto: il punk avrà uno zaino da rider, il bruto una pettorina catarifrangente «ESATTORE», tutti e due gli occhiali da polvere."
+  },
+  "colombe": {
+   "nome": "Le Colombe",
+   "testo": "Droni bianchi con il logo ARIA+: misurano l’aria e spruzzano profumo di pulito.",
+   "nota": "Non le abbiamo ancora disegnate."
+  }
+ },
+ "gioco": {
+  "titolo": "Come si gioca",
+  "intro": "Un platform d’azione in pixel art, con arene di combattimento e puzzle di hacking. Questo è il gioco che stiamo facendo: per ogni pilastro c’è scritto che cosa si prova già nello slice e che cosa è ancora in sviluppo.",
+  "etichetta_slice": "Nello slice",
+  "etichetta_sviluppo": "In sviluppo",
+  "etichetta_carta": "Sulla carta",
+  "pilastri": [
+   {
+    "titolo": "Platform e botte, nella stessa notte",
+    "slice": "si corre, si salta un cavo elettrico e si combatte nell’arena fino a ZONA LIBERATA.",
+    "sviluppo": "il doppio salto e la telecamera che si inclina quando arrivano gli Esattori.",
+    "testo": "Si corre e si salta in 2D laterale, con il doppio salto dal riavvio del braccio, già nel prologo; quando arrivano gli Esattori la telecamera si inclina, il pavimento si allarga e si combatte in profondità, come nei classici a scorrimento delle sale giochi. A scontro finito compare VAI e si torna a saltare.",
+    "schermate": [
+     {"nome": "cavo", "didascalia": "Il cavo da saltare."},
+     {"nome": "arena", "didascalia": "L’arena, fino a ZONA LIBERATA."}
+    ]
+   },
+   {
+    "titolo": "Botte con il peso giusto",
+    "slice": "jab, jab, gancio cyber e calcio; prese con ginocchiate e proiezioni; il calcio volante.",
+    "sviluppo": "la schivata in profondità, la parata a tempo, la Scarica e gli oggetti da lanciare.",
+    "testo": "La combo va avanti solo se il colpo va a segno: jab, jab, gancio cyber, calcio. Prese con ginocchiate e proiezioni, con il corpo proiettato che butta giù gli altri, e il calcio volante. In arrivo: la schivata in profondità, la parata a tempo con il braccio cyber che apre il contrattacco, la Scarica, un pugno elettrico, e bidoni, tubi e casse da lanciare.",
+    "schermate": [
+     {"nome": "combo", "didascalia": "Jab, jab, gancio, calcio."},
+     {"nome": "presa", "didascalia": "Presa e ginocchiate."}
+    ]
+   },
+   {
+    "titolo": "Acrobazie di una volta, comodità di oggi",
+    "largo": true,
+    "slice": "corsa e salto.",
+    "sviluppo": "la Spinta, le sporgenze, le scivolate, i salti a muro, gli scatti, le corse sui muri e il Rampino.",
+    "testo": "Corsa, salto variabile e Spinta, il doppio salto con un colpo del braccio verso il basso; sporgenze, scivolate, salti a muro, scatti in aria e corse sui muri. Più avanti il Rampino, per oscillare su cavi e catene come sulle liane di Pitfall. E quel margine di tolleranza sui salti che oggi ci si aspetta."
+   },
+   {
+    "titolo": "Il braccio si collega",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "GIG collega il braccio ai pannelli di <b class=\"sidera\">SIDERA</b> che la Vista, il suo occhio cyan, gli rivela: inverte i nastri della Linea, apre cancelli, riprogramma le Colombe, spegne i laser. Sono puzzle di hacking a tempo, dentro il livello, come in Comix Zone; nei pochi hack più grandi c’è un mini-gioco a schermo intero, un flusso di dati da instradare in una griglia."
+   },
+   {
+    "titolo": "La Vista e i segreti",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "La Vista buca la polvere rossa del Wind Day, il maestrale forte che porta la polvere sui Tamburi, e scopre muri finti, piattaforme invisibili e pubblicità ARIA+ che, guardate bene, indicano la strada. In ogni atto ci sono registri delle braccia nascosti, come i segreti di Duke Nukem e Jazz Jackrabbit: ognuno racconta la storia di un operaio, e più ne trovi, più ricco è l’epilogo. Sui muri, da collezionare, le firme di Totò."
+   },
+   {
+    "titolo": "Vendetta o giustizia",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "In alcuni momenti scegli tu cosa dice GIG. Sullo schermo non c’è nessun indicatore, ma la storia se ne ricorda fino al finale."
+   },
+   {
+    "titolo": "Taranto da giocare, con le regole di oggi",
+    "slice": "",
+    "sviluppo": "",
+    "testo": "Luoghi veri, dal cimitero di San Brunone ai tetti dei Tamburi, e il cibo della città come recupero: taralli, il caffè del MiniBar, il panzerotto e, rara, la scarcella di Pasqua, che porta la vita oltre il massimo. Tre atti in una notte, il prologo e [[capitoli]] capitoli, da rigiocare per i segreti mancanti; checkpoint frequenti, si riprova senza limiti e senza GAME OVER, e per chi vuole il brivido c’è la modalità arcade con tre vite e il CONTINUA?"
+   }
+  ],
+  "demo": {
+   "titolo": "Prova lo slice",
+   "testo": "Lo slice «Sotto la Linea» si gioca nel browser, con la tastiera o con un controller: dal titolo alla fine della demo, GIG contro il punk e il bruto. È senza musica, perché i brani non sono pubblici.",
+   "onesta": "È lo slice tecnico del 2026: grafica, testi e livelli cambieranno, e nel browser i suoni arrivano tutti dal centro. Il primo caricamento scarica circa [[demo_mb]] MB.",
+   "bottone": "Gioca la demo"
+  },
+  "comandi": {
+   "titolo": "Comandi",
+   "o": "o",
+   "righe": [
+    {"azione": "Muovi", "gruppi": [
+     [{"testo": "◀", "codice": "ArrowLeft", "nome": "freccia a sinistra"}, {"testo": "▲", "codice": "ArrowUp", "nome": "freccia in su"}, {"testo": "▼", "codice": "ArrowDown", "nome": "freccia in giù"}, {"testo": "▶", "codice": "ArrowRight", "nome": "freccia a destra"}],
+     [{"testo": "W", "codice": "KeyW", "nome": ""}, {"testo": "A", "codice": "KeyA", "nome": ""}, {"testo": "S", "codice": "KeyS", "nome": ""}, {"testo": "D", "codice": "KeyD", "nome": ""}]
+    ]},
+    {"azione": "Attacco", "gruppi": [[{"testo": "Z", "codice": "KeyZ", "nome": ""}], [{"testo": "J", "codice": "KeyJ", "nome": ""}]]},
+    {"azione": "Salto", "gruppi": [[{"testo": "X", "codice": "KeyX", "nome": ""}], [{"testo": "K", "codice": "KeyK", "nome": ""}]]},
+    {"azione": "Pausa", "gruppi": [[{"testo": "INVIO", "codice": "Enter", "nome": ""}], [{"testo": "ESC", "codice": "Escape", "nome": ""}]]}
+   ],
+   "nota": "Va bene anche un controller. Prova a premere i tasti: qui si accendono."
+  }
+ },
+ "tecnica": {
+  "titolo": "Retro, con la tecnologia di oggi",
+  "sotto": "La pixel art è lo stile, non un limite d’epoca.",
+  "paragrafi": [
+   "Il gioco gira a 384×216 pixel, ingranditi a multipli interi, e usa le tecniche di oggi dove rendono meglio. Nello slice ci sono già le luci dinamiche con le normal map sui personaggi, scintille e particelle, l’hitstop sui colpi e il rallentatore sull’ultimo KO; nel gioco completo sono ammessi anche telecamera fluida, shader e deformazioni.",
+   "Le scene a fumetto, cioè l’introduzione e gli intermezzi, sono i murales di Totò: pixel art con lo stile della street art, sfumature a spray, colature, contorni grossi e colori neon. La telecamera scorre lungo il muro e le vignette si animano con parallasse, luci e particelle. Lo stile dei murales è ancora in prova, e anche quello degli sprite può cambiare: è tutto in lavorazione.",
+   "Anche questo sito segue le stesse regole: ogni pixel della grafica è un pixel del gioco, ingrandito di un multiplo intero dei pixel dello schermo, e la nube e la polvere le disegna il codice della pagina, con la matrice di Bayer dei giochi di una volta."
+  ],
+  "luce": {
+   "titolo": "La luce, provata qui.",
+   "didascalia": "Lo sprite vero di GIG, con la sua normal map: muovi il puntatore sul riquadro, o usa le frecce quando è selezionato, e la luce lo segue. La calcola il browser, come fa Godot nel gioco.",
+   "label": "GIG in guardia, illuminato da una luce che si sposta: la muovi con il puntatore o con le frecce.",
+   "gruppo": "Che cosa mostrare",
+   "viste": [
+    {"id": "luce", "testo": "Luce"},
+    {"id": "piatto", "testo": "Senza luci"},
+    {"id": "normali", "testo": "Normal map"}
+   ]
+  },
+  "catena": {
+   "titolo": "Come nasce la grafica, a costo zero",
+   "passi": [
+    {"titolo": "Modelli CC0", "testo": "I personaggi partono da modelli e animazioni 3D gratuiti con licenza CC0, di Quaternius e Mesh2Motion."},
+    {"titolo": "Blender", "testo": "Blender li anima e li renderizza. Le mosse più importanti, cioè la presa, le ginocchiate, la proiezione, il gancio cyber e il calcio volante, sono pose scritte negli script."},
+    {"titolo": "Python", "testo": "Script in Python li trasformano in pixel art, con una tavolozza per ogni materiale, timbri per i dettagli del viso, il codino con la molla, stivali costruiti dal codice e una normal map per ogni atlante."},
+    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne. Anche font, effetti, interfaccia ed effetti sonori escono da script, senza campioni né pack."},
+    {"titolo": "Godot", "testo": "Godot mette insieme tutto, con le luci dinamiche e la logica a tick fissi."}
+   ],
+   "chiusa": "Niente ritocchi a mano e nessuna immagine generata da un’intelligenza artificiale: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository."
+  },
+  "colori": {
+   "titolo": "I colori dicono di chi è la scena",
+   "voci": [
+    {"nome": "Notte blu-viola", "testo": "il cielo sotto la nube e le ombre.", "c1": "#06061a", "c2": "#0f1131", "c3": "#1a1230", "ritratto": ""},
+    {"nome": "Asfalto viola", "testo": "la strada e i muri del quartiere.", "c1": "#110c1b", "c2": "#261c39", "c3": "#2b1f3e", "ritratto": ""},
+    {"nome": "Neon rossi e arancioni", "testo": "le insegne dei Tamburi; l’oro è dei comandi.", "c1": "#f06a1e", "c2": "#ff9440", "c3": "#ffe27a", "ritratto": ""},
+    {"nome": "Rosso", "testo": "è di SIDERA, come la cornice degli Esattori.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
+    {"nome": "Cyan", "testo": "è solo di GIG: l’occhio e il braccio.", "c1": "", "c2": "", "c3": "", "ritratto": "gig"}
+   ]
+  }
+ },
+ "tappe": {
+  "titolo": "A che punto siamo",
+  "sotto": "In sviluppo, novembre 2026. CTRL+ALT REVENGE si sta rifacendo da zero in Godot [[godot]], prima per Windows; il vecchio prototipo in Python e Pygame resta archiviato nel ramo legacy-pygame.",
+  "prova": "Il punteggio qui sopra è vero: è quello del replay dimostrativo, che i test rigiocano. Con questa versione finisce sempre al tick [[tick]], con [[punteggio]] punti e lo stesso hash, <span class=\"data\">[[hash]]…</span>: la logica è a tick fissi e deterministica, e i test lo controllano rigiocando gli stessi replay due volte. In tutto sono [[test]] gruppi di test automatici.",
+  "righe": [
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "La storia", "testo": "Scritta e approvata dall’inizio alla fine: prologo, tre atti, finale ed epilogo, con l’introduzione e gli intermezzi a fumetto."},
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "Le basi del gameplay", "testo": "Decise e scritte: platform e arene, mosse, combattimento, puzzle di hacking, vita e checkpoint, recuperi, segreti, capitoli e pericoli."},
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "Taranto, con le fonti", "testo": "Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e perfino la luna di quella notte."},
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "Lo slice «Sotto la Linea»", "testo": "Giocabile dal titolo alla fine della demo: GIG contro il punk e il bruto, con combo, prese, ginocchiate, proiezioni, calcio volante, un cavo elettrico da saltare e un’arena fino a ZONA LIBERATA. Sprite alla versione 7 con normal map e luci dinamiche, effetti sonori sintetizzati, logica a tick fissi controllata da test automatici e replay deterministici."},
+   {"tipo": "prossima", "stato": "▶ PROSSIMA", "titolo": "La stanza di prova", "testo": "Tutta grigia, per tarare le mosse: salti, doppio salto, muri, scatto, rampino e il passaggio all’arena con la telecamera inclinata."},
+   {"tipo": "poi", "stato": "POI", "titolo": "Il prologo", "testo": "Il cimitero di San Brunone e il garage, con il riavvio del braccio."},
+   {"tipo": "poi", "stato": "POI", "titolo": "Capitolo 1, «I tetti dei Tamburi»", "testo": "Con il primo registro, il cibo e l’introduzione a murales."},
+   {"tipo": "parallelo", "stato": "IN PARALLELO", "titolo": "Murales e colonna sonora", "testo": "La prova di stile dei murales e la colonna sonora: suono anni ’90, ma non per forza chiptune."}
+  ],
+  "uscita": "DATA DI USCITA: NESSUNA, PER ORA",
+  "slice": "Lo slice è una prova tecnica, e la sua strada è ancora generica. La rifaremo perché racconti Taranto la sera del Giovedì Santo del 2087: la nube rossa al posto del cielo stellato, il vento e la polvere rossa al posto della pioggia, i nastri della Linea al posto della ferrovia, le insegne del quartiere al posto di quelle da metropoli qualunque."
+ },
+ "crediti": {
+  "titolo": "Crediti e licenze",
+  "chi": {
+   "titolo": "Chi lo fa",
+   "voci": [
+    {"ruolo": "Progetto e direzione", "testo": "Luigi Massari.", "mostra": true},
+    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0. È la stessa riga dei crediti del gioco.", "mostra": true},
+    {"ruolo": "Storia", "testo": "la scrivono insieme Luigi Massari e Claude, un assistente AI: Claude propone, Luigi decide.", "mostra": false},
+    {"ruolo": "Font CAR Pixel, effetti e interfaccia", "testo": "disegnati da script per CTRL+ALT REVENGE.", "mostra": true},
+    {"ruolo": "Motore", "testo": "Godot Engine.", "mostra": true}
+   ]
+  },
+  "ai": "Nessuna immagine di questo sito è generata da un’intelligenza artificiale: c’è la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script, quelli sì, sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository.",
+  "licenze": {
+   "titolo": "Licenze",
+   "voci": [
+    "Codice (GDScript, Python, shader, configurazione e codice di questo sito): <b>MIT</b>.",
+    "Asset originali (grafica, animazioni, sfondi, font CAR Pixel, interfaccia, effetti sonori, livelli, storia e personaggi, comprese le immagini di questo sito): <b>LicenseRef-CAR-Assets</b>, tutti i diritti riservati.",
+    "È vietato usarli per addestrare o mettere a punto sistemi di intelligenza artificiale, come input o riferimento di stile per l’AI generativa e per il text and data mining: riserva espressa ai sensi dell’art. 4(3) della direttiva (UE) 2019/790 e degli artt. 70-ter, 70-quater e 70-septies della legge 633/1941.",
+    "Script per Blender (tools/blender/): <b>GPL-3.0-or-later</b>.",
+    "Materiale di terze parti: <a href=\"[[github_terze_parti]]\">THIRD-PARTY-NOTICES.md</a>. Licenza di ogni file: <a href=\"[[github_reuse]]\">REUSE.toml</a>. Richieste di permesso: <a href=\"[[github_issues]]\">GitHub issues</a>."
+   ]
+  },
+  "cc0": {
+   "titolo": "Sorgenti CC0",
+   "intro": "Il credito non è obbligatorio: lo diamo lo stesso.",
+   "voci": [
+    {"nome": "Quaternius · Universal Base Characters (Standard)", "cosa": "i modelli da cui nascono GIG, il punk e il bruto.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalbasecharacters.html"},
+    {"nome": "Quaternius · Universal Animation Library (Standard)", "cosa": "le loro animazioni.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary.html"},
+    {"nome": "Quaternius · Universal Animation Library 2 (Standard)", "cosa": "altre animazioni.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary2.html"},
+    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "il condizionatore a muro degli sfondi.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
+    {"nome": "Mesh2Motion", "cosa": "le animazioni del calcio circolare di GIG.", "licenza": "CC0 1.0", "url": "https://github.com/Mesh2Motion/mesh2motion-app"},
+    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "il cassonetto del vicolo.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
+    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "il cielo e i piani lontani di «Sotto la Linea» ne sono una versione ricolorata e ricomposta.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"}
+   ],
+   "resto": "Il resto è nostro: pose e mosse scritte negli script, stivali, codino, timbri del viso, normal map e luci; edifici, insegne, carattere pixel delle scritte, travata, piloni e oggetti di scena; font, effetti, interfaccia ed effetti sonori. Non usiamo Mixamo, Reallusion, CraftPix né altro materiale che non si può ridistribuire."
+  },
+  "strumenti": {
+   "titolo": "Strumenti, tutti gratuiti e open source",
+   "voci": [
+    {"nome": "Godot Engine 4.7.2", "cosa": "© 2014-present Godot Engine contributors; © 2007-2014 Juan Linietsky, Ariel Manzur.", "licenza": "MIT", "url": "https://godotengine.org"},
+    {"nome": "Blender 4.5 LTS", "cosa": "anima e renderizza i modelli.", "licenza": "GPL-3.0-or-later", "url": "https://www.blender.org"},
+    {"nome": "FFmpeg 9.0 (build di gyan.dev)", "cosa": "solo per catture e video.", "licenza": "GPL-3.0", "url": "https://ffmpeg.org"},
+    {"nome": "Python 3.14", "cosa": "con NumPy (BSD-3-Clause), Pillow (MIT-CMU) e SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
+   ]
+  },
+  "musica": "Musica: la colonna sonora definitiva sarà generata con Suno e uscirà solo con le build del gioco. Non è nel repository, non è in questo sito e non è nella demo web."
+ },
+ "piede": {
+  "finzione": "CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, Ignazio compreso; l’insegna del MiniBar è usata con il permesso del titolare. Ogni altra somiglianza con persone o aziende reali è casuale. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.",
+  "contesto": [
+   {"testo": "La storia è stata scritta nel novembre 2026, nei giorni in cui a Taranto è cominciato lo spegnimento degli altiforni. Il gioco non racconta la cronaca: inventa una Taranto di sessant’anni dopo e se la prende con chi comanda, mai con chi ci vive, ci lavora o si è ammalato.", "mostra": false}
+  ],
+  "link": [
+   {"testo": "Il codice su GitHub", "url": "[[github_codice]]"},
+   {"testo": "Licenze di terze parti", "url": "[[github_terze_parti]]"},
+   {"testo": "La licenza di ogni file", "url": "[[github_reuse]]"},
+   {"testo": "Richieste di permesso", "url": "[[github_issues]]"}
+  ],
+  "copyright": "CTRL+ALT REVENGE! © 2026 Luigi Massari. Niente cookie e niente tracciamenti: questa pagina non raccoglie dati."
+ },
+ "p404": {
+  "titolo": "Pagina non trovata · CTRL+ALT REVENGE!",
+  "testo": "Questa pagina non c’è. Niente GAME OVER, però: qui si riprova senza limiti.",
+  "bottone": "Torna all’inizio",
+  "alt": "CONTINUA?"
+ }
+}

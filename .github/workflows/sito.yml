@@ -1,0 +1,162 @@
+# Pubblica il sito su GitHub Pages: il sito costruito da tools/site/build.py (italiano nella radice,
+# inglese in en/, con la pagina 404) e la demo web del gioco in gioca/. La demo si esporta con
+# Godot 4.7.2 (preset "Web" di game/export_presets.cfg, senza thread: GitHub Pages non manda le
+# intestazioni COOP/COEP) con lo stesso script che si usa in locale, tools/site/export_web.sh.
+# La musica non è nel repo: la demo parte muta, senza errori.
+#
+# Prima della prima pubblicazione GitHub Pages va attivato con la sorgente "GitHub Actions", e il
+# ramo rewrite-godot va ammesso nell'ambiente github-pages (di solito può pubblicare solo il ramo
+# predefinito, master).
+#
+# Si costruisce dai push su rewrite-godot e su master, ma si pubblica solo da rewrite-godot (vedi il
+# lavoro deploy): così i due rami non si riscrivono il sito a vicenda. Quando i rami si uniranno, lì
+# rewrite-godot diventerà master.
+
+name: Sito
+
+on:
+  push:
+    branches: [rewrite-godot, master]
+    paths:
+      - "site/**"
+      - "tools/site/**"
+      - "game/**"
+      # anche questi finiscono nel sito: il workflow stesso e le licenze lette dai crediti del gioco
+      - ".github/workflows/sito.yml"
+      - "THIRD-PARTY-NOTICES.md"
+  workflow_dispatch:
+
+# Permessi minimi: qui solo la lettura del repo; la scrittura su Pages ce l'ha solo il lavoro
+# che pubblica, più sotto.
+permissions:
+  contents: read
+
+# Una pubblicazione alla volta. Quella in corso arriva in fondo; delle successive in coda resta
+# solo l'ultima.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: "4.7.2"
+  # SHA-512 copiati da SHA512-SUMS.txt della release 4.7.2-stable di godotengine/godot-builds e
+  # fissati qui: se un file sulla release cambiasse, la verifica fallirebbe invece di fidarsi.
+  # Per un'altra versione: cambiare GODOT_VERSION e i due hash. La chiave della cache contiene gli hash:
+  # se cambiano, la cache vecchia non si usa più e Godot si riscarica e si riverifica.
+  GODOT_LINUX_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+  GODOT_TEMPLATES_SHA512: ca4d71c4d7b81dfc15d1a98baa07534aa95b03fdda78a0075b06672e1648d2e5f40980c9adc28d23e1b92e732ee7bf3461997aa804af74ec2fcd7a93ccb84079
+
+jobs:
+  build:
+    name: Costruisce il sito e la demo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Scarica il repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Prima il sito, che è veloce: se un testo ha una parola vietata, un collegamento rotto o una
+      # risorsa esterna, il lavoro si ferma qui, prima di scaricare Godot. Solo la libreria standard.
+      - name: Costruisce il sito
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -I tools/site/build.py --out _site
+
+      # Nella cache c'è solo il necessario (circa 170 MB): l'eseguibile per Linux e i due modelli
+      # web senza thread, non tutti i 1,3 GB dei modelli d'esportazione.
+      - name: Ripristina Godot dalla cache
+        id: cache-godot
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux-web-${{ env.GODOT_LINUX_SHA512 }}-${{ env.GODOT_TEMPLATES_SHA512 }}
+
+      - name: Scarica e verifica Godot e i modelli d'esportazione
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          bin="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          tpz="Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          dl="$RUNNER_TEMP/godot-download"
+          mkdir -p "$dl"
+          curl -fsSL --retry 3 -o "$dl/$bin.zip" "$base/$bin.zip"
+          curl -fsSL --retry 3 -o "$dl/$tpz" "$base/$tpz"
+          # Se un hash non torna, il passo si ferma qui.
+          (cd "$dl" && printf '%s  %s\n%s  %s\n' \
+            "$GODOT_LINUX_SHA512" "$bin.zip" "$GODOT_TEMPLATES_SHA512" "$tpz" | sha512sum -c -)
+          # Modalità autonoma (file _sc_): impostazioni e modelli stanno accanto all'eseguibile.
+          tdir="$HOME/godot/editor_data/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$tdir"
+          unzip -q -j "$dl/$bin.zip" "$bin" -d "$HOME/godot"
+          chmod +x "$HOME/godot/$bin"
+          touch "$HOME/godot/_sc_"
+          unzip -q -j "$dl/$tpz" templates/version.txt templates/web_nothreads_release.zip \
+            templates/web_nothreads_debug.zip -d "$tdir"
+          test "$(cat "$tdir/version.txt")" = "${GODOT_VERSION}.stable"
+          rm -rf "$dl"
+          # Impronte dei file estratti: a ogni giro si controlla che la cache sia intatta.
+          (cd "$HOME/godot" && sha512sum "$bin" editor_data/export_templates/*/* > estratti.sha512)
+
+      # La cache si salva subito, prima che Godot scriva le sue impostazioni in editor_data/.
+      - name: Salva Godot nella cache
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/godot
+          key: ${{ steps.cache-godot.outputs.cache-primary-key }}
+
+      - name: Controlla Godot
+        run: |
+          set -euo pipefail
+          (cd "$HOME/godot" && sha512sum -c --quiet estratti.sha512)
+          "$HOME/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --headless --version
+
+      # Copia game/ in una cartella temporanea, importa, esporta in release e controlla che nella
+      # build non ci sia musica (vedi i commenti in tools/site/export_web.sh).
+      - name: Esporta la demo web
+        run: |
+          set -euo pipefail
+          export GODOT="$HOME/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          export WORK="$RUNNER_TEMP/godot-web"
+          bash tools/site/export_web.sh "$RUNNER_TEMP/demo-web"
+
+      - name: Mette la demo nel sito
+        run: |
+          set -euo pipefail
+          test -f _site/index.html
+          if [ -e _site/gioca ]; then
+            echo "::error::Nel sito c'è già una cartella gioca/: è il posto della demo web."
+            exit 1
+          fi
+          cp -a "$RUNNER_TEMP/demo-web" _site/gioca
+          echo "Contenuto del sito:"
+          (cd _site && find . -type f | sort | head -100)
+          du -sh _site
+
+      - name: Prepara l'artefatto per GitHub Pages
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: Pubblica su GitHub Pages
+    needs: build
+    # Pubblica un ramo solo: oggi rewrite-godot (master ha ancora il prototipo Pygame).
+    if: github.ref == 'refs/heads/rewrite-godot'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Solo qui la scrittura su Pages; id-token serve a deploy-pages per farsi riconoscere da GitHub.
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Pubblica
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

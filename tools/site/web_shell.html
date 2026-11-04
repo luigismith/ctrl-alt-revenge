@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<!--
+	Pagina della demo web di CTRL+ALT REVENGE: la "shell" HTML dell'esportazione Web di Godot 4.7.2.
+	La usa tools/site/export_web.sh, che la copia nel progetto esportato e la indica al preset "Web".
+	Godot sostituisce i segnaposto $GODOT_...; export_web.sh sostituisce __CAR_DEMO_MB__ con il peso vero
+	della demo, e copia accanto a index.html il logo e il font della pagina, dagli asset del gioco.
+	Nessuna risorsa esterna: niente CDN, niente tracciamenti.
+	Lingua: italiano; inglese con ?lang=en o con il browser in un'altra lingua.
+
+	Il gioco sta in una cornice, a scala intera: la pagina decide la misura del canvas (canvasResizePolicy 0,
+	"nessuna" per Godot) e la sceglie come multiplo esatto di 384x216 in pixel del dispositivo, anche a schermo
+	intero. Le misure (canvas, logo, caratteri CAR Pixel a multipli di 12 pixel del dispositivo) si calcolano
+	prima del primo disegno, e il motore (index.js) si scarica dopo: la pagina non salta. Sui telefoni il
+	motore si scarica solo se si sceglie di giocare lo stesso. Il tasto Tab non arriva al gioco, così con la
+	tastiera si può sempre uscire dal canvas.
+	SPDX-FileCopyrightText: 2026 Luigi Massari
+	SPDX-License-Identifier: MIT
+-->
+<html lang="it">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="color-scheme" content="dark">
+		<meta name="theme-color" content="$GODOT_SPLASH_COLOR">
+		<meta name="description" content="CTRL+ALT REVENGE!: la demo nel browser, lo slice «Sotto la Linea» · the browser demo of the “Sotto la Linea” slice. Platform d’azione in pixel art, in sviluppo · pixel-art action platformer, in development.">
+		<meta name="tdm-reservation" content="1">
+		<title>CTRL+ALT REVENGE! · demo</title>
+		<link rel="preload" href="car_pixel_bold.ttf" as="font" type="font/ttf" crossorigin>
+		<script>
+			// Lingua prima del primo disegno, così il testo non cambia sotto gli occhi. Finché lo script in
+			// fondo alla pagina non ha preso le misure, il gioco e i comandi restano nascosti: niente salti.
+			(function () {
+				var p = new URLSearchParams(window.location.search).get('lang');
+				var it = p ? p === 'it' : /^it\b/i.test(navigator.language || 'it');
+				document.documentElement.lang = it ? 'it' : 'en';
+				document.documentElement.classList.add('misura');
+			}());
+		</script>
+		<style>
+@font-face {
+	font-family: "CAR Pixel";
+	src: url("car_pixel_bold.ttf") format("truetype");
+	font-display: swap;
+}
+
+/* Tavolozza di tools/fxui/palette.py. Il cyan è di GIG: qui non si usa. */
+:root {
+	--notte: $GODOT_SPLASH_COLOR;
+	--inchiostro: #0b0816;
+	--viola: #1a1230;
+	--asfalto: #2e2346;
+	--asfalto-scuro: #241a38;
+	--crema: #f7e8bd;
+	--crema-scura: #cfae74;
+	--oro: #ffe27a;
+	--oro-scuro: #a8700a;
+	--arancio: #e48a2e;
+	--arancio-chiaro: #f6b25a;
+	--rosso-scuro: #4f0c07;
+	--neon: #f2563a;
+	--metallo: #8e86ab;
+	--metallo-chiaro: #c9c2de;
+	--metallo-scuro: #3a3352;
+	/* un pixel del gioco in px CSS, per la cornice (la scrive lo script) */
+	--px: 2px;
+	/* CAR Pixel a multipli di 12 pixel del dispositivo, e i loghi a scala intera (li scrive lo script) */
+	--fp-ui: 24px;
+	--fp-piccolo: 12px;
+	--pl: 1px;
+	--pl-testa: 0.5px;
+	--testo: "Bahnschrift", "DIN Alternate", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+}
+
+html, body { margin: 0; padding: 0; }
+html { background: var(--inchiostro); color: var(--crema); font: 400 1rem / 1.5 var(--testo); }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+html[lang="it"] [lang="en"], html[lang="en"] [lang="it"] { display: none !important; }
+html.misura main { visibility: hidden; }
+a { color: var(--oro); }
+a:hover { color: #fff7dc; }
+:focus-visible { outline: 3px solid var(--oro); outline-offset: 3px; }
+.px { font-family: "CAR Pixel", ui-monospace, monospace; -webkit-font-smoothing: none; font-synthesis: none; }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* --- barra in alto -------------------------------------------------------------------- */
+.barra-alta {
+	display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+	padding: 8px clamp(12px, 3vw, 32px);
+	background: var(--inchiostro);
+	border-bottom: 2px solid var(--viola);
+}
+.barra-alta .indietro, .bottone {
+	display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px;
+	font: 400 var(--fp-ui) / 1 "CAR Pixel", ui-monospace, monospace;
+	-webkit-font-smoothing: none; font-synthesis: none;
+	color: var(--crema); text-decoration: none;
+	background: var(--asfalto-scuro); border: 2px solid var(--crema-scura); cursor: pointer;
+}
+.barra-alta .indietro:hover, .bottone:hover { color: #fff7dc; border-color: var(--crema); }
+.bottone--oro { color: var(--inchiostro); background: var(--oro); border-color: #e2a510; }
+.bottone--oro:hover { color: var(--inchiostro); background: #fff0a8; }
+.barra-alta__titolo {
+	display: flex; align-items: center; gap: 12px; margin: 0 auto 0 0;
+	font: 400 var(--fp-ui) / 1 "CAR Pixel", ui-monospace, monospace;
+	-webkit-font-smoothing: none; font-synthesis: none;
+	color: var(--crema);
+}
+/* Il logo nella barra solo dove sta a un pixel del dispositivo per pixel del gioco (schermi da 2x in su):
+   altrimenti il nome, in CAR Pixel. */
+.barra-alta__logo { display: none; width: calc(248 * var(--pl-testa)); height: calc(89 * var(--pl-testa)); image-rendering: pixelated; }
+html.densa .barra-alta__logo { display: block; }
+html.densa .barra-alta__testo { display: none; }
+.barra-alta__livello { color: var(--arancio); font-size: var(--fp-piccolo); line-height: 1; }
+@media (max-width: 639px) { .barra-alta__livello { display: none; } }
+@media (max-width: 519px) { .barra-alta__titolo { display: none; } .barra-alta { gap: 10px; } }
+
+/* --- il gioco nella cornice ----------------------------------------------------------- */
+main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; gap: 18px; padding: 18px 12px 28px; }
+main.di-lato { grid-template-columns: auto minmax(260px, 340px); align-items: start; justify-content: center; column-gap: 28px; }
+.cornice {
+	position: relative;
+	padding: var(--px);
+	background: var(--inchiostro);
+	box-shadow: 0 0 0 var(--px) var(--metallo-scuro), 0 0 0 calc(var(--px) * 2) var(--inchiostro), 0 0 40px rgba(242, 86, 58, 0.12);
+}
+.cornice:fullscreen { display: grid; place-items: center; padding: 0; background: #000; box-shadow: none; }
+#canvas { display: block; background: #000; image-rendering: pixelated; }
+#canvas:focus { outline: none; }
+.cornice:focus-within { box-shadow: 0 0 0 var(--px) var(--oro-scuro), 0 0 0 calc(var(--px) * 2) var(--inchiostro), 0 0 40px rgba(255, 226, 122, 0.16); }
+
+/* schermata di caricamento, dentro la cornice */
+#status {
+	position: absolute; inset: var(--px); z-index: 1;
+	display: flex; flex-direction: column; align-items: center; justify-content: center;
+	gap: 14px; padding: 16px; box-sizing: border-box; overflow: hidden; text-align: center;
+	background:
+		radial-gradient(ellipse 70% 30% at 50% 100%, rgba(242, 86, 58, 0.18), transparent 70%),
+		linear-gradient(to bottom, var(--notte) 0%, var(--notte) 55%, var(--viola) 85%, var(--asfalto-scuro) 100%);
+	transition: opacity 0.35s ease-out;
+}
+#status.esce { opacity: 0; pointer-events: none; }
+#status > * { margin: 0; }
+.logo { display: block; width: calc(248 * var(--pl)); height: calc(89 * var(--pl)); image-rendering: pixelated; }
+.livello { color: var(--arancio); font: 400 var(--fp-piccolo) / 1 "CAR Pixel", monospace; }
+.carica {
+	width: 220px; max-width: 80%; height: 12px; box-sizing: content-box;
+	border: 2px solid var(--metallo-chiaro);
+	box-shadow: 0 0 0 2px var(--metallo-scuro), inset 0 0 0 2px var(--inchiostro);
+	background: repeating-linear-gradient(to bottom, var(--asfalto-scuro) 0 2px, var(--asfalto) 2px 4px);
+}
+.carica > span {
+	display: block; height: 100%; width: 0%;
+	background: linear-gradient(to bottom, #fff3a6 0 2px, #f8d24a 2px 5px, #eab12a 5px 8px, #d18f16 8px 10px, #9c600c 10px 100%);
+	transition: width 0.12s linear;
+}
+.carica.attesa > span { width: 30%; animation: attesa 1.1s steps(12) infinite alternate; }
+@keyframes attesa { from { margin-left: 0; } to { margin-left: 70%; } }
+.stato { font: 400 var(--fp-piccolo) / 1 "CAR Pixel", monospace; min-height: 1em; }
+.stato b { color: var(--oro); font-weight: normal; }
+#status-notice {
+	max-width: min(40em, 90%); padding: 10px 14px;
+	border: 2px solid var(--neon);
+	box-shadow: 0 0 10px rgba(242, 86, 58, 0.45), inset 0 0 0 2px var(--rosso-scuro);
+	background: rgba(11, 8, 22, 0.92); color: var(--crema); text-align: left;
+}
+#status-notice[hidden] { display: none; }
+#status-notice p { margin: 0; }
+#status-notice .dettagli { margin-top: 6px; color: var(--crema-scura); font-family: ui-monospace, Consolas, monospace; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+#status.errore .carica, #status.errore .stato { display: none; }
+.cancello { display: grid; gap: 12px; justify-items: center; max-width: 34em; }
+.cancello[hidden] { display: none; }
+.cancello p { margin: 0; }
+.cancello .bottoni { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+#status.in-attesa .carica, #status.in-attesa .stato { display: none; }
+/* prima di scaricare, sul telefono: il messaggio prende il posto del gioco, alla sua misura */
+#status.in-attesa { position: static; min-height: 216px; width: min(100vw - 32px, 640px); }
+.cornice:has(#status.in-attesa) #canvas { display: none; }
+
+/* --- comandi e note ------------------------------------------------------------------- */
+.pannello { display: grid; gap: 16px; width: min(100%, 860px); }
+main.di-lato .pannello { width: auto; }
+.pannello h2 { margin: 0 0 8px; font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--oro); }
+.comandi { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; align-items: center; margin: 0; }
+.comandi dt { font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--crema); }
+.comandi dd { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.comandi .o { color: var(--crema-scura); padding: 0 4px; }
+kbd {
+	display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; box-sizing: border-box;
+	font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--inchiostro);
+	background: #ddd0b2; border: 2px solid #5e5446; box-shadow: 0 2px 0 #8c7f68;
+}
+.nota kbd { height: auto; min-width: 0; padding: 0 4px; font: 700 0.85em / 1.3 var(--testo); }
+kbd.premuto { background: var(--oro); border-color: var(--oro-scuro); transform: translateY(2px); box-shadow: none; }
+.nota { margin: 0; color: var(--crema-scura); max-width: 60ch; }
+.nota strong { color: var(--crema); }
+.azioni { display: flex; flex-wrap: wrap; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+	.carica.attesa > span { animation: none; }
+	#status, .carica > span { transition: none; }
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<header class="barra-alta">
+			<a class="indietro" id="indietro" href="../"><span aria-hidden="true">◀</span> <span lang="it">Torna al sito</span><span lang="en">Back to the site</span></a>
+			<h1 class="barra-alta__titolo">
+				<img class="barra-alta__logo" src="logo.png" width="248" height="89" alt="CTRL+ALT REVENGE!">
+				<span class="barra-alta__testo">CTRL+ALT REVENGE!</span>
+				<span class="barra-alta__livello"><span lang="it">DEMO · SOTTO LA LINEA</span><span lang="en">DEMO · SOTTO LA LINEA</span></span>
+			</h1>
+			<button type="button" class="bottone" id="schermo-intero"><span lang="it">Schermo intero</span><span lang="en">Full screen</span></button>
+		</header>
+
+		<main id="main">
+			<div class="cornice" id="cornice">
+				<canvas id="canvas" width="768" height="432" tabindex="0">
+					<span lang="it">Area di gioco di CTRL+ALT REVENGE: si gioca con la tastiera o con un controller.</span>
+					<span lang="en">CTRL+ALT REVENGE game area: play with a keyboard or a gamepad.</span>
+				</canvas>
+				<noscript>
+					<p lang="it">Per giocare la demo serve JavaScript.</p>
+					<p lang="en">The demo needs JavaScript to run.</p>
+				</noscript>
+				<div id="status">
+					<img class="logo" src="logo.png" width="248" height="89" alt="">
+					<p class="livello"><span lang="it">DEMO · LIVELLO 1 · SOTTO LA LINEA</span><span lang="en">DEMO · LEVEL 1 · SOTTO LA LINEA</span></p>
+					<div class="carica attesa" id="status-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="status-text"><span></span></div>
+					<p class="stato" id="status-text"><span lang="it">CARICAMENTO…</span><span lang="en">LOADING…</span></p>
+					<div class="cancello" id="cancello" hidden>
+						<p lang="it">Questa demo si gioca con la tastiera o con un controller: sul telefono e sul tablet non ci sono comandi a sfioramento. Il primo caricamento scarica circa __CAR_DEMO_MB__ MB.</p>
+						<p lang="en">This demo is played with a keyboard or a gamepad: there are no touch controls on phones and tablets. The first load downloads about __CAR_DEMO_MB__ MB.</p>
+						<p class="bottoni">
+							<button type="button" class="bottone bottone--oro" id="avvia"><span aria-hidden="true">▶</span> <span lang="it">Avvia lo stesso</span><span lang="en">Start anyway</span></button>
+							<a class="bottone" id="indietro-2" href="../"><span aria-hidden="true">◀</span> <span lang="it">Torna al sito</span><span lang="en">Back to the site</span></a>
+						</p>
+					</div>
+					<div id="status-notice" role="alert" hidden></div>
+				</div>
+			</div>
+
+			<section class="pannello" aria-labelledby="comandi-t">
+				<div>
+					<h2 id="comandi-t"><span lang="it">Comandi</span><span lang="en">Controls</span></h2>
+					<dl class="comandi">
+						<dt><span lang="it">MUOVI</span><span lang="en">MOVE</span></dt>
+						<dd><span aria-hidden="true"><kbd data-tasto="ArrowLeft">◀</kbd><kbd data-tasto="ArrowUp">▲</kbd><kbd data-tasto="ArrowDown">▼</kbd><kbd data-tasto="ArrowRight">▶</kbd></span><span class="sr" lang="it">frecce</span><span class="sr" lang="en">arrow keys</span> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyW">W</kbd><kbd data-tasto="KeyA">A</kbd><kbd data-tasto="KeyS">S</kbd><kbd data-tasto="KeyD">D</kbd></dd>
+						<dt><span lang="it">ATTACCO</span><span lang="en">ATTACK</span></dt>
+						<dd><kbd data-tasto="KeyZ">Z</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyJ">J</kbd></dd>
+						<dt><span lang="it">SALTO</span><span lang="en">JUMP</span></dt>
+						<dd><kbd data-tasto="KeyX">X</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyK">K</kbd></dd>
+						<dt><span lang="it">PAUSA</span><span lang="en">PAUSE</span></dt>
+						<dd><kbd data-tasto="Enter"><span lang="it">INVIO</span><span lang="en">ENTER</span></kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="Escape">ESC</kbd></dd>
+					</dl>
+				</div>
+				<p class="nota" lang="it">Va bene anche un controller. <strong>Clicca sul gioco</strong> se non risponde ai tasti; con <kbd>Tab</kbd> esci dal gioco e torni alla pagina.</p>
+				<p class="nota" lang="en">A gamepad works too. <strong>Click the game</strong> if it doesn’t respond to the keys; <kbd>Tab</kbd> takes you out of the game and back to the page.</p>
+				<p class="nota" lang="it"><strong>È lo slice tecnico del 2026:</strong> grafica, testi e livelli cambieranno, e la strada è ancora provvisoria. È senza musica, perché i brani non sono pubblici, e nel browser i suoni arrivano tutti dal centro: il pan stereo c’è solo nella versione per computer.</p>
+				<p class="nota" lang="en"><strong>This is the 2026 technical slice:</strong> the art, the text and the levels will change, and the street is still a placeholder. The game’s own text is in Italian. It has no music, because the tracks aren’t public, and in the browser all sounds come from the centre: stereo panning is only in the desktop version.</p>
+				<p class="nota"><span lang="it">Motore: Godot Engine (MIT).</span><span lang="en">Engine: Godot Engine (MIT).</span></p>
+				<p class="azioni"><a class="bottone" id="indietro-3" href="../"><span aria-hidden="true">◀</span> <span lang="it">Torna al sito</span><span lang="en">Back to the site</span></a></p>
+			</section>
+		</main>
+
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const GODOT_URL = '$GODOT_URL';
+
+(function () {
+	const doc = document.documentElement;
+	const en = doc.lang === 'en';
+	const sito = en ? '../en/' : '../';
+	for (const a of document.querySelectorAll('#indietro, #indietro-2, #indietro-3')) a.href = sito;
+
+	const canvas = document.getElementById('canvas');
+	const cornice = document.getElementById('cornice');
+	const main = document.getElementById('main');
+	const status = document.getElementById('status');
+	const bar = document.getElementById('status-progress');
+	const fill = bar.firstElementChild;
+	const text = document.getElementById('status-text');
+	const notice = document.getElementById('status-notice');
+
+	// Sul telefono (solo tocco) si chiede prima di scaricare: la demo non ha comandi a sfioramento.
+	const soloTocco = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+	const conPad = !!(navigator.getGamepads && Array.from(navigator.getGamepads()).some(Boolean));
+	const chiedi = soloTocco && !conPad;
+	if (chiedi) {
+		status.classList.add('in-attesa');
+		document.getElementById('cancello').hidden = false;
+	}
+
+	// --- le misure: CAR Pixel a multipli di 12 pixel del dispositivo, loghi e canvas a scala intera ---------
+	function dimensiona() {
+		const dpr = window.devicePixelRatio || 1;
+		const m12 = (c) => (Math.max(1, Math.round((c * dpr) / 12)) * 12) / dpr;
+		doc.style.setProperty('--fp-ui', m12(24) + 'px');
+		doc.style.setProperty('--fp-piccolo', m12(12) + 'px');
+		doc.classList.toggle('densa', dpr >= 2);
+		doc.style.setProperty('--pl-testa', Math.max(1, Math.round(dpr / 2)) / dpr + 'px');
+		const intero = document.fullscreenElement === cornice;
+		const scala = (w, h) => Math.max(1, Math.floor(Math.min((w * dpr) / 384, (h * dpr) / 216) + 1e-6));
+		let n;
+		if (intero) {
+			n = scala(window.innerWidth, window.innerHeight);
+		} else {
+			// I comandi vanno accanto al gioco solo se così il gioco resta grande uguale; se no, sotto.
+			const alto = document.querySelector('.barra-alta').offsetHeight;
+			const sotto = scala(window.innerWidth - 40, window.innerHeight - alto - 64);
+			const lato = window.innerWidth >= 1180 ? scala(window.innerWidth - 420, window.innerHeight - alto - 50) : 0;
+			main.classList.toggle('di-lato', lato >= sotto);
+			n = Math.max(sotto, lato);
+		}
+		canvas.width = 384 * n;
+		canvas.height = 216 * n;
+		canvas.style.width = (384 * n) / dpr + 'px';
+		canvas.style.height = (216 * n) / dpr + 'px';
+		const px = Math.max(1, Math.round(dpr * 2)) / dpr;
+		cornice.style.setProperty('--px', px + 'px');
+		// il logo della schermata di caricamento: un pixel CSS per pixel del gioco, se ci sta, sempre intero
+		const spazio = chiedi ? Math.min(window.innerWidth - 32, 640) - 32 : (384 * n) / dpr - 32;
+		const k = Math.max(1, Math.min(Math.round(dpr), Math.floor((spazio * dpr) / 248)));
+		doc.style.setProperty('--pl', k / dpr + 'px');
+		doc.classList.remove('misura');
+	}
+	dimensiona();
+	window.addEventListener('resize', dimensiona);
+	document.addEventListener('fullscreenchange', () => { dimensiona(); canvas.focus(); });
+	matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`).addEventListener('change', dimensiona);
+
+	const intero = document.getElementById('schermo-intero');
+	// «Schermo intero» serve solo a gioco avviato, e solo dove il browser lo sa fare
+	intero.hidden = !cornice.requestFullscreen || chiedi;
+	intero.addEventListener('click', () => {
+		if (document.fullscreenElement) document.exitFullscreen();
+		else cornice.requestFullscreen().catch(() => {});
+	});
+
+	// --- tastiera: Tab resta della pagina (niente trappola), i tasti del gioco si accendono ----------
+	window.addEventListener('keydown', (e) => { if (e.key === 'Tab') e.stopPropagation(); }, true);
+	window.addEventListener('keyup', (e) => { if (e.key === 'Tab') e.stopPropagation(); }, true);
+	const tasti = new Map();
+	for (const k of document.querySelectorAll('kbd[data-tasto]')) {
+		if (!tasti.has(k.dataset.tasto)) tasti.set(k.dataset.tasto, []);
+		tasti.get(k.dataset.tasto).push(k);
+	}
+	const accendi = (e, si) => { for (const k of tasti.get(e.code) || []) k.classList.toggle('premuto', si); };
+	window.addEventListener('keydown', (e) => accendi(e, true), true);
+	window.addEventListener('keyup', (e) => accendi(e, false), true);
+	window.addEventListener('blur', () => { for (const l of tasti.values()) for (const k of l) k.classList.remove('premuto'); });
+	cornice.addEventListener('pointerdown', () => canvas.focus());
+
+	// --- caricamento ----------------------------------------------------------------------------
+	let initializing = true;
+	let lastPercent = -1;
+	function setProgress(current, total) {
+		if (!(current > 0 && total > 0)) {
+			bar.classList.add('attesa');
+			bar.removeAttribute('aria-valuenow');
+			return;
+		}
+		const percent = Math.min(100, Math.floor((current / total) * 100));
+		if (percent === lastPercent) return;
+		lastPercent = percent;
+		bar.classList.remove('attesa');
+		fill.style.width = percent + '%';
+		bar.setAttribute('aria-valuenow', String(percent));
+		text.textContent = '';
+		text.append(en ? 'LOADING ' : 'CARICAMENTO ');
+		const b = document.createElement('b');
+		b.textContent = percent + '%';
+		text.append(b);
+	}
+	function hide() {
+		if (!initializing) return;
+		initializing = false;
+		// all'avvio il motore mette il nome del progetto nel titolo della scheda: si rimette quello della pagina
+		document.title = 'CTRL+ALT REVENGE! · demo';
+		status.classList.add('esce');
+		const remove = () => status.remove();
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) remove();
+		else { status.addEventListener('transitionend', remove, { once: true }); setTimeout(remove, 600); }
+		canvas.focus();
+	}
+	function fail(err) {
+		console.error(err);
+		initializing = false;
+		let detail = 'An unknown error occurred.';
+		if (err instanceof Error) detail = err.message;
+		else if (typeof err === 'string') detail = err;
+		notice.textContent = '';
+		const p = document.createElement('p');
+		p.textContent = en
+			? 'The demo could not start. Try a recent version of Chrome, Edge or Firefox on a computer.'
+			: 'La demo non è partita. Prova con una versione recente di Chrome, Edge o Firefox su un computer.';
+		const d = document.createElement('p');
+		d.className = 'dettagli';
+		d.textContent = detail;
+		notice.append(p, d);
+		notice.hidden = false;
+		status.classList.add('errore');
+	}
+	function parti() {
+		const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+		if (missing.length !== 0) {
+			fail((en ? 'Missing browser features:\n' : 'Funzioni del browser che mancano:\n') + missing.join('\n'));
+			return;
+		}
+		// La misura del canvas la decide questa pagina: Godot la legge e la segue.
+		const engine = new Engine(Object.assign({}, GODOT_CONFIG, { canvasResizePolicy: 0 }));
+		engine.startGame({ 'onProgress': setProgress }).then(hide, fail);
+	}
+	// Il motore (index.js) si scarica solo adesso: la pagina è già disegnata e non salta.
+	function avvia() {
+		status.classList.remove('in-attesa');
+		document.getElementById('cancello').hidden = true;
+		intero.hidden = !cornice.requestFullscreen;
+		dimensiona();
+		const s = document.createElement('script');
+		s.src = GODOT_URL;
+		s.onload = parti;
+		s.onerror = () => fail(new Error(GODOT_URL));
+		document.body.appendChild(s);
+	}
+	if (chiedi) document.getElementById('avvia').addEventListener('click', avvia, { once: true });
+	else avvia();
+}());
+		</script>
+	</body>
+</html>

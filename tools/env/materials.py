@@ -30,6 +30,8 @@ RAMPS = {
     "trash": ["#09080e", "#110f18", "#1a1724", "#252132", "#322c42"],
     "rubber": ["#09080c", "#121016", "#1b1820", "#26222c"],
     "neon_red": ["#3d0a1a", "#6e1024", "#a8182e", "#e02a3a", "#ff5a5a", "#ffa29a", "#ffe0d8"],
+    # croce delle farmacie italiane: verde, mai rossa (la croce rossa è un emblema protetto; coerenza-slice M12)
+    "neon_green": ["#06240f", "#0b3f1b", "#13662c", "#1d9442", "#35c262", "#8ce8a8", "#dcffe6"],
     "neon_orange": ["#4a1a0c", "#85300f", "#c04a14", "#f06a1e", "#ff9440", "#ffc27a", "#ffe6c0"],
     "warm": ["#2e1a18", "#55301f", "#86482a", "#b8663a", "#e08c4c", "#ffb86a", "#ffdca0"],
     "cyan": ["#0b3a4a", "#138aa6", "#2fd0f0", "#9af4ff"],

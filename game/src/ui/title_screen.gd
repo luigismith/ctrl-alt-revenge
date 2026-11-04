@@ -1,7 +1,7 @@
 class_name TitleScreen
 extends Node2D
 ## Titolo: lo sfondo del livello che scorre piano sotto la pioggia, GIG in guardia, il logo,
-## il sottotitolo e il menu (GIOCA, CREDITI, ESCI). Musica "title".
+## il sottotitolo e il menu (GIOCA, CREDITI, ESCI; nel browser senza ESCI). Musica "title".
 
 signal start_game
 signal show_credits
@@ -10,6 +10,10 @@ signal quit_game
 const ITEMS: PackedStringArray = ["GIOCA", "CREDITI", "ESCI"]
 ## Punto a terra fra i piedi di GIG sullo schermo.
 const GIG_FEET := Vector2(66, 198)
+
+## Voci del menu. Nel browser ESCI non c'è: chiudere il motore lascerebbe la pagina ferma
+## sull'ultimo fotogramma, senza audio, finché non la si ricarica.
+var _items: PackedStringArray = ITEMS.slice(0, 2) if OS.has_feature("web") else ITEMS
 
 var _backdrop: Backdrop
 var _rain: Rain
@@ -105,10 +109,10 @@ func _physics_process(_delta: float) -> void:
 		_locked -= 1
 		return
 	if Input.is_action_just_pressed(&"move_up"):
-		_index = posmod(_index - 1, ITEMS.size())
+		_index = posmod(_index - 1, _items.size())
 		Sfx.play(&"ui_move")
 	elif Input.is_action_just_pressed(&"move_down"):
-		_index = posmod(_index + 1, ITEMS.size())
+		_index = posmod(_index + 1, _items.size())
 		Sfx.play(&"ui_move")
 	elif Input.is_action_just_pressed(&"menu_confirm") or Input.is_action_just_pressed(&"attack"):
 		Sfx.play(&"ui_confirm")
@@ -135,12 +139,12 @@ func _draw_ui() -> void:
 		UiFont.draw_text(_ui, Vector2(192, y + 38), "REVENGE!", _text, 3, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
 		y += 80
 	if not UiArt.draw_centered(_ui, "subtitle", 192, y):
-		UiFont.draw_text(_ui, Vector2(192, y), "PICCHIA DURO A SCORRIMENTO", _orange, 1, 1)
+		UiFont.draw_text(_ui, Vector2(192, y), "TARANTO · 2087", _orange, 1, 1)
 	y = 150.0
-	for i in ITEMS.size():
+	for i in _items.size():
 		var sel := i == _index
 		var col := _gold if sel else _text
-		UiFont.draw_text(_ui, Vector2(192, y + i * 13), ITEMS[i], col, 1, 1)
+		UiFont.draw_text(_ui, Vector2(192, y + i * 13), _items[i], col, 1, 1)
 		if sel and (_t / 16) % 2 == 0:
-			UiFont.draw_text(_ui, Vector2(192 - UiFont.text_width(ITEMS[i]) / 2.0 - 10, y + i * 13), "▶", col)
+			UiFont.draw_text(_ui, Vector2(192 - UiFont.text_width(_items[i]) / 2.0 - 10, y + i * 13), "▶", col)
 	UiFont.draw_text(_ui, Vector2(379, 202), "© 2026 Luigi Massari", UiArt.color("text_dim", Color8(207, 174, 116)), 1, 2, Color(0, 0, 0, 0), UiFont.SHADOW, true)

@@ -356,7 +356,7 @@ def op_neon_text(cv: Canvas, o):
         cm = np.zeros((11, 11), bool)
         cm[4:7, :] = True
         cm[:, 4:7] = True
-        crgb, cal, cem, cpad = neon_bitmap(cm, "neon_red", ring=1, core_idx=5, tube_idx=4)
+        crgb, cal, cem, cpad = neon_bitmap(cm, "neon_green", ring=1, core_idx=5, tube_idx=4)
         cv.paste(ox, y0 + (h - cal.shape[0]) // 2, crgb, cal, where, cem, neon=True)
         ox += cross_w
     cv.paste(ox, oy, rgbm, al, where, em, neon=True)
@@ -428,11 +428,11 @@ def op_neon_vertical(cv: Canvas, o):
 
 
 def op_cross_blade(cv: Canvas, o):
-    """Croce della farmacia sulla faccia +X dell'insegna a bandiera."""
+    """Croce della farmacia sulla faccia +X dell'insegna a bandiera: verde, come in Italia."""
     Xf, Y0, Y1, z0, z1 = o["Xf"], o["Y0"], o["Y1"], o["z0"], o["z1"]
     where = cv.oid == o["oid"]
     ys, xs = np.nonzero(where)
-    r = RAMPS["neon_red"]
+    r = RAMPS["neon_green"]
     for y, x in zip(ys, xs):
         Y = ((x + cv.x0 + 0.5) - cv.kx * Xf) / cv.kyx
         Z = (cv.oy - cv.kyy * Y - (y + cv.y0 + 0.5)) / cv.kz
