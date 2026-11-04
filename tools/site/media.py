@@ -44,6 +44,8 @@ Come lavora:
      meno e costa meno decodificarlo;
    - docs/media/demo.gif: GIF del README a 2x (768x432), 20 fotogrammi al secondo, al massimo 3 MB;
    - site/media/schermate/*.png: ritagli a 1x (il sito li ingrandisce a multipli interi);
+   - docs/media/schermate/*-2x.png: gli stessi ritagli a 2x, per il README (GitHub non li
+     ingrandisce a pixel netti: il README li mostra a metà, netti su ogni schermo);
    - site/media/social.png: anteprima social 1280x640, gioco a 3x più il logo a 2x;
    - site/media/sprite/*.png e *.json: strisce di GIG, punk e bruto (guardia, camminata, una
      mossa) prese dagli atlanti di game/assets/sprites, con fotogrammi e durate; per GIG anche
@@ -776,6 +778,7 @@ def step_schermate(out: dict) -> None:
         p = SITE_MEDIA / "schermate" / f"{name}.png"
         im = frame(k).crop(box)
         save_png(im, p)
+        save_png(up(im, 2), DOCS_MEDIA / "schermate" / f"{name}-2x.png")
         items.append({"file": site_rel(p), "larghezza": im.width, "altezza": im.height, "scala": 1,
                       "fotogramma": k, "ritaglio": list(box), "alt": {"it": alt_it, "en": alt_en}})
     out["schermate"] = items

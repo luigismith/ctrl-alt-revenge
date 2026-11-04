@@ -91,6 +91,7 @@ path = [
   "site/media/schermate/**",
   "site/media/social.png",
   "docs/media/demo.gif",
+  "docs/media/schermate/**",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]

@@ -1,17 +1,17 @@
 {
  "nota": "Dati comuni alle due lingue. Nei testi di it.json ed en.json [[nome]] diventa il valore di 'numeri' o di 'link'; tools/site/build.py aggiunge da solo test (le funzioni test_ del gioco), punteggio, tick e hash (dal replay dei test, in site/media/media.json) e godot.",
  "url_sito": "https://luigismith.github.io/ctrl-alt-revenge/",
- "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/rewrite-godot",
+ "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/master",
  "godot": "4.7.2",
  "numeri": {
   "capitoli": 13,
-  "demo_mb": 13
+  "demo_mb": 21
  },
  "link": {
   "github": "https://github.com/luigismith/ctrl-alt-revenge",
-  "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/rewrite-godot",
-  "github_terze_parti": "https://github.com/luigismith/ctrl-alt-revenge/blob/rewrite-godot/THIRD-PARTY-NOTICES.md",
-  "github_reuse": "https://github.com/luigismith/ctrl-alt-revenge/blob/rewrite-godot/REUSE.toml",
+  "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/master",
+  "github_terze_parti": "https://github.com/luigismith/ctrl-alt-revenge/blob/master/THIRD-PARTY-NOTICES.md",
+  "github_reuse": "https://github.com/luigismith/ctrl-alt-revenge/blob/master/REUSE.toml",
   "github_issues": "https://github.com/luigismith/ctrl-alt-revenge/issues"
  }
 }

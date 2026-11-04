@@ -96,15 +96,14 @@ winget install --id astral-sh.uv -e
    - Sul PC dove arrivi: aspetta la stessa cosa prima di aprire il progetto.
 3. **A fine giornata, copia di sicurezza su GitHub.**
    - Il modo semplice: chiedi a Claude "fai il commit e il push su GitHub, anche della storia".
-   - **Il repo pubblico.** Il ramo di lavoro è `rewrite-godot`. A mano, nella cartella del repo:
+   - **Il repo pubblico.** Il ramo di lavoro è `master` (il vecchio prototipo Pygame è nel ramo `legacy-pygame`). A mano, nella cartella del repo:
 
      | Comando | A cosa serve |
      |---|---|
      | `git status` | mostra cosa è cambiato |
-     | `git push origin rewrite-godot` | manda su GitHub i commit fatti |
-     | `git pull --ff-only origin rewrite-godot` | prende da GitHub le novità fatte altrove (per esempio da Claude sul web) |
-     | `git push -u origin rewrite-godot` | solo la prima volta, se il ramo non è ancora su GitHub |
-
+     | `git push origin master` | manda su GitHub i commit fatti |
+     | `git pull --ff-only origin master` | prende da GitHub le novità fatte altrove (per esempio da Claude sul web) |
+     
    - **La storia.** `docs\lore\` è un repo git a parte, collegato al repo privato `ctrl-alt-revenge-storia`. A mano, sempre dalla cartella del repo, ma prima un controllo: `git -C docs\lore rev-parse --show-toplevel` deve finire con `docs/lore`. Se finisce con `ctrlaltrevenge`, il repo della storia su questo PC non c'è: non andare avanti, perché i comandi qui sotto agirebbero sul repo pubblico, e chiedi a Claude.
 
      | Comando | A cosa serve |

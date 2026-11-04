@@ -2,21 +2,18 @@
 # inglese in en/, con la pagina 404) e la demo web del gioco in gioca/. La demo si esporta con
 # Godot 4.7.2 (preset "Web" di game/export_presets.cfg, senza thread: GitHub Pages non manda le
 # intestazioni COOP/COEP) con lo stesso script che si usa in locale, tools/site/export_web.sh.
-# La musica non è nel repo: la demo parte muta, senza errori.
+# La musica non è nel repo: si scarica dagli allegati della release "musica-demo". Se la release
+# manca, la demo esce muta, senza errori.
 #
-# Prima della prima pubblicazione GitHub Pages va attivato con la sorgente "GitHub Actions", e il
-# ramo rewrite-godot va ammesso nell'ambiente github-pages (di solito può pubblicare solo il ramo
-# predefinito, master).
-#
-# Si costruisce dai push su rewrite-godot e su master, ma si pubblica solo da rewrite-godot (vedi il
-# lavoro deploy): così i due rami non si riscrivono il sito a vicenda. Quando i rami si uniranno, lì
-# rewrite-godot diventerà master.
+# GitHub Pages è attivo con la sorgente "GitHub Actions", e l'ambiente github-pages ammette solo il
+# ramo master. Si costruisce e si pubblica dai push su master (il prototipo Pygame di prima è nel
+# ramo legacy-pygame).
 
 name: Sito
 
 on:
   push:
-    branches: [rewrite-godot, master]
+    branches: [master]
     paths:
       - "site/**"
       - "tools/site/**"
@@ -160,8 +157,8 @@ jobs:
   deploy:
     name: Pubblica su GitHub Pages
     needs: build
-    # Pubblica un ramo solo: oggi rewrite-godot (master ha ancora il prototipo Pygame).
-    if: github.ref == 'refs/heads/rewrite-godot'
+    # Pubblica solo da master (un lancio a mano da un altro ramo costruisce soltanto).
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     # Solo qui la scrittura su Pages; id-token serve a deploy-pages per farsi riconoscere da GitHub.
