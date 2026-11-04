@@ -1,0 +1,358 @@
+{
+  "nota": [
+    "Manifesto del laboratorio di CTRL+ALT REVENGE: tutto ciò che tools/setup/prepara_laboratorio.ps1 scarica, con versioni, URL ufficiali e hash.",
+    "Gli hash degli archivi coincidono con i checksum ufficiali (SHA512-SUMS.txt di Godot, file .sha256 di Blender, di gyan.dev e di uv); quelli dei pacchetti Python sono gli sha256 pubblicati da PyPI. Verificati il 2026-11-04 sul PC di lavoro.",
+    "file_installati: sha256 dei file estratti, uguali a quelli del laboratorio del PC di lavoro. Servono a capire se uno strumento è già a posto.",
+    "Per cambiare una versione si aggiornano insieme URL, byte, hash e file_installati, ricontrollati sul checksum ufficiale."
+  ],
+  "formato": 1,
+  "verificato": "2026-11-04",
+  "laboratorio": {
+    "variabile": "CAR_LAB",
+    "predefinito": "ctrlaltrevenge-lab",
+    "nota": "Cartella dentro %USERPROFILE%, fuori da OneDrive. Il gioco cerca la musica solo in %USERPROFILE%\\ctrlaltrevenge-lab\\music: meglio non spostarla.",
+    "spazio_libero_minimo_gb": 8
+  },
+  "prerequisiti": {
+    "git": {
+      "nome": "Git for Windows, con Git Bash",
+      "versione_minima": "2.40",
+      "winget": "Git.Git",
+      "winget_argomenti": [
+        "--scope",
+        "user"
+      ],
+      "pagina": "https://gitforwindows.org/"
+    },
+    "python": {
+      "nome": "Python 3.14 con il Python install manager (comando py)",
+      "versione": "3.14",
+      "versione_di_riferimento": "3.14.4",
+      "winget": "Python.PythonInstallManager",
+      "installa_runtime": [
+        "install",
+        "3.14"
+      ],
+      "pagina": "https://www.python.org/downloads/windows/"
+    },
+    "uv": {
+      "nome": "uv di Astral",
+      "versione": "0.11.6",
+      "winget": "astral-sh.uv",
+      "pagina": "https://docs.astral.sh/uv/",
+      "cartella_di_riserva": "tools/uv-0.11.6",
+      "download": {
+        "url": "https://github.com/astral-sh/uv/releases/download/0.11.6/uv-x86_64-pc-windows-msvc.zip",
+        "file": "uv-x86_64-pc-windows-msvc.zip",
+        "byte": 23498773,
+        "algoritmo": "SHA256",
+        "hash": "99aa60edd017a256dbf378f372d1cff3292dbc6696e0ea01716d9158d773ab77",
+        "checksum_ufficiale": {
+          "url": "https://github.com/astral-sh/uv/releases/download/0.11.6/uv-x86_64-pc-windows-msvc.zip.sha256",
+          "file": "uv-x86_64-pc-windows-msvc.zip.sha256"
+        }
+      },
+      "radice_zip": "",
+      "file_installati": {
+        "uv.exe": "6eb0e7a7bc0a84c3158120d36046b48c30a29e109f718c0d25fee0701a9fc84c"
+      }
+    }
+  },
+  "strumenti": [
+    {
+      "id": "godot",
+      "nome": "Godot 4.7.2 stable, win64 (editor ed eseguibile con la console)",
+      "versione": "4.7.2",
+      "licenza": "MIT",
+      "cartella": "tools/godot-4.7.2",
+      "download": {
+        "url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_win64.exe.zip",
+        "file": "Godot_v4.7.2-stable_win64.exe.zip",
+        "byte": 86013866,
+        "algoritmo": "SHA512",
+        "hash": "83decd58fdf67b9d657958a1ae6bf1929c20785315a81effe245874cdc57acb709bf868e00778a96984338c1b29dafdb453c6847747694621c6ecf5da2259993",
+        "checksum_ufficiale": {
+          "url": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/SHA512-SUMS.txt",
+          "file": "SHA512-SUMS.txt"
+        }
+      },
+      "radice_zip": "",
+      "eseguibile": "Godot_v4.7.2-stable_win64.exe",
+      "eseguibile_console": "Godot_v4.7.2-stable_win64_console.exe",
+      "file_installati": {
+        "Godot_v4.7.2-stable_win64.exe": "ab1824f85bfd8e0e4128182c000c4003a3e042245b2967848d089b2a04b22424",
+        "Godot_v4.7.2-stable_win64_console.exe": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643"
+      },
+      "file_vuoti": [
+        "_sc_"
+      ],
+      "nota_file_vuoti": "Il file _sc_ accanto all'eseguibile mette Godot in modalità autonoma: le impostazioni dell'editor stanno in editor_data/, non in %APPDATA%.",
+      "copia_checksum": true,
+      "controllo_versione": {
+        "eseguibile": "Godot_v4.7.2-stable_win64_console.exe",
+        "argomenti": [
+          "--version"
+        ],
+        "atteso": "4.7.2.stable.official"
+      }
+    },
+    {
+      "id": "blender",
+      "nome": "Blender 4.5.15 LTS portatile, windows-x64",
+      "versione": "4.5.15",
+      "licenza": "GPL-3.0-or-later",
+      "cartella": "tools/blender-4.5.15",
+      "download": {
+        "url": "https://download.blender.org/release/Blender4.5/blender-4.5.15-windows-x64.zip",
+        "file": "blender-4.5.15-windows-x64.zip",
+        "byte": 398649826,
+        "algoritmo": "SHA256",
+        "hash": "52dd02fd74877fa08e74b67d7854cf32468a232c02aaa19b6844c91285574f8d",
+        "checksum_ufficiale": {
+          "url": "https://download.blender.org/release/Blender4.5/blender-4.5.15.sha256",
+          "file": "blender-4.5.15.sha256"
+        }
+      },
+      "radice_zip": "blender-4.5.15-windows-x64",
+      "file_installati": {
+        "blender.exe": "935e4bed28e51d08b8e1fbcc31dcccc000cc1c3dd065d82dcb1da813e75db795"
+      },
+      "controllo_versione": {
+        "eseguibile": "blender.exe",
+        "argomenti": [
+          "--version"
+        ],
+        "atteso": "Blender 4.5.15"
+      }
+    },
+    {
+      "id": "ffmpeg",
+      "nome": "FFmpeg 9.0.2 essentials, build statica win64 di gyan.dev",
+      "versione": "9.0.2",
+      "licenza": "GPL-3.0",
+      "cartella": "tools/ffmpeg",
+      "download": {
+        "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+        "url_di_riserva": "https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-essentials_build.zip",
+        "file": "ffmpeg-9.0.2-essentials_build.zip",
+        "byte": 114768076,
+        "algoritmo": "SHA256",
+        "hash": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+        "checksum_ufficiale": {
+          "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip.sha256",
+          "file": "ffmpeg-9.0.2-essentials_build.zip.sha256"
+        }
+      },
+      "radice_zip": "ffmpeg-9.0.2-essentials_build",
+      "estrai": [
+        "bin/ffmpeg.exe",
+        "bin/ffprobe.exe",
+        "LICENSE",
+        "README.txt"
+      ],
+      "file_installati": {
+        "bin/ffmpeg.exe": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec",
+        "bin/ffprobe.exe": "f0d36ecbbdd3bcfac3efa078c96c7271c2e68b3810595552ac3b7f17e9a65c52",
+        "LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "README.txt": "0342de6bb39dd421cbec2c00d89ad274b640d75ad3f2cab09ffd647ce2d8f949"
+      },
+      "controllo_versione": {
+        "eseguibile": "bin/ffmpeg.exe",
+        "argomenti": [
+          "-hide_banner",
+          "-version"
+        ],
+        "atteso": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev"
+      }
+    }
+  ],
+  "python": {
+    "nota": "Pacchetti installati con uv pip install --require-hashes --only-binary :all: (solo wheel per CPython 3.14, Windows x64). Versioni del laboratorio del PC di lavoro, sha256 pubblicati da PyPI.",
+    "venv": {
+      "nome": "venv del laboratorio (Pillow, NumPy, SciPy per le pipeline; sempre con python -I)",
+      "cartella": "venv",
+      "pacchetti": [
+        {"nome": "numpy", "versione": "2.5.4", "file": "numpy-2.5.4-cp314-cp314-win_amd64.whl", "sha256": "2ca144f15135b6212a5c47b1e2aeca6e412f102f95a2d5d88d8aec77eb255de3"},
+        {"nome": "pillow", "versione": "13.0.0", "file": "pillow-13.0.0-cp314-cp314-win_amd64.whl", "sha256": "f7cbb7a64e7ec664775195e4f81923bc8a93d9451b963f844e59118f63147a7a"},
+        {"nome": "scipy", "versione": "1.18.1", "file": "scipy-1.18.1-cp314-cp314-win_amd64.whl", "sha256": "78a0d7c918e74a232394117160e7e3db503377572a45bcef8826e4ab8a35feba"}
+      ]
+    },
+    "pymusiclooper": {
+      "nome": "PyMusicLooper 3.6.0 (punti di loop della musica)",
+      "versione": "3.6.0",
+      "licenza": "MIT",
+      "cartella": "tools/pymusiclooper",
+      "ambiente": "venv",
+      "ambiente_vecchio": "tools/pymusiclooper",
+      "nota_ambiente_vecchio": "Sul PC di lavoro è installato con uv tool install pymusiclooper==3.6.0 --python 3.14 e l'ambiente sta in tools/pymusiclooper/tools/pymusiclooper: va bene anche quello.",
+      "eseguibile": "bin/pymusiclooper.exe",
+      "eseguibile_nell_ambiente": "Scripts/pymusiclooper.exe",
+      "pacchetti": [
+        {"nome": "audioop-lts", "versione": "0.2.2", "file": "audioop_lts-0.2.2-cp313-abi3-win_amd64.whl", "sha256": "a2c2a947fae7d1062ef08c4e369e0ba2086049a5e598fda41122535557012e9e"},
+        {"nome": "audioread", "versione": "3.1.0", "file": "audioread-3.1.0-py3-none-any.whl", "sha256": "b30d1df6c5d3de5dcef0fb0e256f6ea17bdcf5f979408df0297d8a408e2971b4"},
+        {"nome": "certifi", "versione": "2026.10.23", "file": "certifi-2026.10.23-py3-none-any.whl", "sha256": "e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1"},
+        {"nome": "cffi", "versione": "2.1.1", "file": "cffi-2.1.1-cp314-cp314-win_amd64.whl", "sha256": "3222ba5d678f80a030e6afbcc33dc1ae5cb45facabb61cee2c7016b8432fde48"},
+        {"nome": "charset-normalizer", "versione": "3.5.2", "file": "charset_normalizer-3.5.2-cp314-cp314-win_amd64.whl", "sha256": "e4e81e09c1578b8df602e3db08b0b3ea0a6947ad612f52bf8dc5ea8d47691f0c"},
+        {"nome": "click", "versione": "8.5.0", "file": "click-8.5.0-py3-none-any.whl", "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"},
+        {"nome": "click-option-group", "versione": "0.5.9", "file": "click_option_group-0.5.9-py3-none-any.whl", "sha256": "ad2599248bd373e2e19bec5407967c3eec1d0d4fc4a5e77b08a0481e75991080"},
+        {"nome": "click-params", "versione": "0.5.0", "file": "click_params-0.5.0-py3-none-any.whl", "sha256": "bbb2efe44197ab896bffcb50f42f22240fb077e6756b568fbdab3e1700b859d6"},
+        {"nome": "cloudpickle", "versione": "3.1.2", "file": "cloudpickle-3.1.2-py3-none-any.whl", "sha256": "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a"},
+        {"nome": "colorama", "versione": "0.4.6", "file": "colorama-0.4.6-py2.py3-none-any.whl", "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
+        {"nome": "decorator", "versione": "5.3.1", "file": "decorator-5.3.1-py3-none-any.whl", "sha256": "f47fe6fdbd2edd623ecfe36875d37aba411624e2670dd395dddae1358689bb3c"},
+        {"nome": "deprecated", "versione": "1.3.1", "file": "deprecated-1.3.1-py2.py3-none-any.whl", "sha256": "597bfef186b6f60181535a29fbe44865ce137a5079f295b479886c82729d5f3f"},
+        {"nome": "idna", "versione": "3.20", "file": "idna-3.20-py3-none-any.whl", "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"},
+        {"nome": "joblib", "versione": "1.6.0", "file": "joblib-1.6.0-py3-none-any.whl", "sha256": "3dbbf9f6e4b592a2357b854608e980fe6390d131d7a82f011a377ef2ebef7aba"},
+        {"nome": "lazy-loader", "versione": "0.6", "file": "lazy_loader-0.6-py3-none-any.whl", "sha256": "77253be3391b06124a0e16105bd663b6c54470af1a9ca8e1cf026f38d58ed056"},
+        {"nome": "librosa", "versione": "0.11.0", "file": "librosa-0.11.0-py3-none-any.whl", "sha256": "0b6415c4fd68bff4c29288abe67c6d80b587e0e1e2cfb0aad23e4559504a7fa1"},
+        {"nome": "llvmlite", "versione": "0.50.0", "file": "llvmlite-0.50.0-cp314-cp314-win_amd64.whl", "sha256": "7ae211012c6849528a5f7cd17a78d8b2421a2813c7b4184d6c0b2ffa89a7d296"},
+        {"nome": "markdown-it-py", "versione": "4.2.0", "file": "markdown_it_py-4.2.0-py3-none-any.whl", "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"},
+        {"nome": "mdurl", "versione": "0.1.2", "file": "mdurl-0.1.2-py3-none-any.whl", "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
+        {"nome": "msgpack", "versione": "1.2.4", "file": "msgpack-1.2.4-cp314-cp314-win_amd64.whl", "sha256": "80f5d4fda1ba373d95933f98e6c1d18247feffac839fda3930bdd85e6561bb5f"},
+        {"nome": "narwhals", "versione": "2.28.0", "file": "narwhals-2.28.0-py3-none-any.whl", "sha256": "1f69d6385ec30e2fa6e1fdeb37c562ecabd0f713f6f3e3b58a668c5c9df9567f"},
+        {"nome": "numba", "versione": "0.68.1", "file": "numba-0.68.1-cp314-cp314-win_amd64.whl", "sha256": "5d4bd6ff1923d0b32a2208eaf3e1940f4548a13fdba8bd1ee7893b8f4b8f55f8"},
+        {"nome": "numpy", "versione": "2.5.4", "file": "numpy-2.5.4-cp314-cp314-win_amd64.whl", "sha256": "2ca144f15135b6212a5c47b1e2aeca6e412f102f95a2d5d88d8aec77eb255de3"},
+        {"nome": "packaging", "versione": "26.3", "file": "packaging-26.3-py3-none-any.whl", "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"},
+        {"nome": "platformdirs", "versione": "4.14.3", "file": "platformdirs-4.14.3-py3-none-any.whl", "sha256": "cba2d05fe5e18b26b1fa6f376b8e6234c012abe1f8696c486fface7d0054e931"},
+        {"nome": "pooch", "versione": "1.9.0", "file": "pooch-1.9.0-py3-none-any.whl", "sha256": "f265597baa9f760d25ceb29d0beb8186c243d6607b0f60b83ecf14078dbc703b"},
+        {"nome": "pycparser", "versione": "3.12", "file": "pycparser-3.12-py3-none-any.whl", "sha256": "a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e"},
+        {"nome": "pygments", "versione": "2.21.0", "file": "pygments-2.21.0-py3-none-any.whl", "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"},
+        {"nome": "pymusiclooper", "versione": "3.6.0", "file": "pymusiclooper-3.6.0-py3-none-any.whl", "sha256": "e40cd15a743cf4c9c901808f87ac2982aa68f3e0508e68f9ad4806800d0a834b"},
+        {"nome": "pytaglib", "versione": "3.2.0", "file": "pytaglib-3.2.0-cp314-cp314-win_amd64.whl", "sha256": "550e444771fb4876a6ce002163d381b071edd7c6f64723a39aa13fecdb7b854b"},
+        {"nome": "requests", "versione": "2.34.2", "file": "requests-2.34.2-py3-none-any.whl", "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"},
+        {"nome": "rich", "versione": "15.0.0", "file": "rich-15.0.0-py3-none-any.whl", "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"},
+        {"nome": "rich-click", "versione": "1.9.9", "file": "rich_click-1.9.9-py3-none-any.whl", "sha256": "365e7a9d0adb42e41ea832a0a12e02c44c079a26536dee688125eb9814f97274"},
+        {"nome": "scikit-learn", "versione": "1.9.1", "file": "scikit_learn-1.9.1-cp314-cp314-win_amd64.whl", "sha256": "ca9051447455dae341d4d591eece7deb2d8e3d1020298fc87a81fc51e4da8f53"},
+        {"nome": "scipy", "versione": "1.18.1", "file": "scipy-1.18.1-cp314-cp314-win_amd64.whl", "sha256": "78a0d7c918e74a232394117160e7e3db503377572a45bcef8826e4ab8a35feba"},
+        {"nome": "sounddevice", "versione": "0.5.6", "file": "sounddevice-0.5.6-py3-none-win_amd64.whl", "sha256": "7f4162f514f007b0bf25a3ccfed3f1705bc2ec311888a90232729eec4f57a4f4"},
+        {"nome": "soundfile", "versione": "0.14.0", "file": "soundfile-0.14.0-py2.py3-none-win_amd64.whl", "sha256": "299491d3499460fb1b74bb4bd78b57ffc2d243a5fafa7b6ec1b264875c78453e"},
+        {"nome": "soxr", "versione": "1.1.0", "file": "soxr-1.1.0-cp312-abi3-win_amd64.whl", "sha256": "6ae2a174bffea94e8ead857dad85999d3f49f091774dbad5b046c0417d7092f4"},
+        {"nome": "standard-aifc", "versione": "3.13.0", "file": "standard_aifc-3.13.0-py3-none-any.whl", "sha256": "f7ae09cc57de1224a0dd8e3eb8f73830be7c3d0bc485de4c1f82b4a7f645ac66"},
+        {"nome": "standard-chunk", "versione": "3.13.0", "file": "standard_chunk-3.13.0-py3-none-any.whl", "sha256": "17880a26c285189c644bd5bd8f8ed2bdb795d216e3293e6dbe55bbd848e2982c"},
+        {"nome": "standard-sunau", "versione": "3.13.0", "file": "standard_sunau-3.13.0-py3-none-any.whl", "sha256": "53af624a9529c41062f4c2fd33837f297f3baa196b0cfceffea6555654602622"},
+        {"nome": "threadpoolctl", "versione": "3.7.0", "file": "threadpoolctl-3.7.0-py3-none-any.whl", "sha256": "cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be"},
+        {"nome": "typing-extensions", "versione": "4.16.0", "file": "typing_extensions-4.16.0-py3-none-any.whl", "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"},
+        {"nome": "urllib3", "versione": "2.8.0", "file": "urllib3-2.8.0-py3-none-any.whl", "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"},
+        {"nome": "validators", "versione": "0.22.0", "file": "validators-0.22.0-py3-none-any.whl", "sha256": "61cf7d4a62bbae559f2e54aed3b000cea9ff3e2fdbe463f51179b92c58c9585a"},
+        {"nome": "wrapt", "versione": "2.5.2", "file": "wrapt-2.5.2-cp314-cp314-win_amd64.whl", "sha256": "fabc60720d1e4a36bbe8aaf1c32024f04c6674991313f5acaca5eeadb564c600"},
+        {"nome": "yt-dlp", "versione": "2026.10.26", "file": "yt_dlp-2026.10.26-py3-none-any.whl", "sha256": "a05c5b5d8562f7e8a62f5334348b406af4930d56d3a65f8021d14af0e22339ae"}
+      ]
+    }
+  },
+  "condiviso": {
+    "variabile": "CAR_CONDIVISO",
+    "nome_cartella": "ctrlaltrevenge-lab-condiviso",
+    "nota": "Cartella PRIVATA nel OneDrive di lavoro, sorella del repo. Mai nel repo, mai condivisa con altri, niente brani di Suno.",
+    "nota_copie": "Le copie, in tutte e due le direzioni, prendono solo i file più nuovi (robocopy /XO, anche con -Forza): un file non viene mai sostituito con uno più vecchio. prepara_laboratorio.ps1 mette prima da parte in <laboratorio>\\backup\\<data> i file del laboratorio che sta per sostituire.",
+    "inventario": "inventario.json",
+    "nel_laboratorio": [
+      {
+        "cartella": "sources",
+        "descrizione": "modelli e animazioni CC0 delle pipeline (Quaternius, Kenney, Warped City, Mesh2Motion, CMU, Rokoko, spike-out)"
+      },
+      {
+        "cartella": "music",
+        "descrizione": "musica segnaposto CC0: solo music.json, FONTI.md e i quattro OGG segnaposto (i brani veri, come quelli di Suno, non ci vanno)",
+        "regola": "musica",
+        "file_di_testo": [
+          "music.json",
+          "FONTI.md"
+        ],
+        "segnaposto_sha256": {
+          "title.ogg": "928e81ef21da9f73e80c92b4c08130b92d6859a9baf2088b551ed6d0a4db0073",
+          "stage1.ogg": "8c62ae5d2136ee155e3ed3149e32b51d4215eb4008858f429b54ef416a2f0e7e",
+          "stage1_arena.ogg": "ae81eaec950167649dacefc58e0550364a9bfb0c32d10c86afd6d46c6d507b03",
+          "clear.ogg": "b09e4a8daf60eb71fdf860797ac714c00891a70fa6258c3a3c31e533cad70ee8"
+        },
+        "nota_segnaposto": "sha256 dei brani segnaposto CC0 (Free VGMs di Safety Stoat Studios) preparati il 2026-11-03 con tools/audio/make_placeholder_music.py. Gli script copiano music solo se music.json elenca soltanto questi brani, ognuno con questo sha256, e se nella cartella non c'è nessun altro file (_work esclusa): altrimenti la trattano come privata e non la copiano. Se si rifà la musica segnaposto, si aggiornano qui gli hash.",
+        "escludi_cartelle": [
+          "_work"
+        ]
+      },
+      {
+        "cartella": "note-private",
+        "descrizione": "note private, fuori dal repo"
+      },
+      {
+        "cartella": "suno",
+        "descrizione": "solo i testi per Suno (PROMPT.md), mai i brani",
+        "solo_file": [
+          "*.md",
+          "*.txt"
+        ]
+      },
+      {
+        "cartella": "ricerca-2026-11-03",
+        "descrizione": "la ricerca del 3 novembre 2026: rapporti, licenze verificate e prove (le leggono tools/env/compose.py e tools/fxui/make_mockups.py)"
+      }
+    ],
+    "solo_condiviso": [
+      {
+        "cartella": "riferimenti-estetica",
+        "descrizione": "le due locandine di riferimento generate con ChatGPT",
+        "dal_repo": "docs/riferimenti-estetica",
+        "solo_file": [
+          "*.png",
+          "*.jpg",
+          "*.jpeg",
+          "*.webp"
+        ]
+      }
+    ],
+    "escludi_cartelle": [
+      ".godot",
+      "__pycache__",
+      ".git"
+    ],
+    "escludi_file": [
+      "desktop.ini",
+      "Thumbs.db",
+      "*.tmp",
+      "*.tmp_prepare",
+      "~$*"
+    ],
+    "skill": {
+      "cartella": "skills",
+      "variabile": "CAR_SKILLS_DIR",
+      "predefinito": ".claude/skills",
+      "fonte": "https://github.com/thedivergentai/Game-Dev-Agentic-Skills",
+      "commit": "db004d74c40686ca2f7a35fe067b119a9cda593e",
+      "licenza": "LGPL-3.0",
+      "file_obbligatori": [
+        "SKILL.md",
+        "FONTE.md",
+        "LICENSE"
+      ],
+      "nomi": [
+        "godot-genre-platformer",
+        "godot-characterbody-2d",
+        "godot-genre-fighting",
+        "godot-combat-system",
+        "godot-2d-animation",
+        "godot-dialogue-system"
+      ]
+    }
+  },
+  "verifica_finale": {
+    "progetto_predefinito": "game",
+    "nota": "Godot gira con APPDATA spostata in <laboratorio>\\logs\\verifica-<data>-appdata: così user:// della verifica (log, cache) non tocca i dati del gioco in %APPDATA%\\Godot\\app_userdata.",
+    "importazione": {
+      "argomenti": [
+        "--headless",
+        "--import"
+      ],
+      "timeout_s": 900,
+      "tentativi": 3,
+      "nota_tentativi": "Godot 4.7.2 a volte va in crash all'inizio della prima importazione (lo dice anche tools/site/export_web.sh): in quel caso si riprova, al massimo tre volte."
+    },
+    "test": {
+      "argomenti": [
+        "--headless",
+        "-s",
+        "res://tests/run_tests.gd"
+      ],
+      "timeout_s": 900,
+      "ultima_riga": "DONE"
+    },
+    "errori": "SCRIPT ERROR|Parse Error|^ERROR:"
+  }
+}

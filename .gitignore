@@ -10,6 +10,10 @@ export_credentials.cfg
 *.exe
 *.zip
 
+# --- storia privata: sta nel repo privato luigismith/ctrl-alt-revenge-storia ---
+/docs/lore/
+/docs/gameplay.md
+
 # --- asset privati: mai nel repo pubblico ---
 # le locandine di riferimento sono generate con ChatGPT: stanno solo in ctrlaltrevenge-lab-condiviso
 /docs/riferimenti-estetica/
