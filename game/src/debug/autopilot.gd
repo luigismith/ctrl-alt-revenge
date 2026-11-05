@@ -76,6 +76,9 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 	var g := level.player
 	if g.state == Fighter.State.GRAB:
 		return _in_grab(tick)
+	# Afferrato da un rider: si divincola premendo ATTACCO a ripetizione.
+	if g.state == Fighter.State.GRABBED:
+		return A if tick % 4 == 0 else 0
 	if _jump_kick > 0:
 		return _do_jump_kick()
 	var e := _target()

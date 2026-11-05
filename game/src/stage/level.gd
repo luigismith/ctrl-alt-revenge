@@ -83,6 +83,8 @@ var _wave_tick: int = 0
 var _pending: Array[Dictionary] = []
 
 var _uid: int = 0
+## Nemici creati per tipo: sceglie la variante di colore (solo disegno, fuori dall'hash).
+var _spawned: Dictionary[StringName, int] = {}
 var _attack_serial: int = 0
 var _freeze: int = 0
 var _slowmo: int = 0
@@ -288,8 +290,10 @@ func _spawn_player() -> void:
 
 ## Crea un nemico che entra da fuori schermo (side +1 da destra, -1 da sinistra).
 func spawn_thug(type_id: StringName, side: int, y: float, wave_id: String) -> Thug:
-	var t := Thug.new()
+	var t: Thug = Rider.new() if type_id == &"rider" else Thug.new()
 	t.setup_thug(type_id, self, _next_uid(), rng.randi())
+	t.set_palette_variant(_spawned.get(type_id, 0))
+	_spawned[type_id] = _spawned.get(type_id, 0) + 1
 	t.wave_id = wave_id
 	t.px = camera.x + VIEW_W + 28.0 if side > 0 else camera.x - 28.0
 	t.py = clampf(y, band_top, band_bottom)

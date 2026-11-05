@@ -19,6 +19,9 @@ extends Resource
 @export var ko_score: int = 500
 ## Larghezza dell'ombra in px.
 @export var shadow_width: int = 33
+## Varianti di colore (solo disegno): ogni voce è un dizionario "#colore dello sprite" → "#colore nuovo".
+## Due nemici dello stesso tipo nella stessa arena prendono varianti diverse, come in Streets of Rage.
+@export var palette_variants: Array = []
 @export_group("Intelligenza")
 ## Attacchi possibili, per id di AttackData, con il loro peso nella scelta.
 @export var attacks: PackedStringArray = []

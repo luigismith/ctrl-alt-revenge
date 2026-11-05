@@ -154,7 +154,12 @@ func _think_approach(p: Fighter) -> void:
 		return
 	# Chi ha il turno si avvicina con passo deciso: la camminata d'attesa era troppo lenta e
 	# allungava il turno (Luigi, 4 novembre 2026: nemici molto più aggressivi).
-	_walk_towards(tx, p.py, 0.625, APPROACH_SPEED)
+	_walk_towards(tx, p.py, 0.625, _approach_speed())
+
+
+## Passo di chi ha il turno (il rider arriva di corsa).
+func _approach_speed() -> float:
+	return APPROACH_SPEED
 
 
 ## Distanza a cui attaccare: la punta della hitbox poco dentro la hurtbox di GIG.

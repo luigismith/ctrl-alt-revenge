@@ -65,11 +65,12 @@ const PERSP := 240.0
 ## Posizione dell'arena rispetto al suo cartello ("f"): telecamera bloccata e punto d'ingresso.
 const ARENA_CAM_FROM_SIGN := -170
 const ARENA_TRIGGER_FROM_SIGN := -40
-## Gli Esattori dell'arena. Per ora punk e bruto dello slice, che diventeranno rider ed esattore di
-## professione (decisione 63) quando avranno l'intelligenza nuova.
+## Gli Esattori dell'arena (decisione 63): due rider, che arrivano in gruppo, e poi il bruto dello
+## slice, che diventerà l'esattore di professione quando avrà l'intelligenza nuova.
 const ARENA_SPAWNS := [
-	{"type": "thug_punk", "delay": 30, "side": 1, "y": 213},
-	{"type": "thug_bruiser", "delay": 210, "side": -1, "y": 243},
+	{"type": "rider", "delay": 30, "side": 1, "y": 205},
+	{"type": "rider", "delay": 55, "side": -1, "y": 240},
+	{"type": "thug_bruiser", "delay": 320, "side": 1, "y": 243},
 ]
 
 var grid: SolidGrid

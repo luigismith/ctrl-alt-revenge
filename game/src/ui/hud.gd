@@ -81,6 +81,28 @@ func _draw() -> void:
 		_bar(Rect2(eb[0], eb[1], eb[2], eb[3]), float(_target.hp) / _target.data.max_hp, _enemy_trail, "_enemy", Color8(222, 54, 52))
 	var sc := UiArt.layout("score_right", [378, 2])
 	UiFont.draw_text(self, Vector2(sc[0], sc[1]), "%06d" % Game.score, _gold, 1, 2)
+	if p is Gig:
+		_draw_pignoramento(p as Gig)
+
+
+## Il pignoramento del rider: DIVINCOLATI! sopra GIG afferrato, con le tacche delle pressioni,
+## e BRACCIO SOSPESO accanto alla barra della vita finché il braccio non torna (lampeggia
+## nell'ultimo secondo).
+func _draw_pignoramento(g: Gig) -> void:
+	var red := UiArt.color("accent_red", Color8(122, 23, 15))
+	if g.state == Fighter.State.GRABBED and g.grab_partner is Rider:
+		var sx := g.px - level.camera.x
+		var sy := g.py - 150.0
+		if (level.tick / 8) % 2 == 0:
+			UiFont.draw_text(self, Vector2(sx, sy), "DIVINCOLATI!", _gold, 1, 1, red)
+		var n := Gig.ESCAPE_PRESSES
+		var x0 := sx - n * 3 + 1
+		for i in n:
+			var on := i < g.escape_presses
+			draw_rect(Rect2(x0 + i * 6, sy + 12, 4, 4), _gold if on else Color(0.1, 0.06, 0.15, 0.8))
+	if g.arm_off > 0 and (g.arm_off > 60 or (g.arm_off / 6) % 2 == 0):
+		var gb := UiArt.layout("gig_bar", [46, 15, 104, 6])
+		UiFont.draw_text(self, Vector2(gb[0] + gb[2] + 8, gb[1] - 2), "BRACCIO SOSPESO", Color8(170, 170, 178), 1, 0, red)
 
 
 ## Barra della vita: fondo, scia del danno, vita, cornice (in quest'ordine, come da README).

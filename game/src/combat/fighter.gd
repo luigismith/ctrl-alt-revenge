@@ -114,9 +114,26 @@ func setup(fighter_data: FighterData, lvl: Level, id: int, fighter_team: Team) -
 ## simulazione non lo vede.
 const FLASH_SHADER := """shader_type canvas_item;
 uniform float flash = 0.0;
+// varianti di colore del nemico: i colori swap_from diventano swap_to
+const int SWAP_MAX = 8;
+uniform int swap_n = 0;
+uniform vec3 swap_from[SWAP_MAX];
+uniform vec3 swap_to[SWAP_MAX];
+// braccio cyber sospeso (pignoramento del rider): i toni cyan delle luci del braccio e dell'occhio diventano grigi
+uniform float arm_off = 0.0;
 // colore del contorno degli sprite (palette.outline nei JSON dei personaggi, #140e1e)
 const vec3 OUTLINE = vec3(0.0784, 0.0549, 0.1176);
 void fragment() {
+	for (int i = 0; i < SWAP_MAX; i++) {
+		if (i < swap_n && distance(COLOR.rgb, swap_from[i]) < 0.02) {
+			COLOR.rgb = swap_to[i];
+		}
+	}
+	if (arm_off > 0.5) {
+		vec3 c = COLOR.rgb;
+		float cyan = step(0.4, c.b - c.r) * step(0.3, c.g - c.r);
+		COLOR.rgb = mix(c, vec3(dot(c, vec3(0.299, 0.587, 0.114)) * 0.7), cyan);
+	}
 	COLOR.rgb = mix(COLOR.rgb, vec3(1.0), flash);
 }
 void light() {
@@ -556,7 +573,10 @@ func has_armor() -> bool:
 
 
 func receive_hit(attacker: Entity, atk: AttackData, info: HitInfo) -> void:
-	hp = maxi(hp - atk.damage, 0)
+	var dmg := atk.damage
+	if attacker is Fighter and (attacker as Fighter).damage_scale() != 1.0:
+		dmg = maxi(1, int(roundf(dmg * (attacker as Fighter).damage_scale())))
+	hp = maxi(hp - dmg, 0)
 	flash = FLASH_TICKS
 	hitstop = atk.hitstop_victim
 	_shake_ticks = hitstop
@@ -710,6 +730,35 @@ func shadow_width() -> int:
 	return 0 if removed else data.shadow_width
 
 
+## Sceglie la variante di colore `i` dei dati (se ce ne sono): cambia solo il disegno.
+func set_palette_variant(i: int) -> void:
+	if data.palette_variants.is_empty():
+		return
+	var v: Dictionary = data.palette_variants[i % data.palette_variants.size()]
+	var from := PackedVector3Array()
+	var to := PackedVector3Array()
+	for k: String in v:
+		var a := Color.html(k)
+		var b := Color.html(str(v[k]))
+		from.append(Vector3(a.r, a.g, a.b))
+		to.append(Vector3(b.r, b.g, b.b))
+	from.resize(8)
+	to.resize(8)
+	_mat.set_shader_parameter(&"swap_n", mini(v.size(), 8))
+	_mat.set_shader_parameter(&"swap_from", from)
+	_mat.set_shader_parameter(&"swap_to", to)
+
+
+## Moltiplicatore del danno dei propri colpi (GIG col braccio sospeso: 0,5).
+func damage_scale() -> float:
+	return 1.0
+
+
+## Disegno: le luci cyan del braccio spente (braccio sospeso).
+func arm_greyed() -> bool:
+	return false
+
+
 # --- Disegno ---------------------------------------------------------------------------------
 
 func sync_visual() -> void:
@@ -736,6 +785,7 @@ func sync_visual() -> void:
 	# in quel momento si vedono tutti.
 	visible = not removed and not (blink and not level.ko_sequence_active())
 	_mat.set_shader_parameter(&"flash", 1.0 if _flash_shown() else 0.0)
+	_mat.set_shader_parameter(&"arm_off", 1.0 if arm_greyed() else 0.0)
 
 
 ## Lampo bianco. Nel congelamento del KO finale gli attori non avanzano e il lampo resterebbe

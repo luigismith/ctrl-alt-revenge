@@ -26,6 +26,10 @@ const THROW_RELEASE_DX := 22.5
 const RESPAWN_HEIGHT := 187.5
 const RESPAWN_INVULN := 120
 const DEAD_BLINK_TICKS := 60
+## Pignoramento del rider: pressioni per divincolarsi e durata del braccio sospeso (4 s).
+const ESCAPE_PRESSES := 8
+const ARM_OFF_TICKS := 240
+const ESCAPE_INVULN := 24
 
 const CHAIN: Array[StringName] = [&"gig_jab1", &"gig_jab2", &"gig_hook", &"gig_kick"]
 const ATTACK_IDS: Array[StringName] = [&"gig_jab1", &"gig_jab2", &"gig_hook", &"gig_kick", &"gig_air_kick",
@@ -42,6 +46,10 @@ var grab_action: GrabAction = GrabAction.HOLD
 var grab_action_tick: int = 0
 var air_attacked: bool = false
 var attacks: Dictionary[StringName, AttackData] = {}
+## Pressioni contate mentre un rider tenta il pignoramento.
+var escape_presses: int = 0
+## Tick rimasti di braccio sospeso: niente prese, niente calcio in salto, pugni a metà danno.
+var arm_off: int = 0
 
 var _run_dir: int = 0
 var _last_tap_dir: int = 0
@@ -65,6 +73,11 @@ func setup_gig(lvl: Level, id: int) -> void:
 ## così una pressione non va persa: resta nel buffer per 8 tick di GIG.
 func feed_input(frame: InputFrame, world_tick: int) -> void:
 	input = frame
+	# Afferrato da un rider ogni tasto premuto conta per divincolarsi, e non resta nel buffer.
+	if state == State.GRABBED:
+		if frame.pressed != 0:
+			escape_presses += 1
+		return
 	if frame.was_pressed(InputFrame.ATTACK):
 		buf_attack = BUFFER_TICKS
 	if frame.was_pressed(InputFrame.JUMP):
@@ -84,6 +97,8 @@ func _think() -> void:
 			combo_step = 0
 	if _grab_cooldown > 0:
 		_grab_cooldown -= 1
+	if arm_off > 0:
+		arm_off -= 1
 	if input.axis_x() != _run_dir:
 		_run_dir = 0
 	match state:
@@ -95,6 +110,9 @@ func _think() -> void:
 			_think_attack()
 		State.GRAB:
 			_think_grab()
+		State.GRABBED:
+			# Si dimena: alterna i due fotogrammi del colpo subito. La posizione la tiene chi afferra.
+			anim.show_frame(&"hurt_high", (state_ticks / 6) % 2)
 	if buf_attack > 0:
 		buf_attack -= 1
 	if buf_jump > 0:
@@ -125,7 +143,7 @@ func _think_free() -> void:
 	# Dopo il cambio di stato (che azzera le velocità entrando in IDLE).
 	vx = ax * (data.run_speed if running else data.walk_speed.x)
 	vy = ay * data.walk_speed.y
-	if ax != 0 and _grab_cooldown == 0:
+	if ax != 0 and _grab_cooldown == 0 and arm_off == 0:
 		var target := level.find_grab_target(self)
 		if target != null:
 			_start_grab(target)
@@ -147,7 +165,7 @@ func _start_jump() -> void:
 
 
 func _think_air() -> void:
-	if buf_attack > 0 and not air_attacked:
+	if buf_attack > 0 and not air_attacked and arm_off == 0:
 		buf_attack = 0
 		air_attacked = true
 		start_attack(attacks[&"gig_air_kick"], level.next_attack_serial())
@@ -307,7 +325,7 @@ func _release_throw(v: Fighter) -> void:
 	if _throw_back:
 		_throw_back = false
 		facing = -facing
-	var e := anim.frame().victim_entry(v.data.id)
+	var e := anim.frame().victim_entry(v.data.sprite_id)
 	var release_dx := float(e[0]) if not e.is_empty() else THROW_RELEASE_DX
 	grab_partner = null
 	v.grab_partner = null
@@ -346,7 +364,7 @@ func _leave_grab() -> void:
 func _place_victim() -> void:
 	var v := grab_partner
 	var f := anim.frame()
-	var e := f.victim_entry(v.data.id)
+	var e := f.victim_entry(v.data.sprite_id)
 	var dx := 23
 	var dy := 0
 	var vanim: StringName = &"grabbed"
@@ -385,6 +403,45 @@ func _place_victim() -> void:
 func _enter_hurt(atk: AttackData, info: HitInfo) -> void:
 	buf_attack = 0
 	super._enter_hurt(atk, info)
+
+
+# --- Pignoramento del rider -------------------------------------------------------------------
+
+func _on_grabbed() -> void:
+	escape_presses = 0
+	buf_attack = 0
+	buf_jump = 0
+	combo_step = 0
+	combo_timer = 0
+
+
+## Divincolato: torna libero con un attimo di invulnerabilità.
+func escape_from_grab() -> void:
+	_release_from_grab()
+	escape_presses = 0
+	invuln = maxi(invuln, ESCAPE_INVULN)
+	_sfx(&"whoosh_light")
+
+
+## Pignoramento riuscito: poco danno, un colpo all'indietro e il braccio sospeso.
+func suspend_arm(damage: int) -> void:
+	_release_from_grab()
+	escape_presses = 0
+	hp = maxi(hp - damage, 1)
+	flash = FLASH_TICKS
+	arm_off = ARM_OFF_TICKS
+	set_state(State.HURT, &"hurt_low")
+	stun = 16
+	_sfx(&"hit_light")
+
+
+## Col braccio sospeso i pugni fanno metà danno.
+func damage_scale() -> float:
+	return 0.5 if arm_off > 0 else 1.0
+
+
+func arm_greyed() -> bool:
+	return arm_off > 0
 
 
 ## Una combo interrotta da un colpo riparte da jab1.
@@ -430,6 +487,8 @@ func respawn() -> void:
 	vh = 0.0
 	grav = data.gravity
 	invuln = RESPAWN_INVULN
+	arm_off = 0
+	escape_presses = 0
 	combo_step = 0
 	combo_timer = 0
 	set_state(State.JUMP, &"jump_fall")

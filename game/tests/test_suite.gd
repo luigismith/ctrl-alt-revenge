@@ -50,6 +50,7 @@ func run(tree_root: Node) -> bool:
 	_test_replays()
 	_test_platform()
 	_test_room_arena()
+	_test_rider()
 	return failures == 0
 
 
@@ -1362,3 +1363,118 @@ func _test_room_arena() -> void:
 	var b := _arena_run(4000)
 	check(a["close"] == b["close"] and a["hash"] == b["hash"], "Arena: due giri uguali finiscono allo stesso tick e nello stesso stato",
 		"%d / %d" % [a["close"], b["close"]])
+
+
+# --- Il rider (decisione 63) -------------------------------------------------------------------------
+
+## Un rider già in campo accanto a GIG, fermo, pronto a tentare il pignoramento.
+func _rider_grab_setup(input_fn: Callable) -> Array:
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(input_fn), 375.0, 225.0)
+	var g := lvl.player
+	var r := lvl.spawn_thug(&"rider", 1, 225.0, "") as Rider
+	r.px = g.px + Rider.GRAB_DX
+	r.py = g.py
+	r.set_state(Fighter.State.IDLE)
+	g.facing = 1
+	lvl.director.request(r, lvl.tick)
+	r._start_pignora(g, 1)
+	return [lvl, g, r]
+
+
+func _test_rider() -> void:
+	# Si divincola: premendo a ripetizione GIG si libera prima che il pignoramento riesca.
+	var s := _rider_grab_setup(func(t: int) -> int: return InputFrame.ATTACK if t % 4 == 0 else 0)
+	var lvl: Level = s[0]
+	var g: Gig = s[1]
+	var r: Rider = s[2]
+	check(g.state == Fighter.State.GRABBED and r.state == Fighter.State.GRAB, "Rider: il pignoramento afferra GIG")
+	var freed := -1
+	for i in Rider.PIGNORA_TICKS + 10:
+		lvl.step()
+		if g.state != Fighter.State.GRABBED:
+			freed = i
+			break
+	check(freed >= 0 and freed < Rider.PIGNORA_TICKS and g.arm_off == 0 and g.invuln > 0 and r.state == Fighter.State.HURT,
+		"Rider: con %d pressioni GIG si divincola, e il rider barcolla" % Gig.ESCAPE_PRESSES, "tick %d, braccio %d, stato del rider %d" % [freed, g.arm_off, r.state])
+	check(not lvl.director.is_holder(r) and r.retreat > 0, "Rider: dopo il pignoramento lascia il turno e scappa")
+	Harness.free_level(lvl)
+
+	# Non si divincola: il braccio resta sospeso, con poco danno.
+	s = _rider_grab_setup(func(_t: int) -> int: return 0)
+	lvl = s[0]
+	g = s[1]
+	r = s[2]
+	for i in Rider.PIGNORA_TICKS + 2:
+		lvl.step()
+	check(g.state != Fighter.State.GRABBED and g.arm_off > Gig.ARM_OFF_TICKS - 5 and g.hp == g.data.max_hp - Rider.PIGNORA_DAMAGE,
+		"Rider: senza divincolarsi il braccio resta sospeso per %d tick" % Gig.ARM_OFF_TICKS, "braccio %d, vita %d" % [g.arm_off, g.hp])
+	Harness.free_level(lvl)
+
+	# Braccio sospeso: pugni a metà danno, niente presa, niente calcio in salto; poi torna.
+	var keys := [0]
+	lvl = Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return keys[0]), 375.0, 225.0)
+	g = lvl.player
+	var t := lvl.spawn_thug(&"thug_punk", 1, 225.0, "")
+	t.ai_enabled = false
+	t.px = g.px + 30.0
+	t.py = g.py
+	t.set_state(Fighter.State.IDLE)
+	g.facing = 1
+	g.arm_off = 200
+	keys[0] = InputFrame.ATTACK
+	var hp0 := t.hp
+	for i in 30:
+		lvl.step()
+		keys[0] = 0
+		if t.hp < hp0:
+			break
+	var jab := load("res://data/attacks/gig_jab1.tres") as AttackData
+	check(hp0 - t.hp == maxi(1, roundi(jab.damage * 0.5)), "Braccio sospeso: il jab fa metà danno", "%d su %d" % [hp0 - t.hp, jab.damage])
+	for i in 40:
+		lvl.step()
+	t.px = g.px + 20.0
+	t.py = g.py
+	t.set_state(Fighter.State.IDLE)
+	keys[0] = InputFrame.RIGHT
+	var grabbed := false
+	for i in 30:
+		lvl.step()
+		grabbed = grabbed or g.state == Fighter.State.GRAB
+	check(not grabbed, "Braccio sospeso: camminando contro un nemico non lo si afferra")
+	keys[0] = 0
+	t.px = g.px + 200.0
+	for i in 10:
+		lvl.step()
+	keys[0] = InputFrame.JUMP
+	lvl.step()
+	keys[0] = 0
+	for i in 8:
+		lvl.step()
+	var in_air := g.state == Fighter.State.JUMP
+	keys[0] = InputFrame.ATTACK
+	var kicked := false
+	for i in 30:
+		lvl.step()
+		keys[0] = 0
+		kicked = kicked or g.state == Fighter.State.ATTACK
+	check(in_air and not kicked, "Braccio sospeso: niente calcio in salto", "in aria %s, calcio %s" % [in_air, kicked])
+	for i in 200:
+		lvl.step()
+	check(g.arm_off == 0, "Braccio sospeso: dopo %d tick il braccio torna" % Gig.ARM_OFF_TICKS, str(g.arm_off))
+	Harness.free_level(lvl)
+
+	# Colpisce e scappa: dopo il suo attacco il rider si allontana di corsa.
+	lvl = Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
+	g = lvl.player
+	r = lvl.spawn_thug(&"rider", 1, 225.0, "") as Rider
+	var attacked := -1
+	var far := false
+	for i in 900:
+		lvl.step()
+		if attacked < 0 and (r.state == Fighter.State.ATTACK or r.state == Fighter.State.GRAB):
+			attacked = i
+		if attacked >= 0 and r.retreat > 0 and absf(r.px - g.px) > 90.0:
+			far = true
+			break
+	check(attacked >= 0 and far, "Rider: colpisce e poi scappa oltre 90 px", "attacco al tick %d, distanza %.0f" % [attacked, absf(r.px - g.px)])
+	Harness.free_level(lvl)
