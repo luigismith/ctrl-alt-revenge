@@ -30,7 +30,7 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
 - **Budget:** costo zero. Sono ammessi strumenti gratuiti anche solo per uso non commerciale; di ognuno si annotano la licenza e cosa servirebbe per vendere il gioco.
 - **Persone reali:** i nomi veri entrano nel gioco e nei file pubblici solo con il consenso.
   - Il MiniBar di Ignazio, il bar dei Tamburi, ce l'ha (Luigi, 4 novembre 2026).
-  - Per il writer che ispira Totò è ancora in attesa: finché non arriva, si scrive solo "Totò".
+  - Il writer che ispira Totò l'ha dato (Luigi, 5 novembre 2026): nome e tag vanno nei crediti e nel sito come omaggio, i murales hanno il suo stile. Nel gioco Totò resta un personaggio inventato e firma solo "Totò".
 - **Coerenza, prima di tutto.** Luigi: "mantenere riferimenti alla città e alle ambientazioni, deve essere tutto coerente con la storia e col passare degli anni".
   - Ogni livello, sfondo, insegna, testo, oggetto e suono deve essere coerente con Taranto e i suoi luoghi veri, con la storia e con le sue epoche (le date sono nella cronologia). Deve esserlo anche con età, date, ore, meteo e luna di ogni scena.
   - I riferimenti sono `docs/lore/cronologia.md` e `docs/lore/ricerca-taranto.md`. Prima di disegnare o scrivere qualcosa di nuovo, controllali.

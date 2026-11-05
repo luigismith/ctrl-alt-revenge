@@ -90,4 +90,4 @@ Difficoltà, prove su più PC e con più controller, build per Windows, pagina d
 Non bloccano la tappa 1, ma vanno prese prima di disegnare i capitoli in cui servono:
 - l'aspetto di alcuni personaggi secondari, per i murales;
 - alcuni nomi del mondo di SIDERA, come i piani di abbonamento del braccio;
-- il consenso del writer che ispira Totò, che serve prima di usarne il nome o lo stile.
+- nome e tag del writer che ispira Totò, per i crediti e il sito: il consenso c'è.

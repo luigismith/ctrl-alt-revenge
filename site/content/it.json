@@ -75,7 +75,7 @@
   "titolo": "Sotto la nube rossa",
   "sotto": "Taranto, 2087: il mondo del gioco",
   "paragrafi": [
-   "Dal 2041 la vecchia fabbrica è chiusa sotto cupole bianche, sigillate, con la scritta «Cantiere, accesso vietato». <b class=\"sidera\">SIDERA</b> lo chiama bonifica e gli ha dato un nome da abbonamento in streaming: ARIA+, «L’aria che meriti»; per chi può pagare c’è ARIA+ Premium. Sopra la città resta una nube rossa: il fumo, dicono, è «vapore di bonifica», la polvere un «disagio temporaneo». Le Colombe, droni bianchi con il logo ARIA+, misurano l’aria e spruzzano profumo di pulito; si chiamano così per la colomba di legno che la tradizione attribuisce ad Archita, l’ingegnere-filosofo della Taranto greca. Sui maxischermi passa la pubblicità della festa di Pasqua: «Taranto è pura».",
+   "Dal 2041 la vecchia fabbrica è chiusa sotto cupole bianche, sigillate, con la scritta «Cantiere, accesso vietato». <b class=\"sidera\">SIDERA</b> lo chiama bonifica e gli ha dato un nome da abbonamento in streaming: ARIA+, «L’aria che meriti»; per chi può pagare c’è ARIA+ Alta Quota. Sopra la città resta una nube rossa: il fumo, dicono, è «vapore di bonifica», la polvere un «disagio temporaneo». Le Colombe, droni bianchi con il logo ARIA+, misurano l’aria e spruzzano profumo di pulito; si chiamano così per la colomba di legno che la tradizione attribuisce ad Archita, l’ingegnere-filosofo della Taranto greca. Sui maxischermi passa la pubblicità della festa di Pasqua: «Taranto è pura».",
    "I Tamburi sono il quartiere operaio a ridosso della fabbrica: palazzine popolari con i terrazzini, panni stesi rossi di polvere, finestre tappate con l’asciugamano bagnato quando il maestrale porta la polvere sul quartiere. Tutto quello che era chiaro ha addosso una patina rossa, perfino le tombe del cimitero di San Brunone. Sopra le strade corre la Linea: i nastri trasportatori sui piloni di cemento, che spariscono sotto le cupole. Ai piedi dei piloni c’è il MiniBar di Ignazio, il bar di GIG. Molti qui portano un braccio MANODOPERA con gli anelli rossi, in abbonamento mensile; chi salta una rata riceve la visita degli Esattori."
   ],
   "aria": {
@@ -83,7 +83,7 @@
    "slogan": "«L’aria che meriti.»",
    "testo": "La bonifica di Taranto. In abbonamento.",
    "colombe": "Misurano l’aria. Profumano di pulito. Arrivano le Colombe.",
-   "clausola": "ARIA+ Premium per chi può pagare.",
+   "clausola": "ARIA+ Alta Quota per chi può pagare.",
    "nota": "Pubblicità inventata, come SIDERA."
   },
   "strada": {
@@ -319,7 +319,7 @@
   "musica": "Musica: i brani della demo li ha creati Luigi Massari con Suno (piano Pro). Non sono nel repository: la demo web li prende dagli allegati di una release del progetto."
  },
  "piede": {
-  "finzione": "CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, Ignazio compreso; l’insegna del MiniBar è usata con il permesso del titolare. Ogni altra somiglianza con persone o aziende reali è casuale. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.",
+  "finzione": "CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati. Ogni somiglianza con persone o aziende reali è casuale. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.",
   "contesto": [
    {"testo": "La storia è stata scritta nel novembre 2026, nei giorni in cui a Taranto è cominciato lo spegnimento degli altiforni. Il gioco non racconta la cronaca: inventa una Taranto di sessant’anni dopo e se la prende con chi comanda, mai con chi ci vive, ci lavora o si è ammalato.", "mostra": false}
   ],

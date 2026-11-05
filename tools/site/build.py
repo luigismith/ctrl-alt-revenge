@@ -70,7 +70,7 @@ RISERVATA = "gioca"          # cartella della demo web, la riempie il workflow
 # regole di rispetto di docs/lore/storia.md e decisioni del 4 novembre 2026). Si cercano nel testo
 # e negli attributi delle pagine finite, URL esclusi.
 VIETATE_SENSIBILI = [  # maiuscole e minuscole contano: sono nomi
-    "Dario", "Altamura", "Caporale", "Cosimo", "Warden", "Teresa", "EFESTO", "Leonida", "Vito",
+    "Dario", "Altamura", "Caporale", "Cosimo", "Warden", "Custode", "Custodi", "TUTORE", "Teresa", "EFESTO", "Leonida", "Vito",
     "Riva", "Jindal", "Flacks", "Mittal", "ArcelorMittal", "Federacciai", "Iacovone", "Mostro",
     "ARIA VERA",
 ]

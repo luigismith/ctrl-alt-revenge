@@ -75,7 +75,7 @@
   "titolo": "Under the red cloud",
   "sotto": "Taranto, 2087: the world of the game",
   "paragrafi": [
-   "Since 2041 the old steelworks has been sealed under white domes marked “Construction site, no entry”. <b class=\"sidera\">SIDERA</b> calls it the clean-up, and has given it a name that sounds like a streaming service: ARIA+, “The air you deserve” (<i lang=\"it\">aria</i> means air), with ARIA+ Premium for those who can pay. A red cloud hangs over the city: the smoke, they say, is “clean-up steam”, the dust a “temporary inconvenience”. The Colombe (“doves”), white drones carrying the ARIA+ logo, measure the air and spray a fresh, clean scent; they are named after the wooden dove that tradition credits to Archytas, the engineer-philosopher of Greek Taranto. On the big screens, the Easter celebration is already being advertised: “Taranto is pure”.",
+   "Since 2041 the old steelworks has been sealed under white domes marked “Construction site, no entry”. <b class=\"sidera\">SIDERA</b> calls it the clean-up, and has given it a name that sounds like a streaming service: ARIA+, “The air you deserve” (<i lang=\"it\">aria</i> means air), with ARIA+ Alta Quota (“high altitude”) for those who can pay. A red cloud hangs over the city: the smoke, they say, is “clean-up steam”, the dust a “temporary inconvenience”. The Colombe (“doves”), white drones carrying the ARIA+ logo, measure the air and spray a fresh, clean scent; they are named after the wooden dove that tradition credits to Archytas, the engineer-philosopher of Greek Taranto. On the big screens, the Easter celebration is already being advertised: “Taranto is pure”.",
    "The Tamburi is the working-class district pressed up against the steelworks: public housing blocks with small terraces, washing hung out to dry and turned red by the dust, windows stopped up with wet towels whenever the north-west wind blows the dust in. Everything that was once pale wears a red film, even the tombs of San Brunone cemetery. Above the streets runs the Linea (“the Line”): conveyor belts on concrete pylons that disappear under the domes. At the foot of the pylons stands Ignazio’s MiniBar, GIG’s local. Plenty of people here wear a MANODOPERA arm (the word means “workforce”, literally “the work of the hand”) with red rings, on a monthly subscription; miss a payment and the Esattori come knocking."
   ],
   "aria": {
@@ -83,7 +83,7 @@
    "slogan": "“The air you deserve.”",
    "testo": "Taranto’s clean-up. By subscription.",
    "colombe": "They measure the air. They smell squeaky clean. Here come the Colombe.",
-   "clausola": "ARIA+ Premium for those who can pay.",
+   "clausola": "ARIA+ Alta Quota for those who can pay.",
    "nota": "A made-up advert, like SIDERA."
   },
   "strada": {
@@ -319,7 +319,7 @@
   "musica": "Music: the demo tracks were made by Luigi Massari with Suno (Pro plan). They aren’t in the repository: the web demo fetches them from a project release."
  },
  "piede": {
-  "finzione": "CTRL+ALT REVENGE is a work of fiction, set in a Taranto of 2087 imagined from the real city. SIDERA, ARIA+, MANODOPERA and all the characters are invented, Ignazio included; the MiniBar sign is used with the owner’s permission. Any other resemblance to real people or companies is coincidental. The city’s places and rituals are real, and we portray them with respect.",
+  "finzione": "CTRL+ALT REVENGE is a work of fiction, set in a Taranto of 2087 imagined from the real city. SIDERA, ARIA+, MANODOPERA and all the characters are invented. Any resemblance to real people or companies is coincidental. The city’s places and rituals are real, and we portray them with respect.",
   "contesto": [
    {"testo": "The story was written in November 2026, in the days when Taranto’s blast furnaces began to be shut down. The game doesn’t retell the news: it imagines Taranto sixty years on, and takes aim at those in power, never at the people who live there, work there or have fallen ill.", "mostra": false}
   ],

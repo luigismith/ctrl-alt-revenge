@@ -170,7 +170,7 @@ Nessuna immagine è generata da un’intelligenza artificiale: la grafica la fan
 
 **Strumenti, tutti gratuiti e open source:** Godot Engine 4.7.2 (MIT), Blender 4.5 LTS (GPL-3.0-or-later), FFmpeg 9.0 (GPL-3.0, solo per catture e video), Python 3.14 con NumPy, Pillow e SciPy.
 
-CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, Ignazio compreso; l’insegna del MiniBar è usata con il permesso del titolare. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.
+CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.
 
 ## Licenze
 
