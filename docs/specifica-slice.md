@@ -62,7 +62,10 @@ Scelte tecniche già fissate:
 
 ## 3. Scala del mondo e pseudo-profondità
 
-- **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. GIG in guardia misura circa 88-92 px dai piedi alla cima del codino; il punk circa 92; il bruto, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 58 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
+- **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. Le misure in guardia, dai piedi alla cima della testa:
+  - **GIG**: 89-90 px (88-92 in tutte le pose di guardia e di passo) e 47-49 px di larghezza con le braccia. Dal 4 novembre 2026 ha la figura da ex pugile di cinquant'anni: forma a V, torace largo con le braccia attaccate al busto, vita non stretta, camicia che cade dritta, pantaloni asciutti. Di spalle, a 60 px/m come nei murales: spalle 47,5 px, busto all'ascella 32,5, vita 20,8, bacino 23,2, collo 14,5. Nella vista degli sprite (48 px/m): sommità del busto 22,5 px, bacino 19,5. Testa (1,45) e mani (1,8) restano ingrandite; le proporzioni stanno in `tools/sprites/chars/gig.json`;
+  - **punk**: circa 92 px, 44 di larghezza;
+  - **bruto**, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 58 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
 - **Coordinate di ogni entità**:
   - `x` orizzontale, in px del mondo;
   - `y` è la linea dei piedi sullo schermo, cioè la profondità;
@@ -78,8 +81,8 @@ Scelte tecniche già fissate:
 
 È il contratto tra grafica e codice. Ogni personaggio ha una cartella `game/assets/sprites/<id>/` con questi file:
 
-- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine; al massimo 30 colori (pipeline v7: rampe ridotte dentro ogni materiale).
-- `<id>_n.png` (opzionale, campo `normal_image` del JSON): atlante delle normali per le luci dinamiche, stesso impacchettamento e stessa misura di `<id>.png`. RGB = 0,5 + 0,5 × normale (x verso destra, y verso l'alto, z verso chi guarda: la convenzione delle `CanvasTexture` di Godot 4), alfa uguale a quella dell'atlante dei colori. Sul contorno la normale punta verso l'esterno (luce di taglio). La produce la pipeline dal G-buffer, a costo zero.
+- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine; al massimo 30 colori. Dal 4 novembre 2026 gli sprite sono in cel shading (blocco `pixel_cfg.cel` dei JSON in `tools/sprites/chars/`): due toni per materiale, ombra e luce, più un terzo tono solo dove serve ai volumi (tono medio su giacca e pelle, e sui pantaloni di GIG; luce piena sui pantaloni dei nemici; riflesso sul metallo del braccio cyber). GIG ha 26 colori, punk e bruto 20.
+- `<id>_n.png` (opzionale, campo `normal_image` del JSON): atlante delle normali per le luci dinamiche, stesso impacchettamento e stessa misura di `<id>.png`. RGB = 0,5 + 0,5 × normale (x verso destra, y verso l'alto, z verso chi guarda: la convenzione delle `CanvasTexture` di Godot 4), alfa uguale a quella dell'atlante dei colori. Sul contorno la normale punta verso l'esterno (luce di taglio). La produce la pipeline dal G-buffer, a costo zero; nel cel le normali sono lisciate dentro ogni parte del corpo, quindi la luce segue i volumi grandi.
 - `<id>.json`, con questa struttura:
 
 ```json
@@ -283,7 +286,8 @@ Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di par
 - `cable`: le scintille del cavo, accese nei fotogrammi del lampo (0 e 3 del ciclo);
 - `lightning`: il lampo del temporale sopra la vista, ogni 9 s circa, deterministico.
 
-Le luci illuminano solo gli attori con la normal map (maschera `Fighter.LIGHT_MASK_ACTORS`), mai gli sfondi, che hanno la luce già dipinta. La luce è a 3 bande (come le ombre della pixel art): sul bordo della sagoma arriva il colore della luce, dentro schiarisce senza cambiare tinta, così l'ocra di GIG non vira. Sono solo disegno e non toccano la simulazione: replay e hash non cambiano. F5 le accende e spegne (build di debug); `--no-lights` parte spento.
+Le luci illuminano solo gli attori con la normal map (maschera `Fighter.LIGHT_MASK_ACTORS`), mai gli sfondi, che hanno la luce già dipinta. La luce è a 3 bande (come le ombre della pixel art): sul bordo della sagoma arriva il colore della luce, dentro schiarisce senza cambiare tinta, così l'ocra di GIG non vira. Sui colori chiari conta meno (× 1 − 0,6 × la luminanza del colore: barba, capelli e scintille non bruciano) e il contorno scuro, con le linee interne dello stesso colore, ne resta fuori come l'inchiostro. Sono solo disegno e non toccano la simulazione: replay e hash non cambiano. F5 le accende e spegne (build di debug); `--no-lights` parte spento.
+- Gli sfondi `backdrop`, `floor`, `near` e `fg` sono in cel shading a 3 toni, senza retino: luce chiave a toni, luce dei neon e riflessi sul bagnato a zone con il bordo netto, aloni ad anelli netti. Dentro la cornice delle insegne l'alone è pieno; sotto le lampade a muro c'è un cono di luce a due bande; nella fascia calpestabile i riflessi sono più scuri, per non confondersi con gli stivali.
 - I piani a fattore 1,0 coprono tutti i 1920 px. Quelli più lenti coprono almeno `384 + 1536 × scroll` px, oppure si ripetono: far 576, mid 768, near 1152; `fg` (1,25) è largo 2304 px.
 - I piani con `z` < 0 stanno dietro agli attori, quelli con `z` ≥ 0 davanti.
 - `backdrop` (facciate, alto 149 px) e `floor` (da y 130: contiene anche la base delle cose basse davanti alle facciate) non si sovrappongono. `fg` è la travata del viadotto vista dal basso, con lampade al sodio piatte attaccate sotto: resta sopra y 26, perché le insegne del fondale stanno fra y 27 e 45 e devono leggersi a telecamera ferma, e non copre la fascia calpestabile.
