@@ -99,5 +99,5 @@ func _apply_block(a: Fighter, v: Fighter, point: Vector2, dir: int, by_player: b
 		if v is Thug:
 			level.on_enemy_hit(v as Thug)
 	if level.sound_enabled:
-		Sfx.play_at(&"bin_hit", point.x)
+		Sfx.play_at(&"block", point.x)
 	level.fx.spawn(&"hit_spark_light", point.x, point.y, dir, v.depth_z(2) + 2)

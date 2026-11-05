@@ -868,6 +868,7 @@ func _draw_contact(n: Node2D) -> void:
 # ------------------------------------------------------------------ effetti
 
 func _on_event(e: String) -> void:
+	_event_sound(e)
 	match e:
 		"spinta":
 			# La scarica del braccio verso il basso: un ventaglio di scintille cyan.
@@ -910,6 +911,24 @@ func _on_event(e: String) -> void:
 		"slide":
 			for i in 5:
 				_spark(player.px - player.facing * 10, player.py - 2, -player.facing * _spark_rng.randf_range(0.5, 1.5), -_spark_rng.randf_range(0.2, 0.8), 12, C_DIM)
+
+
+## I suoni degli eventi: salto, atterraggio, hacking e cancelli.
+const EVENT_SFX := {
+	"jump": [&"jump", 0.0], "spinta": [&"whoosh_light", -2.0], "scatto": [&"whoosh_heavy", -2.0],
+	"land": [&"land", 0.0], "hack_start": [&"hack", 0.0], "hack_done": [&"zap", 0.0],
+	"hack_cut": [&"ui_move", -4.0], "gate_close": [&"bin_hit", -8.0],
+}
+
+
+func _event_sound(e: String) -> void:
+	if not EVENT_SFX.has(e):
+		return
+	var s: Array = EVENT_SFX[e]
+	var x := player.px
+	if e == "gate_close" or e == "hack_done":
+		x = _cam.x + View.W / 2.0
+	Sfx.play_at(s[0], x, 0.05, s[1])
 
 
 func _spark(x: float, y: float, sx: float, sy: float, life: int, color: Color) -> void:

@@ -13,7 +13,7 @@ extends Node
 ## - 12 AudioStreamPlayer in un pool; se sono tutti occupati si riusa quello partito per primo.
 ## - I suoni elencati in assets/sfx/mix.json si caricano all'avvio, gli altri alla prima richiesta;
 ##   poi restano in cache (anche quando mancano, così l'avviso esce una volta sola).
-## - mix.json (scritto da tools/audio/sfx_gen.py) dà il guadagno di missaggio di ogni suono:
+## - mix.json (scritto da tools/audio/sfx_pack.py) dà il guadagno di missaggio di ogni suono:
 ##   i file hanno tutti il picco a -1 dBFS, il bilanciamento sta lì. volume_db si somma.
 ## - Pan: cinque posizioni. Sono bus figli di "SFX" con un AudioEffectPanner, creati all'avvio.
 ##   La posizione sullo schermo si ricava dalla trasformazione del canvas della viewport

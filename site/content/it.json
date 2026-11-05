@@ -237,7 +237,7 @@
     {"titolo": "Modelli CC0", "testo": "I personaggi partono da modelli e animazioni 3D gratuiti con licenza CC0, di Quaternius e Mesh2Motion."},
     {"titolo": "Blender", "testo": "Blender li anima e li renderizza. Le mosse più importanti, cioè la presa, le ginocchiate, la proiezione, il gancio cyber e il calcio volante, sono pose scritte negli script."},
     {"titolo": "Python", "testo": "Script in Python li trasformano in pixel art, con una tavolozza per ogni materiale, timbri per i dettagli del viso, il codino con la molla, stivali costruiti dal codice e una normal map per ogni atlante."},
-    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne. Anche font, effetti, interfaccia ed effetti sonori escono da script, senza campioni né pack."},
+    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
     {"titolo": "Godot", "testo": "Godot mette insieme tutto, con le luci dinamiche e la logica a tick fissi."}
    ],
    "chiusa": "Niente ritocchi a mano e nessuna immagine generata da un’intelligenza artificiale: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository."
@@ -261,7 +261,7 @@
    {"tipo": "fatto", "stato": "FATTO", "titolo": "La storia", "testo": "Scritta e approvata dall’inizio alla fine: prologo, tre atti, finale ed epilogo, con l’introduzione e gli intermezzi a fumetto."},
    {"tipo": "fatto", "stato": "FATTO", "titolo": "Le basi del gameplay", "testo": "Decise e scritte: platform e arene, mosse, combattimento, puzzle di hacking, vita e checkpoint, recuperi, segreti, capitoli e pericoli."},
    {"tipo": "fatto", "stato": "FATTO", "titolo": "Taranto, con le fonti", "testo": "Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e perfino la luna di quella notte."},
-   {"tipo": "fatto", "stato": "FATTO", "titolo": "Lo slice «Sotto la Linea»", "testo": "Giocabile dal titolo alla fine della demo: GIG contro il punk e il bruto, con combo, prese, ginocchiate, proiezioni, calcio volante, un cavo elettrico da saltare e un’arena fino a ZONA LIBERATA. Sprite alla versione 7 con normal map e luci dinamiche, effetti sonori sintetizzati, logica a tick fissi controllata da test automatici e replay deterministici."},
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "Lo slice «Sotto la Linea»", "testo": "Giocabile dal titolo alla fine della demo: GIG contro il punk e il bruto, con combo, prese, ginocchiate, proiezioni, calcio volante, un cavo elettrico da saltare e un’arena fino a ZONA LIBERATA. Sprite alla versione 7 con normal map e luci dinamiche, effetti sonori sintetizzati (poi sostituiti con suoni già pronti), logica a tick fissi controllata da test automatici e replay deterministici."},
    {"tipo": "prossima", "stato": "▶ PROSSIMA", "titolo": "La stanza di prova", "testo": "Tutta grigia, per tarare le mosse: salti, doppio salto, muri, scatto, rampino e il passaggio all’arena con la telecamera inclinata."},
    {"tipo": "poi", "stato": "POI", "titolo": "Il prologo", "testo": "Il cimitero di San Brunone e il garage, con il riavvio del braccio."},
    {"tipo": "poi", "stato": "POI", "titolo": "Capitolo 1, «I tetti dei Tamburi»", "testo": "Con il primo registro, il cibo e l’introduzione a murales."},
@@ -294,8 +294,8 @@
    ]
   },
   "cc0": {
-   "titolo": "Sorgenti CC0",
-   "intro": "Il credito non è obbligatorio: lo diamo lo stesso.",
+   "titolo": "Sorgenti libere",
+   "intro": "Quasi tutte sono CC0, e il credito non è obbligatorio: lo diamo lo stesso. Per i pugni di DavidW, CC BY 4.0, è obbligatorio.",
    "voci": [
     {"nome": "Quaternius · Universal Base Characters (Standard)", "cosa": "i modelli da cui nascono GIG, il punk e il bruto.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalbasecharacters.html"},
     {"nome": "Quaternius · Universal Animation Library (Standard)", "cosa": "le loro animazioni.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary.html"},
@@ -303,9 +303,14 @@
     {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "il condizionatore a muro degli sfondi.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
     {"nome": "Mesh2Motion", "cosa": "le animazioni del calcio circolare di GIG.", "licenza": "CC0 1.0", "url": "https://github.com/Mesh2Motion/mesh2motion-app"},
     {"nome": "Kenney · City Kit Roads 2.2", "cosa": "il cassonetto del vicolo.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
-    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "il cielo e i piani lontani di «Sotto la Linea» ne sono una versione ricolorata e ricomposta.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"}
+    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "il cielo e i piani lontani di «Sotto la Linea» ne sono una versione ricolorata e ricomposta.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"},
+    {"nome": "Kenney · Impact, Interface, RPG e Sci-Fi Sounds", "cosa": "la base degli effetti sonori: colpi, metallo, stoffa, interfaccia, la scarica del braccio cyber.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/impact-sounds"},
+    {"nome": "Freesound", "cosa": "fruscii, cadute, atterraggio, scintilla, scarica del cavo, bidone e cibo (dieci suoni singoli, elencati in THIRD-PARTY-NOTICES).", "licenza": "CC0 1.0", "url": "https://freesound.org"},
+    {"nome": "rubberduck · 100 CC0 SFX #2", "cosa": "i passi sull’asfalto bagnato.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/100-cc0-sfx-2"},
+    {"nome": "AntumDeluge · Thwack Sounds", "cosa": "la parata dell’esattore.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/thwack-sounds"},
+    {"nome": "DavidW · Punch SFX", "cosa": "uno strato dei colpi pesanti e del KO, modificato.", "licenza": "CC BY 4.0", "url": "https://opengameart.org/content/punch-sfx"}
    ],
-   "resto": "Il resto è nostro: pose e mosse scritte negli script, stivali, codino, timbri del viso, normal map e luci; edifici, insegne, carattere pixel delle scritte, travata, piloni e oggetti di scena; font, effetti, interfaccia ed effetti sonori. Non usiamo Mixamo, Reallusion, CraftPix né altro materiale che non si può ridistribuire."
+   "resto": "Il resto è nostro: pose e mosse scritte negli script, stivali, codino, timbri del viso, normal map e luci; edifici, insegne, carattere pixel delle scritte, travata, piloni e oggetti di scena; font, effetti e interfaccia. Non usiamo Mixamo, Reallusion, CraftPix né altro materiale che non si può ridistribuire."
   },
   "strumenti": {
    "titolo": "Strumenti, tutti gratuiti e open source",

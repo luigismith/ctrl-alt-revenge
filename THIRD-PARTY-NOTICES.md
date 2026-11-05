@@ -15,6 +15,25 @@ Ogni voce indica la fonte, la licenza e il credito. Chi aggiunge un pack o un fo
   - I piani `sky`, `far` e `mid` di "Sotto la Linea" ne sono una versione ricolorata e ricomposta.
   - La musica del pack (Pascal Belisle) ha un'altra licenza e non è usata.
 
+## Effetti sonori
+
+Gli effetti sonori in `game/assets/sfx/` li monta `tools/audio/sfx_pack.py` da suoni già pronti: taglio, intonazione, filtri, strati sovrapposti, saturazione e livelli. I file di partenza non sono in questo repository: restano nel laboratorio (`sources/sfx/`).
+
+- **Kenney**: Impact Sounds, Interface Sounds, RPG Audio e Sci-Fi Sounds.
+  - Licenza CC0 1.0; il credito "Kenney" è gradito ma non obbligatorio.
+  - https://kenney.nl/assets/impact-sounds, https://kenney.nl/assets/interface-sounds, https://kenney.nl/assets/rpg-audio, https://kenney.nl/assets/sci-fi-sounds
+- **Freesound**, suoni singoli CC0 1.0 (la pagina di ognuno è `https://freesound.org/s/<ID>/`): 389590 (whoosh_light), 475135 (whoosh_heavy), 507466 (throw), 667271 (grab), 504626 (body_fall), 540272 (land), 545238 (glint), 512471 (zap), 498434 (bin_break), 816237 (pickup).
+- **rubberduck, "100 CC0 SFX #2"** (OpenGameArt): i passi bagnati.
+  - Licenza CC0 1.0.
+  - https://opengameart.org/content/100-cc0-sfx-2
+- **AntumDeluge, "Thwack Sounds"** (OpenGameArt): la parata.
+  - Licenza CC0 1.0.
+  - https://opengameart.org/content/thwack-sounds
+- **DavidW, "Punch SFX"** (OpenGameArt): uno strato di `hit_medium`, `hit_heavy`, `hit_kick` e `ko`.
+  - Licenza CC BY 4.0, https://creativecommons.org/licenses/by/4.0/. Il credito è obbligatorio e sta nei crediti del gioco e fra le fonti del sito.
+  - I suoni sono stati modificati: tagliati, filtrati, sovrapposti ad altri e saturati.
+  - https://opengameart.org/content/punch-sfx
+
 ## Sorgenti usate dalla pipeline da 3D a pixel
 
 I file di queste sorgenti non sono in questo repository: restano nel laboratorio di chi produce la grafica. Gli sprite, i ritratti e gli sfondi derivati sono opera nostra.
@@ -45,11 +64,9 @@ Non sono usati Mixamo, Reallusion, CraftPix, Oonquil, Shapeforms, Sonniss, i fil
 
 - **Script bpy della pipeline** (`tools/blender/`): codice nostro sotto GPL-3.0-or-later, come chiede blender.org per gli script che usano l'API di Blender. Testo in `LICENSES/GPL-3.0-or-later.txt`.
 
-## Font, effetti, interfaccia ed effetti sonori
+## Font, effetti e interfaccia
 
-Sono nostri, senza materiale di terze parti:
-- i font **CAR Pixel** (regolare e grassetto), gli effetti visivi e l'interfaccia, disegnati da script in `tools/fxui/`;
-- gli effetti sonori, generati da `tools/audio/sfx_gen.py` senza campioni né pack scaricati.
+Sono nostri, senza materiale di terze parti: i font **CAR Pixel** (regolare e grassetto), gli effetti visivi e l'interfaccia, disegnati da script in `tools/fxui/`.
 
 ## Musica segnaposto (fuori dal repository)
 

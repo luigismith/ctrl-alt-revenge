@@ -52,7 +52,7 @@ Una stanza senza grafica in cui si tarano tutte le mosse con Luigi, prima di cos
 
 **Il resto della tappa, in quest'ordine** (scelto da Luigi il 5 novembre 2026):
 1. la taratura di tempi e distanze dell'hacking, alla prova col pad;
-2. l'esattore di professione, che para e carica;
+2. l'esattore di professione, che para e carica (fatto il 5 novembre 2026: la guardia salta al terzo colpo parato, e la carica a vuoto lo lascia stordito contro il bordo; con le sue animazioni di guardia, carica e stordimento, e gli effetti sonori nuovi, montati da suoni già pronti con licenza libera);
 3. gli sprite veri del rider e dell'esattore dalla pipeline 3D (ora il rider usa quello del punk, ricolorato), poi le GIF e i video del sito rifatti con i nemici nuovi;
 4. la prova col pad che chiude la tappa.
 

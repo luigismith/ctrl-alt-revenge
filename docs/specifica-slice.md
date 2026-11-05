@@ -328,10 +328,11 @@ Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza
 - sotto, la barra del nemico colpito per ultimo, con il suo nome ("PUNK", "BRUTO");
 - in alto a destra, il punteggio a 6 cifre.
 
-**Suoni** in `game/assets/sfx/<nome>.wav`: mono, 16 bit, 44,1 kHz, nostri (generati da `tools/audio/sfx_gen.py`) o CC0 con licenza registrata. Nomi:
+**Suoni** in `game/assets/sfx/<nome>.wav`: mono, 16 bit, 44,1 kHz. Dal 5 novembre 2026 li monta `tools/audio/sfx_pack.py` da suoni già pronti CC0 e CC BY, con le fonti in `THIRD-PARTY-NOTICES.md`; prima erano sintetizzati da `tools/audio/sfx_gen.py`. Nomi:
 - colpi e movimenti: `whoosh_light`, `whoosh_heavy`, `hit_light`, `hit_medium`, `hit_heavy`, `hit_kick`, `knee`, `grab`, `throw`, `body_fall`, `body_thud`, `step_a`, `step_b`, `jump`, `land`, `glint`;
 - scena: `zap` (cavo), `bin_hit`, `bin_break`, `pickup`, `ko`;
-- interfaccia: `ui_move`, `ui_confirm`, `ui_pause`, `go_arrow`.
+- interfaccia: `ui_move`, `ui_confirm`, `ui_pause`, `go_arrow`;
+- stanza di prova: `block` (la parata dell'esattore), `hack` (il pugno cyber sulla centralina).
 
 Accanto ai WAV:
 - i `.wav.import` li importano in PCM, senza compressione e senza loop;

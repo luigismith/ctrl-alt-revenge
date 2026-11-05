@@ -44,6 +44,20 @@ precedence = "override"
 SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]
 SPDX-License-Identifier = "LicenseRef-CAR-Assets"
 
+# 2c) Effetti sonori con uno strato di "Punch SFX" di DavidW (OpenGameArt, CC BY 4.0, modificati):
+#     restano asset del gioco, con l'autore dell'originale indicato (vedi THIRD-PARTY-NOTICES.md).
+#     Gli altri effetti vengono da suoni CC0, che non chiedono annotazioni qui.
+[[annotations]]
+path = [
+  "game/assets/sfx/hit_medium.wav",
+  "game/assets/sfx/hit_heavy.wav",
+  "game/assets/sfx/hit_kick.wav",
+  "game/assets/sfx/ko.wav",
+]
+precedence = "override"
+SPDX-FileCopyrightText = ["2026 Luigi Massari", "DavidW (OpenGameArt, Punch SFX, CC-BY-4.0)"]
+SPDX-License-Identifier = "LicenseRef-CAR-Assets"
+
 # 3) Script bpy della pipeline: GPL, come chiede blender.org per gli script che usano l'API di Blender.
 [[annotations]]
 path = "tools/blender/**"

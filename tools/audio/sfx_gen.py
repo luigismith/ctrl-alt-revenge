@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: MIT
 """Genera da script tutti gli effetti sonori dello slice (specifica, paragrafo 7).
 
+Dal 5 novembre 2026 il gioco usa i suoni già pronti montati da tools/audio/sfx_pack.py, che prende
+da qui nomi, livelli e finitura: --install sovrascriverebbe quei suoni con questi sintetizzati.
+
 Carattere da console 16 bit (Mega Drive): suoni corti, secchi e con peso.
 - colpi: transiente netto + corpo grave con discesa di altezza e saturazione + coda di rumore
   filtrato, poi una passata "PCM" (sample-and-hold a bassa frequenza e quantizzazione a pochi bit)
@@ -55,7 +58,7 @@ MIX_TARGET = {
     "hit_light": -11.0, "hit_medium": -10.5, "hit_heavy": -10.0, "hit_kick": -10.0, "knee": -10.5,
     "body_fall": -11.0, "body_thud": -11.5, "ko": -9.5, "bin_hit": -12.0, "bin_break": -11.0,
     "whoosh_light": -18.0, "whoosh_heavy": -17.0, "throw": -15.0, "grab": -16.0, "jump": -19.0,
-    "land": -17.0, "step_a": -24.0, "step_b": -24.0, "glint": -14.0, "zap": -13.0,
+    "land": -17.0, "step_a": -31.0, "step_b": -31.0, "glint": -14.0, "zap": -13.0,
     "pickup": -15.0, "ui_move": -19.0, "ui_confirm": -17.0, "ui_pause": -17.0, "go_arrow": -16.0,
 }
 
@@ -357,23 +360,24 @@ def gen_whoosh_heavy(rng):
 
 
 def gen_hit_light(rng):
+    # Più grave dopo la prova di Luigi (5 novembre 2026: "il suono dei pugni è troppo alto di tono").
     n = n_of(0.16)
-    y = (layer_transient(n, rng, 2500.0, 0.0012, 0.8)
-         + layer_snap(n, 2400.0, 600.0, 0.004, 0.005, 0.6)
-         + layer_body(n, 290.0, 165.0, 0.015, 0.022, 2.5, 0.6)
+    y = (layer_transient(n, rng, 1600.0, 0.0012, 0.7)
+         + layer_snap(n, 1500.0, 380.0, 0.004, 0.005, 0.5)
+         + layer_body(n, 210.0, 120.0, 0.015, 0.024, 2.5, 0.7)
          # lo "smack": rumore in banda media, è la parte che si sente su qualsiasi altoparlante
-         + layer_noise_band(n, rng, 900.0, 3200.0, 0.0006, 0.028, 0.9)
-         + layer_noise_low(n, rng, 1500.0, 0.002, 0.040, 0.2))
+         + layer_noise_band(n, rng, 600.0, 2200.0, 0.0006, 0.028, 0.9)
+         + layer_noise_low(n, rng, 1000.0, 0.002, 0.040, 0.25))
     return pcm_crunch(sat(y, 1.4), 16000.0, 8)
 
 
 def gen_hit_medium(rng):
     n = n_of(0.21)
-    y = (layer_transient(n, rng, 2000.0, 0.0016, 0.85)
-         + layer_snap(n, 2000.0, 450.0, 0.005, 0.007, 0.55)
-         + layer_body(n, 240.0, 125.0, 0.022, 0.038, 3.0, 0.75)
-         + layer_noise_band(n, rng, 700.0, 2600.0, 0.0008, 0.040, 0.95)
-         + layer_noise_low(n, rng, 1100.0, 0.003, 0.060, 0.25))
+    y = (layer_transient(n, rng, 1300.0, 0.0016, 0.75)
+         + layer_snap(n, 1300.0, 300.0, 0.005, 0.007, 0.45)
+         + layer_body(n, 175.0, 95.0, 0.022, 0.040, 3.0, 0.85)
+         + layer_noise_band(n, rng, 500.0, 1800.0, 0.0008, 0.040, 0.95)
+         + layer_noise_low(n, rng, 800.0, 0.003, 0.060, 0.3))
     return pcm_crunch(sat(y, 1.5), 16000.0, 8)
 
 

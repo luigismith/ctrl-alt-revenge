@@ -6,6 +6,10 @@ Luigi Massari
 # CODICE, GRAFICA ED EFFETTI SONORI
 Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney, sfondi Warped City di Luis Zuno (ansimuz).
 
+# SUONI
+Montati e ritoccati da suoni CC0 di Kenney (Impact, Interface, RPG e Sci-Fi Sounds), di Freesound e di rubberduck e AntumDeluge (OpenGameArt).
+I colpi pesanti e il KO contengono "Punch SFX" di DavidW (opengameart.org/content/punch-sfx), licenza CC BY 4.0, modificati.
+
 # FONT, EFFETTI E INTERFACCIA
 Font CAR Pixel, effetti e interfaccia disegnati per CTRL+ALT REVENGE.
 
