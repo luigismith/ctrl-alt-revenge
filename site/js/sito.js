@@ -331,15 +331,15 @@
 		const re = eroe.getBoundingClientRect();
 		const rv = video.getBoundingClientRect();
 		const alto = rv.top - re.top;
-		nube.misura(re.width, re.height, alto - 36 * pw);
+		nube.misura(re.width, re.height, alto - 45 * pw);
 		// La parallasse non porta mai la fascia rossa sotto i tetti; sui telefoni la nube sta ferma.
-		limiteNube = S.largo ? 30 * pw : 0;
-		limiteTetti = S.largo ? 24 * pw : 0;
+		limiteNube = S.largo ? 38 * pw : 0;
+		limiteTetti = S.largo ? 30 * pw : 0;
 		const chiave = S.nw + ':' + S.dpr;
 		if (tettiChiave !== chiave) {
 			tettiChiave = chiave;
 			if (tettiEroe) {
-				css(tettiEroe, '--maschera-tetti', `url("${maschera(4, 140, S.nw, { basso: 44 })}")`);
+				css(tettiEroe, '--maschera-tetti', `url("${maschera(4, 175, S.nw, { basso: 55 })}")`);
 				css(tettiEroe, '--maschera-tetti-w', px(4, S.nw) + 'px');
 			}
 			// in fondo all'eroe la nube sfuma a scacchi nella notte, come il video
@@ -350,11 +350,11 @@
 			}
 		}
 		// Il video sfuma ai lati (sotto l'HUD del gioco, che resta intero) e in basso; se sborda, niente lati.
-		const lato = re.width - rv.width > 8 * pw ? 12 : 0;
+		const lato = re.width - rv.width > 10 * pw ? 15 : 0;
 		const chiaveVideo = [S.nw, S.dpr, lato].join(':');
 		if (chiaveVideo !== mascheraChiave) {
 			mascheraChiave = chiaveVideo;
-			css(video, '--maschera', `url("${maschera(384, 216, S.nw, { basso: 8, lato, latoDa: 44 })}")`);
+			css(video, '--maschera', `url("${maschera(480, 270, S.nw, { basso: 10, lato, latoDa: 44 })}")`);
 		}
 	}
 
@@ -465,7 +465,7 @@
 
 	/* ------------------------------------------------------------ la strada: si scorre e GIG cammina */
 	const strada = { el: $('.strada__scena'), gig: null, ultimoP: null, fermo: 0, passi: 0 };
-	const STRADA_W = 940;
+	const STRADA_W = 1175;
 	function aggiornaStrada(ora, r) {
 		const el = strada.el;
 		if (!el || !r) return;
@@ -473,17 +473,17 @@
 		const ps = px(1, S.ns);
 		const V = r.width / ps;
 		const t = clamp((S.vh - r.top) / (S.vh + r.height), 0, 1);
-		const p = moto ? 60 + (660 - 60) * t : 560;
+		const p = moto ? 75 + (825 - 75) * t : 700;
 		const cam = clamp(p - V * 0.36, 0, Math.max(0, STRADA_W - V));
 		css(el, '--strada-x', -Math.round(cam * S.ns) / S.dpr + 'px');
-		css(el, '--strada-tetti-x', (-Math.round(cam * 0.5 * S.ns) - 300 * S.ns) / S.dpr + 'px');
+		css(el, '--strada-tetti-x', (-Math.round(cam * 0.5 * S.ns) - 375 * S.ns) / S.dpr + 'px');
 		const g = strada.gig;
 		if (g) {
 			css(g.el, '--x', Math.round((p - cam) * S.ns) / S.ns);
-			css(g.el, '--y', g.el.dataset.y || 188);
+			css(g.el, '--y', g.el.dataset.y || 235);
 			if (strada.ultimoP !== null && Math.abs(p - strada.ultimoP) > 0.05) {
 				strada.passi += p - strada.ultimoP;
-				g.fotogramma('camminata', Math.floor(strada.passi / 6));
+				g.fotogramma('camminata', Math.floor(strada.passi / 7.5));
 				strada.fermo = ora;
 			} else if (g.nome === 'camminata' && ora - strada.fermo > 150) {
 				g.imposta('guardia');
@@ -726,8 +726,8 @@
 
 	/* ------------------------------------------------------------ la luce provata con la normal map */
 	const luce = {
-		tela: $('.luce__tela'), ctx: null, out: null, alb: null, nor: null, W: 120, H: 120, chiesta: false,
-		vista: 'luce', lx: 92, ly: 34, auto: true, tempo: 0, anim: null, i: 0, t: 0, chiave: '', pronta: false,
+		tela: $('.luce__tela'), ctx: null, out: null, alb: null, nor: null, W: 150, H: 150, chiesta: false,
+		vista: 'luce', lx: 115, ly: 42, auto: true, tempo: 0, anim: null, i: 0, t: 0, chiave: '', pronta: false,
 		// La normal map (100 KB) si scarica solo quando il riquadro sta per entrare nello schermo.
 		prova() {
 			if (this.chiesta || !this.tela || !DATI.gig || !vede(this.tela)) return;
@@ -793,8 +793,8 @@
 				while (this.t >= f.ms) { this.t -= f.ms; this.i = (this.i + 1) % this.anim.fotogrammi.length; f = this.anim.fotogrammi[this.i]; }
 				if (this.auto) {
 					this.tempo += dt / 1000;
-					this.lx = 60 + 46 * Math.cos(this.tempo * 0.9);
-					this.ly = 44 + 26 * Math.sin(this.tempo * 0.7);
+					this.lx = 75 + 58 * Math.cos(this.tempo * 0.9);
+					this.ly = 55 + 32 * Math.sin(this.tempo * 0.7);
 				}
 			}
 			this.disegna();
@@ -816,7 +816,7 @@
 					let r = 11, g = 8, b = 22;
 					if (this.vista === 'luce') {
 						const dd = Math.hypot(x - lxq, y - lyq);
-						const a = Math.max(0, 1 - dd / 70);
+						const a = Math.max(0, 1 - dd / 88);
 						const q = a * a * 0.5 > BAYER[(y & 3) * 4 + (x & 3)] * 0.5 ? 1 : 0;
 						if (q) { r = 38; g = 20; b = 30; }
 					}
@@ -825,7 +825,7 @@
 				}
 			}
 			const A = this.alb.data, N = this.nor.data, IW = this.alb.width;
-			const AMB = [0.38, 0.34, 0.52], COL = [1.0, 0.68, 0.38], E = 2.1, Z = 28, R = 104;
+			const AMB = [0.38, 0.34, 0.52], COL = [1.0, 0.68, 0.38], E = 2.1, Z = 35, R = 130;
 			for (let y = 0; y < ch; y++) {
 				for (let x = 0; x < cw; x++) {
 					const s = ((f.y + y) * IW + f.x + x) * 4;

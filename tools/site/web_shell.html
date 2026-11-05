@@ -8,7 +8,7 @@
 	Lingua: italiano; inglese con ?lang=en o con il browser in un'altra lingua.
 
 	Il gioco sta in una cornice, a scala intera: la pagina decide la misura del canvas (canvasResizePolicy 0,
-	"nessuna" per Godot) e la sceglie come multiplo esatto di 384x216 in pixel del dispositivo, anche a schermo
+	"nessuna" per Godot) e la sceglie come multiplo esatto di 480x270 in pixel del dispositivo, anche a schermo
 	intero. Le misure (canvas, logo, caratteri CAR Pixel a multipli di 12 pixel del dispositivo) si calcolano
 	prima del primo disegno, e il motore (index.js) si scarica dopo: la pagina non salta. Sui telefoni il
 	motore si scarica solo se si sceglie di giocare lo stesso. Il tasto Tab non arriva al gioco, così con la
@@ -301,7 +301,7 @@ const GODOT_URL = '$GODOT_URL';
 		doc.classList.toggle('densa', dpr >= 2);
 		doc.style.setProperty('--pl-testa', Math.max(1, Math.round(dpr / 2)) / dpr + 'px');
 		const intero = document.fullscreenElement === cornice;
-		const scala = (w, h) => Math.max(1, Math.floor(Math.min((w * dpr) / 384, (h * dpr) / 216) + 1e-6));
+		const scala = (w, h) => Math.max(1, Math.floor(Math.min((w * dpr) / 480, (h * dpr) / 270) + 1e-6));
 		let n;
 		if (intero) {
 			n = scala(window.innerWidth, window.innerHeight);
@@ -313,14 +313,14 @@ const GODOT_URL = '$GODOT_URL';
 			main.classList.toggle('di-lato', lato >= sotto);
 			n = Math.max(sotto, lato);
 		}
-		canvas.width = 384 * n;
-		canvas.height = 216 * n;
-		canvas.style.width = (384 * n) / dpr + 'px';
-		canvas.style.height = (216 * n) / dpr + 'px';
+		canvas.width = 480 * n;
+		canvas.height = 270 * n;
+		canvas.style.width = (480 * n) / dpr + 'px';
+		canvas.style.height = (270 * n) / dpr + 'px';
 		const px = Math.max(1, Math.round(dpr * 2)) / dpr;
 		cornice.style.setProperty('--px', px + 'px');
 		// il logo della schermata di caricamento: un pixel CSS per pixel del gioco, se ci sta, sempre intero
-		const spazio = chiedi ? Math.min(window.innerWidth - 32, 640) - 32 : (384 * n) / dpr - 32;
+		const spazio = chiedi ? Math.min(window.innerWidth - 32, 640) - 32 : (480 * n) / dpr - 32;
 		const k = Math.max(1, Math.min(Math.round(dpr), Math.floor((spazio * dpr) / 248)));
 		doc.style.setProperty('--pl', k / dpr + 'px');
 		doc.classList.remove('misura');

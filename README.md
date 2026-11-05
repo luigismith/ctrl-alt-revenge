@@ -14,18 +14,18 @@
 </p>
 
 <p align="center">
-  <img src="docs/media/demo.gif" width="768" height="432" alt="Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù; poi compare VAI.">
+  <img src="docs/media/demo.gif" width="480" height="270" alt="Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.">
 </p>
 
 > **Taranto, 2087. Il braccio è in abbonamento. La vendetta no.**
 
 <p align="center">
-  <img src="docs/media/schermate/arena-2x.png" width="368" height="156" alt="Nello slice, nell’arena: il calcio di GIG manda il punk addosso al bruto.">
-  <img src="docs/media/schermate/presa-2x.png" width="368" height="156" alt="Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.">
+  <img src="docs/media/schermate/arena-2x.png" width="460" height="195" alt="Nello slice, nell’arena: il calcio di GIG manda il punk addosso al bruto.">
+  <img src="docs/media/schermate/presa-2x.png" width="460" height="195" alt="Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.">
 </p>
 <p align="center">
-  <img src="docs/media/schermate/cavo-2x.png" width="264" height="176" alt="Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.">
-  <img src="docs/media/schermate/combo-2x.png" width="224" height="190" alt="Nello slice: combo sul punk davanti all’insegna KEBAB, il gancio cyber e poi il calcio finale.">
+  <img src="docs/media/schermate/cavo-2x.png" width="330" height="220" alt="Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.">
+  <img src="docs/media/schermate/combo-2x.png" width="280" height="238" alt="Nello slice: combo sul punk davanti all’insegna KEBAB, il gancio cyber e poi il calcio finale.">
 </p>
 
 ## La storia
@@ -49,7 +49,7 @@ Tutto succede fra il Giovedì e il Venerdì Santo, 17–18 aprile 2087: la notte
 
 Nello slice di oggi ci sono la corsa, il salto, il cavo da saltare, le combo, le prese, le proiezioni, il calcio volante e l’arena; il resto è in sviluppo. Il sito dice pilastro per pilastro che cosa c’è già e che cosa no.
 
-**Retro, con la tecnologia di oggi.** La pixel art è lo stile, non un limite d’epoca: 384×216 pixel ingranditi a multipli interi, luci dinamiche con le normal map, particelle, hitstop e rallentatore sull’ultimo KO. Le scene a fumetto sono i murales di Totò.
+**Retro, con la tecnologia di oggi.** La pixel art è lo stile, non un limite d’epoca: 480×270 pixel ingranditi a multipli interi (×4 su uno schermo 1080p), luci dinamiche con le normal map, particelle, hitstop e rallentatore sull’ultimo KO. Le scene a fumetto sono i murales di Totò.
 
 ## Stato
 
@@ -61,7 +61,7 @@ In sviluppo, novembre 2026. Il gioco si sta rifacendo da zero in Godot 4.7.2, pr
 | Le basi del gameplay: platform e arene, mosse, combattimento, puzzle di hacking, recuperi, segreti | fatte |
 | Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e luna | fatta |
 | Lo slice verticale «Sotto la Linea», giocabile dal titolo alla fine della demo | fatto |
-| La stanza di prova per tarare le mosse | prossima |
+| La stanza di prova per tarare le mosse: corsa, salto, Spinta, piattaforme sottili, sporgenze, scivolata, salto a muro, scatto e corsa sui muri | in corso |
 | Il prologo (il cimitero di San Brunone e il garage) e il capitolo 1, «I tetti dei Tamburi» | poi |
 | La prova di stile dei murales e la colonna sonora (i primi due brani sono già nella demo) | in parallelo |
 
@@ -78,7 +78,7 @@ godot --headless --path game --import
 godot --path game
 ```
 
-Il primo comando importa gli asset (serve la prima volta e dopo ogni aggiornamento della grafica o dei suoni), il secondo apre il gioco in una finestra 1152×648, cioè tre volte la risoluzione interna 384×216.
+Il primo comando importa gli asset (serve la prima volta e dopo ogni aggiornamento della grafica o dei suoni), il secondo apre il gioco in una finestra 1440×810, cioè tre volte la risoluzione interna 480×270.
 
 Sul PC di sviluppo, con il laboratorio in `%USERPROFILE%\ctrlaltrevenge-lab\`, basta un doppio clic su `Gioca.bat` in quella cartella: importa il progetto e avvia il gioco.
 
@@ -87,6 +87,8 @@ Argomenti utili, da scrivere dopo `--`:
 | Argomento | Effetto |
 |---|---|
 | `--autostart` | salta il titolo e parte dal livello |
+| `--stanza` | parte dalla stanza di prova in grigio (anche dal titolo: STANZA DI PROVA) |
+| `--autopilot stanza` | GIG percorre da solo la stanza di prova |
 | `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 67 s (GIG gioca da solo) |
 | `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |
@@ -104,6 +106,7 @@ La musica non è in questo repository (vedi sotto). Il gioco la cerca in `game/a
 | Correre | due tocchi rapidi verso destra o sinistra | due tocchi rapidi verso destra o sinistra |
 | Attacco | J oppure Z | X oppure Y (Quadrato o Triangolo) |
 | Salto | K oppure X | A oppure B (Croce o Cerchio) |
+| Scatto (stanza di prova) | L oppure C | un dorsale (L1 o R1) |
 | Pausa | Esc oppure Invio | Start (Options) |
 | Confermare nei menu | Invio, Spazio, J oppure Z | A oppure Start |
 | Tornare indietro nei menu | Esc oppure Backspace | B |
@@ -113,6 +116,16 @@ Le mosse dello slice:
 - **Calcio volante**: attacco durante il salto.
 - **Presa**: si cammina contro un nemico vicino, nella sua stessa corsia. Dalla presa, attacco dà una ginocchiata (al massimo due); il terzo attacco, oppure attacco più la direzione opposta, lo proietta. Il corpo proiettato atterra gli altri nemici.
 - **Ostacolo**: il cavo nella pozzanghera si salta; toccarlo fa 10 di danno e atterra.
+
+Nella stanza di prova, che c'è solo nelle versioni per PC:
+- **Spinta**: il doppio salto, cioè salto premuto di nuovo in aria; il braccio scarica verso il basso.
+- **Piattaforme sottili**: si sale da sotto; giù più salto per scendere.
+- **Sporgenze**: cadendo verso un muro GIG si aggrappa; su, salto o la direzione del muro per salire, giù per lasciarsi.
+- **Scivolata**: giù mentre si corre, o giù con una direzione anche da fermi; giù da solo per accovacciarsi, poi la direzione per camminare accovacciati.
+- **Salto a muro**: cadendo contro un muro GIG pianta il braccio e frena; salto lo stacca in diagonale. Fra due muri vicini si risale.
+- **Scatto**: in aria, il tasto dello scatto spinge GIG in avanti di 3 blocchi, dritto; uno per salto.
+- **Corsa sul muro**: di corsa contro un muro, salto: GIG sale qualche passo in verticale; in cima, salto di nuovo è la Spinta.
+- **R** (Select sul gamepad) ricomincia dall'inizio, **Esc** (Start) torna al titolo; in basso ci sono velocità, altezza dell'ultimo salto e tick in aria, per tarare il movimento.
 
 Avviando il gioco con Godot, come sopra, è una build di debug e funzionano anche F1 (hitbox e hurtbox), F2 (rallentatore), F3 (fermo immagine), F4 (avanza di un fotogramma durante il fermo immagine) e F5 (accende e spegne le luci dinamiche sui personaggi). Nelle build esportate per i giocatori, e nella demo web, questi tasti non fanno nulla.
 

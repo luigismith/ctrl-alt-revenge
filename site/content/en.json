@@ -216,7 +216,7 @@
   "titolo": "Retro, with today’s technology",
   "sotto": "Pixel art is the style, not a period limitation.",
   "paragrafi": [
-   "The game runs at 384×216 pixels, scaled up by whole multiples, and uses modern techniques wherever they look better. The slice already has dynamic lights with normal maps on the characters, sparks and particles, hit-stop on impacts and slow motion on the final KO; the full game can also use a smooth camera, shaders and deformation.",
+   "The game runs at 480×270 pixels, scaled up by whole multiples, and uses modern techniques wherever they look better. The slice already has dynamic lights with normal maps on the characters, sparks and particles, hit-stop on impacts and slow motion on the final KO; the full game can also use a smooth camera, shaders and deformation.",
    "The comic-book scenes, meaning the intro and the interludes, are Totò’s murals: pixel art in a street-art style, with spray-can gradients, drips, thick outlines and neon colours. The camera pans along the wall and the panels come alive with parallax, lights and particles. The mural style is still being tested, and the look of the sprites may change too: everything here is work in progress.",
    "This site follows the same rules: every pixel of the art is a game pixel, scaled up by a whole number of your screen’s pixels, and the cloud and the dust are drawn by the page’s own code, with old-school Bayer dithering."
   ],

@@ -4,10 +4,11 @@
  "cattura": {
   "replay": "game/tests/replays/demo.json",
   "godot": "4.7.2.stable.official.ed1daf0bf",
-  "punteggio": 2840,
-  "tick_fine": 4092,
-  "hash": "230ba2c05f5ea3de59da62eafa3d73a81389a96dd622b9c1b0912eb2acbc31cf",
-  "fotogrammi": 4101
+  "punteggio": 2940,
+  "tick_fine": 3841,
+  "hash": "66e84c1924f2646fe34361f182b66d0dd3c51126bbdce390554cc1d90ea9fb07",
+  "fotogrammi": 3850,
+  "impronta_grafica": "55f6409a372a567d731f2c4e966b77219fe951c8413ea1280e8f4014eaa4e048"
  },
  "controllo": {
   "zone": [
@@ -15,9 +16,9 @@
     "piano": "backdrop",
     "riquadro": [
      0,
-     98,
-     52,
-     134
+     122,
+     65,
+     168
     ],
     "cosa": "il graffito GIG",
     "azione": "vieta"
@@ -25,10 +26,10 @@
    {
     "piano": "backdrop",
     "riquadro": [
-     994,
-     16,
-     1147,
-     60
+     1242,
+     20,
+     1434,
+     75
     ],
     "cosa": "la FARMACIA con la croce rossa (emblema protetto)",
     "azione": "vieta"
@@ -36,10 +37,10 @@
    {
     "piano": "backdrop",
     "riquadro": [
-     1478,
-     22,
-     1548,
-     140
+     1820,
+     28,
+     1936,
+     176
     ],
     "cosa": "l'insegna HOTEL",
     "azione": "vieta"
@@ -47,10 +48,10 @@
    {
     "piano": "near",
     "riquadro": [
-     470,
-     24,
-     568,
-     68
+     588,
+     30,
+     710,
+     85
     ],
     "cosa": "il cartellone HOTEL",
     "azione": "vieta"
@@ -58,10 +59,10 @@
    {
     "piano": "near",
     "riquadro": [
-     998,
-     16,
-     1109,
-     47
+     1248,
+     20,
+     1388,
+     60
     ],
     "cosa": "il cartellone CINEMA",
     "azione": "vieta"
@@ -69,10 +70,10 @@
    {
     "piano": "near",
     "riquadro": [
-     450,
-     138,
-     472,
-     168
+     562,
+     172,
+     590,
+     210
     ],
     "cosa": "l'insegna rossa verticale dei tetti",
     "azione": "vieta"
@@ -80,9 +81,9 @@
    {
     "piano": "mid",
     "riquadro": [
-     578,
+     646,
      50,
-     614,
+     682,
      122
     ],
     "cosa": "le insegne HOTEL e BAR del piano medio",
@@ -92,20 +93,20 @@
     "piano": "sky",
     "riquadro": [
      192,
-     18,
+     30,
      232,
-     60
+     72
     ],
     "cosa": "la luna",
-    "azione": "vieta"
+    "azione": "copri"
    },
    {
     "piano": "sky",
     "riquadro": [
      59,
-     36,
+     48,
      68,
-     46
+     58
     ],
     "cosa": "una stella grande",
     "azione": "vieta"
@@ -114,9 +115,9 @@
     "piano": "sky",
     "riquadro": [
      169,
-     37,
+     49,
      178,
-     47
+     59
     ],
     "cosa": "una stella grande",
     "azione": "vieta"
@@ -125,9 +126,20 @@
     "piano": "sky",
     "riquadro": [
      315,
-     36,
+     48,
      324,
-     46
+     58
+    ],
+    "cosa": "una stella grande",
+    "azione": "vieta"
+   },
+   {
+    "piano": "sky",
+    "riquadro": [
+     443,
+     48,
+     452,
+     58
     ],
     "cosa": "una stella grande",
     "azione": "vieta"
@@ -136,9 +148,9 @@
     "piano": "sky",
     "riquadro": [
      242,
-     2,
+     14,
      251,
-     11
+     23
     ],
     "cosa": "una stella grande",
     "azione": "vieta"
@@ -147,9 +159,9 @@
     "piano": "sky",
     "riquadro": [
      223,
-     2,
+     14,
      232,
-     11
+     23
     ],
     "cosa": "una stella grande",
     "azione": "vieta"
@@ -157,25 +169,27 @@
    {
     "piano": "far",
     "riquadro": [
-     136,
+     174,
      0,
-     166,
-     124
+     204,
+     155
     ],
     "cosa": "le luci cyan della torre lontana (il cyan è solo di GIG)",
     "azione": "spegni"
    }
   ],
-  "fotogrammi_controllati": 366,
-  "luci_spente_in": 363,
-  "confronto_minimo": 0.847
+  "fotogrammi_controllati": 377,
+  "luci_spente_in": 374,
+  "luna_coperta_in": 376,
+  "luna_pixel_coperti_max": 212,
+  "confronto_minimo": 0.858
  },
  "eroe": {
   "video": [
    {
     "file": "eroe-2x.webm",
     "media": "(max-width: 699px)",
-    "type": "video/webm; codecs=\"vp09.01.30.08.03.01.01.01.00\"",
+    "type": "video/webm; codecs=\"vp09.01.31.08.03.01.01.01.00\"",
     "nota": "Lo stesso loop a 2x, per i telefoni: va per primo, con l'attributo media."
    },
    {
@@ -185,29 +199,29 @@
    },
    {
     "file": "eroe.mp4",
-    "type": "video/mp4; codecs=\"avc1.640029\"",
+    "type": "video/mp4; codecs=\"avc1.64002A\"",
     "nota": "H.264 High, 4:2:0: per tutti gli altri (Safari)."
    }
   ],
   "poster": "eroe-poster.png",
-  "larghezza": 1152,
-  "altezza": 648,
+  "larghezza": 1440,
+  "altezza": 810,
   "fps": 60,
-  "fotogrammi": 363,
-  "durata_s": 6.05,
+  "fotogrammi": 374,
+  "durata_s": 6.233,
   "audio": false,
   "segmenti": [
    [
-    696,
-    780
+    657,
+    741
    ],
    [
-    1140,
-    1283
+    1010,
+    1187
    ],
    [
-    560,
-    696
+    544,
+    657
    ]
   ],
   "alt_poster": {
@@ -215,49 +229,49 @@
    "en": "GIG lands a cyber-arm hook on the punk in the rain, under the KEBAB neon sign."
   },
   "descrizione": {
-   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù; poi compare VAI.",
-   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down; then VAI (“GO”) flashes up."
+   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.",
+   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down."
   },
   "nota": "Loop continuo: l'ultimo fotogramma precede il primo. Il poster è il primo fotogramma."
  },
  "gif": {
   "file": "docs/media/demo.gif",
-  "larghezza": 768,
-  "altezza": 432,
+  "larghezza": 960,
+  "altezza": 540,
   "fps": 20,
-  "fotogrammi": 122,
-  "durata_s": 6.1,
+  "fotogrammi": 125,
+  "durata_s": 6.25,
   "segmenti": [
    [
-    696,
-    780
+    657,
+    741
    ],
    [
-    1140,
-    1283
+    1010,
+    1187
    ],
    [
-    560,
-    696
+    544,
+    657
    ]
   ],
   "alt": {
-   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù; poi compare VAI.",
-   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down; then VAI (“GO”) flashes up."
+   "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.",
+   "en": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down."
   }
  },
  "schermate": [
   {
    "file": "schermate/combo.png",
-   "larghezza": 224,
-   "altezza": 190,
+   "larghezza": 280,
+   "altezza": 238,
    "scala": 1,
-   "fotogramma": 720,
+   "fotogramma": 662,
    "ritaglio": [
-    160,
-    26,
-    384,
-    216
+    200,
+    32,
+    480,
+    270
    ],
    "alt": {
     "it": "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
@@ -266,15 +280,15 @@
   },
   {
    "file": "schermate/cavo.png",
-   "larghezza": 264,
-   "altezza": 176,
+   "larghezza": 330,
+   "altezza": 220,
    "scala": 1,
-   "fotogramma": 1762,
+   "fotogramma": 1658,
    "ritaglio": [
-    120,
-    40,
-    384,
-    216
+    150,
+    50,
+    480,
+    270
    ],
    "alt": {
     "it": "Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
@@ -283,15 +297,15 @@
   },
   {
    "file": "schermate/arena.png",
-   "larghezza": 368,
-   "altezza": 156,
+   "larghezza": 460,
+   "altezza": 195,
    "scala": 1,
-   "fotogramma": 2744,
+   "fotogramma": 2750,
    "ritaglio": [
-    16,
-    60,
-    384,
-    216
+    20,
+    75,
+    480,
+    270
    ],
    "alt": {
     "it": "Nello slice, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
@@ -300,15 +314,15 @@
   },
   {
    "file": "schermate/presa.png",
-   "larghezza": 368,
-   "altezza": 156,
+   "larghezza": 460,
+   "altezza": 195,
    "scala": 1,
-   "fotogramma": 2914,
+   "fotogramma": 3004,
    "ritaglio": [
-    16,
-    60,
-    384,
-    216
+    20,
+    75,
+    480,
+    270
    ],
    "alt": {
     "it": "Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
@@ -320,7 +334,7 @@
   "file": "social.png",
   "larghezza": 1280,
   "altezza": 640,
-  "fotogramma": 696,
+  "fotogramma": 657,
   "alt": {
    "it": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa.",
    "en": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street."
@@ -332,8 +346,8 @@
    "json": "sprite/gig.json",
    "personaggio": "GIG",
    "cella": [
-    79,
-    102
+    100,
+    128
    ],
    "animazioni": [
     "guardia",
@@ -348,8 +362,8 @@
    "json": "sprite/punk.json",
    "personaggio": "Punk",
    "cella": [
-    74,
-    105
+    92,
+    130
    ],
    "animazioni": [
     "guardia",
@@ -362,8 +376,8 @@
    "json": "sprite/bruto.json",
    "personaggio": "Bruto",
    "cella": [
-    93,
-    115
+    115,
+    143
    ],
    "animazioni": [
     "guardia",
@@ -466,32 +480,32 @@
  "livello": [
   {
    "file": "livello/tetti.png",
-   "larghezza": 1152,
-   "altezza": 168,
+   "larghezza": 1440,
+   "altezza": 210,
    "fonte": "game/assets/env/sotto_la_linea/near.png"
   },
   {
    "file": "livello/tetti-luce.png",
-   "larghezza": 1152,
-   "altezza": 168,
+   "larghezza": 1440,
+   "altezza": 210,
    "fonte": "game/assets/env/sotto_la_linea/near_emis.png"
   },
   {
    "file": "livello/strada.png",
-   "larghezza": 940,
-   "altezza": 216,
+   "larghezza": 1175,
+   "altezza": 270,
    "x_nel_livello": [
-    52,
-    992
+    65,
+    1240
    ]
   },
   {
    "file": "livello/strada-luce.png",
-   "larghezza": 940,
-   "altezza": 216,
+   "larghezza": 1175,
+   "altezza": 270,
    "x_nel_livello": [
-    52,
-    992
+    65,
+    1240
    ]
   },
   {
@@ -499,10 +513,10 @@
    "larghezza": 92,
    "altezza": 24,
    "riquadro_nel_livello": [
-    626,
-    110,
-    718,
-    134
+    793,
+    141,
+    885,
+    165
    ]
   }
  ],
@@ -574,35 +588,35 @@
  "file": [
   {
    "file": "site/media/eroe-2x.webm",
-   "byte": 1078545
+   "byte": 1089644
   },
   {
    "file": "site/media/eroe.webm",
-   "byte": 2130336
+   "byte": 2199885
   },
   {
    "file": "site/media/eroe.mp4",
-   "byte": 2277533
+   "byte": 2515063
   },
   {
    "file": "site/media/eroe-poster.png",
-   "byte": 54625
+   "byte": 53615
   },
   {
    "file": "site/media/schermate/combo.png",
-   "byte": 25350
+   "byte": 25201
   },
   {
    "file": "site/media/schermate/cavo.png",
-   "byte": 21595
+   "byte": 22490
   },
   {
    "file": "site/media/schermate/arena.png",
-   "byte": 25647
+   "byte": 27323
   },
   {
    "file": "site/media/schermate/presa.png",
-   "byte": 22915
+   "byte": 25947
   },
   {
    "file": "site/media/ui/ritratto-gig.png",
@@ -614,11 +628,11 @@
   },
   {
    "file": "site/media/ui/ritratto-punk.png",
-   "byte": 936
+   "byte": 885
   },
   {
    "file": "site/media/ui/ritratto-bruto.png",
-   "byte": 975
+   "byte": 833
   },
   {
    "file": "site/media/ui/barra-cornice.png",
@@ -666,23 +680,23 @@
   },
   {
    "file": "site/media/livello/tetti.png",
-   "byte": 20471
+   "byte": 19440
   },
   {
    "file": "site/media/livello/tetti-luce.png",
-   "byte": 5216
+   "byte": 4288
   },
   {
    "file": "site/media/livello/strada.png",
-   "byte": 57639
+   "byte": 58295
   },
   {
    "file": "site/media/livello/strada-luce.png",
-   "byte": 7568
+   "byte": 6755
   },
   {
    "file": "site/media/livello/revenge.png",
-   "byte": 946
+   "byte": 835
   },
   {
    "file": "site/media/logo/logo-1x.png",
@@ -722,44 +736,44 @@
   },
   {
    "file": "site/media/sprite/gig.png",
-   "byte": 26272
+   "byte": 27603
   },
   {
    "file": "site/media/sprite/gig.json",
-   "byte": 2850
+   "byte": 2855
   },
   {
    "file": "site/media/sprite/gig-normali.png",
-   "byte": 107302
+   "byte": 128512
   },
   {
    "file": "site/media/sprite/gig-spento.png",
-   "byte": 26328
+   "byte": 27605
   },
   {
    "file": "site/media/sprite/punk.png",
-   "byte": 24907
+   "byte": 25432
   },
   {
    "file": "site/media/sprite/punk.json",
-   "byte": 2555
+   "byte": 2556
   },
   {
    "file": "site/media/sprite/bruto.png",
-   "byte": 29910
+   "byte": 29439
   },
   {
    "file": "site/media/sprite/bruto.json",
-   "byte": 2629
+   "byte": 2634
   },
   {
    "file": "site/media/social.png",
-   "byte": 56832
+   "byte": 47676
   },
   {
    "file": "docs/media/demo.gif",
-   "byte": 1713821
+   "byte": 2258597
   }
  ],
- "totale_byte": 7750400
+ "totale_byte": 8630105
 }

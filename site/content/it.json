@@ -216,7 +216,7 @@
   "titolo": "Retro, con la tecnologia di oggi",
   "sotto": "La pixel art è lo stile, non un limite d’epoca.",
   "paragrafi": [
-   "Il gioco gira a 384×216 pixel, ingranditi a multipli interi, e usa le tecniche di oggi dove rendono meglio. Nello slice ci sono già le luci dinamiche con le normal map sui personaggi, scintille e particelle, l’hitstop sui colpi e il rallentatore sull’ultimo KO; nel gioco completo sono ammessi anche telecamera fluida, shader e deformazioni.",
+   "Il gioco gira a 480×270 pixel, ingranditi a multipli interi, e usa le tecniche di oggi dove rendono meglio. Nello slice ci sono già le luci dinamiche con le normal map sui personaggi, scintille e particelle, l’hitstop sui colpi e il rallentatore sull’ultimo KO; nel gioco completo sono ammessi anche telecamera fluida, shader e deformazioni.",
    "Le scene a fumetto, cioè l’introduzione e gli intermezzi, sono i murales di Totò: pixel art con lo stile della street art, sfumature a spray, colature, contorni grossi e colori neon. La telecamera scorre lungo il muro e le vignette si animano con parallasse, luci e particelle. Lo stile dei murales è ancora in prova, e anche quello degli sprite può cambiare: è tutto in lavorazione.",
    "Anche questo sito segue le stesse regole: ogni pixel della grafica è un pixel del gioco, ingrandito di un multiplo intero dei pixel dello schermo, e la nube e la polvere le disegna il codice della pagina, con la matrice di Bayer dei giochi di una volta."
   ],

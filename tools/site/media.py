@@ -23,7 +23,7 @@ Come lavora:
 1. copia game/ in %USERPROFILE%/ctrlaltrevenge-lab/sito/godot, senza .godot/ né
    assets_private/, e la importa: le catture non toccano il repository;
 2. registra il replay tests/replays/demo.json con Movie Maker (tools/run_godot.sh, --write-movie,
-   --fixed-fps 60): un PNG 384x216 per tick in sito/media/cattura. La musica resta fuori:
+   --fixed-fps 60): un PNG 480x270 per tick in sito/media/cattura. La musica resta fuori:
    Godot non vede la cartella music del laboratorio e il WAV della registrazione si cancella;
 3. controlla le zone vietate (VIETATI, qui sotto): per ogni fotogramma usato trova dove sta la
    telecamera confrontando la cattura con il piano della strada (backdrop.png), ricostruisce dove
@@ -35,14 +35,14 @@ Come lavora:
    accorge dalle misure dei piani e le zone vanno ridisegnate;
 4. con Pillow e l'FFmpeg del laboratorio prepara, ingrandendo solo per multipli interi e con il
    vicino più prossimo (pixel netti):
-   - site/media/eroe.webm, eroe.mp4, eroe-poster.png: loop di circa 6 s a 3x (1152x648, 60 fps),
+   - site/media/eroe.webm, eroe.mp4, eroe-poster.png: loop di circa 6 s a 3x (1440x810, 60 fps),
      solo la rissa davanti al KEBAB. WebM VP9 profilo 1 in 4:4:4: il colore non si dimezza e i
      bordi dei pixel restano netti (Chrome ed Edge; chi non lo decodifica lo capisce dal tipo
      MIME e passa all'MP4); MP4 H.264 High in 4:2:0 per tutti gli altri (Safari). Senza audio;
-   - site/media/eroe-2x.webm: lo stesso loop a 2x (768x432) per i telefoni (<source media>): sui
+   - site/media/eroe-2x.webm: lo stesso loop a 2x (960x540) per i telefoni (<source media>): sui
      telefoni il gioco sta a 2 pixel del dispositivo per pixel del gioco, quindi è a 1:1, pesa
      meno e costa meno decodificarlo;
-   - docs/media/demo.gif: GIF del README a 2x (768x432), 20 fotogrammi al secondo, al massimo 3 MB;
+   - docs/media/demo.gif: GIF del README a 2x (960x540), 20 fotogrammi al secondo, al massimo 3 MB;
    - site/media/schermate/*.png: ritagli a 1x (il sito li ingrandisce a multipli interi);
    - docs/media/schermate/*-2x.png: gli stessi ritagli a 2x, per il README (GitHub non li
      ingrandisce a pixel netti: il README li mostra a metà, netti su ogni schermo);
@@ -103,10 +103,10 @@ SITE_MEDIA = ROOT / "site" / "media"
 DOCS_MEDIA = ROOT / "docs" / "media"
 MANIFEST = SITE_MEDIA / "media.json"
 
-VIEW_W, VIEW_H = 384, 216
+VIEW_W, VIEW_H = 480, 270
 TICKS = 60
 REPLAY = "res://tests/replays/demo.json"
-ATTESO_TICK_FINE = 4092          # "Livello finito: ... tick 4092" del replay dimostrativo, seme 13
+ATTESO_TICK_FINE = 3841          # "Livello finito: ... tick 3841" del replay dimostrativo, seme 13
 
 MAX_FILE = 4 * 1024 * 1024
 MAX_TOTALE = 15 * 1024 * 1024
@@ -117,12 +117,13 @@ MAX_GIF = 3 * 1024 * 1024
 # Intervalli [primo, ultimo escluso].
 
 # Loop dell'eroe: solo la rissa davanti al KEBAB, l'unico tratto dello slice senza FARMACIA, HOTEL,
-# CINEMA, luna e stelle (lo verifica controlla_zone). Comincia e finisce dentro la stessa combo
-# (695 -> 696), così il giro è continuo, e il primo fotogramma, il gancio cyber, fa da poster.
+# CINEMA e stelle (lo verifica controlla_zone; l'orlo della luna che spunta fra i palazzi si copre).
+# La telecamera sta ferma dal 513 al 1186. Comincia e finisce dentro la stessa combo (656 -> 657), così
+# il giro è continuo, e il primo fotogramma, il gancio cyber che solleva il punk, fa da poster.
 EROE = [
-    (696, 780),    # gancio cyber e calcio: il punk vola via
-    (1140, 1283),  # secondo scambio e il punk va giù (dal 1283 la telecamera riparte verso la FARMACIA)
-    (560, 696),    # il punk arriva: jab, jab... e si ricomincia dal gancio
+    (657, 741),    # gancio cyber e calcio: il punk vola via e resta a terra
+    (1010, 1187),  # secondo scambio e il punk va giù (dal 1187 compare VAI e la telecamera riparte verso la FARMACIA)
+    (544, 657),    # il punk arriva: jab, jab... e si ricomincia dal gancio
 ]
 EROE_SCALA = 3
 EROE_SCALA_PICCOLO = 2           # eroe-2x.webm, per i telefoni
@@ -139,27 +140,27 @@ GIF_SCALA = 2
 # I ritagli tengono fuori le zone vietate (lo verifica controlla_zone); nell'arena si taglia sotto
 # la luna e il cartellone CINEMA, e a sinistra l'insegna HOTEL.
 SCHERMATE = [
-    ("combo", 720, (160, 26, 384, 216),   # senza l'HUD: l'insegna KEBAB e il calcio sul punk
+    ("combo", 662, (200, 32, 480, 270),   # senza l'HUD: l'insegna KEBAB e il calcio sul punk
      "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
      "In the slice: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."),
-    ("cavo", 1762, (120, 40, 384, 216),
+    ("cavo", 1658, (150, 50, 480, 270),
      "Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
      "In the slice: GIG leaps over a live power cable sparking in a puddle."),
-    ("arena", 2744, (16, 60, 384, 216),
+    ("arena", 2750, (20, 75, 480, 270),
      "Nello slice, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
      "In the slice, in the arena: GIG's kick sends the punk crashing into the brute."),
-    ("presa", 2914, (16, 60, 384, 216),
+    ("presa", 3004, (20, 75, 480, 270),
      "Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
      "In the slice: GIG holds the brute in a grab and drives a knee into him."),
 ]
 
-# Anteprima social 1280x640: il fotogramma a 3x (1152x648) spostato a destra di 128 px e tagliato di
-# 4 px sopra e sotto, con una fascia scura retinata a sinistra; il logo a 2x copre l'HUD.
-SOCIAL_FOTOGRAMMA = 696
+# Anteprima social 1280x640: il fotogramma a 3x (1440x810) spostato a sinistra di 160 px (la rissa è a
+# destra) e tagliato di 90 px sopra e 80 sotto; a sinistra sfuma a scacchi nella notte e il logo a 2x copre l'HUD.
+SOCIAL_FOTOGRAMMA = 657
 SOCIAL_SCALA = 3
-SOCIAL_SPOSTA = (128, -4)
+SOCIAL_SPOSTA = (-160, -90)
 SOCIAL_LOGO = (40, 28, 2)        # x, y, scala
-SOCIAL_HUD = [(0, 0, 156, 42), (328, 0, 384, 16)]   # l'HUD nel fotogramma: ritratto e barre, punteggio
+SOCIAL_HUD = [(0, 0, 156, 42), (424, 0, 480, 16)]   # l'HUD nel fotogramma: ritratto e barre, punteggio
 
 # Strisce degli sprite: (file, nome sul sito, atlante, [(animazione sul sito, animazione, AttackData)]).
 SPRITE = [
@@ -179,9 +180,9 @@ METALLO = [(0x3a, 0x33, 0x52), (0x58, 0x50, 0x73), (0x8e, 0x86, 0xab), (0xc9, 0x
 ALT_EROE = ("GIG colpisce il punk con il gancio del braccio cyber, sotto la pioggia, davanti all'insegna KEBAB.",
             "GIG lands a cyber-arm hook on the punk in the rain, under the KEBAB neon sign.")
 DESCR_VIDEO = ("Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine "
-               "va giù; poi compare VAI.",
+               "va giù.",
                "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes "
-               "down; then VAI (“GO”) flashes up.")
+               "down.")
 ALT_SOCIAL = ("Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa.",
               "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street.")
 
@@ -189,32 +190,36 @@ ALT_SOCIAL = ("Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con i
 # Quello che il sito non deve mostrare (elenco "vietato" del brief del sito e giudizi dei prototipi),
 # in coordinate dei piani di game/assets/env/sotto_la_linea/layers.json: (piano, x0, y0, x1, y1, cosa,
 # azione). Con "vieta" lo script si ferma se in un ritaglio usato se ne vede anche un pixel; con
-# "spegni" i pixel cyan che si vedono prendono il colore scuro del piano lì accanto (luci spente).
+# "spegni" i pixel cyan che si vedono prendono il colore scuro del piano lì accanto (luci spente); con
+# "copri" i pixel della cosa che si vedono prendono il colore del fondo del riquadro (il cielo vuoto).
+# La luna si copre: a 480x270, nella rissa davanti al KEBAB, fra i palazzi ne spunta l'orlo in alto a
+# sinistra (una cinquantina di pixel scuri) e la telecamera lì sta ferma; nei ritagli dell'arena resta fuori.
 LIVELLO = GAME / "assets" / "env" / "sotto_la_linea"
 VIETATI = [
-    ("backdrop", 0, 98, 52, 134, "il graffito GIG", "vieta"),
-    ("backdrop", 994, 16, 1147, 60, "la FARMACIA con la croce rossa (emblema protetto)", "vieta"),
-    ("backdrop", 1478, 22, 1548, 140, "l'insegna HOTEL", "vieta"),
-    ("near", 470, 24, 568, 68, "il cartellone HOTEL", "vieta"),
-    ("near", 998, 16, 1109, 47, "il cartellone CINEMA", "vieta"),
-    ("near", 450, 138, 472, 168, "l'insegna rossa verticale dei tetti", "vieta"),
-    ("mid", 578, 50, 614, 122, "le insegne HOTEL e BAR del piano medio", "vieta"),
-    ("sky", 192, 18, 232, 60, "la luna", "vieta"),
-    ("sky", 59, 36, 68, 46, "una stella grande", "vieta"),
-    ("sky", 169, 37, 178, 47, "una stella grande", "vieta"),
-    ("sky", 315, 36, 324, 46, "una stella grande", "vieta"),
-    ("sky", 242, 2, 251, 11, "una stella grande", "vieta"),
-    ("sky", 223, 2, 232, 11, "una stella grande", "vieta"),
-    ("far", 136, 0, 166, 124, "le luci cyan della torre lontana (il cyan è solo di GIG)", "spegni"),
+    ("backdrop", 0, 122, 65, 168, "il graffito GIG", "vieta"),
+    ("backdrop", 1242, 20, 1434, 75, "la FARMACIA con la croce rossa (emblema protetto)", "vieta"),
+    ("backdrop", 1820, 28, 1936, 176, "l'insegna HOTEL", "vieta"),
+    ("near", 588, 30, 710, 85, "il cartellone HOTEL", "vieta"),
+    ("near", 1248, 20, 1388, 60, "il cartellone CINEMA", "vieta"),
+    ("near", 562, 172, 590, 210, "l'insegna rossa verticale dei tetti", "vieta"),
+    ("mid", 646, 50, 682, 122, "le insegne HOTEL e BAR del piano medio", "vieta"),
+    ("sky", 192, 30, 232, 72, "la luna", "copri"),
+    ("sky", 59, 48, 68, 58, "una stella grande", "vieta"),
+    ("sky", 169, 49, 178, 59, "una stella grande", "vieta"),
+    ("sky", 315, 48, 324, 58, "una stella grande", "vieta"),
+    ("sky", 443, 48, 452, 58, "una stella grande", "vieta"),
+    ("sky", 242, 14, 251, 23, "una stella grande", "vieta"),
+    ("sky", 223, 14, 232, 23, "una stella grande", "vieta"),
+    ("far", 174, 0, 204, 155, "le luci cyan della torre lontana (il cyan è solo di GIG)", "spegni"),
 ]
 # Misure attese dei piani: se cambiano, la strada è stata rifatta e le zone vanno ricontrollate.
-MISURE_PIANI = {"sky": (384, 216), "far": (576, 124), "mid": (768, 209), "near": (1152, 168),
-                "backdrop": (1920, 149), "floor": (1920, 86), "fg": (2304, 26)}
+MISURE_PIANI = {"sky": (480, 270), "far": (720, 155), "mid": (960, 259), "near": (1440, 210),
+                "backdrop": (2400, 187), "floor": (2400, 108), "fg": (2880, 33)}
 MARGINE = 3                      # px di sicurezza attorno ai ritagli: scossoni e arrotondamenti
 
 # Tratto di strada del sito (backdrop e floor): dopo il graffito GIG, prima della FARMACIA.
-STRADA_X = (52, 992)
-REVENGE = (626, 110, 718, 134)   # il graffito REVENGE sul tavolato dei lavori, con un filo di margine
+STRADA_X = (65, 1240)
+REVENGE = (793, 141, 885, 165)   # il graffito REVENGE sul tavolato dei lavori, con un filo di margine
 
 
 def log(msg: str) -> None:
@@ -294,6 +299,7 @@ def frame(k: int) -> Image.Image:
     """Il fotogramma k per il sito: quello della cattura, con le luci cyan della torre spente."""
     if k not in _frame_cache:
         a = raw_frame(k).copy()
+        livello().copri(k, a)
         livello().spegni(k, a)
         _frame_cache[k] = Image.fromarray(a, "RGB")
     return _frame_cache[k]
@@ -329,7 +335,7 @@ class Livello:
     lo scossone della telecamera, uguale per tutti i piani. Serve a sapere che cosa si vede in ogni
     fotogramma della cattura senza guardarlo."""
 
-    RIGHE = np.arange(40, 128, 3)        # righe della strada (sopra il marciapiede) per trovare la telecamera
+    RIGHE = np.arange(50, 160, 3)        # righe della strada (sopra il marciapiede) per trovare la telecamera
 
     def __init__(self) -> None:
         spec = json.loads((LIVELLO / "layers.json").read_text(encoding="utf-8"))
@@ -361,6 +367,18 @@ class Livello:
                     break
         self.far_cyan = cyan
         self.far_spenta = spenta
+        # Le zone "copri": il colore del fondo (il più frequente nel riquadro) e i pixel della cosa da coprire.
+        self.copri_dati: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+        for i, (nome, zx0, zy0, zx1, zy1, _, azione) in enumerate(VIETATI):
+            if azione != "copri":
+                continue
+            img = self.piani[nome]["img"]
+            riq = img[zy0:zy1, zx0:zx1, :3].reshape(-1, 3)
+            colori, quanti = np.unique(riq, axis=0, return_counts=True)
+            fondo = colori[int(np.argmax(quanti))]
+            segno = np.zeros(img.shape[:2], bool)
+            segno[zy0:zy1, zx0:zx1] = np.any(img[zy0:zy1, zx0:zx1, :3] != fondo, axis=-1)
+            self.copri_dati[i] = (fondo, segno)
 
     # ---- dove sta la telecamera
     def _punteggio(self, f: np.ndarray, x: int, dy: int) -> float:
@@ -405,7 +423,7 @@ class Livello:
         return -_round_half_away(cam * l["scroll"]), l["y"] + dy
 
     def coperto(self, nome: str, k: int, cache: dict | None = None) -> np.ndarray:
-        """Maschera 216x384 dei pixel coperti dai piani davanti a `nome` (HUD e personaggi esclusi)."""
+        """Maschera VIEW_H x VIEW_W dei pixel coperti dai piani davanti a `nome` (HUD e personaggi esclusi)."""
         if cache is not None and (nome, k) in cache:
             return cache[(nome, k)]
         z = self.piani[nome]["z"]
@@ -425,7 +443,7 @@ class Livello:
         return out
 
     def visibili(self, zona: tuple, k: int, cache: dict | None = None) -> np.ndarray:
-        """Maschera 216x384 dei pixel della zona che si vedono nel fotogramma k."""
+        """Maschera VIEW_H x VIEW_W dei pixel della zona che si vedono nel fotogramma k."""
         nome, zx0, zy0, zx1, zy1 = zona[:5]
         l = self.piani[nome]
         ox, oy = self.posizione(nome, k)
@@ -438,6 +456,25 @@ class Livello:
         if y0 < y1 and x0 < x1:
             out[y0:y1, x0:x1] = a[y0 - oy:y1 - oy, x0 - ox:x1 - ox]
         return out & ~self.coperto(nome, k, cache)
+
+    def copri(self, k: int, a: np.ndarray) -> int:
+        """Copre nel fotogramma (array RGB) le zone "copri" con il loro fondo; restituisce i pixel cambiati.
+        Si toccano solo i pixel uguali a quelli del piano: pioggia, personaggi ed effetti davanti restano."""
+        cambiati = 0
+        for i, (fondo, segno) in self.copri_dati.items():
+            zona = VIETATI[i]
+            vis = self.visibili(zona, k)
+            if not vis.any():
+                continue
+            ox, oy = self.posizione(zona[0], k)
+            img = self.piani[zona[0]]["img"]
+            ys, xs = np.nonzero(vis)
+            fy, fx = ys - oy, xs - ox
+            uguali = np.abs(a[ys, xs].astype(int) - img[fy, fx, :3].astype(int)).sum(-1) < 12
+            sel = segno[fy, fx] & uguali
+            a[ys[sel], xs[sel]] = fondo
+            cambiati += int(sel.sum())
+        return cambiati
 
     def spegni(self, k: int, a: np.ndarray) -> int:
         """Spegne nel fotogramma (array RGB) le luci delle zone "spegni"; restituisce i pixel cambiati."""
@@ -524,16 +561,22 @@ def step_controllo() -> dict:
     if errori:
         sys.exit("Zone vietate nei media:\n  " + "\n  ".join(errori) +
                  "\nCambia i momenti o i ritagli in tools/site/media.py (EROE, GIF, SCHERMATE, SOCIAL, STRADA_X).")
-    spenti = {}
+    spenti, coperti = {}, {}
     for k in sorted({k for _, frames, _ in usi for k in frames}):
-        n = lv.spegni(k, raw_frame(k).copy())
+        a = raw_frame(k).copy()
+        c = lv.copri(k, a)
+        n = lv.spegni(k, a)
         if n:
             spenti[k] = n
+        if c:
+            coperti[k] = c
     qualita = min(lv.stime[k][2] for k in lv.stime)
     log(f"controllo: {len(lv.stime)} fotogrammi, nessuna zona vietata in vista (confronto minimo {qualita:.2f}); "
-        f"luci della torre spente in {len(spenti)} fotogrammi")
+        f"luci della torre spente in {len(spenti)} fotogrammi; luna coperta in {len(coperti)} fotogrammi "
+        f"(al massimo {max(coperti.values(), default=0)} pixel)")
     return {"zone": [{"piano": z[0], "riquadro": list(z[1:5]), "cosa": z[5], "azione": z[6]} for z in VIETATI],
             "fotogrammi_controllati": len(lv.stime), "luci_spente_in": len(spenti),
+            "luna_coperta_in": len(coperti), "luna_pixel_coperti_max": max(coperti.values(), default=0),
             "confronto_minimo": round(qualita, 3)}
 
 
@@ -587,7 +630,7 @@ def step_copia() -> None:
 
 
 def step_cattura(forza: bool) -> dict:
-    """Registra il replay dimostrativo con Movie Maker: un PNG 384x216 per tick."""
+    """Registra il replay dimostrativo con Movie Maker: un PNG 480x270 per tick."""
     if FRAMES.exists():
         rmtree(FRAMES)
     FRAMES.mkdir(parents=True)
@@ -700,7 +743,7 @@ def step_video(out: dict) -> None:
     log(f"video: {len(frames)} fotogrammi ({len(frames) / TICKS:.2f} s), H.264...")
     ffmpeg(["-vf", up_rgb + ",format=yuv420p," + bt709, "-c:v", "libx264", "-preset", "veryslow", "-crf", str(EROE_CRF_H264),
             "-x264-params", "no-deblock=1:aq-mode=3:psy-rd=1.0,0.25", "-g", "120", "-profile:v", "high",
-            "-level:v", "4.1", "-pix_fmt", "yuv420p", *tags, "-movflags", "+faststart", "-an", str(mp4)], frames)
+            "-level:v", "4.2", "-pix_fmt", "yuv420p", *tags, "-movflags", "+faststart", "-an", str(mp4)], frames)
     log("video: VP9 4:4:4, due passate...")
     passlog = MEDIA_WORK / "vp9"
     vp9 = ["-vf", up_rgb + ",format=yuv444p," + bt709, "-c:v", "libvpx-vp9", "-profile:v", "1", "-pix_fmt", "yuv444p",
@@ -807,14 +850,16 @@ def step_social(out: dict) -> None:
         dx = np.maximum(np.maximum(x0 - xx, xx - (x1 - 1)), 0)
         dy = np.maximum(np.maximum(y0 - yy, yy - (y1 - 1)), 0)
         dist = np.minimum(dist, np.hypot(dx, dy))
-    soglia = np.tile(BAYER4, (VIEW_H // 4, VIEW_W // 4))
+    soglia = np.tile(BAYER4, (-(-VIEW_H // 4), -(-VIEW_W // 4)))[:VIEW_H, :VIEW_W]
     f[np.clip(1 - dist / 14, 0, 1) > soglia] = notte
     big = up(Image.fromarray(f, "RGB"), s).convert("RGBA")
-    # sfumatura a scacchi sui primi 40 pixel del gioco a sinistra, calcolata a 1x e poi ingrandita
+    # sfumatura a scacchi sui primi 40 pixel del gioco che si vedono a sinistra, calcolata a 1x e poi ingrandita
     w = 40
+    x0 = max(0, -(sx // s))                     # prima colonna del gioco che entra nell'anteprima
     a = np.ones((VIEW_H, VIEW_W), float)
-    a[:, :w] = (np.arange(w) + 0.5) / w
-    soglia = np.tile(BAYER4, (VIEW_H // 4, VIEW_W // 4))
+    a[:, :x0] = 0
+    a[:, x0:x0 + w] = (np.arange(w) + 0.5) / w
+    soglia = np.tile(BAYER4, (-(-VIEW_H // 4), -(-VIEW_W // 4)))[:VIEW_H, :VIEW_W]
     alpha = Image.fromarray(np.where(a > soglia, 255, 0).astype(np.uint8), "L").resize(big.size, Image.NEAREST)
     big.putalpha(alpha)
     card.alpha_composite(big, (sx, sy))
@@ -890,8 +935,9 @@ def senza_zone(nome: str, im: Image.Image) -> Image.Image:
 
 def step_livello(out: dict) -> None:
     """Pezzi veri del livello per il sito: i tetti (near) senza i cartelloni e un tratto di strada
-    (backdrop sopra, floor da y 130) senza le zone vietate, ognuno con la sua mappa emissiva."""
-    livello()                                   # controlla le misure dei piani
+    (backdrop sopra, floor alla sua y di layers.json) senza le zone vietate, ognuno con la sua mappa emissiva."""
+    lv = livello()                              # controlla le misure dei piani
+    pav_y = lv.piani["floor"]["y"]
     items = []
     for src, dst in [("near.png", "tetti.png"), ("near_emis.png", "tetti-luce.png")]:
         im = senza_zone("near", rgba(LIVELLO / src))
@@ -903,7 +949,7 @@ def step_livello(out: dict) -> None:
                            ("backdrop_emis.png", "floor_emis.png", "strada-luce.png")]:
         tela = Image.new("RGBA", (MISURE_PIANI["backdrop"][0], VIEW_H), (0, 0, 0, 0))
         tela.alpha_composite(senza_zone("backdrop", rgba(LIVELLO / base)), (0, 0))
-        tela.alpha_composite(senza_zone("floor", rgba(LIVELLO / pav)), (0, 130))
+        tela.alpha_composite(senza_zone("floor", rgba(LIVELLO / pav)), (0, pav_y))
         im = tela.crop((x0, 0, x1, VIEW_H))
         p = SITE_MEDIA / "livello" / dst
         save_png(im, p)

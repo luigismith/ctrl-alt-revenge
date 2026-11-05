@@ -259,12 +259,12 @@
 				<div class="strada__cielo"></div>
 				<div class="strada__tetti"><div class="tetti"></div><div class="tetti tetti--luce"></div></div>
 				<div class="strada__via">
-					<img class="px" src="{{ pagina.radice }}media/livello/strada.png" width="940" height="216" alt="" loading="lazy" decoding="async">
-					<img class="px strada__luce" src="{{ pagina.radice }}media/livello/strada-luce.png" width="940" height="216" alt="" loading="lazy" decoding="async">
-					<span class="sprite specchio" data-sprite="punk" data-x="790" data-y="178" style="--x:790;--y:178"></span>
-					<span class="sprite specchio" data-sprite="bruto" data-x="850" data-y="192" style="--x:850;--y:192"></span>
+					<img class="px" src="{{ pagina.radice }}media/livello/strada.png" width="1175" height="270" alt="" loading="lazy" decoding="async">
+					<img class="px strada__luce" src="{{ pagina.radice }}media/livello/strada-luce.png" width="1175" height="270" alt="" loading="lazy" decoding="async">
+					<span class="sprite specchio" data-sprite="punk" data-x="988" data-y="222" style="--x:988;--y:222"></span>
+					<span class="sprite specchio" data-sprite="bruto" data-x="1062" data-y="240" style="--x:1062;--y:240"></span>
 				</div>
-				<span class="sprite strada__gig" data-sprite="gig" data-y="188"></span>
+				<span class="sprite strada__gig" data-sprite="gig" data-y="235"></span>
 				<span class="vai px"></span>
 			</div>
 			<figcaption class="strada__didascalia">{{ t.mondo.strada.didascalia }}</figcaption>
@@ -427,7 +427,7 @@
 				</div>
 				<figure class="luce" aria-labelledby="luce-t">
 					<div class="luce__palco">
-						<canvas class="luce__tela px" width="120" height="120" role="img" aria-label="{{ t.tecnica.luce.label }}" aria-describedby="luce-t"></canvas>
+						<canvas class="luce__tela px" width="150" height="150" role="img" aria-label="{{ t.tecnica.luce.label }}" aria-describedby="luce-t"></canvas>
 					</div>
 					<div class="luce__comandi" role="group" aria-label="{{ t.tecnica.luce.gruppo }}">
 						{% for v in t.tecnica.luce.viste %}<button type="button" class="bottone bottone--piccolo" data-vista="{{ v.id }}" aria-pressed="{% if loop.first %}true{% else %}false{% endif %}">{{ v.testo | pixel }}</button>

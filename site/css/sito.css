@@ -429,12 +429,12 @@ html.js .hud--stretto .hud__nav a { padding: 12px 0; }
 
 /* Il gioco al centro, anche quando sborda di qualche pixel del gioco (telefoni da 375 px): i lati si tagliano. */
 .eroe__gioco {
-	position: relative; margin: 0; width: calc(384 * var(--pw));
-	justify-self: start; margin-left: calc((100% - 384 * var(--pw)) / 2);
+	position: relative; margin: 0; width: calc(480 * var(--pw));
+	justify-self: start; margin-left: calc((100% - 480 * var(--pw)) / 2);
 }
 .eroe__video {
 	position: relative; z-index: 1;
-	width: calc(384 * var(--pw)); height: calc(216 * var(--pw));
+	width: calc(480 * var(--pw)); height: calc(270 * var(--pw));
 	max-width: none;
 	background: var(--notte);
 	object-fit: fill;
@@ -447,8 +447,8 @@ html.js .hud--stretto .hud__nav a { padding: 12px 0; }
 .eroe__tetti {
 	position: absolute; z-index: 0;
 	left: calc(50% - 50cqw); width: 100cqw;
-	top: calc(var(--pw) * -62);
-	height: calc(140 * var(--pw));
+	top: calc(var(--pw) * -78);
+	height: calc(175 * var(--pw));
 	transform: translate3d(0, var(--par-tetti, 0px), 0);
 	-webkit-mask-image: var(--maschera-tetti, none);
 	mask-image: var(--maschera-tetti, none);
@@ -458,20 +458,20 @@ html.js .hud--stretto .hud__nav a { padding: 12px 0; }
 	mask-repeat: repeat-x;
 }
 .eroe__didascalia { position: relative; z-index: 2; color: var(--crema-2); padding: 10px 0 20px; font-size: 1rem; }
-@media (max-width: 899px) { .eroe__didascalia { padding-inline: max(var(--margine), calc((384 * var(--pw) - 100cqw) / 2 + var(--margine))); } }
+@media (max-width: 899px) { .eroe__didascalia { padding-inline: max(var(--margine), calc((480 * var(--pw) - 100cqw) / 2 + var(--margine))); } }
 
 /* i tetti dei Tamburi (near.png senza i cartelloni), con le finestre che bruciano un po' */
 .tetti {
 	position: absolute; inset: 0;
 	background: url("../media/livello/tetti.png") repeat-x;
-	background-size: calc(1152 * var(--pw)) calc(168 * var(--pw));
+	background-size: calc(1440 * var(--pw)) calc(210 * var(--pw));
 	background-position: var(--tetti-x, 0px) 0;
 	image-rendering: pixelated;
 }
-/* al centro dell'eroe, il tetto con il serbatoio (700 pixel del gioco dentro i tetti), a passi interi */
+/* al centro dell'eroe, il tetto con il serbatoio (875 pixel del gioco dentro i tetti), a passi interi */
 .eroe__tetti .tetti {
-	background-position: calc(50cqw - 700 * var(--pw)) 0;
-	background-position: round(nearest, calc(50cqw - 700 * var(--pw)), var(--pw)) 0;
+	background-position: calc(50cqw - 875 * var(--pw)) 0;
+	background-position: round(nearest, calc(50cqw - 875 * var(--pw)), var(--pw)) 0;
 }
 .tetti--luce {
 	background-image: url("../media/livello/tetti-luce.png");
@@ -500,20 +500,20 @@ html[data-movimento="si"] .eroe__logo img { animation: accensione 1.6s steps(1, 
 	.eroe .eroe__azioni { justify-self: stretch; }
 	.eroe__azioni .bottoni { flex-direction: column; }
 	.eroe__azioni .bottone { width: 100%; }
-	.eroe__gioco { margin-top: calc(var(--pw) * 62); }
-	.eroe__didascalia { padding-inline: max(12px, calc((384 * var(--pw) - 100cqw) / 2 + 12px)); }
+	.eroe__gioco { margin-top: calc(var(--pw) * 78); }
+	.eroe__didascalia { padding-inline: max(12px, calc((480 * var(--pw) - 100cqw) / 2 + 12px)); }
 }
 
 /* ------------------------------------------------------------------ sprite (strisce di media.py) */
 .sprite {
 	position: absolute; display: block;
-	width: calc(var(--cw, 79) * var(--s));
-	height: calc(var(--ch, 102) * var(--s));
-	left: calc((var(--x, 0) - var(--px0, 33)) * var(--s));
-	top: calc((var(--y, 0) - var(--py0, 93)) * var(--s));
+	width: calc(var(--cw, 100) * var(--s));
+	height: calc(var(--ch, 128) * var(--s));
+	left: calc((var(--x, 0) - var(--px0, 41)) * var(--s));
+	top: calc((var(--y, 0) - var(--py0, 116)) * var(--s));
 	background-image: var(--img);
 	background-repeat: no-repeat;
-	background-size: calc(var(--iw, 632) * var(--s)) calc(var(--ih, 306) * var(--s));
+	background-size: calc(var(--iw, 800) * var(--s)) calc(var(--ih, 384) * var(--s));
 	background-position: calc(var(--fx, 0) * var(--s) * -1) calc(var(--fy, 0) * var(--s) * -1);
 	image-rendering: pixelated;
 	pointer-events: none;
@@ -594,7 +594,7 @@ html:not(.js) .muro__frecce button { display: none; }
 .cartellone__arte {
 	position: relative;
 	display: grid; place-items: center;
-	min-height: calc(var(--pm) * 120);
+	min-height: calc(var(--pm) * 150);
 	padding: calc(var(--pm) * 8);
 	overflow: hidden;
 	/* spray: una sfumatura della bomboletta, con le goccioline più chiare dove la vernice è più carica */
@@ -661,7 +661,7 @@ html:not(.js) .muro__frecce button { display: none; }
 .arte-nube { width: 100%; height: 100%; }
 /* i tetti dei Tamburi sotto la nube, come nell'eroe */
 .arte-citta__tetti { position: absolute; left: 0; right: 0; bottom: 0; height: calc(34 * var(--pm)); --pw: var(--pm); }
-.arte-citta__tetti .tetti { background-position: calc(var(--pm) * -600) calc(var(--pm) * -66); }
+.arte-citta__tetti .tetti { background-position: calc(var(--pm) * -750) calc(var(--pm) * -82); }
 .maxischermo {
 	position: absolute; right: calc(var(--pm) * 10); bottom: calc(var(--pm) * 10);
 	display: grid; gap: 2px; padding: 8px 12px 10px;
@@ -672,11 +672,11 @@ html:not(.js) .muro__frecce button { display: none; }
 .maxischermo__marchio { font: 200 1.6rem / 1 system-ui, "Segoe UI", Roboto, Arial, sans-serif; font-style: normal; letter-spacing: 0.08em; color: #1c2a44; }
 .maxischermo__marchio span { color: var(--menta-scura); font-weight: 400; }
 
-.palchetto { position: relative; width: calc(79 * var(--pm)); height: calc(102 * var(--pm)); }
+.palchetto { position: relative; width: calc(var(--cw, 100) * var(--pm)); height: calc(var(--ch, 128) * var(--pm)); }
 .palchetto .sprite { left: 0; top: 0; }
-.palchetto--due { width: calc(170 * var(--pm)); height: calc(115 * var(--pm)); }
-.palchetto--due .sprite:nth-child(1) { left: 0; top: calc(var(--pm) * 10); }
-.palchetto--due .sprite:nth-child(2) { left: calc(var(--pm) * 74); top: 0; }
+.palchetto--due { width: calc(213 * var(--pm)); height: calc(144 * var(--pm)); }
+.palchetto--due .sprite:nth-child(1) { left: 0; top: calc(var(--pm) * 13); }
+.palchetto--due .sprite:nth-child(2) { left: calc(var(--pm) * 93); top: 0; }
 
 .ritratto-grande { width: calc(34 * var(--pr)); height: calc(34 * var(--pr)); flex: none; }
 .finestra-errore {
@@ -769,7 +769,7 @@ html:not(.js) .risveglio__bottone { display: none; }
 .strada { margin: 0; }
 .strada__scena {
 	position: relative;
-	height: calc(216 * var(--ps));
+	height: calc(270 * var(--ps));
 	overflow: hidden;
 	background: var(--notte);
 	--s: var(--ps);
@@ -781,11 +781,11 @@ html:not(.js) .risveglio__bottone { display: none; }
 .strada__scena::before { top: 0; }
 .strada__scena::after { bottom: 0; }
 .strada__cielo { position: absolute; inset: 0; background: linear-gradient(var(--notte-fonda), #1e0f2c 45%, #3e142c 75%, #561a36); }
-.strada__tetti { position: absolute; left: 0; right: 0; top: 0; height: calc(168 * var(--ps)); --pw: var(--ps); }
+.strada__tetti { position: absolute; left: 0; right: 0; top: 0; height: calc(210 * var(--ps)); --pw: var(--ps); }
 .strada__tetti .tetti { background-position: var(--strada-tetti-x, 0px) 0; }
 .strada__via {
 	position: absolute; left: 0; top: 0;
-	width: calc(940 * var(--ps)); height: calc(216 * var(--ps));
+	width: calc(1175 * var(--ps)); height: calc(270 * var(--ps));
 	transform: translate3d(var(--strada-x, 0px), 0, 0);
 }
 .strada__via > img { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -795,7 +795,7 @@ html:not(.js) .risveglio__bottone { display: none; }
 .strada__via .sprite { z-index: 3; }
 .vai {
 	position: absolute; z-index: 5;
-	right: calc(var(--ps) * 6); top: calc(var(--ps) * 52);
+	right: calc(var(--ps) * 6); top: calc(var(--ps) * 68);
 	width: calc(56 * var(--ps)); height: calc(24 * var(--ps));
 	background: url("../media/ui/vai.png") 0 0 / calc(168 * var(--ps)) calc(24 * var(--ps));
 	image-rendering: pixelated;
@@ -829,23 +829,23 @@ html:not(.js) .strada__gig { display: none; }
 .palco { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px 32px; align-items: end; }
 .palco__scena {
 	position: relative; --s: var(--pc);
-	min-height: calc(118 * var(--pc));
+	min-height: calc(148 * var(--pc));
 	display: flex; align-items: flex-end; justify-content: center;
 	padding: 0 calc(var(--pc) * 6) calc(var(--pc) * 4);
 }
 .palco__luce {
-	position: absolute; left: 50%; bottom: calc(var(--pc) * 2); width: calc(var(--pc) * 110); height: calc(var(--pc) * 24);
-	transform: translateX(-50%); border-radius: 50%; filter: blur(calc(var(--pc) * 4)); pointer-events: none;
+	position: absolute; left: 50%; bottom: calc(var(--pc) * 2); width: calc(var(--pc) * 138); height: calc(var(--pc) * 30);
+	transform: translateX(-50%); border-radius: 50%; filter: blur(calc(var(--pc) * 5)); pointer-events: none;
 }
 .palco--gig .palco__luce { background: radial-gradient(closest-side, rgb(255 176 74 / 0.5), rgb(226 165 16 / 0.18) 60%, transparent); }
-.palco--esattori .palco__luce { background: radial-gradient(closest-side, rgb(224 42 58 / 0.55), rgb(168 24 46 / 0.2) 60%, transparent); width: calc(var(--pc) * 170); }
+.palco--esattori .palco__luce { background: radial-gradient(closest-side, rgb(224 42 58 / 0.55), rgb(168 24 46 / 0.2) 60%, transparent); width: calc(var(--pc) * 213); }
 .palco__sprite {
 	position: relative; display: block;
-	width: calc(var(--cw, 79) * var(--pc)); height: calc(var(--ch, 102) * var(--pc));
+	width: calc(var(--cw, 100) * var(--pc)); height: calc(var(--ch, 128) * var(--pc));
 	padding: 0; border: 0; background: none; cursor: pointer;
 }
 .palco__sprite .sprite { left: 0; top: 0; --s: var(--pc); }
-.palco__sprite--bruto { margin-left: calc(var(--pc) * -20); }
+.palco__sprite--bruto { margin-left: calc(var(--pc) * -25); }
 .palco--esattori { grid-template-columns: minmax(0, 1fr); }
 .palco--esattori .palco__scena { justify-content: flex-start; padding-left: 0; }
 .palco__testo { display: grid; gap: 12px; align-content: end; padding-bottom: 4px; }
@@ -948,7 +948,7 @@ html[data-movimento="si"] .tere.parla span { animation: tere 0.5s steps(4) infin
 .schermata { display: grid; gap: 8px; }
 .schermata { max-width: 100%; }
 .schermata img {
-	width: calc(var(--w, 384) * var(--pq)); height: auto; aspect-ratio: var(--w) / var(--h);
+	width: calc(var(--w, 480) * var(--pq)); height: auto; aspect-ratio: var(--w) / var(--h);
 	max-width: 100%;
 	box-shadow: 0 0 0 var(--pi) var(--inchiostro), 0 0 0 calc(var(--pi) * 2) var(--muro-2);
 }
@@ -990,14 +990,14 @@ html[data-movimento="si"] .tere.parla span { animation: tere 0.5s steps(4) infin
 	display: grid; grid-template-columns: minmax(0, 66ch) auto; gap: 40px clamp(32px, 5vw, 80px);
 	align-items: start; justify-content: space-between;
 }
-.luce { display: grid; gap: 14px; justify-items: center; max-width: 440px; }
+.luce { display: grid; gap: 14px; justify-items: center; max-width: 470px; }
 .luce__palco {
 	padding: 10px; background: var(--inchiostro);
 	box-shadow: 0 0 0 var(--pi) var(--muro-2), 0 0 0 calc(var(--pi) * 2) var(--inchiostro);
 }
-.luce__tela { width: calc(120 * var(--px)); height: calc(120 * var(--px)); cursor: crosshair; touch-action: none; }
+.luce__tela { width: calc(150 * var(--px)); height: calc(150 * var(--px)); cursor: crosshair; touch-action: none; }
 .luce__comandi { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.luce figcaption { color: var(--crema-2); font-size: 1rem; text-align: left; max-width: calc(120 * var(--px) + 20px); }
+.luce figcaption { color: var(--crema-2); font-size: 1rem; text-align: left; max-width: calc(150 * var(--px) + 20px); }
 .luce figcaption strong { color: var(--crema); }
 .tecnica__strisce {
 	width: var(--largo); margin: 56px auto 0;
@@ -1116,7 +1116,7 @@ html:not(.js) .piede__fine { max-width: 100%; height: auto; }
 .continua__testi { display: grid; gap: 8px; max-width: 52ch; }
 .continua__testi p[lang="en"] { color: var(--crema-2); }
 .continua__bottoni { justify-content: center; }
-.continua__gig { position: relative; width: calc(79 * var(--pm)); height: calc(102 * var(--pm)); }
+.continua__gig { position: relative; width: calc(var(--cw, 100) * var(--pm)); height: calc(var(--ch, 128) * var(--pm)); }
 .continua__gig .sprite { left: 0; top: 0; }
 
 /* ------------------------------------------------------------------ testi pieghevoli: aperti sugli schermi larghi,

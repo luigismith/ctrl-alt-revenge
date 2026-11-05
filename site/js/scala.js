@@ -51,8 +51,8 @@
 				var logo = (89 * nl) / dpr;
 				return affiancata ? Math.max(logo, destra) : logo + 14 + destra;
 			};
-			var sta = function (nw, nl) { return S.hud + 12 + (4 * nw) / dpr + testa(nl) + (0.9 * 216 * nw) / dpr <= vh; };
-			var nw = n(384, Math.min(vw, 2400));
+			var sta = function (nw, nl) { return S.hud + 12 + (4 * nw) / dpr + testa(nl) + (0.9 * 270 * nw) / dpr <= vh; };
+			var nw = n(480, Math.min(vw, 2400));
 			while (nw > 1 && !sta(nw, 1)) nw--;
 			var nl = Math.min(n(248, affiancata ? vw * 0.45 : vw - 2 * margine), nw);
 			while (nl > 1 && !sta(nw, nl)) nl--;
@@ -61,8 +61,8 @@
 		} else {
 			// Telefoni: il gioco a scala intera. Se la scala successiva sborda al massimo di 5 pixel del gioco
 			// per lato, si usa quella e si tagliano i lati: l'HUD del gioco resta intero (iPhone da 375 px).
-			var k = n(384, vw);
-			var taglio = (384 - (vw * dpr) / (k + 1)) / 2;
+			var k = n(480, vw);
+			var taglio = (480 - (vw * dpr) / (k + 1)) / 2;
 			S.nw = taglio <= 5 ? k + 1 : k;
 			S.nl = n(248, vw - 2 * margine);
 		}
@@ -70,7 +70,7 @@
 		S.ns = vw >= 1600 ? vicino(3) : largo ? vicino(2) : vicino(1.34);
 		S.nm = vw >= 420 ? vicino(2) : vicino(1.5);
 		S.nr = largo ? vicino(3) : vicino(2);
-		S.nx = Math.max(1, Math.min(vicino(3), Math.floor((Math.min(vw - 40, 440) * dpr) / 120)));
+		S.nx = Math.max(1, Math.min(vicino(3), Math.floor((Math.min(vw - 40, 450) * dpr) / 150)));
 
 		var st = doc.style;
 		['nw', 'nl', 'nc', 'ns', 'ni', 'nh', 'nm', 'nr', 'nx'].forEach(function (k) { st.setProperty('--' + k, S[k]); });
