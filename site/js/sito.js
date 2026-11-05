@@ -361,7 +361,8 @@
 	/* ------------------------------------------------------------ sprite veri, con i tempi veri */
 	const DATI = {};
 	const sprite = [];
-	const urlMedia = (f) => new URL('media/sprite/' + f, BASE).href;
+	// ?v= è l'impronta dei file degli sprite (tools/site/build.py): niente miscugli di versioni dalla cache.
+	const urlMedia = (f) => new URL('media/sprite/' + f + (doc.dataset.mediaV ? '?v=' + doc.dataset.mediaV : ''), BASE).href;
 	class Sprite {
 		constructor(el, d) {
 			this.el = el; this.d = d; this.anim = null; this.i = 0; this.t = 0; this.poi = null; this.fx = -1; this.fy = -1;
@@ -751,6 +752,8 @@
 			try {
 				[this.alb, this.nor] = await Promise.all([leggi(d.immagine), leggi(d.normali)]);
 			} catch (e) { return; }
+			// la normal map deve combaciare con lo sprite pixel per pixel, se no la luce disegna strisce
+			if (this.alb.width !== this.nor.width || this.alb.height !== this.nor.height) return;
 			this.d = d;
 			this.anim = d.animazioni.guardia;
 			this.ctx = this.tela.getContext('2d');

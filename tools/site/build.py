@@ -321,21 +321,34 @@ def arricchisci(t: dict, manifesto: dict, lingua: str) -> None:
             s.setdefault("alt", m["alt"][lingua])
 
 
+def versione_sprite() -> str:
+    """Impronta dei file in site/media/sprite: va in coda agli indirizzi (?v=) degli sprite, così il browser non
+    mescola mai una striscia nuova con una normal map o un JSON vecchi rimasti nella cache (5 novembre 2026: GIG
+    a strisce nella prova della luce, con la normal map 632x306 della cache e lo sprite nuovo 800x384)."""
+    h = hashlib.sha256()
+    for p in sorted((MEDIA / "sprite").iterdir()):
+        if p.is_file():
+            h.update(p.name.encode("utf-8"))
+            h.update(p.read_bytes())
+    return h.hexdigest()[:10]
+
+
 def css_sprite(radice: str) -> str:
     """Le strisce degli sprite in CSS, dai JSON di tools/site/media.py: così si vedono (fermi, al primo
     fotogramma della guardia) anche senza JavaScript. sito.js poi le anima con gli stessi dati.
     Il percorso dev'essere assoluto: un url() dentro una variabile CSS si risolve nel foglio che la usa."""
     regole = []
+    ver = versione_sprite()
     for p in sorted((MEDIA / "sprite").glob("*.json")):
         d = _carica(p)
         n = p.stem
         cw, ch = d["cella"]
         iw, ih = d["dimensioni"]
         px0, py0 = d["piedi"]
-        regole.append(f'[data-sprite="{n}"]{{--img:url("{radice}media/sprite/{d["immagine"]}");--cw:{cw};--ch:{ch};'
+        regole.append(f'[data-sprite="{n}"]{{--img:url("{radice}media/sprite/{d["immagine"]}?v={ver}");--cw:{cw};--ch:{ch};'
                       f'--iw:{iw};--ih:{ih};--px0:{px0};--py0:{py0}}}')
         for v, f in d.get("varianti", {}).items():
-            regole.append(f'[data-sprite="{n}"][data-variante="{v}"]{{--img:url("{radice}media/sprite/{f}")}}')
+            regole.append(f'[data-sprite="{n}"][data-variante="{v}"]{{--img:url("{radice}media/sprite/{f}?v={ver}")}}')
         regole.append(f'.palco__sprite:has(>[data-sprite="{n}"]),.palchetto:not(.palchetto--due):has(>[data-sprite="{n}"]),'
                       f'.continua__gig:has(>[data-sprite="{n}"]){{--cw:{cw};--ch:{ch}}}')
     return "\n".join(regole)
@@ -622,6 +635,7 @@ def costruisci(out: Path, url: str | None) -> None:
             "gioca": radice + RISERVATA + "/?lang=" + l,
             "og_immagine": url_sito + "media/" + manifesto["social"]["file"],
             "assoluta": percorso,
+            "media_v": versione_sprite(),
         }
         ctx = [{"t": testi[l], "d": dati, "m": manifesto, "n": numeri, "pagina": pagina,
                 "altra_t": testi[altra], "gen": gen}]
@@ -631,7 +645,7 @@ def costruisci(out: Path, url: str | None) -> None:
         dest.write_text(html_pagina, encoding="utf-8")
         pagine[l] = dest
     ctx = [{"it": testi["it"], "en": testi["en"], "d": dati, "m": manifesto, "n": numeri,
-            "pagina": {"assoluta": percorso, "url_it": url_sito, "url_en": url_sito + "en/"},
+            "pagina": {"assoluta": percorso, "url_it": url_sito, "url_en": url_sito + "en/", "media_v": versione_sprite()},
             "gen": gen}]
     (out / "404.html").write_text(Pagina("404.html", glifi).rendi(modello404, ctx), encoding="utf-8")
 
