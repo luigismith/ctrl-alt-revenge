@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/fighter_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"esattore"
+display_name = "ESATTORE"
+sprite_id = &"thug_bruiser"
+max_hp = 110
+walk_speed = Vector2(1.0, 0.625)
+run_speed = 1.875
+jump_velocity = 4.375
+gravity = 0.325
+getup_invuln = 20
+down_ticks = 46
+ko_score = 1000
+shadow_width = 45
+attacks = PackedStringArray("thug_bruiser_punch")
+attack_weights = PackedFloat32Array(1)
+wait_distance = Vector2(70.0, 110.0)
+wait_lane_offset = Vector2(17.5, 30.0)
+cooldown_ticks = Vector2i(40, 70)
+approach_timeout = 220
+palette_variants = [{
+"#b1b7be": "#ffb347",
+"#8c9098": "#ff7a1f",
+"#5f6067": "#b8501a",
+"#373840": "#6a2c14"
+}]

@@ -565,6 +565,12 @@ func can_be_hit_by(attacker: Entity, atk: AttackData) -> bool:
 	return not dead
 
 
+## Parata: chi para (l'esattore) lo decide qui, prima che il colpo arrivi. true = colpo parato,
+## niente danno e niente reazione (CombatSystem.apply_hit fa il resto).
+func try_block(_attacker: Entity, _atk: AttackData) -> bool:
+	return false
+
+
 ## Armatura attiva: fotogramma "armor" oppure avvio di un attacco con armor.
 func has_armor() -> bool:
 	if anim.has_tag(AnimFrame.TAG_ARMOR):

@@ -390,8 +390,9 @@ def ground_contact(cfg, names, sprites, anchors):
     alto dei piedi della guardia. Nel 3D il corpo sdraiato può restare sopra il pavimento (il bruto di circa
     17 cm, con la caduta presa dal rig del mocap) e in gioco galleggia sopra la sua ombra: qui si abbassa
     l'ancora del fotogramma, e con lei box e punti, che si misurano dall'ancora. Mai il contrario: un corpo
-    già più basso dei piedi resta com'è."""
-    want = [n for n in names if cfg["anims"][n].get("ground") == "contact"]
+    già più basso dei piedi resta com'è. Con "ground": "feet" (corse con le gambe scritte a mano, dove i piedi
+    possono finire sotto il pavimento) il punto più basso va sempre all'altezza dei piedi, sopra o sotto."""
+    want = [n for n in names if cfg["anims"][n].get("ground") in ("contact", "feet")]
     if not want:
         return
     foot = sprite_bottom(sprites["idle"][0]) - anchors["idle"][0][1]
@@ -399,7 +400,8 @@ def ground_contact(cfg, names, sprites, anchors):
         fixed = []
         for sp, (ax, ay) in zip(sprites[n], anchors[n]):
             b = sprite_bottom(sp)
-            fixed.append((ax, b - foot) if b - ay < foot else (ax, ay))
+            always = cfg["anims"][n].get("ground") == "feet"
+            fixed.append((ax, b - foot) if b - ay < foot or always else (ax, ay))
         moved = [a[1] - f[1] for a, f in zip(anchors[n], fixed)]
         if any(moved):
             C.say(f"  {n}: corpo portato a terra di {moved} px")

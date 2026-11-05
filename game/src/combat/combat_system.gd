@@ -63,6 +63,9 @@ func apply_hit(a: Fighter, v: Entity, atk: AttackData, point: Vector2, dir: int)
 		dir = 1 if v.px > a.px else (-1 if v.px < a.px else a.facing)
 	var high := point.y < v.py - v.ph - HIGH_HIT_HEIGHT
 	var by_player := a.team == Entity.Team.PLAYER or (a.state == Fighter.State.THROWN and a.body_team == Entity.Team.PLAYER)
+	if v is Fighter and (v as Fighter).try_block(a, atk):
+		_apply_block(a, v as Fighter, point, dir, by_player)
+		return
 	v.receive_hit(a, atk, HitInfo.new(point, dir, high))
 	a.hitstop = maxi(a.hitstop, atk.hitstop_attacker)
 	if a.state == Fighter.State.ATTACK or a is Gig:
@@ -80,3 +83,21 @@ func apply_hit(a: Fighter, v: Entity, atk: AttackData, point: Vector2, dir: int)
 	level.fx.spawn(atk.fx_hit, point.x, point.y, dir, v.depth_z(2) + 2)
 	if atk.shake > 0.0:
 		level.add_shake(atk.shake)
+
+
+## Colpo parato: niente danno, un piccolo fermo per tutti e due, le scintille e un colpo secco.
+## Per la combo di GIG conta come andato a segno, così la catena prosegue fino a rompere la guardia.
+func _apply_block(a: Fighter, v: Fighter, point: Vector2, dir: int, by_player: bool) -> void:
+	a.hitstop = maxi(a.hitstop, v.hitstop)
+	if a.state == Fighter.State.ATTACK or a is Gig:
+		a.connected = true
+	if a is Gig:
+		(a as Gig).on_attack_connected(v)
+	last_hits.append([a.uid, v.uid, "parata"])
+	if by_player:
+		Game.count(&"colpi_parati")
+		if v is Thug:
+			level.on_enemy_hit(v as Thug)
+	if level.sound_enabled:
+		Sfx.play_at(&"bin_hit", point.x)
+	level.fx.spawn(&"hit_spark_light", point.x, point.y, dir, v.depth_z(2) + 2)

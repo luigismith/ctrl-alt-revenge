@@ -290,7 +290,14 @@ func _spawn_player() -> void:
 
 ## Crea un nemico che entra da fuori schermo (side +1 da destra, -1 da sinistra).
 func spawn_thug(type_id: StringName, side: int, y: float, wave_id: String) -> Thug:
-	var t: Thug = Rider.new() if type_id == &"rider" else Thug.new()
+	var t: Thug
+	match type_id:
+		&"rider":
+			t = Rider.new()
+		&"esattore":
+			t = Esattore.new()
+		_:
+			t = Thug.new()
 	t.setup_thug(type_id, self, _next_uid(), rng.randi())
 	t.set_palette_variant(_spawned.get(type_id, 0))
 	_spawned[type_id] = _spawned.get(type_id, 0) + 1

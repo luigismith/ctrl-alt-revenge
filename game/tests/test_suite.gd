@@ -52,6 +52,7 @@ func run(tree_root: Node) -> bool:
 	_test_room_arena()
 	_test_room_hacking()
 	_test_rider()
+	_test_esattore()
 	return failures == 0
 
 
@@ -1601,3 +1602,115 @@ func _test_rider() -> void:
 			break
 	check(attacked >= 0 and far, "Rider: colpisce e poi scappa oltre 90 px", "attacco al tick %d, distanza %.0f" % [attacked, absf(r.px - g.px)])
 	Harness.free_level(lvl)
+
+
+# --- L'esattore di professione (decisione 63) --------------------------------------------------------
+
+## Un esattore fermo davanti a GIG, rivolto verso di lui, a `dx` px (GIG guarda a destra).
+func _esattore_setup(dx: float, ai: bool) -> Array:
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
+	var g := lvl.player
+	var e := lvl.spawn_thug(&"esattore", 1, 225.0, "") as Esattore
+	e.ai_enabled = ai
+	e.px = g.px + dx
+	e.py = g.py
+	e.facing = -1
+	e.set_state(Fighter.State.IDLE)
+	g.facing = 1
+	return [lvl, g, e]
+
+
+## GIG colpisce l'esattore con `atk_id`, come se il colpo arrivasse adesso.
+func _gig_hits(lvl: Level, g: Gig, e: Fighter, atk_id: StringName) -> void:
+	g.start_attack(g.attacks[atk_id], lvl.next_attack_serial())
+	lvl.combat.apply_hit(g, e, g.attacks[atk_id], Vector2(e.px, e.py - 75), 1)
+	g.set_state(Fighter.State.IDLE)
+	e.hitstop = 0
+
+
+func _test_esattore() -> void:
+	# La guardia: da davanti para due pugni senza danno, al terzo la guardia salta e barcolla.
+	var s := _esattore_setup(40.0, false)
+	var lvl: Level = s[0]
+	var g: Gig = s[1]
+	var e: Esattore = s[2]
+	var hp0 := e.hp
+	_gig_hits(lvl, g, e, &"gig_jab1")
+	_gig_hits(lvl, g, e, &"gig_jab2")
+	check(e.hp == hp0 and e.guard_hits == 2 and e.is_free(), "Esattore: da davanti para i pugni, senza danno",
+		"vita %d → %d, parati %d" % [hp0, e.hp, e.guard_hits])
+	_gig_hits(lvl, g, e, &"gig_hook")
+	check(e.hp == hp0 and e.state == Fighter.State.HURT and e.stun >= Esattore.GUARD_BREAK_STUN - 1 and e.guard_hits == 0,
+		"Esattore: al terzo colpo parato la guardia salta e barcolla", "stato %d, stordimento %d" % [e.state, e.stun])
+	var stun0 := e.stun
+	_gig_hits(lvl, g, e, &"gig_jab1")
+	check(e.hp < hp0 and e.stun >= stun0 - 1, "Esattore: con la guardia rotta i pugni fanno danno, e non accorciano il barcollare",
+		"vita %d, stordimento %d → %d" % [e.hp, stun0, e.stun])
+	Harness.free_level(lvl)
+
+	# Il calcio in salto e i colpi alle spalle passano.
+	s = _esattore_setup(40.0, false)
+	lvl = s[0]
+	g = s[1]
+	e = s[2]
+	hp0 = e.hp
+	_gig_hits(lvl, g, e, &"gig_air_kick")
+	check(e.hp < hp0, "Esattore: il calcio in salto passa la guardia", "vita %d → %d" % [hp0, e.hp])
+	Harness.free_level(lvl)
+	s = _esattore_setup(40.0, false)
+	lvl = s[0]
+	g = s[1]
+	e = s[2]
+	e.facing = 1
+	hp0 = e.hp
+	_gig_hits(lvl, g, e, &"gig_jab1")
+	check(e.hp < hp0, "Esattore: alle spalle non para")
+	Harness.free_level(lvl)
+
+	# La carica: si abbassa lampeggiando, poi corre lungo la corsia e atterra GIG.
+	s = _esattore_setup(Esattore.CHARGE_DX, true)
+	lvl = s[0]
+	g = s[1]
+	e = s[2]
+	lvl.director.request(e, lvl.tick)
+	e._start_charge(g)
+	var ran := -1
+	var hit := -1
+	for i in Esattore.CHARGE_WIND + 80:
+		lvl.step()
+		if ran < 0 and e.charge == Esattore.Charge.RUN:
+			ran = i
+		if hit < 0 and g.state == Fighter.State.KNOCK_AIR:
+			hit = i
+			break
+	check(ran >= Esattore.CHARGE_WIND - 2 and ran <= Esattore.CHARGE_WIND + 1 and hit > ran,
+		"Esattore: la carica parte dopo %d tick di preparazione e atterra GIG nella sua corsia" % Esattore.CHARGE_WIND, "corsa %d, colpo %d" % [ran, hit])
+	# Il fermo dell'impatto (hitstop) e poi la frenata.
+	for i in 12:
+		lvl.step()
+	check(e.charge == Esattore.Charge.NONE and e.dizzy == 0 and not lvl.director.is_holder(e),
+		"Esattore: preso GIG, frena senza stordirsi e lascia il turno")
+	Harness.free_level(lvl)
+
+	# La carica a vuoto: GIG cambia corsia, l'esattore sbatte contro il bordo e resta stordito.
+	s = _esattore_setup(Esattore.CHARGE_DX, true)
+	lvl = s[0]
+	g = s[1]
+	e = s[2]
+	lvl.director.request(e, lvl.tick)
+	e._start_charge(g)
+	g.py += 30.0
+	var dizzy_at := -1
+	for i in Esattore.CHARGE_WIND + Esattore.CHARGE_MAX:
+		lvl.step()
+		if e.dizzy > 0:
+			dizzy_at = i
+			break
+	var edge := minf(absf(e.px - lvl.view_left()), absf(e.px - lvl.view_right()))
+	check(dizzy_at > 0 and e.state == Fighter.State.HURT and edge < Level.WALL_MARGIN + 20.0 and g.state != Fighter.State.KNOCK_AIR,
+		"Esattore: a vuoto sbatte contro il bordo e resta stordito", "tick %d, distanza dal bordo %.0f" % [dizzy_at, edge])
+	var st := e.stun
+	_gig_hits(lvl, g, e, &"gig_jab1")
+	check(e.stun >= st - 1 and e.state == Fighter.State.HURT, "Esattore: stordito, i pugni non lo svegliano prima")
+	Harness.free_level(lvl)
+

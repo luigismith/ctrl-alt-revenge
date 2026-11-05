@@ -826,6 +826,101 @@
      ]
     }
    ]
+  },
+  "block": {
+   "src": "tl:esa_block",
+   "frames": [
+    {
+     "at": 0,
+     "t": 4
+    },
+    {
+     "at": 3,
+     "t": 4
+    },
+    {
+     "at": 6,
+     "t": 8
+    }
+   ]
+  },
+  "charge_wind": {
+   "src": "tl:esa_charge_wind",
+   "frames": [
+    {
+     "at": 0,
+     "t": 4
+    },
+    {
+     "at": 4,
+     "t": 4
+    },
+    {
+     "at": 8,
+     "t": 4
+    },
+    {
+     "at": 12,
+     "t": 4
+    },
+    {
+     "at": 16,
+     "t": 16
+    }
+   ]
+  },
+  "charge_run": {
+   "src": "tl:esa_charge_run",
+   "ground": "feet",
+   "loop": true,
+   "period": 20,
+   "frames": [
+    {
+     "at": 0,
+     "t": 5,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 5,
+     "t": 5
+    },
+    {
+     "at": 10,
+     "t": 5,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 15,
+     "t": 5
+    }
+   ]
+  },
+  "dizzy": {
+   "src": "tl:esa_dizzy",
+   "loop": true,
+   "period": 48,
+   "frames": [
+    {
+     "at": 0,
+     "t": 12
+    },
+    {
+     "at": 12,
+     "t": 12
+    },
+    {
+     "at": 24,
+     "t": 12
+    },
+    {
+     "at": 36,
+     "t": 12
+    }
+   ]
   }
  },
  "pixel_cfg": {

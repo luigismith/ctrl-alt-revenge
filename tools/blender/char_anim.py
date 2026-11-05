@@ -443,8 +443,92 @@ def keys_hack():
     return k
 
 
+# ============================================================== l'esattore (corpo del bruto, rivolto a destra)
+def _st(**kw):
+    return CP.stance(**kw)
+
+
+def keys_esa_block():
+    """guardia dell'esattore: avambracci alzati a scudo davanti alla faccia, mento giù, spalle chiuse, ginocchia
+    piegate. "hit" è la stessa guardia spinta indietro dal pugno parato; "up" la guardia ferma."""
+    k = {}
+    arms = dict(arm_l=dict(ik=(0.04, -0.34, 1.38), pole=(0.6, -0.3, -1.0)),
+                arm_r=dict(ik=(-0.04, -0.30, 1.32), pole=(-0.6, -0.3, -1.0)))
+    k["up"] = _st(hip=(0.0, 0.04, 0.86), pelvis=(2, 0, 8), spine=(16, 0, -8), neck=(10, 0, 0), **arms)
+    k["hit"] = _st(hip=(0.0, 0.09, 0.86), pelvis=(-4, 0, 10), spine=(4, 0, -6), neck=(0, 0, 4),
+                   arm_l=dict(ik=(0.04, -0.26, 1.42), pole=(0.6, -0.3, -1.0)),
+                   arm_r=dict(ik=(-0.04, -0.22, 1.36), pole=(-0.6, -0.3, -1.0)),
+                   leg_l=dict(ik=(0.12, -0.15, 0.10), pole=(0.25, -1, 0)))
+    return k
+
+
+def keys_esa_charge_wind():
+    """preparazione della spallata: si abbassa sulle gambe larghe, avvita il busto con la spalla sinistra avanti,
+    l'avambraccio sinistro chiuso davanti al petto, il pugno destro tirato indietro, la testa bassa che guarda
+    avanti. "set" è la discesa, "coil" la tenuta tesa, "coil2" il fremito."""
+    k = {}
+    legs = dict(leg_l=dict(ik=(0.14, -0.34, 0.086), pole=(0.25, -1, 0)),
+                leg_r=dict(ik=(-0.13, 0.34, 0.086), pole=(-0.1, -1, 0)))
+    k["set"] = _st(hip=(0.0, 0.04, 0.82), pelvis=(8, 0, 0), spine=(18, 0, -20), neck=(-12, 0, 10),
+                   arm_l=dict(up=V(0.30, -0.30, -0.90), lo=V(-0.50, -0.55, 0.67)),
+                   arm_r=dict(up=V(-0.35, 0.40, -0.85), lo=V(-0.05, -0.30, 0.95)), **legs)
+    k["coil"] = _st(hip=(0.0, 0.07, 0.78), pelvis=(14, 0, -4), spine=(28, 0, -34), neck=(-26, 0, 18),
+                    arm_l=dict(up=V(0.30, -0.45, -0.84), lo=V(-0.55, -0.60, 0.58)),
+                    arm_r=dict(up=V(-0.40, 0.60, -0.70), lo=V(-0.10, -0.10, 0.99)), **legs)
+    k["coil2"] = _st(hip=(0.0, 0.07, 0.775), pelvis=(15, 0, -5), spine=(29, 0, -36), neck=(-27, 0, 19),
+                     arm_l=dict(up=V(0.30, -0.46, -0.84), lo=V(-0.56, -0.60, 0.57)),
+                     arm_r=dict(up=V(-0.40, 0.62, -0.68), lo=V(-0.10, -0.12, 0.99)), **legs)
+    return k
+
+
+def keys_esa_charge_run():
+    """corsa della spallata: piegato in avanti, la spalla sinistra davanti a fare da ariete con l'avambraccio
+    chiuso, il braccio destro che pompa. Quattro chiavi per ciclo, due per passo (contatto e passaggio)."""
+    k = {}
+    reach = dict(up=V(0.0, -0.62, -0.78), lo=V(0.0, -0.20, -0.98), foot=V(0, -0.5, -0.87))
+    push = dict(up=V(0.0, 0.55, -0.84), lo=V(0.0, 0.85, -0.53), foot=V(0, 0.6, -0.80))
+    knee = dict(up=V(0.0, -0.80, -0.60), lo=V(0.0, 0.30, -0.95), foot=V(0, -0.2, -0.98))
+    stand = dict(up=V(0.0, 0.15, -0.99), lo=V(0.0, 0.30, -0.95), foot=V(0, 0.1, -0.99))
+
+    def L(d, x):
+        return dict(up=V(x, *d["up"][1:]), lo=V(x * 0.6, *d["lo"][1:]), foot=d["foot"])
+
+    ram = dict(up=V(0.30, -0.40, -0.87), lo=V(-0.55, -0.55, 0.63))
+    body = dict(pelvis=(24, 0, -2), spine=(36, 0, -32), neck=(-40, 0, 16))
+    k["ca"] = _st(hip=(0.0, 0.0, 0.84), **body, leg_l=L(reach, 0.10), leg_r=L(push, -0.10), arm_l=ram,
+                  arm_r=dict(up=V(-0.35, -0.55, -0.76), lo=V(-0.10, -0.65, 0.75)))
+    k["pa"] = _st(hip=(0.0, 0.0, 0.88), **body, leg_l=L(stand, 0.10), leg_r=L(knee, -0.10), arm_l=ram,
+                  arm_r=dict(up=V(-0.35, 0.05, -0.94), lo=V(-0.10, -0.55, 0.83)))
+    k["cb"] = _st(hip=(0.0, 0.0, 0.84), **body, leg_l=L(push, 0.10), leg_r=L(reach, -0.10), arm_l=ram,
+                  arm_r=dict(up=V(-0.35, 0.60, -0.72), lo=V(-0.10, -0.20, 0.97)))
+    k["pb"] = _st(hip=(0.0, 0.0, 0.88), **body, leg_l=L(knee, 0.10), leg_r=L(stand, -0.10), arm_l=ram,
+                  arm_r=dict(up=V(-0.35, 0.05, -0.94), lo=V(-0.10, -0.55, 0.83)))
+    return k
+
+
+def keys_esa_dizzy():
+    """stordito dopo la carica a vuoto: ginocchia molli, braccia che pendono, il corpo che ondeggia avanti e
+    indietro e la testa che ciondola in ritardo sul busto."""
+    k = {}
+    legs = dict(leg_l=dict(ik=(0.13, -0.14, 0.086), pole=(0.25, -1, 0)),
+                leg_r=dict(ik=(-0.12, 0.18, 0.086), pole=(-0.1, -1, 0)))
+    hang_l = dict(up=V(0.25, -0.05, -0.97), lo=V(0.15, -0.20, -0.97))
+    hang_r = dict(up=V(-0.25, 0.05, -0.97), lo=V(-0.15, -0.15, -0.98))
+    k["back"] = _st(hip=(0.0, 0.07, 0.85), pelvis=(-6, 0, 12), spine=(-10, 0, -6), neck=(-24, 0, 14),
+                    arm_l=dict(up=V(0.30, 0.10, -0.95), lo=V(0.20, -0.05, -0.98)),
+                    arm_r=dict(up=V(-0.30, 0.20, -0.93), lo=V(-0.20, 0.05, -0.98)), **legs)
+    k["mid"] = _st(hip=(0.0, 0.03, 0.83), pelvis=(2, 0, 10), spine=(8, 0, -10), neck=(-4, 0, -8),
+                   arm_l=hang_l, arm_r=hang_r, **legs)
+    k["fwd"] = _st(hip=(0.0, -0.01, 0.84), pelvis=(8, 0, 8), spine=(22, 0, -14), neck=(26, 0, -14),
+                   arm_l=dict(up=V(0.20, -0.20, -0.96), lo=V(0.10, -0.40, -0.91)),
+                   arm_r=dict(up=V(-0.20, -0.10, -0.97), lo=V(-0.10, -0.35, -0.93)), **legs)
+    return k
+
+
 KEYSETS = dict(hack=keys_hack, idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
-               wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash)
+               wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash,
+               esa_block=keys_esa_block, esa_charge_wind=keys_esa_charge_wind, esa_charge_run=keys_esa_charge_run,
+               esa_dizzy=keys_esa_dizzy)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
 TRACKS = dict(
@@ -461,6 +545,10 @@ TRACKS = dict(
     wall_run=[(0, "ca"), (6, "pa", "smooth"), (12, "cb", "smooth"), (18, "pb", "smooth"), (24, "ca", "smooth"),
               (30, "top", "step")],
     air_dash=[(0, "kick"), (6, "glide", "dec")],
+    esa_block=[(0, "hit"), (6, "up", "dec")],
+    esa_charge_wind=[(0, "set"), (8, "coil", "dec"), (12, "coil2", "smooth"), (16, "coil", "smooth")],
+    esa_charge_run=[(0, "ca"), (5, "pa", "smooth"), (10, "cb", "smooth"), (15, "pb", "smooth"), (20, "ca", "smooth")],
+    esa_dizzy=[(0, "back"), (12, "mid", "smooth"), (24, "fwd", "smooth"), (36, "mid", "smooth"), (48, "back", "smooth")],
     hurt_high=[(0, "snap"), (5, "max", "dec"), (10, "rebound", "smooth"), (16, "guard", "smooth")],
     double_jump=[(0, "air"), (3, "coil", "dec"), (5, "coil", "hold"), (6.5, "thrust", "acc"), (9, "launch", "dec"),
                  (14, "open", "smooth"), (19, "tuck", "smooth"), (26, "fall", "smooth")],
