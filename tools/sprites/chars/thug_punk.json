@@ -715,6 +715,7 @@
   "knock_down": {
    "src": "Hit_Knockback",
    "anchor": "pelvis",
+   "ground": "contact",
    "hurt": "lying",
    "frames": [
     {
@@ -744,6 +745,7 @@
   "getup": {
    "src": "LayToIdle",
    "anchor": "pelvis",
+   "ground": "contact",
    "frames": [
     {
      "f": 3,

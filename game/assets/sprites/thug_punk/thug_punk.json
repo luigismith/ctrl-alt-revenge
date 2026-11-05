@@ -79,8 +79,8 @@
     "knock_down": {
       "loop": false,
       "frames": [
-        {"rect": [236, 583, 98, 59], "anchor": [56, 65], "ticks": 4, "hurt": [[-45, -51, 80, 41]], "hit": [], "events": [], "tags": ["invuln"], "dx": 0, "points": {"fist_l": [-21, -49], "fist_r": [-49, -37], "foot_l": [29, -62], "foot_r": [37, -42], "head": [-42, -25], "grip": [-35, -43]}},
-        {"rect": [335, 583, 110, 50], "anchor": [47, 46], "ticks": 6, "hurt": [[-38, -37, 90, 37]], "hit": [], "events": [], "tags": ["invuln"], "dx": 0, "points": {"fist_l": [12, -21], "fist_r": [-16, -20], "foot_l": [59, -17], "foot_r": [47, -14], "head": [-34, -36], "grip": [-2, -21]}},
+        {"rect": [236, 583, 98, 59], "anchor": [56, 54], "ticks": 4, "hurt": [[-45, -40, 80, 41]], "hit": [], "events": [], "tags": ["invuln"], "dx": 0, "points": {"fist_l": [-21, -38], "fist_r": [-49, -26], "foot_l": [29, -51], "foot_r": [37, -31], "head": [-42, -14], "grip": [-35, -32]}},
+        {"rect": [335, 583, 110, 50], "anchor": [47, 45], "ticks": 6, "hurt": [[-38, -36, 90, 37]], "hit": [], "events": [], "tags": ["invuln"], "dx": 0, "points": {"fist_l": [12, -20], "fist_r": [-16, -19], "foot_l": [59, -16], "foot_r": [47, -13], "head": [-34, -35], "grip": [-2, -20]}},
         {"rect": [137, 646, 119, 36], "anchor": [54, 28], "ticks": 12, "hurt": [[-45, -21, 99, 26]], "hit": [], "events": [], "tags": ["invuln", "hold"], "dx": 0, "points": {"fist_l": [15, -16], "fist_r": [-15, -10], "foot_l": [61, -16], "foot_r": [44, -12], "head": [-42, -19], "grip": [0, -13]}}
       ]
     },

@@ -49,6 +49,7 @@ func run(tree_root: Node) -> bool:
 	_test_json_files()
 	_test_replays()
 	_test_platform()
+	_test_room_arena()
 	return failures == 0
 
 
@@ -1295,3 +1296,69 @@ func _test_platform() -> void:
 	p = _pp(gr, 20 * T - 14, 26)
 	ev = _run_pp(p, 80, func(t: int) -> int: return (_R | _J) if t < 30 else _R)
 	check(_count_events(ev, "wallrun") == 0, "Platform: da fermi contro il muro non c'è la corsa sul muro", "corse %d" % _count_events(ev, "wallrun"))
+
+
+# --- Platform: l'arena della stanza -----------------------------------------------------------------
+
+## Un giro nell'arena della stanza col pilota automatico, partendo 100 px prima del punto d'ingresso
+## (più indietro GIG sarebbe dentro il blocco del cunicolo).
+## Restituisce i numeri che i test confrontano.
+func _arena_run(max_ticks: int) -> Dictionary:
+	Game.reset_run()
+	SpriteSheet.clear_cache()
+	var pilot := RoomPilot.new()
+	var room := TestRoom.new()
+	room.configure({"input": PlayerInput.from_provider(pilot.decide, pilot), "pilot": pilot, "sound": false})
+	root.add_child(room)
+	room.set_physics_process(false)
+	room._start = Vector2i(room._arena_trigger_x - 100, room._floor_y)
+	room._reset()
+	var out := {"open": -1, "fight": -1, "close": -1, "max_tilt": 0.0, "lock_ok": true, "spawned": 0,
+		"wave_started": false, "room_x_after": 0, "state_after": "", "tilt_after": -1.0, "cam_y_lock": 0.0}
+	for t in max_ticks:
+		var before := room.arena_phase
+		room._sim_tick()
+		room._follow_camera()
+		if room.arena != null:
+			out["max_tilt"] = maxf(out["max_tilt"], room.tilt)
+			out["spawned"] = maxi(out["spawned"], room.arena.enemies().size())
+			out["wave_started"] = out["wave_started"] or not room.arena.active_wave.is_empty()
+		if before == TestRoom.ArenaPhase.NONE and room.arena_phase == TestRoom.ArenaPhase.ENTER:
+			out["open"] = t
+		if before == TestRoom.ArenaPhase.ENTER and room.arena_phase == TestRoom.ArenaPhase.FIGHT:
+			out["fight"] = t
+			out["cam_y_lock"] = room._cam.y
+		if room.arena_phase == TestRoom.ArenaPhase.FIGHT:
+			out["lock_ok"] = out["lock_ok"] and roundi(room._cam.x) == room._arena_cam_x and room.arena.camera.x == room._arena_cam_x
+		if before == TestRoom.ArenaPhase.LEAVE and room.arena_phase == TestRoom.ArenaPhase.NONE:
+			out["close"] = t
+			out["px_close"] = room.player.px
+		if out["close"] >= 0 and t >= out["close"] + 120:
+			break
+	out["room_x_after"] = room.player.px
+	out["state_after"] = room.player.state_name()
+	out["tilt_after"] = room.tilt
+	out["done"] = room.arena_done
+	out["trigger"] = room._arena_trigger_x
+	out["floor_y"] = room._floor_y
+	out["hash"] = room.player.state_hash()
+	room.get_parent().remove_child(room)
+	room.free()
+	return out
+
+
+func _test_room_arena() -> void:
+	var a := _arena_run(4000)
+	check(a["open"] >= 0 and a["open"] < 120, "Arena: oltre il punto d'ingresso, coi piedi a terra, la stanza entra nell'arena", "tick %d" % a["open"])
+	check(a["fight"] == a["open"] + TestRoom.TILT_IN and is_equal_approx(a["max_tilt"], 1.0),
+		"Arena: la telecamera si inclina del tutto in %d tick, poi si combatte" % TestRoom.TILT_IN, "inizio %d, scontro %d, inclinazione %.2f" % [a["open"], a["fight"], a["max_tilt"]])
+	check(a["lock_ok"] and is_equal_approx(a["cam_y_lock"], a["floor_y"] - TestRoom.ARENA_BAND.x),
+		"Arena: durante lo scontro la telecamera resta bloccata, col pavimento sul bordo dietro della fascia", "y %.0f" % a["cam_y_lock"])
+	check(a["wave_started"] and a["spawned"] >= 1, "Arena: arrivano gli Esattori", "nemici %d" % a["spawned"])
+	check(a["close"] > a["fight"] and a["done"] and a["tilt_after"] == 0.0,
+		"Arena: a scontro finito la telecamera torna laterale e l'arena si chiude", "fine %d, inclinazione %.2f" % [a["close"], a["tilt_after"]])
+	check(a["room_x_after"] > a.get("px_close", 1 << 30) + 100,
+		"Arena: dopo l'arena GIG riprende il platform e va avanti", "x %d → %d, stato %s" % [a.get("px_close", -1), a["room_x_after"], a["state_after"]])
+	var b := _arena_run(4000)
+	check(a["close"] == b["close"] and a["hash"] == b["hash"], "Arena: due giri uguali finiscono allo stesso tick e nello stesso stato",
+		"%d / %d" % [a["close"], b["close"]])

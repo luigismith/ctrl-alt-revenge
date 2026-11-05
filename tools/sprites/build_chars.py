@@ -379,6 +379,33 @@ def palette_remap(cfg, meta, allim):
     return PX.reduce_palette(allim, pal.get("max_colors", 32), pal.get("protect", []))
 
 
+def sprite_bottom(sp):
+    """prima riga sotto l'ultimo pixel opaco del fotogramma intero."""
+    rows = np.nonzero(sp[..., 3].max(axis=1))[0]
+    return int(rows[-1]) + 1 if len(rows) else 0
+
+
+def ground_contact(cfg, names, sprites, anchors):
+    """Pose a terra (cadute, rialzo) con "ground": "contact": il punto più basso del corpo non resta più in
+    alto dei piedi della guardia. Nel 3D il corpo sdraiato può restare sopra il pavimento (il bruto di circa
+    17 cm, con la caduta presa dal rig del mocap) e in gioco galleggia sopra la sua ombra: qui si abbassa
+    l'ancora del fotogramma, e con lei box e punti, che si misurano dall'ancora. Mai il contrario: un corpo
+    già più basso dei piedi resta com'è."""
+    want = [n for n in names if cfg["anims"][n].get("ground") == "contact"]
+    if not want:
+        return
+    foot = sprite_bottom(sprites["idle"][0]) - anchors["idle"][0][1]
+    for n in want:
+        fixed = []
+        for sp, (ax, ay) in zip(sprites[n], anchors[n]):
+            b = sprite_bottom(sp)
+            fixed.append((ax, b - foot) if b - ay < foot else (ax, ay))
+        moved = [a[1] - f[1] for a, f in zip(anchors[n], fixed)]
+        if any(moved):
+            C.say(f"  {n}: corpo portato a terra di {moved} px")
+        anchors[n] = fixed
+
+
 def step_assemble(cid):
     cfg = C.char_cfg(cid)
     meta = C.load_json(os.path.join(raw_dir(cid), "meta.json"))
@@ -404,6 +431,7 @@ def step_assemble(cid):
             anchors[n] = [a0 for _ in fdata[n]]
         else:
             anchors[n] = [anchor_of(fd, mode, guard_pelvis_h(cid, fdata)) for fd in fdata[n]]
+    ground_contact(cfg, names, sprites, anchors)
     # offset delle vittime (solo GIG)
     victims, vlog = {}, []
     if cid == "gig":

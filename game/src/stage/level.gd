@@ -37,6 +37,12 @@ var sound_enabled: bool = true
 var auto_tick: bool = true
 var show_card: bool = true
 var record_path: String = ""
+## Arena dentro un tratto platform (la stanza di prova): niente telecamera propria, sfondo,
+## pioggia, cartello né musica; gli ingressi e la telecamera li dà chi la ospita, e GIG KO
+## rientra sempre, senza perdere vite.
+var embedded: bool = false
+## Dati del livello passati da fuori (stesso formato del JSON); vuoto = LEVEL_JSON.
+var _given_data: Dictionary = {}
 
 var data: Dictionary = {}
 var level_width: int = 2400
@@ -108,6 +114,8 @@ func configure(opts: Dictionary) -> void:
 	auto_tick = bool(opts.get("auto_tick", true))
 	show_card = bool(opts.get("card", true))
 	record_path = str(opts.get("record", ""))
+	embedded = bool(opts.get("embedded", false))
+	_given_data = opts.get("data", {})
 
 
 func _ready() -> void:
@@ -131,9 +139,9 @@ func _ready() -> void:
 		if start_x >= 0.0:
 			r.start = {"x": start_x, "y": player.py}
 		input.recorder = r
-	if show_card:
+	if show_card and not embedded:
 		overlay.show_card(str(data.get("title", "1 · SOTTO LA LINEA")))
-	if sound_enabled:
+	if sound_enabled and not embedded:
 		# Dopo un GAME OVER o una pausa la musica potrebbe essere ancora abbassata.
 		Music.duck(false)
 		Music.play(&"stage1")
@@ -141,7 +149,7 @@ func _ready() -> void:
 
 
 func _load_data() -> void:
-	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(LEVEL_JSON))
+	var d: Variant = _given_data if not _given_data.is_empty() else JSON.parse_string(FileAccess.get_file_as_string(LEVEL_JSON))
 	if not (d is Dictionary):
 		push_error("Dati del livello non validi: %s (si usano i valori predefiniti, senza ondate)" % LEVEL_JSON)
 	data = d if d is Dictionary else {}
@@ -160,7 +168,10 @@ func _build_nodes() -> void:
 	cam_node.drag_horizontal_enabled = false
 	cam_node.drag_vertical_enabled = false
 	add_child(cam_node)
-	cam_node.make_current()
+	if embedded:
+		cam_node.enabled = false
+	else:
+		cam_node.make_current()
 
 	_back_layer = CanvasLayer.new()
 	_back_layer.name = "Sfondo"
@@ -190,6 +201,22 @@ func _build_nodes() -> void:
 	world.add_child(debug_overlay)
 	_build_lights()
 
+	if not embedded:
+		_build_scenery()
+
+	var hud_layer := CanvasLayer.new()
+	hud_layer.name = "Interfaccia"
+	hud_layer.layer = 5
+	add_child(hud_layer)
+	hud = Hud.new()
+	hud.level = self
+	hud_layer.add_child(hud)
+	overlay = LevelOverlay.new()
+	hud_layer.add_child(overlay)
+
+
+## Sfondo, primo piano e pioggia (non nelle arene ospitate).
+func _build_scenery() -> void:
 	backdrop = Backdrop.new()
 	var env_path := str(data.get("env", "res://assets/env/sotto_la_linea/layers.json"))
 	if not backdrop.load_json(env_path):
@@ -212,16 +239,6 @@ func _build_nodes() -> void:
 	splashes.z_index = 61
 	world.add_child(splashes)
 	rain.set_splash_canvas(splashes, true)
-
-	var hud_layer := CanvasLayer.new()
-	hud_layer.name = "Interfaccia"
-	hud_layer.layer = 5
-	add_child(hud_layer)
-	hud = Hud.new()
-	hud.level = self
-	hud_layer.add_child(hud)
-	overlay = LevelOverlay.new()
-	hud_layer.add_child(overlay)
 
 
 func _next_uid() -> int:
@@ -344,10 +361,11 @@ func _physics_process(_delta: float) -> void:
 
 
 ## Un tick di simulazione.
-func step() -> void:
+## Con un'arena ospitata gli ingressi li passa chi la ospita (frame), che li registra nel suo replay.
+func step(given: InputFrame = null) -> void:
 	if phase == Phase.DONE or phase == Phase.OVER:
 		return
-	var frame := input.next_frame(tick)
+	var frame := given if given != null else input.next_frame(tick)
 	player.feed_input(frame, tick)
 	var move := true
 	_slowmo_step = false
@@ -395,7 +413,8 @@ func _actors_tick() -> void:
 	for p in props:
 		p.sim_tick()
 	_update_waves()
-	rain.tick(camera.x)
+	if rain != null:
+		rain.tick(camera.x)
 	_cleanup()
 	actor_ticks += 1
 
@@ -527,6 +546,10 @@ func on_fighter_ko(f: Fighter, _attacker: Entity) -> void:
 
 ## Chiamata da GIG alla fine del lampeggio dopo il KO.
 func on_player_died() -> void:
+	if embedded:
+		player.respawn()
+		Game.count(&"respawns")
+		return
 	var left := Game.lose_life()
 	# A zona già liberata (KO quasi insieme a quello dell'ultimo nemico) GIG rientra comunque,
 	# senza CONTINUA?: la fase resta CLEAR e il livello finisce come sempre.
@@ -752,7 +775,8 @@ func _sync_all() -> void:
 	cam_node.position = Vector2(camera.x + camera.shake.x, camera.shake.y)
 	_back_layer.offset = Vector2(camera.shake)
 	_front_layer.offset = Vector2(camera.shake)
-	backdrop.update(camera.x, tick)
+	if backdrop != null:
+		backdrop.update(camera.x, tick)
 	_update_lights()
 	shadows.queue_redraw()
 	if debug_overlay.visible:

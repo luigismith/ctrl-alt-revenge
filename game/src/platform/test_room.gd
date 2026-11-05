@@ -25,7 +25,7 @@ const SIGNS := {
 	"c": ["PIATTAFORME SOTTILI", "si sale da sotto · GIÙ + SALTO per scendere"],
 	"d": ["SPORGENZE", "in caduta verso il muro ti aggrappi · SU o SALTO per salire"],
 	"e": ["CUNICOLO BASSO", "GIÙ mentre corri: scivolata"],
-	"f": ["ARENA", "il passaggio all'arena arriva nella prossima tappa"],
+	"f": ["ARENA", "entra: la telecamera si inclina e arrivano gli Esattori · poi VAI"],
 	"h": ["SALTO A MURO", "in caduta spingi contro il muro: il braccio frena · SALTO per staccarti"],
 	"i": ["SCATTO", "in aria L, C o un dorsale: 3 blocchi in avanti, uno per salto"],
 	"j": ["CORSA SUL MURO", "di corsa contro il muro, SALTO: qualche passo in su"],
@@ -41,6 +41,36 @@ const C_TEXT := Color8(232, 228, 214)
 const C_DIM := Color8(160, 156, 150)
 const C_CYAN := Color8(64, 232, 255)
 const C_BOX := Color8(255, 80, 80)
+const C_FLOOR := Color8(66, 66, 80)
+const C_FLOOR_LINE := Color8(84, 84, 100)
+const C_KERB := Color8(30, 30, 38)
+
+## L'arena della stanza (decisione del 4 novembre 2026, in docs/gameplay.md): quando GIG entra la
+## telecamera si blocca e si inclina un po' dall'alto, il pavimento si allarga in profondità e si
+## combatte con il sistema dello slice (un Level ospitato, a corsie); a scontro finito compare VAI,
+## la telecamera torna laterale e si riprende a saltare.
+enum ArenaPhase { NONE, ENTER, FIGHT, LEAVE }
+## La fascia calpestabile dell'arena in coordinate dello schermo, come nello slice: il bordo dietro
+## coincide con la linea del pavimento del platform.
+const ARENA_BAND := Vector2(188, 260)
+## Tick dell'inclinazione all'entrata e all'uscita.
+const TILT_IN := 40
+const TILT_OUT := 32
+## Quanto si schiaccia in verticale la stanza dietro il pavimento, a telecamera inclinata.
+const TILT_SQUASH := 0.12
+## Quanto GIG scende nella fascia mentre la telecamera si inclina.
+const ENTRY_DEPTH := 26.0
+## Distanza del punto di fuga delle linee del pavimento, in px sopra la linea del pavimento.
+const PERSP := 240.0
+## Posizione dell'arena rispetto al suo cartello ("f"): telecamera bloccata e punto d'ingresso.
+const ARENA_CAM_FROM_SIGN := -170
+const ARENA_TRIGGER_FROM_SIGN := -40
+## Gli Esattori dell'arena. Per ora punk e bruto dello slice, che diventeranno rider ed esattore di
+## professione (decisione 63) quando avranno l'intelligenza nuova.
+const ARENA_SPAWNS := [
+	{"type": "thug_punk", "delay": 30, "side": 1, "y": 213},
+	{"type": "thug_bruiser", "delay": 210, "side": -1, "y": 243},
+]
 
 var grid: SolidGrid
 var player: PlatformPlayer
@@ -49,6 +79,8 @@ var pilot: RoomPilot
 var moves: PlatformMoves
 var tick: int = 0
 var show_boxes: bool = false
+## Musica ed effetti sonori (spenti nei test).
+var sound: bool = true
 
 var _start: Vector2i = Vector2i(100, 380)
 ## Tick in cui si è premuto R (ricomincia): fanno parte della sessione registrata.
@@ -56,8 +88,24 @@ var _resets: Array = []
 var _replay_resets: Array = []
 var _record_path: String = ""
 var _view: Node2D
+var _room_node: Node2D
+var _floor_node: Node2D
 var _body: Sprite2D
 var _hud: Control
+var _overlay: LevelOverlay
+
+## L'arena: il Level ospitato esiste solo mentre si combatte.
+var arena: Level
+var arena_phase: ArenaPhase = ArenaPhase.NONE
+var arena_done: bool = false
+var _arena_t: int = 0
+## Inclinazione della telecamera, da 0 (laterale) a 1 (arena). Solo disegno, ma segue i tick.
+var tilt: float = 0.0
+var _floor_y: int = 460
+var _arena_cam_x: int = -1
+var _arena_trigger_x: int = -1
+var _cam_from: Vector2 = Vector2.ZERO
+var _leave_from_py: float = 0.0
 var _cam: Vector2 = Vector2.ZERO
 ## Scintille della Spinta e degli atterraggi: [x, y, vx, vy, vita, vita iniziale, colore]. Solo disegno.
 var _sparks: Array = []
@@ -68,6 +116,7 @@ func configure(opts: Dictionary) -> void:
 	input = opts.get("input", null)
 	pilot = opts.get("pilot", null)
 	_record_path = str(opts.get("record", ""))
+	sound = bool(opts.get("sound", true))
 	if input != null and input.mode == PlayerInput.Mode.REPLAY:
 		_replay_resets = input.replay.start.get("resets", [])
 
@@ -83,13 +132,26 @@ func _ready() -> void:
 		_start = grid.marks["G"][0]
 	if Game.options.start_x >= 0.0:
 		_start.x = roundi(Game.options.start_x)
+	if grid.marks.has("f"):
+		var f: Vector2i = grid.marks["f"][0]
+		_floor_y = f.y
+		_arena_cam_x = clampi(f.x + ARENA_CAM_FROM_SIGN, 0, grid.pixel_width() - View.W)
+		_arena_trigger_x = f.x + ARENA_TRIGGER_FROM_SIGN
 	_spark_rng.seed = 7
 	# La musica del livello, se il laboratorio ha i brani (non tocca la simulazione).
-	Music.duck(false)
-	Music.play(&"stage1")
+	if sound:
+		Music.duck(false)
+		Music.play(&"stage1")
 	_view = Node2D.new()
-	_view.draw.connect(_draw_room)
+	_view.draw.connect(_draw_back)
 	add_child(_view)
+	_room_node = Node2D.new()
+	_room_node.draw.connect(_draw_room)
+	_view.add_child(_room_node)
+	_floor_node = Node2D.new()
+	_floor_node.z_index = 1
+	_floor_node.draw.connect(_draw_floor)
+	_view.add_child(_floor_node)
 	var sheet := SpriteSheet.get_sheet(&"gig")
 	player = PlatformPlayer.new(moves, grid, sheet)
 	if pilot != null:
@@ -111,6 +173,8 @@ func _ready() -> void:
 	_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.draw.connect(_draw_hud)
 	layer.add_child(_hud)
+	_overlay = LevelOverlay.new()
+	layer.add_child(_overlay)
 	show_boxes = Game.options.debug_boxes
 	if input.mode == PlayerInput.Mode.REPLAY and input.replay.start.has("x"):
 		_start.x = int(input.replay.start["x"])
@@ -126,6 +190,8 @@ func _ready() -> void:
 
 
 func _reset() -> void:
+	_close_arena()
+	arena_done = false
 	player.place(_start.x, _start.y)
 	player.facing = 1
 	_sparks.clear()
@@ -149,6 +215,7 @@ func _physics_process(_delta: float) -> void:
 	_tick_sparks()
 	_follow_camera()
 	_sync_visual()
+	_overlay.tick()
 	_view.queue_redraw()
 	_hud.queue_redraw()
 	for c in _view.get_children():
@@ -162,11 +229,16 @@ func _sim_tick() -> void:
 		_reset()
 	var frame := input.next_frame(tick)
 	tick += 1
+	if arena_phase != ArenaPhase.NONE:
+		_arena_tick(frame)
+		return
 	player.step(frame)
 	for e in player.events:
 		_on_event(e)
 	if player.py > grid.pixel_height() + 80:
 		_reset()
+	elif _arena_starts():
+		_open_arena()
 
 
 func _exit_tree() -> void:
@@ -191,6 +263,9 @@ func _cam_target() -> Vector2:
 
 
 func _follow_camera() -> void:
+	if arena_phase != ArenaPhase.NONE:
+		_arena_camera()
+		return
 	var t := _cam_target()
 	_cam.x += (t.x - _cam.x) * 0.12
 	# In verticale segue piano mentre GIG salta, deciso quando atterra o cade a lungo.
@@ -204,6 +279,16 @@ func _follow_camera() -> void:
 # ------------------------------------------------------------------ disegno
 
 func _sync_visual() -> void:
+	# A telecamera inclinata la stanza dietro il pavimento si schiaccia verso la linea del pavimento.
+	var s := 1.0 - TILT_SQUASH * tilt
+	_room_node.scale = Vector2(1, s)
+	_room_node.position = Vector2(0, _floor_y * (1.0 - s))
+	_body.visible = arena == null
+	if arena != null:
+		arena.player.sync_visual()
+		# Mentre la telecamera si inclina il livello non fa step(), che di solito ridisegna le ombre.
+		arena.shadows.queue_redraw()
+		return
 	var f := player.anim.frame()
 	_body.region_rect = Rect2(f.rect)
 	_body.offset = Vector2(-f.anchor)
@@ -211,13 +296,17 @@ func _sync_visual() -> void:
 	_body.position = Vector2(player.sprite_anchor())
 
 
+func _draw_back() -> void:
+	_view.draw_rect(Rect2(_cam.x - 8, _cam.y - 8, View.W + 16, View.H + 16), C_BG)
+
+
 func _draw_room() -> void:
-	var v := _view
+	var v := _room_node
 	var x0 := maxi(int(_cam.x) / SolidGrid.TILE - 1, 0)
 	var x1 := mini(int(_cam.x + View.W) / SolidGrid.TILE + 1, grid.width - 1)
-	var y0 := maxi(int(_cam.y) / SolidGrid.TILE - 1, 0)
+	# Con la stanza schiacciata dall'inclinazione si vedono un paio di file in più in alto.
+	var y0 := maxi(int(_cam.y) / SolidGrid.TILE - 3, 0)
 	var y1 := mini(int(_cam.y + View.H) / SolidGrid.TILE + 1, grid.height - 1)
-	v.draw_rect(Rect2(_cam.x - 8, _cam.y - 8, View.W + 16, View.H + 16), C_BG)
 	# Una riga ogni metro (3 blocchi), per leggere le misure a occhio.
 	var t := SolidGrid.TILE
 	for cx in range(x0, x1 + 1):
@@ -236,16 +325,7 @@ func _draw_room() -> void:
 				SolidGrid.Cell.THIN:
 					v.draw_rect(Rect2(cx * t, cy * t, t, 4), C_THIN)
 					v.draw_rect(Rect2(cx * t, cy * t, t, 1), C_SOLID_TOP)
-	for k: String in SIGNS:
-		if not grid.marks.has(k):
-			continue
-		var p: Vector2i = grid.marks[k][0]
-		if p.x < _cam.x - 250 or p.x > _cam.x + View.W + 250:
-			continue
-		var lines: Array = SIGNS[k]
-		UiFont.draw_text(v, Vector2(p.x, p.y - 150), str(lines[0]), C_TEXT, 1, 1)
-		UiFont.draw_text(v, Vector2(p.x, p.y - 138), str(lines[1]), C_DIM, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
-	if show_boxes:
+	if show_boxes and arena == null:
 		var r := Rect2(player.left(), player.top(), moves.body_width, player.height)
 		v.draw_rect(Rect2(r.position, Vector2(r.size.x, 1)), C_BOX)
 		v.draw_rect(Rect2(r.position + Vector2(0, r.size.y - 1), Vector2(r.size.x, 1)), C_BOX)
@@ -253,8 +333,57 @@ func _draw_room() -> void:
 		v.draw_rect(Rect2(r.position + Vector2(r.size.x - 1, 0), Vector2(1, r.size.y)), C_BOX)
 
 
+## I cartelli non si schiacciano con la stanza (il testo in pixel verrebbe storto): si sposta
+## solo la loro altezza, come i blocchi.
+func _draw_signs(v: Node2D) -> void:
+	var s := 1.0 - TILT_SQUASH * tilt
+	for k: String in SIGNS:
+		if not grid.marks.has(k):
+			continue
+		var p: Vector2i = grid.marks[k][0]
+		if p.x < _cam.x - 250 or p.x > _cam.x + View.W + 250:
+			continue
+		var lines: Array = SIGNS[k]
+		var y := roundf(_floor_y - (_floor_y - (p.y - 150)) * s)
+		UiFont.draw_text(v, Vector2(p.x, y), str(lines[0]), C_TEXT, 1, 1)
+		UiFont.draw_text(v, Vector2(p.x, y + 12), str(lines[1]), C_DIM, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+
+
+## Il pavimento in profondità dell'arena: si apre sotto la linea del pavimento mentre la telecamera
+## si inclina, con una linea ogni metro che si allarga verso chi guarda.
+func _draw_floor() -> void:
+	var v := _floor_node
+	if tilt > 0.0:
+		var top := float(_floor_y)
+		var depth := roundf((View.H - ARENA_BAND.x + 8.0) * tilt)
+		var band := roundf((ARENA_BAND.y - ARENA_BAND.x) * tilt)
+		var x0 := _cam.x - 8.0
+		var w := View.W + 16.0
+		v.draw_rect(Rect2(x0, top, w, depth), C_FLOOR)
+		var vp_x := _cam.x + View.CX
+		var m := float(View.PPM)
+		var lx := floorf((x0 - 200.0) / m) * m
+		while lx < x0 + w + 200.0:
+			for r in int(band):
+				var xr := vp_x + (lx - vp_x) * (1.0 + r / PERSP)
+				v.draw_rect(Rect2(roundf(xr), top + r, 1, 1), C_FLOOR_LINE)
+			lx += m
+		# Linee di traverso: più fitte in fondo, più larghe davanti.
+		for k: float in [0.2, 0.43, 0.7]:
+			v.draw_rect(Rect2(x0, roundf(top + band * k), w, 1), C_FLOOR_LINE)
+		v.draw_rect(Rect2(x0, top, w, 2), C_SOLID_TOP)
+		# Il bordo davanti della fascia calpestabile, poi il marciapiede scuro fino al fondo dello schermo.
+		if depth > band:
+			v.draw_rect(Rect2(x0, top + band, w, depth - band), C_KERB)
+			v.draw_rect(Rect2(x0, top + band, w, 1), C_FLOOR_LINE)
+	_draw_signs(v)
+
+
 func _draw_hud() -> void:
 	var h := _hud
+	if arena_phase != ArenaPhase.NONE:
+		# Nell'arena c'è l'interfaccia dello slice, con la vita di GIG e del nemico.
+		return
 	h.draw_rect(Rect2(0, 0, View.W, 15), Color(0, 0, 0, 0.55))
 	UiFont.draw_text(h, Vector2(4, 2), "STANZA DI PROVA", C_CYAN)
 	UiFont.draw_text(h, Vector2(View.W - 4, 2), player.state_name(), C_TEXT, 1, 2)
@@ -263,6 +392,119 @@ func _draw_hud() -> void:
 		player.vx / sub, player.vy / sub, player.last_peak, player.last_peak / float(View.PPM), player.air_ticks, player.boosts_left]
 	h.draw_rect(Rect2(0, View.H - 15, View.W, 15), Color(0, 0, 0, 0.55))
 	UiFont.draw_text(h, Vector2(4, View.H - 13), info, C_DIM, 1, 0, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+
+
+# ------------------------------------------------------------------ arena
+
+## Si entra nell'arena una volta per giro, coi piedi sul pavimento oltre il punto d'ingresso.
+func _arena_starts() -> bool:
+	if arena_done or _arena_cam_x < 0 or player.px < _arena_trigger_x or player.py != _floor_y:
+		return false
+	return player.state in [PlatformPlayer.State.GROUND, PlatformPlayer.State.CROUCH, PlatformPlayer.State.SLIDE]
+
+
+func _arena_data() -> Dictionary:
+	return {
+		"id": "stanza_arena",
+		"width": grid.pixel_width(),
+		"floor_band": [ARENA_BAND.x, ARENA_BAND.y],
+		"waves": [{"id": "arena_prova", "camera_x": _arena_cam_x, "music_layer": "arena", "spawns": ARENA_SPAWNS}],
+	}
+
+
+func _open_arena() -> void:
+	arena = Level.new()
+	arena.configure({"seed": 1, "input": input, "embedded": true, "auto_tick": false, "card": false, "sound": sound,
+		"data": _arena_data(), "start_x": float(player.px), "start_y": ARENA_BAND.x})
+	# Il bordo dietro della fascia sta sulla linea del pavimento del platform.
+	arena.position = Vector2(0, _floor_y - ARENA_BAND.x)
+	_view.add_child(arena)
+	arena.camera.min_x = _arena_cam_x
+	arena.camera.max_x = _arena_cam_x
+	arena.camera.x = _arena_cam_x
+	var g := arena.player
+	g.facing = player.facing
+	g.play_anim(&"walk")
+	arena_phase = ArenaPhase.ENTER
+	_arena_t = 0
+	_cam_from = _cam
+	_sparks.clear()
+	if pilot != null:
+		pilot.arena = arena
+
+
+func _arena_tick(frame: InputFrame) -> void:
+	var g := arena.player
+	_arena_t += 1
+	match arena_phase:
+		ArenaPhase.ENTER:
+			# GIG fa qualche passo dentro la fascia mentre la telecamera si inclina; gli ingressi aspettano.
+			var k := float(_arena_t) / TILT_IN
+			tilt = _ease(k)
+			g.py = ARENA_BAND.x + ENTRY_DEPTH * k
+			g.anim.advance()
+			if _arena_t >= TILT_IN:
+				g.set_state(Fighter.State.IDLE, &"idle")
+				arena_phase = ArenaPhase.FIGHT
+				_arena_t = 0
+		ArenaPhase.FIGHT:
+			arena.step(frame)
+			# Zona liberata (il livello ha già acceso VAI): si esce appena GIG è libero e coi piedi a terra.
+			if arena.waves_cleared > 0 and arena.active_wave.is_empty() and g.is_free() and g.ph <= 0.0:
+				arena_phase = ArenaPhase.LEAVE
+				_arena_t = 0
+				_leave_from_py = g.py
+				_cam_from = _cam
+				g.play_anim(&"walk")
+		ArenaPhase.LEAVE:
+			# GIG torna sul bordo dietro e la telecamera torna laterale.
+			var k := float(_arena_t) / TILT_OUT
+			tilt = 1.0 - _ease(k)
+			g.py = lerpf(_leave_from_py, ARENA_BAND.x, k)
+			g.anim.advance()
+			arena.overlay.tick()
+			if _arena_t >= TILT_OUT:
+				player.place(roundi(g.px), _floor_y)
+				player.facing = g.facing
+				_overlay.go_ticks = arena.overlay.go_ticks
+				arena_done = true
+				_close_arena()
+
+
+## Toglie l'arena, a fine scontro o quando si ricomincia.
+func _close_arena() -> void:
+	if arena != null:
+		# Ricominciando a metà scontro, lo strato "arena" della musica resterebbe acceso.
+		if sound and not arena.active_wave.is_empty():
+			Music.set_layer(&"arena", false)
+		_view.remove_child(arena)
+		arena.queue_free()
+	arena = null
+	arena_phase = ArenaPhase.NONE
+	tilt = 0.0
+	if pilot != null:
+		pilot.arena = null
+
+
+func _arena_camera() -> void:
+	var lock := Vector2(_arena_cam_x, _floor_y - ARENA_BAND.x)
+	match arena_phase:
+		ArenaPhase.ENTER:
+			_cam = _cam_from.lerp(lock, _ease(float(_arena_t) / TILT_IN))
+		ArenaPhase.FIGHT:
+			_cam = lock
+		ArenaPhase.LEAVE:
+			var g := arena.player
+			var back := Vector2(g.px + g.facing * 45 - View.CX, _floor_y - 188)
+			back.x = clampf(back.x, 0.0, float(grid.pixel_width() - View.W))
+			back.y = clampf(back.y, -80.0, float(grid.pixel_height() - View.H))
+			_cam = lock.lerp(back, _ease(float(_arena_t) / TILT_OUT))
+	_view.position = -_cam.round() + Vector2(arena.camera.shake)
+
+
+static func _ease(k: float) -> float:
+	k = clampf(k, 0.0, 1.0)
+	return k * k * (3.0 - 2.0 * k)
 
 
 # ------------------------------------------------------------------ effetti

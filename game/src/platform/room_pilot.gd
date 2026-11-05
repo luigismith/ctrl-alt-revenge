@@ -8,6 +8,9 @@ extends RefCounted
 ## passano da PlayerInput come quelli veri.
 
 var player: PlatformPlayer
+## L'arena in corso (la imposta la stanza): lì combatte il pilota dello slice.
+var arena: Level
+var _fighter: Autopilot
 var _jump_hold: int = 0
 var _boost_wait: int = -1
 var _dash_wait: int = -1
@@ -18,6 +21,12 @@ var _last_jump: bool = false
 
 
 func decide(_tick: int) -> int:
+	if arena != null:
+		if _fighter == null or _fighter.level != arena:
+			_fighter = Autopilot.new(&"arena")
+			_fighter.level = arena
+		_last_jump = false
+		return _fighter.decide(_tick)
 	var keys := _decide(_tick)
 	_last_jump = (keys & InputFrame.JUMP) != 0
 	return keys
