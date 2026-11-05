@@ -42,7 +42,10 @@
 		S.hud = (34 * S.nh) / dpr + 16;
 		if (largo) {
 			// L'eroe: HUD, logo, motto e il video del gioco, nello schermo. Il video può passare la piega di un
-			// decimo della sua altezza (sotto c'è solo la didascalia). Prima il video più grande, poi il logo.
+			// decimo della sua altezza (sotto c'è solo la didascalia). Poi si prova una scala in più, se il video
+			// sta nella larghezza fra i margini e passa la piega al massimo di due quinti: Luigi, 5 novembre 2026,
+			// lo vuole ×3 anche in una finestra alta 950 px su un monitor 1080p, anche se poi si scorre.
+			// Prima il video più grande, poi il logo.
 			// Sopra i 1000 px la testa ha il logo a sinistra e, a destra, motto, genere e pulsanti: è alta quanto
 			// il più alto dei due; sotto va in colonna, e le altezze si sommano (@container eroe in sito.css).
 			var affiancata = vw > 1000;
@@ -51,9 +54,13 @@
 				var logo = (89 * nl) / dpr;
 				return affiancata ? Math.max(logo, destra) : logo + 14 + destra;
 			};
-			var sta = function (nw, nl) { return S.hud + 12 + (4 * nw) / dpr + testa(nl) + (0.9 * 270 * nw) / dpr <= vh; };
+			var piega = 0.9;
+			var sta = function (nw, nl) { return S.hud + 12 + (4 * nw) / dpr + testa(nl) + (piega * 270 * nw) / dpr <= vh; };
 			var nw = n(480, Math.min(vw, 2400));
 			while (nw > 1 && !sta(nw, 1)) nw--;
+			piega = 0.6;
+			if ((480 * (nw + 1)) / dpr <= Math.min(vw - 2 * margine, 2400) && sta(nw + 1, 1)) nw++;
+			// il logo si sceglie con la stessa tolleranza, così su uno schermo più alto non diventa più piccolo
 			var nl = Math.min(n(248, affiancata ? vw * 0.45 : vw - 2 * margine), nw);
 			while (nl > 1 && !sta(nw, nl)) nl--;
 			S.nw = nw;
