@@ -124,7 +124,7 @@
    "punk": {"testo": "A temp, paid by the hour.", "label": "Make the punk wind up his haymaker"},
    "bruto": {"nome": "BRUTO", "testo": "The brute: a career debt collector, bigger than GIG, who throws punches with his whole body.", "label": "Make the brute throw a punch"},
    "mossa": "Tap them: they attack.",
-   "nota": "In the game their look will change: the punk gets a rider’s backpack, the brute a reflective ESATTORE vest, and both of them dust goggles."
+   "nota": "In the game there will be four kinds of Esattori, all in dust goggles: the punk becomes a gig-economy rider with an insulated delivery backpack, the brute gets a reflective ESATTORE vest, and they are joined by the renter, with a rented arm, and the bailiff, who reads out the seizure order and calls for backup."
   },
   "colombe": {
    "nome": "The Colombe",
