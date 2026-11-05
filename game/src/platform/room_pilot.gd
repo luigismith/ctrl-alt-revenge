@@ -8,8 +8,16 @@ extends RefCounted
 ## passano da PlayerInput come quelli veri.
 
 var player: PlatformPlayer
+## La stanza (la imposta lei): serve per i pannelli dell'hacking.
+var room: TestRoom
 ## L'arena in corso (la imposta la stanza): lì combatte il pilota dello slice.
 var arena: Level
+## I pannelli da forzare, in ordine. Nella prova dei due pannelli quello giusto è prima R (sul
+## ballatoio), poi Q; i test provano anche l'ordine sbagliato.
+var hack_plan: Array[String] = ["P", "R", "Q"]
+## Entro questa distanza orizzontale il pilota smette di correre e va al pannello.
+const HACK_LOOKAHEAD := 360
+var _plan_i: int = 0
 var _fighter: Autopilot
 var _jump_hold: int = 0
 var _boost_wait: int = -1
@@ -36,6 +44,9 @@ func _decide(_tick: int) -> int:
 	var p := player
 	if p == null:
 		return 0
+	var hk := _hack_keys()
+	if hk >= 0:
+		return hk
 	var keys := InputFrame.RIGHT if _dir > 0 else InputFrame.LEFT
 	var g := p.grid
 	var T := SolidGrid.TILE
@@ -104,4 +115,57 @@ func _decide(_tick: int) -> int:
 	if _jump_hold > 0:
 		_jump_hold -= 1
 		keys |= InputFrame.JUMP
+	return keys
+
+
+## Il prossimo pannello del piano, quando è vicino: ci va (saltando sul ballatoio o scendendone),
+## si ferma davanti e tiene SU finché il cancello si apre. -1 se non c'è niente da forzare qui.
+func _hack_keys() -> int:
+	if room == null:
+		return -1
+	while _plan_i < hack_plan.size() and (int(room.hacks_done.get(hack_plan[_plan_i], 0)) > 0 \
+			or not room.grid.marks.has(hack_plan[_plan_i])):
+		_plan_i += 1
+	if _plan_i >= hack_plan.size():
+		return -1
+	var p := player
+	var m: Vector2i = room.grid.marks[hack_plan[_plan_i]][0]
+	# Sullo stesso piano si punta al posto col pugno sotto la presa; da sotto o da sopra, alla centralina.
+	var dx := (room.hack_spot(hack_plan[_plan_i]) if p.py == m.y else m.x) - p.px
+	if absi(dx) > HACK_LOOKAHEAD:
+		return -1
+	var toward := InputFrame.RIGHT if dx > 0 else InputFrame.LEFT
+	var away := InputFrame.LEFT if dx > 0 else InputFrame.RIGHT
+	var keys := 0
+	match p.state:
+		PlatformPlayer.State.GROUND:
+			_dir = 1
+			if p.py == m.y:
+				if room.hack_panel != "" or absi(dx) <= 6 and absi(p.vx) < PlatformPlayer.SUB / 2:
+					keys = InputFrame.UP
+				elif absi(dx) <= 6:
+					keys = 0
+				else:
+					keys = toward
+			elif m.y < p.py:
+				# Il pannello è sul ballatoio: un salto in corsa dalla distanza giusta, che atterra lì sopra.
+				if absi(dx) < 90:
+					keys = away
+				elif absi(dx) > 130 or _last_jump:
+					keys = toward
+				else:
+					_jump_hold = 22
+					keys = toward | InputFrame.JUMP
+					_jump_hold -= 1
+			else:
+				# Il pannello è più in basso: GIÙ + SALTO per scendere dal ballatoio.
+				keys = InputFrame.DOWN | (0 if _last_jump else InputFrame.JUMP)
+		PlatformPlayer.State.AIR:
+			keys = toward if absi(dx) > 8 else 0
+			if _jump_hold > 0:
+				_jump_hold -= 1
+				keys |= InputFrame.JUMP
+		_:
+			return -1
+	_last_jump = (keys & InputFrame.JUMP) != 0
 	return keys

@@ -103,6 +103,9 @@ var _just_boosted: bool = false
 
 ## Eventi del tick per gli effetti e i suoni: "jump", "spinta", "land", "slide", "grab", "climb".
 var events: PackedStringArray = []
+## Una posa imposta da fuori (per esempio l'hacking della stanza), al posto di quella dello stato.
+## Solo disegno: non entra nell'impronta dello stato.
+var pose_override: StringName = &""
 var anim: FrameAnim
 
 ## Misure per la taratura, mostrate dalla stanza di prova: altezza massima dell'ultimo salto
@@ -838,6 +841,10 @@ func sprite_anchor() -> Vector2i:
 
 func _update_anim() -> void:
 	if anim == null:
+		return
+	if pose_override != &"" and anim.sheet.has_anim(pose_override):
+		anim.ensure(pose_override)
+		anim.advance()
 		return
 	match state:
 		State.GROUND:

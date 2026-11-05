@@ -429,7 +429,21 @@ def keys_air_dash():
     return k
 
 
-KEYSETS = dict(idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
+def keys_hack():
+    """hacking (stanza di prova, «Collega e corri»): la cassetta del pannello è sul muro sopra la testa; GIG
+    alza il braccio cyber (il sinistro) teso verso di lei, guarda in su, l'altro braccio resta raccolto al petto.
+    Due chiavi appena diverse: il braccio che vibra mentre forza il pannello."""
+    k = {}
+    k["a"] = guard(hip=(0.0, 0.02, 0.89), pelvis=(-2, 0, 10), spine=(-5, 0, -10), neck=(-26, 0, 6),
+                   arm_l=dict(ik=(0.18, -0.12, 2.02), pole=(0.6, 0.3, 0.2)),
+                   arm_r=dict(up=V(-0.30, -0.20, -0.93), lo=V(0.10, -0.50, 0.86)))
+    k["b"] = guard(hip=(0.0, 0.02, 0.885), pelvis=(-2, 0, 11), spine=(-4, 0, -12), neck=(-24, 0, 8),
+                   arm_l=dict(ik=(0.20, -0.10, 1.99), pole=(0.6, 0.3, 0.2)),
+                   arm_r=dict(up=V(-0.30, -0.22, -0.92), lo=V(0.10, -0.52, 0.85)))
+    return k
+
+
+KEYSETS = dict(hack=keys_hack, idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
                wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
@@ -443,6 +457,7 @@ TRACKS = dict(
           (11, "impact", "hold"), (14, "over", "dec"), (21, "back", "smooth"), (27, "guard", "smooth")],
     ledge_hang=[(0, "a"), (24, "b", "smooth"), (48, "a", "smooth")],
     wall_slide=[(0, "a"), (6, "b", "smooth"), (12, "a", "smooth")],
+    hack=[(0, "a"), (4, "b", "smooth"), (8, "a", "smooth")],
     wall_run=[(0, "ca"), (6, "pa", "smooth"), (12, "cb", "smooth"), (18, "pb", "smooth"), (24, "ca", "smooth"),
               (30, "top", "step")],
     air_dash=[(0, "kick"), (6, "glide", "dec")],

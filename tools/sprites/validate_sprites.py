@@ -27,7 +27,7 @@ REQUIRED = {
                      "grabbed", "kneed", "thrown"],
 }
 # cicli: i tre dello slice più quelli delle mosse platform di prova (accovacciato, appeso alla sporgenza)
-LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_slide", "wall_run"}
+LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_slide", "wall_run", "hack"}
 # (avvio, attivo, recupero) in tick a 60 Hz, §5; None = non controllato
 TIMING = {("gig", "jab1"): (3, 2, 9), ("gig", "jab2"): (3, 2, 9), ("gig", "hook"): (6, 3, 12),
           ("gig", "kick"): (10, 3, 20), ("gig", "air_kick"): (4, 8, None), ("gig", "knee"): (4, 3, 10),

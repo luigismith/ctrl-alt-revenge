@@ -50,6 +50,7 @@ func run(tree_root: Node) -> bool:
 	_test_replays()
 	_test_platform()
 	_test_room_arena()
+	_test_room_hacking()
 	_test_rider()
 	return failures == 0
 
@@ -1363,6 +1364,128 @@ func _test_room_arena() -> void:
 	var b := _arena_run(4000)
 	check(a["close"] == b["close"] and a["hash"] == b["hash"], "Arena: due giri uguali finiscono allo stesso tick e nello stesso stato",
 		"%d / %d" % [a["close"], b["close"]])
+
+
+# --- Platform: l'hacking della stanza ("Collega e corri") -------------------------------------------
+
+## Una stanza di prova pronta, con GIG fermo in `start` e gli ingressi da `input_fn` (o dal pilota
+## automatico, se `plan` non è vuoto).
+func _hack_room(start: Vector2i, input_fn: Callable, plan: Array[String] = []) -> TestRoom:
+	Game.reset_run()
+	SpriteSheet.clear_cache()
+	var room := TestRoom.new()
+	if plan.is_empty():
+		room.configure({"input": PlayerInput.from_provider(input_fn), "sound": false})
+	else:
+		var pilot := RoomPilot.new()
+		pilot.hack_plan = plan
+		room.configure({"input": PlayerInput.from_provider(pilot.decide, pilot), "pilot": pilot, "sound": false})
+	root.add_child(room)
+	room.set_physics_process(false)
+	room._start = start
+	room._reset()
+	return room
+
+
+func _free_room(room: TestRoom) -> void:
+	room.get_parent().remove_child(room)
+	room.free()
+
+
+## Un giro del pilota dal cartello dell'hacking, con il piano dato: quando forza i pannelli e fin
+## dove arriva.
+func _hack_run(plan: Array[String], max_ticks: int) -> Dictionary:
+	var gm := SolidGrid.load_file(TestRoom.MAP)
+	var k: Vector2i = gm.marks["k"][0]
+	var room := _hack_room(Vector2i(k.x - 60, k.y), Callable(), plan)
+	var out := {"done": {}, "max_x": 0, "end_tick": -1}
+	var far: Rect2i = room.gates[";"]["rect"]
+	for t in max_ticks:
+		room._sim_tick()
+		for id: String in room.hacks_done:
+			if not out["done"].has(id):
+				out["done"][id] = t
+		out["max_x"] = maxi(out["max_x"], room.player.px)
+		if room.player.left() > far.end.x and out["end_tick"] < 0:
+			out["end_tick"] = t
+			break
+	out["hash"] = room.state_hash()
+	out["far_x"] = far.position.x
+	_free_room(room)
+	return out
+
+
+func _test_room_hacking() -> void:
+	var gm := SolidGrid.load_file(TestRoom.MAP)
+	var ok := true
+	for id: String in TestRoom.PANELS:
+		ok = ok and gm.marks.has(id) and gm.marks.has(TestRoom.PANELS[id]["gate"])
+	check(ok and gm.marks.has("k") and gm.marks.has("l"), "Hacking: la mappa ha i tre pannelli, i loro cancelli e i cartelli")
+
+	# Il cancello è chiuso; tenere SU per HACK_TICKS lo apre. Collegato, GIG non cammina: fa solo i
+	# passi che mancano per avere il pugno cyber sotto la presa, e lì resta.
+	var p: Vector2i = gm.marks["P"][0]
+	var keys := [InputFrame.UP]
+	var room := _hack_room(p, func(_t: int) -> int: return keys[0])
+	var gate: Dictionary = room.gates["|"]
+	var c0: Vector2i = gate["cells"][0]
+	check(room.grid.cell(c0.x, c0.y) == SolidGrid.Cell.SOLID, "Hacking: all'inizio il cancello è chiuso (pieno)")
+	var spot := room.hack_spot("P")
+	var opened := -1
+	var steady := true
+	var prev := room.player.px
+	for t in TestRoom.HACK_TICKS + 5:
+		room._sim_tick()
+		if room.hack_panel != "":
+			steady = steady and absi(room.player.px - prev) <= 1 and absi(room.player.px - spot) <= absi(prev - spot)
+		prev = room.player.px
+		if opened < 0 and room.hacks_done.has("P"):
+			opened = t
+	check(opened == TestRoom.HACK_TICKS - 1 and room.grid.cell(c0.x, c0.y) == SolidGrid.Cell.EMPTY and steady and room.player.px == spot,
+		"Hacking: dopo %d tick con SU il cancello si apre, con GIG fermo col pugno sotto la presa" % TestRoom.HACK_TICKS,
+		"tick %d, x %d (posto %d)" % [opened, room.player.px, spot])
+	# Il cancello resta aperto per il suo tempo, poi si richiude.
+	keys[0] = 0
+	var open_ticks: int = TestRoom.PANELS["P"]["open"]
+	var closed := -1
+	for t in open_ticks + 10:
+		room._sim_tick()
+		if closed < 0 and room.grid.cell(c0.x, c0.y) == SolidGrid.Cell.SOLID:
+			closed = t
+	check(closed >= open_ticks - 6 and closed <= open_ticks, "Hacking: il cancello si richiude dopo %d tick" % open_ticks, "tick %d" % closed)
+	_free_room(room)
+
+	# Lasciando SU prima del tempo il cavo si stacca e il cancello resta chiuso.
+	room = _hack_room(p, func(t: int) -> int: return InputFrame.UP if t < TestRoom.HACK_TICKS - 10 else 0)
+	for t in TestRoom.HACK_TICKS + 10:
+		room._sim_tick()
+	check(room.hacks_done.is_empty() and room.hack_panel == "" and room.grid.cell(c0.x, c0.y) == SolidGrid.Cell.SOLID,
+		"Hacking: lasciando SU prima del tempo il cancello resta chiuso")
+	_free_room(room)
+
+	# Il cancello non si chiude addosso a GIG: aspetta che sia passato.
+	room = _hack_room(Vector2i(gate["rect"].position.x + 20, p.y), func(_t: int) -> int: return 0)
+	room.gates["|"]["timer"] = 1
+	room._set_gate("|", true)
+	room._sim_tick()
+	room._sim_tick()
+	check(room.grid.cell(c0.x, c0.y) == SolidGrid.Cell.EMPTY and room.gates["|"]["timer"] > 0,
+		"Hacking: il cancello non si chiude addosso a GIG")
+	_free_room(room)
+
+	# I due pannelli: nell'ordine giusto (prima il ballatoio) si passa; nell'ordine sbagliato il
+	# cancello lontano si richiude prima che GIG arrivi.
+	var good := _hack_run(["P", "R", "Q"], 3000)
+	check(good["done"].has("P") and good["done"].has("R") and good["done"].has("Q") and good["end_tick"] > 0,
+		"Hacking: nell'ordine giusto (P, poi R sul ballatoio, poi Q) GIG passa tutti i cancelli",
+		"forzati %s, fine %d, x massima %d" % [good["done"], good["end_tick"], good["max_x"]])
+	var bad := _hack_run(["P", "Q", "R"], 3000)
+	check(bad["done"].has("Q") and bad["done"].has("R") and bad["end_tick"] < 0 and bad["max_x"] < bad["far_x"],
+		"Hacking: nell'ordine sbagliato (Q prima di R) il cancello lontano si richiude prima",
+		"forzati %s, x massima %d" % [bad["done"], bad["max_x"]])
+	var again := _hack_run(["P", "R", "Q"], 3000)
+	check(again["end_tick"] == good["end_tick"] and again["hash"] == good["hash"],
+		"Hacking: due giri uguali finiscono allo stesso tick e nello stesso stato", "%d / %d" % [good["end_tick"], again["end_tick"]])
 
 
 # --- Il rider (decisione 63) -------------------------------------------------------------------------

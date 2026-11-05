@@ -1801,6 +1801,21 @@
     }
    ]
   },
+  "hack": {
+   "src": "tl:hack",
+   "loop": true,
+   "period": 8,
+   "frames": [
+    {
+     "at": 0,
+     "t": 4
+    },
+    {
+     "at": 4,
+     "t": 4
+    }
+   ]
+  },
   "wall_run": {
    "src": "tl:wall_run",
    "anchor": "pelvis_h",
