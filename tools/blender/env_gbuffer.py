@@ -9,7 +9,7 @@ scritto da tools/env/layout.py (codice Python MIT): qui non c'è nessuna scelta 
 
 Sistema di riferimento (metri): X lungo la strada (verso destra sullo schermo), Y profondità (lontano
 dalla telecamera), Z in alto. Telecamera ortografica di tre quarti, la stessa dei personaggi
-(tools/sprites/camera.json: yaw 30, pitch 12, 48 px/m), con supersampling ss. L'immagine viene poi
+(tools/sprites/camera.json: yaw 30, pitch 12, 60 px/m; fino al 5 novembre 2026 erano 48), con supersampling ss. L'immagine viene poi
 inclinata in verticale (shear k = tan(yaw)·sin(pitch)) nel post-processo, così la strada è orizzontale.
 
 Passate (PNG RGBA 8 bit, vista "Raw", nessun anti-aliasing, alfa = copertura):

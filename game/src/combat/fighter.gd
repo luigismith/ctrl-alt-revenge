@@ -21,8 +21,8 @@ enum State { IDLE, WALK, RUN, JUMP, LAND, ATTACK, GRAB, GRABBED, HURT, KNOCK_AIR
 const FLASH_TICKS := 2
 const JUGGLE_POINTS := 3
 ## Lancio di base (px/s) per gli atterramenti senza lancio proprio e per i KO.
-const DEFAULT_LAUNCH := Vector2(90.0, 170.0)
-const KO_LAUNCH := Vector2(120.0, 210.0)
+const DEFAULT_LAUNCH := Vector2(112.5, 212.5)
+const KO_LAUNCH := Vector2(150.0, 262.5)
 ## Rimbalzo dopo il primo impatto con il suolo, in px/tick.
 const BOUNCE_VH := 1.7
 const BLINK_PERIOD := 4
@@ -42,7 +42,7 @@ var vx: float = 0.0
 var vy: float = 0.0
 var vh: float = 0.0
 ## Gravità del volo corrente, px per tick².
-var grav: float = 0.26
+var grav: float = 0.325
 var hitstop: int = 0
 var flash: int = 0
 var invuln: int = 0
@@ -256,7 +256,7 @@ func _on_landed() -> void:
 			_sfx_unless_anim(&"land")
 			_fx_unless_anim(&"dust_land")
 		State.KNOCK_AIR, State.THROWN:
-			if not bounced and vh < -1.2:
+			if not bounced and vh < -1.5:
 				bounced = true
 				vh = BOUNCE_VH
 				vx *= 0.5
@@ -336,11 +336,11 @@ func _fx_event(fx_name: StringName) -> void:
 ## dove sta il pugno alzato (il fotogramma di carica non ha una box per il pugno).
 func _on_glint() -> void:
 	_sfx(&"glint")
-	var main := Rect2i(-11, -86, 22, 86)
+	var main := Rect2i(-14, -108, 28, 108)
 	for b in anim.frame().hurt:
-		if b.get_area() > main.get_area() or main == Rect2i(-11, -86, 22, 86):
+		if b.get_area() > main.get_area() or main == Rect2i(-14, -108, 28, 108):
 			main = b
-	var p := Vector2(main.end.x - 2, main.position.y + 4)
+	var p := Vector2(main.end.x - 3, main.position.y + 5)
 	level.fx.spawn(&"glint", px + p.x * facing, py - ph + p.y, facing, depth_z(1) + 4)
 
 
@@ -490,7 +490,7 @@ func world_hurtboxes() -> Array[Rect2]:
 	var out: Array[Rect2] = []
 	var f := anim.frame()
 	if f.hurt.is_empty():
-		out.append(to_world(Rect2i(-11, -86, 22, 86)))
+		out.append(to_world(Rect2i(-14, -108, 28, 108)))
 	else:
 		for b in f.hurt:
 			out.append(to_world(b))
@@ -518,15 +518,15 @@ func _legs_box(boxes: Array[Rect2i]) -> Rect2i:
 		lowest = maxi(lowest, b.end.y)
 		if b.get_area() > main.get_area():
 			main = b
-	if lowest >= -10 or main.size.x <= 0:
+	if lowest >= -13 or main.size.x <= 0:
 		return Rect2i()
-	return Rect2i(main.position.x + 2, lowest, maxi(4, main.size.x - 4), -lowest)
+	return Rect2i(main.position.x + 3, lowest, maxi(5, main.size.x - 5), -lowest)
 
 
 func _standing_hurt() -> Array[Rect2i]:
 	var idle := sheet.clip(&"idle")
 	if idle.frames.is_empty() or idle.frames[0].hurt.is_empty():
-		return [Rect2i(-11, -86, 22, 86)]
+		return [Rect2i(-14, -108, 28, 108)]
 	return idle.frames[0].hurt
 
 
@@ -568,9 +568,9 @@ func receive_hit(attacker: Entity, atk: AttackData, info: HitInfo) -> void:
 	if state == State.KNOCK_AIR or state == State.THROWN:
 		# Giocoleria: ogni colpo in aria consuma punti e rilancia un poco.
 		juggle -= atk.juggle_cost
-		vh = maxf(vh, 2.2)
-		vx = info.dir * maxf(absf(vx), 1.3)
-		ph = maxf(ph, 1.0)
+		vh = maxf(vh, 2.75)
+		vx = info.dir * maxf(absf(vx), 1.625)
+		ph = maxf(ph, 1.25)
 	elif state == State.GRABBED:
 		if dead:
 			# Vittima KO in presa: si liberano tutti e due, anche chi la tiene (che altrimenti
@@ -579,7 +579,7 @@ func receive_hit(attacker: Entity, atk: AttackData, info: HitInfo) -> void:
 			_release_from_grab()
 			if holder != null and holder.grab_partner == self:
 				holder.grab_partner = null
-			launch(KO_LAUNCH, 900.0, info.dir)
+			launch(KO_LAUNCH, 1125.0, info.dir)
 	elif dead:
 		launch(atk.launch if atk.launch.length() > KO_LAUNCH.length() else KO_LAUNCH, atk.launch_gravity, info.dir)
 	elif atk.knockdown or atk.launch != Vector2.ZERO or is_airborne():
@@ -620,7 +620,7 @@ func launch(v: Vector2, gravity_px_s2: float, dir: int) -> void:
 	vy = 0.0
 	vh = v.y / 60.0
 	grav = gravity_px_s2 / 3600.0
-	ph = maxf(ph, 0.5)
+	ph = maxf(ph, 0.625)
 	bounced = false
 
 
@@ -671,7 +671,7 @@ func release_grab(push_victim: bool) -> void:
 		v._release_from_grab()
 		if push_victim:
 			v._push_ticks = 6
-			v._push_v = facing * 2.0
+			v._push_v = facing * 2.5
 			v.set_state(State.HURT, &"hurt_low")
 			v.stun = 10
 

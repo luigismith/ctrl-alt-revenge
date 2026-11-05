@@ -17,10 +17,10 @@ signal game_over
 enum Phase { PLAY, CLEAR, CONTINUE, OVER, DONE }
 
 const LEVEL_JSON := "res://data/levels/sotto_la_linea.json"
-const VIEW_W := 384
+const VIEW_W := View.W
 ## Muri invisibili a questa distanza dai bordi della vista: mezza larghezza di uno sprite in
 ## guardia (22-24 px) più 2, così nessuno resta tagliato a metà dal bordo dello schermo.
-const WALL_MARGIN := 26.0
+const WALL_MARGIN := 32.5
 const KO_FREEZE_TICKS := 26
 const KO_SLOWMO_TICKS := 24
 const KO_SLOWMO_RATE := 0.35
@@ -39,9 +39,9 @@ var show_card: bool = true
 var record_path: String = ""
 
 var data: Dictionary = {}
-var level_width: int = 1920
-var band_top: float = 150.0
-var band_bottom: float = 208.0
+var level_width: int = 2400
+var band_top: float = 188.0
+var band_bottom: float = 260.0
 var tick: int = 0
 ## Tick in cui gli attori si sono davvero mossi (senza congelamenti).
 var actor_ticks: int = 0
@@ -145,8 +145,8 @@ func _load_data() -> void:
 	if not (d is Dictionary):
 		push_error("Dati del livello non validi: %s (si usano i valori predefiniti, senza ondate)" % LEVEL_JSON)
 	data = d if d is Dictionary else {}
-	level_width = int(data.get("width", 1920))
-	var band: Array = data.get("floor_band", [150, 208])
+	level_width = int(data.get("width", 2400))
+	var band: Array = data.get("floor_band", [188, 260])
 	band_top = float(band[0])
 	band_bottom = float(band[1])
 	for w: Variant in data.get("waves", []):
@@ -240,11 +240,11 @@ func _build_props() -> void:
 		match str(p.get("type", "")):
 			"bin":
 				var b := PropBin.new()
-				b.setup_bin(self, _next_uid(), float(p.get("x", 1050)), float(p.get("y", 162)))
+				b.setup_bin(self, _next_uid(), float(p.get("x", 1313)), float(p.get("y", 203)))
 				_add_prop(b)
 			"cable":
 				var c := PropCable.new()
-				c.setup_cable(self, _next_uid(), float(p.get("x0", 1230)), float(p.get("x1", 1270)))
+				c.setup_cable(self, _next_uid(), float(p.get("x0", 1538)), float(p.get("x1", 1588)))
 				_add_prop(c)
 
 
@@ -262,7 +262,7 @@ func spawn_pickup(x: float, y: float, pop: float) -> void:
 func _spawn_player() -> void:
 	player = Gig.new()
 	player.setup_gig(self, _next_uid())
-	var ps: Array = data.get("player_start", [56, 182])
+	var ps: Array = data.get("player_start", [70, 228])
 	player.px = start_x if start_x >= 0.0 else float(ps[0])
 	player.py = start_y if start_y >= 0.0 else float(ps[1])
 	fighters.append(player)
@@ -518,7 +518,7 @@ func on_fighter_ko(f: Fighter, _attacker: Entity) -> void:
 				and wave_enemies_alive() == 0:
 			_freeze = KO_FREEZE_TICKS
 			add_shake(0.45)
-			fx.spawn(&"ko_flash", t.px, t.py - t.ph - 44.0, 1, 2900)
+			fx.spawn(&"ko_flash", t.px, t.py - t.ph - 55.0, 1, 2900)
 			Game.count(&"ko_freezes")
 	elif f == player:
 		Game.count(&"gig_ko")
@@ -864,7 +864,7 @@ func _update_lights() -> void:
 			"cable":
 				l.energy = base * _cable_flash()
 			"lightning":
-				l.position.x = camera.x + 192.0
+				l.position.x = camera.x + View.CX
 				l.energy = base * _lightning(tick)
 
 

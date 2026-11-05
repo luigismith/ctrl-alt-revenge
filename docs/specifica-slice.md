@@ -37,7 +37,7 @@ Direzione di Luigi del 4 novembre 2026, che vale per il gioco completo:
 
 Scelte tecniche già fissate:
 
-- risoluzione 384×216;
+- risoluzione 480×270 (dal 5 novembre 2026; prima era 384×216): su uno schermo 1080p sono pixel ×4;
 - GIG non si specchia mai (decisione del 4 novembre 2026): braccio cyber sempre a sinistra e occhio cyber a destra, e le animazioni si rendono dal 3D per i due versi. Lo slice di oggi lo specchia ancora;
 - prima Windows;
 - un solo giocatore;
@@ -47,7 +47,7 @@ Scelte tecniche già fissate:
 
 - Godot 4.7.2 standard con GDScript tipizzato, senza plugin. Il progetto è in `game/`.
 - Le impostazioni del progetto sono scritte esplicitamente in `game/project.godot`:
-  - 384×216, stretch `viewport`, aspect `keep`, scale `integer`, finestra 1152×648;
+  - 480×270, stretch `viewport`, aspect `keep`, scale `integer`, finestra 1440×810. La misura sta anche in `View` (`game/src/core/view.gd`), che il codice usa al posto dei numeri; un test controlla che le due coincidano;
   - filtro Nearest; snap delle trasformazioni 2D attivo, dei vertici spento;
   - renderer Mobile su Direct3D 12.
 - Fisica a 60 tick al secondo, interpolazione spenta. Tutto il gameplay gira in `_physics_process`, un tick alla volta, in modo deterministico: niente `randf()` senza seme e niente tempi reali.
@@ -62,19 +62,19 @@ Scelte tecniche già fissate:
 
 ## 3. Scala del mondo e pseudo-profondità
 
-- **Densità**: 48 px per metro sul piano del pavimento, pari al blocco 4 della pipeline v6. Le misure in guardia, dai piedi alla cima della testa:
-  - **GIG**: 89-90 px in guardia (90-93 nel passo) e 47-49 px di larghezza con le braccia. Dal 4 novembre 2026 ha la figura da ex pugile di cinquant'anni: forma a V, torace largo con le braccia attaccate al busto, vita non stretta, camicia che cade dritta, pantaloni asciutti. Di spalle, a 60 px/m come nei murales: spalle 47,5 px, busto all'ascella 32,5, vita 20,8, bacino 23,2, collo 14,5. Nella vista degli sprite (48 px/m): sommità del busto 22,5 px, bacino 19,5. Testa (1,45) e mani (1,8) restano ingrandite; le proporzioni stanno in `tools/sprites/chars/gig.json`;
-  - **punk**: circa 92 px, 44 di larghezza;
-  - **bruto**, il nemico pesante, lo supera nettamente: circa 101 px in guardia e 58 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
+- **Densità**: 60 px per metro sul piano del pavimento (`tools/sprites/camera.json` e `View.PPM`). Fino al 5 novembre 2026 erano 48: con la risoluzione nuova tutto è cresciuto del 25%, e i numeri del progetto vecchio si convertono con `floor(p × 1,25 + 0,5)`. Le misure in guardia, dai piedi alla cima della testa:
+  - **GIG**: 111-112 px in guardia (113-116 nel passo) e 58-60 px di larghezza con le braccia. Dal 4 novembre 2026 ha la figura da ex pugile di cinquant'anni: forma a V, torace largo con le braccia attaccate al busto, vita non stretta, camicia che cade dritta, pantaloni asciutti. Di spalle, a 60 px/m come nei murales e negli sprite: spalle 47,5 px, busto all'ascella 32,5, vita 20,8, bacino 23,2, collo 14,5. Nella vista degli sprite: sommità del busto 28 px, bacino 24. Testa (1,45) e mani (1,8) restano ingrandite; le proporzioni stanno in `tools/sprites/chars/gig.json`;
+  - **punk**: circa 114 px, 54 di larghezza;
+  - **bruto**, il nemico pesante, lo supera nettamente: circa 126 px in guardia e 71 px di larghezza, con i pantaloni da lavoro blu che lo staccano dall'ocra della camicia di GIG.
 - **Coordinate di ogni entità**:
   - `x` orizzontale, in px del mondo;
   - `y` è la linea dei piedi sullo schermo, cioè la profondità;
   - `h` è l'altezza dal suolo (≥ 0, verso l'alto).
 
   Lo sprite si disegna in (x, y − h), l'ombra in (x, y).
-- **Fascia calpestabile**: y da 150 a 208.
+- **Fascia calpestabile**: y da 188 a 260.
 - **Ordine di disegno**: per `y` crescente.
-- **Tolleranza di profondità per i colpi**: ±10 px per gli attacchi di GIG, ±8 px per quelli dei nemici.
+- **Tolleranza di profondità per i colpi**: ±12,5 px per gli attacchi di GIG, ±10 px per quelli dei nemici.
 - **Direzione**: tutti gli sprite sono disegnati rivolti a destra. Verso sinistra si specchiano, insieme a hitbox, hurtbox e offset.
 
 ## 4. Formato degli sprite
@@ -90,15 +90,15 @@ Scelte tecniche già fissate:
   "id": "gig",
   "format": 1,
   "image": "gig.png",
-  "pixels_per_meter": 48,
+  "pixels_per_meter": 60,
   "animations": {
     "jab1": {
       "loop": false,
       "frames": [
-        {"rect": [0, 0, 70, 96], "anchor": [30, 93], "ticks": 3,
-         "hurt": [[-11, -86, 22, 86]], "hit": [], "events": ["sfx:whoosh_light"], "tags": [], "dx": 0},
-        {"rect": [70, 0, 88, 96], "anchor": [30, 93], "ticks": 2,
-         "hurt": [[-11, -86, 22, 86]], "hit": [[14, -66, 30, 12]], "events": [], "tags": ["active"], "dx": 1}
+        {"rect": [0, 0, 88, 120], "anchor": [38, 116], "ticks": 3,
+         "hurt": [[-14, -108, 28, 108]], "hit": [], "events": ["sfx:whoosh_light"], "tags": [], "dx": 0},
+        {"rect": [88, 0, 110, 120], "anchor": [38, 116], "ticks": 2,
+         "hurt": [[-14, -108, 28, 108]], "hit": [[18, -83, 38, 15]], "events": [], "tags": ["active"], "dx": 1}
       ]
     }
   }
@@ -144,11 +144,11 @@ Scelte tecniche già fissate:
   - `dx` sposta davvero la vittima; `dy` è solo uno scostamento di disegno: la vittima resta alla profondità di GIG.
 - `behind: true` vuol dire che la vittima va disegnata dietro GIG in quel fotogramma.
 - Gli offset vengono da `author.py`, ricalcolati per ogni corpo (`tools/blender/char_poses.py`).
-- **Proiezione.** `throw` non ha fotogrammi `active`: il rilascio avviene al tick 8 (fine dell'avvio), senza evento, all'inizio del fotogramma 2. In quel momento la vittima parte dal `dx` della sua voce (circa 30 px), dove è già disegnata con `thrown` 0, e da lì riproduce `thrown` dall'inizio.
+- **Proiezione.** `throw` non ha fotogrammi `active`: il rilascio avviene al tick 8 (fine dell'avvio), senza evento, all'inizio del fotogramma 2. In quel momento la vittima parte dal `dx` della sua voce (circa 38 px), dove è già disegnata con `thrown` 0, e da lì riproduce `thrown` dall'inizio.
 - **Ordine di `thrown`** nei nemici: 0 rilasciato, 1 in volo (`hold`, `air`), 2 afferrato, 3 sollevato. Dopo il rilascio si vedono solo 0 e 1; il 2 e il 3 compaiono solo durante la presa, tramite `victim`.
 - **Proiezione all'indietro** (attacco più la direzione opposta): GIG si gira quando la clip arriva al fotogramma 1, con la vittima sollevata sopra la testa, così la vittima atterra dall'altra parte senza salti.
 
-**Animazioni in più (prova delle mosse platform):** l'atlante di GIG contiene anche `double_jump`, `ledge_hang`, `ledge_climb`, `slide` e `crouch`. Il gioco dello slice non le usa: servono a provare la pipeline per lo step del gameplay. Il validatore le segnala come avvisi, non come errori.
+**Animazioni in più (prova delle mosse platform):** l'atlante di GIG contiene anche `double_jump`, `ledge_hang`, `ledge_climb`, `slide`, `crouch`, `crouch_walk`, `wall_slide`, `wall_run` e `air_dash` (camminata accovacciata e mosse sui muri, aggiunte il 5 novembre 2026). Il gioco dello slice non le usa: le usa la stanza di prova. Il validatore le segnala come avvisi, non come errori.
 
 **Animazioni richieste**, con nomi esatti:
 
@@ -167,7 +167,7 @@ Il fotogramma 0 di `knock_air` è un contraccolpo all'indietro (posa scritta, `k
 **Oggetti di scena** (§6): `game/assets/props/<id>.json` oppure `game/assets/props/<id>/<id>.json`, stesso formato.
 - `bin`: `idle`, `hit` (con `sfx:bin_hit`), `break` (con `sfx:bin_break`, ultimo fotogramma `hold`).
 - `apple`: `idle`; la `hurt` è l'area di raccolta.
-- `cable`: `idle` in loop di 6 fotogrammi, con `sfx:zap` sul primo (il codice lo suona a -12 dB e solo se il cavo è vicino allo schermo). L'ancora è dove il cavo che pende dal palo del fondale tocca terra, e il codice la posa in x 1250, y 150. Nei fotogrammi 0 e 3 c'è il lampo: archi bianco-azzurri di 16-24 px e la luce sull'acqua e sull'asfalto intorno, già dipinta nell'immagine (più larga della pozza per l'alone).
+- `cable`: `idle` in loop di 6 fotogrammi, con `sfx:zap` sul primo (il codice lo suona a -12 dB e solo se il cavo è vicino allo schermo). L'ancora è dove il cavo che pende dal palo del fondale tocca terra, e il codice la posa in x 1563, y 188. Nei fotogrammi 0 e 3 c'è il lampo: archi bianco-azzurri di 16-24 px e la luce sull'acqua e sull'asfalto intorno, già dipinta nell'immagine (più larga della pozza per l'alone).
 
 **Segnaposto**: se manca lo sprite vero il codice usa `game/assets/sprites/_placeholder/<id>.json`, e se manca anche quello disegna rettangoli di debug. Così il gioco resta giocabile.
 
@@ -180,7 +180,7 @@ Tick a 60 Hz. Sono valori di partenza: si tarano con le prove di Luigi. Stanno i
 | GIG `jab1` | 3 | 2 | 9 | 4 | 5/7 | stordimento 14 |
 | GIG `jab2` | 3 | 2 | 9 | 4 | 5/7 | stordimento 14 |
 | GIG `hook` (gancio cyber) | 6 | 3 | 12 | 7 | 7/9 | stordimento 18 |
-| GIG `kick` (finale) | 10 | 3 | 20 | 12 | 9/12 | atterra; lancio 170 px/s in avanti e 220 px/s in alto, gravità 900 px/s² |
+| GIG `kick` (finale) | 10 | 3 | 20 | 12 | 9/12 | atterra; lancio 212,5 px/s in avanti e 275 px/s in alto, gravità 1125 px/s² |
 | GIG `air_kick` | 4 | 8 | 6 all'atterraggio | 8 | 6/8 | atterra |
 | GIG `knee` (in presa) | 4 | 3 | 10 | 6 | 6/8 | — |
 | GIG `throw` | 8 | — | 14 | 14, più 8 a chi viene colpito dal corpo | 11/11 | proiezione |
@@ -208,19 +208,19 @@ Tick a 60 Hz. Sono valori di partenza: si tarano con le prove di Luigi. Stanno i
 - un colpo che prende un combattente in aria (salto, calcio volante), anche leggero, lo atterra, come in Streets of Rage;
 - lampo bianco sulla vittima per 2 tick;
 - lo sprite trema, la hurtbox no;
-- tremolio dello schermo solo per colpi pesanti, KO e proiezioni: massimo 5 px, solo traslazione, decadimento 1,5 al secondo.
+- tremolio dello schermo solo per colpi pesanti, KO e proiezioni: massimo 6 px, solo traslazione, decadimento 1,5 al secondo.
 
 **Valori dei personaggi:**
 - **Vita**: GIG 120, punk 48, bruto 110. GIG ha 3 vite. Se perde l'ultima a zona già liberata (KO quasi insieme a quello dell'ultimo nemico) rientra senza CONTINUA? e il livello finisce lo stesso.
 - **Invulnerabilità dopo il rialzo**: GIG 60 tick, nemici 20.
 - **Movimento di GIG**:
-  - camminata 1,5 px per tick in orizzontale e 1 px per tick in profondità;
-  - corsa con doppio tocco della direzione entro 12 tick, a 3 px per tick;
-  - salto con velocità iniziale 4,4 px per tick e gravità 0,26 px per tick².
-- **Presa automatica**: scatta quando GIG cammina contro un nemico entro 18 px in orizzontale e 4 px in profondità, se il nemico non sta attaccando, non è in aria e non è a terra.
+  - camminata 1,875 px per tick in orizzontale e 1,25 px per tick in profondità;
+  - corsa con doppio tocco della direzione entro 12 tick, a 3,75 px per tick;
+  - salto con velocità iniziale 5,5 px per tick e gravità 0,325 px per tick².
+- **Presa automatica**: scatta quando GIG cammina contro un nemico entro 22,5 px in orizzontale e 5 px in profondità, se il nemico non sta attaccando, non è in aria e non è a terra.
   - Dalla presa: attacco = ginocchiata (al massimo 2); il terzo attacco, oppure attacco più la direzione opposta, = proiezione.
   - Dopo 90 tick il nemico si libera.
-  - La vittima scivola fino all'offset della voce `victim` (circa 30 px) in 4 tick, senza scatti. Vicino ai muri GIG arretra, così la coppia resta dentro; la proiezione rilascia la vittima sempre dentro i muri.
+  - La vittima scivola fino all'offset della voce `victim` (circa 38 px) in 4 tick, senza scatti. Vicino ai muri GIG arretra, così la coppia resta dentro; la proiezione rilascia la vittima sempre dentro i muri.
   - Una ginocchiata che manda KO chiude la presa: la vittima vola via con `knock_air`.
   - Un colpo subito fa ripartire la combo da `jab1`.
 - **Punteggio**:
@@ -230,22 +230,22 @@ Tick a 60 Hz. Sono valori di partenza: si tarano con le prove di Luigi. Stanno i
 
 **Intelligenza dei nemici:**
 - Un `AttackDirector` (autoload) dà il permesso di attaccare a un solo nemico alla volta, con almeno 0,35 s fra due attacchi nemici qualsiasi e 0,6-1,0 s fra due attacchi dello stesso nemico (erano 1,2-2,0 s: Luigi, 4 novembre 2026, li ha voluti molto più aggressivi).
-- Chi aspetta resta a 60-90 px da GIG, fuori dalla sua corsia, e si sposta di lato.
+- Chi aspetta resta a 50-80 px da GIG (il bruto a 55-82), fuori dalla sua corsia, e si sposta di lato.
 - Il gancio caricato del punk si annuncia con il lampo (`glint`).
 - Il bruto è lento e pesante: non si ferma per i jab durante l'avvio del pugno e tiene il turno d'attacco finché il pugno non finisce. Il pugno avanza con il corpo (dx dei fotogrammi): la distanza d'attacco dell'IA ne tiene conto.
 - Un nemico che entra da fuori schermo diventa colpibile solo dentro i muri invisibili.
 
 ## 6. Livello "Sotto la Linea"
 
-Mondo largo 1920 px, cioè 5 schermate. La telecamera segue GIG su posizioni intere, con zona morta di ±24 px e velocità massima di 4 px per tick; l'altezza della telecamera è fissa. I muri invisibili stanno a 26 px dai bordi della vista e del livello (mezza larghezza di uno sprite in guardia più 2), così nessuno resta tagliato a metà dal bordo dello schermo.
+Mondo largo 2400 px, cioè 5 schermate. La telecamera segue GIG su posizioni intere, con zona morta di ±30 px e velocità massima di 5 px per tick; l'altezza della telecamera è fissa. I muri invisibili stanno a 32,5 px dai bordi della vista e del livello (mezza larghezza di uno sprite in guardia più 2), così nessuno resta tagliato a metà dal bordo dello schermo.
 
 | x | Contenuto |
 |---|---|
-| 0-384 | Partenza; cartello "1 · SOTTO LA LINEA" (immagine dell'interfaccia, non dello sfondo) |
-| 576-960 | Ondata 1, con la telecamera bloccata: un punk |
-| 1050 | Bidone dell'immondizia da rompere; dentro c'è una mela (+30 di vita) |
-| 1230-1270 | Ostacolo da saltare: cavo dell'alta tensione strappato in una pozzanghera; scintille animate, 10 di danno e atterramento |
-| 1536-1920 | Arena sotto i piloni della ferrovia, con la telecamera bloccata: un punk e un bruto, il bruto entra 3 s dopo |
+| 0-480 | Partenza; cartello "1 · SOTTO LA LINEA" (immagine dell'interfaccia, non dello sfondo) |
+| 720-1200 | Ondata 1, con la telecamera bloccata: un punk |
+| 1313 | Bidone dell'immondizia da rompere; dentro c'è una mela (+30 di vita) |
+| 1538-1588 | Ostacolo da saltare: cavo dell'alta tensione strappato in una pozzanghera; scintille animate, 10 di danno e atterramento |
+| 1920-2400 | Arena sotto i piloni della ferrovia, con la telecamera bloccata: un punk e un bruto, il bruto entra 3 s dopo |
 | fine | "ZONA LIBERATA", poi la schermata di fine demo |
 
 Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di partenza di GIG e gli oggetti di scena sono descritti in `game/data/levels/sotto_la_linea.json`.
@@ -260,15 +260,15 @@ Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di par
 ```json
 {
   "format": 1,
-  "level_width": 1920,
-  "floor_band": [150, 208],
+  "level_width": 2400,
+  "floor_band": [188, 260],
   "layers": [
     {"name": "sky", "image": "sky.png", "scroll": 0.0, "y": 0, "repeat_x": 0, "z": -100},
-    {"name": "far", "image": "far.png", "scroll": 0.125, "y": 26, "repeat_x": 0, "z": -90, "emissive": "far_emis.png"},
-    {"name": "mid", "image": "mid.png", "scroll": 0.25, "y": 14, "repeat_x": 0, "z": -80, "emissive": "mid_emis.png"},
+    {"name": "far", "image": "far.png", "scroll": 0.125, "y": 33, "repeat_x": 0, "z": -90, "emissive": "far_emis.png"},
+    {"name": "mid", "image": "mid.png", "scroll": 0.25, "y": 18, "repeat_x": 0, "z": -80, "emissive": "mid_emis.png"},
     {"name": "near", "image": "near.png", "scroll": 0.5, "y": 0, "repeat_x": 0, "z": -70, "emissive": "near_emis.png"},
     {"name": "backdrop", "image": "backdrop.png", "scroll": 1.0, "y": 0, "repeat_x": 0, "z": -20, "emissive": "backdrop_emis.png"},
-    {"name": "floor", "image": "floor.png", "scroll": 1.0, "y": 130, "repeat_x": 0, "z": -10, "emissive": "floor_emis.png"},
+    {"name": "floor", "image": "floor.png", "scroll": 1.0, "y": 162, "repeat_x": 0, "z": -10, "emissive": "floor_emis.png"},
     {"name": "fg", "image": "fg.png", "scroll": 1.25, "y": 0, "repeat_x": 0, "z": 100, "emissive": "fg_emis.png"}
   ]
 }
@@ -288,12 +288,12 @@ Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di par
 
 Le luci illuminano solo gli attori con la normal map (maschera `Fighter.LIGHT_MASK_ACTORS`), mai gli sfondi, che hanno la luce già dipinta. La luce è a 3 bande (come le ombre della pixel art): sul bordo della sagoma arriva il colore della luce, dentro schiarisce senza cambiare tinta, così l'ocra di GIG non vira. Sui colori chiari conta meno (× 1 − 0,6 × la luminanza del colore: barba, capelli e scintille non bruciano) e il contorno scuro, con le linee interne dello stesso colore, ne resta fuori come l'inchiostro. Sono solo disegno e non toccano la simulazione: replay e hash non cambiano. F5 le accende e spegne (build di debug); `--no-lights` parte spento.
 - Gli sfondi `backdrop`, `floor`, `near` e `fg` sono in cel shading a 3 toni, senza retino: luce chiave a toni, luce dei neon e riflessi sul bagnato a zone con il bordo netto, aloni ad anelli netti. Dentro la cornice delle insegne l'alone è pieno; sotto le lampade a muro c'è un cono di luce a due bande; nella fascia calpestabile i riflessi sono più scuri, per non confondersi con gli stivali.
-- I piani a fattore 1,0 coprono tutti i 1920 px. Quelli più lenti coprono almeno `384 + 1536 × scroll` px, oppure si ripetono: far 576, mid 768, near 1152; `fg` (1,25) è largo 2304 px.
+- I piani a fattore 1,0 coprono tutti i 2400 px. Quelli più lenti coprono almeno `480 + 1920 × scroll` px, oppure si ripetono: far 720, mid 960, near 1440; `fg` (1,25) è largo 2880 px.
 - I piani con `z` < 0 stanno dietro agli attori, quelli con `z` ≥ 0 davanti.
-- `backdrop` (facciate, alto 149 px) e `floor` (da y 130: contiene anche la base delle cose basse davanti alle facciate) non si sovrappongono. `fg` è la travata del viadotto vista dal basso, con lampade al sodio piatte attaccate sotto: resta sopra y 26, perché le insegne del fondale stanno fra y 27 e 45 e devono leggersi a telecamera ferma, e non copre la fascia calpestabile.
-- I piani `sky`, `far` e `mid` vengono da Warped City (CC0), ricolorati; la pipeline è in `tools/env/` (`python -I tools/env/build_all.py --install`, circa 75 s, serve il laboratorio).
+- `backdrop` (facciate, alto 187 px) e `floor` (da y 162: contiene anche la base delle cose basse davanti alle facciate) non si sovrappongono. `fg` è la travata del viadotto vista dal basso, con lampade al sodio piatte attaccate sotto: resta sopra y 33, perché le insegne del fondale stanno fra y 34 e 56 e devono leggersi a telecamera ferma, e non copre la fascia calpestabile.
+- I piani `sky`, `far` e `mid` vengono da Warped City (CC0), ricolorati; la pipeline è in `tools/env/` (`python -I tools/env/build_all.py --install`, circa 55 s, serve il laboratorio).
 
-**Oggetti di scena**, in `game/assets/props/`: bidone (intero, colpito, rotto), mela, cavo con scintille (6 fotogrammi). Ognuno ha un JSON con lo stesso formato degli sprite (dettagli al §4). Il bidone è in x 1050, y 160; la pozzanghera del cavo va da x 1224 a 1280 su tutta la fascia ed è un'unica forma irregolare che in ogni riga copre la zona del danno (x 1230-1270).
+**Oggetti di scena**, in `game/assets/props/`: bidone (intero, colpito, rotto), mela, cavo con scintille (6 fotogrammi). Ognuno ha un JSON con lo stesso formato degli sprite (dettagli al §4). Il bidone è in x 1313, y 200; la pozzanghera del cavo va da x 1528 a 1603 su tutta la fascia ed è un'unica forma irregolare che in ogni riga copre la zona del danno (x 1538-1588).
 
 ## 7. Effetti visivi, interfaccia, suoni
 
@@ -308,7 +308,7 @@ Servono `hit_spark_light`, `hit_spark_heavy`, `dust_land`, `dust_skid`, `glint`,
 Campi in più di `fx.json`:
 - `mode`: `anim` (striscia animata) oppure `variants` (fotogrammi alternativi, non un'animazione);
 - `flip`: l'effetto è asimmetrico e va specchiato con la direzione del colpo (il codice specchia comunque tutti gli effetti secondo la direzione);
-- `ombra` ha tre varianti: 0 grande (46×10, bruto e corpi a terra), 1 media (36×8, GIG e punk), 2 piccola (24×6, oggetti). Il codice sceglie dalla larghezza dell'ombra del personaggio e passa a quella più piccola sopra i 36 px d'altezza; si disegna a 1x in (x, y), prima dello sprite.
+- `ombra` ha tre varianti: 0 grande (58×12, bruto e corpi a terra), 1 media (44×10, GIG e punk), 2 piccola (30×8, oggetti). Il codice sceglie dalla larghezza dell'ombra del personaggio e passa a quella più piccola sopra i 45 px d'altezza; si disegna a 1x in (x, y), prima dello sprite.
 
 Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza 0,25), `rain_splash` (schizzo a terra), `rain_sheet` (tessera di pioggia 128×128, facoltativa, non usata) e `ko_flash` (lampo del KO finale di un'ondata). La pioggia è deterministica, con un generatore suo.
 

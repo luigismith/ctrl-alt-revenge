@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="PlatformMoves" format=3]
+
+[ext_resource type="Script" path="res://src/platform/platform_moves.gd" id="1_moves"]
+
+[resource]
+script = ExtResource("1_moves")

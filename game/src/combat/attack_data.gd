@@ -25,12 +25,12 @@ enum Weight { LIGHT, MEDIUM, HEAVY }
 ## Lancio in px/s: x in avanti, y verso l'alto. Zero = valori di base dell'atterramento.
 @export var launch: Vector2 = Vector2.ZERO
 ## Gravità del lancio in px/s².
-@export var launch_gravity: float = 900.0
+@export var launch_gravity: float = 1125.0
 ## Spinta all'indietro per i colpi che non atterrano, in px.
-@export var push: float = 6.0
+@export var push: float = 7.5
 @export var juggle_cost: int = 1
 ## Tolleranza di profondità: ±10 per GIG, ±8 per i nemici.
-@export var depth_tolerance: float = 10.0
+@export var depth_tolerance: float = 12.5
 @export var points: int = 10
 ## Trauma aggiunto alla telecamera (0-1): solo colpi pesanti, KO e proiezioni.
 @export var shake: float = 0.0
@@ -47,7 +47,7 @@ enum Weight { LIGHT, MEDIUM, HEAVY }
 ## L'avvio ha armatura (non si interrompe con i colpi leggeri).
 @export var armor: bool = false
 ## Hitbox da usare se il fotogramma attivo non ne ha.
-@export var hitbox: Rect2i = Rect2i(12, -70, 24, 12)
+@export var hitbox: Rect2i = Rect2i(15, -87, 30, 15)
 
 
 func total_ticks() -> int:

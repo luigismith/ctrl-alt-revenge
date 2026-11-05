@@ -24,7 +24,7 @@ var _t: int = 0
 
 
 func _ready() -> void:
-	size = Vector2(384, 216)
+	size = View.SIZE
 	_build()
 	# Il tema del titolo: dal titolo continua senza ripartire, dopo la fine della demo riparte
 	# (prima i crediti erano muti, dopo il jingle di ZONA LIBERATA).
@@ -174,7 +174,7 @@ func _physics_process(_delta: float) -> void:
 		speed = 3.0
 	elif Input.is_action_pressed(&"move_up"):
 		speed = -3.0
-	_scroll = clampf(_scroll + speed, -216.0, _content_height())
+	_scroll = clampf(_scroll + speed, -float(View.H), _content_height())
 	queue_redraw()
 	if _t > 20 and (Input.is_action_just_pressed(&"menu_back") or Input.is_action_just_pressed(&"attack") or Input.is_action_just_pressed(&"menu_confirm")):
 		Sfx.play(&"ui_confirm")
@@ -195,16 +195,16 @@ static func _line_h(l: Array) -> int:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 384, 216), Color8(12, 8, 26))
+	draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color8(12, 8, 26))
 	var y := -roundf(_scroll)
 	for l in _lines:
 		var lh := _line_h(l)
-		if y > -lh and y < 216:
+		if y > -lh and y < View.H:
 			var tex: Texture2D = l[3]
 			if tex != null:
-				draw_texture(tex, Vector2(roundf(192 - tex.get_width() / 2.0), y + 2))
+				draw_texture(tex, Vector2(roundf(View.CX - tex.get_width() / 2.0), y + 2))
 			else:
-				UiFont.draw_text(self, Vector2(14, y), str(l[0]), l[1], 1, 0, Color(0, 0, 0, 0), UiFont.SHADOW, bool(l[2]))
+				UiFont.draw_text(self, Vector2(View.CX - 178, y), str(l[0]), l[1], 1, 0, Color(0, 0, 0, 0), UiFont.SHADOW, bool(l[2]))
 		y += lh
-	draw_rect(Rect2(0, 0, 384, 10), Color8(12, 8, 26))
-	draw_rect(Rect2(0, 206, 384, 10), Color8(12, 8, 26))
+	draw_rect(Rect2(0, 0, View.W, 10), Color8(12, 8, 26))
+	draw_rect(Rect2(0, View.H - 10, View.W, 10), Color8(12, 8, 26))

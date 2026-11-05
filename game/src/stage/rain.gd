@@ -7,12 +7,12 @@ extends Node2D
 ## Le gocce stanno in primo piano; gli spruzzi, se c'è un nodo apposito (set_splash_canvas),
 ## si disegnano lì, sotto gli attori, così non compaiono sopra gambe e stivali.
 
-const VIEW := Vector2i(384, 216)
+const VIEW := View.SIZE_I
 const DROPS := 64
 const SLANT := 0.25
 
 var fx: FxLayer
-var band: Vector2 = Vector2(150, 208)
+var band: Vector2 = Vector2(188, 260)
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Per goccia: x nel mondo, y, velocità, lunghezza, y del suolo dove finisce.
@@ -31,7 +31,7 @@ func setup(rng_seed: int, fx_layer: FxLayer, floor_band: Vector2) -> void:
 	fx = fx_layer
 	band = floor_band
 	for i in DROPS:
-		_drops.append(_new_drop(_rng.randf_range(-20.0, VIEW.y)))
+		_drops.append(_new_drop(_rng.randf_range(-25.0, VIEW.y)))
 
 
 ## Gli spruzzi si disegnano in `canvas`, da mettere sotto gli attori. `world_space`: il nodo è
@@ -43,8 +43,8 @@ func set_splash_canvas(canvas: Node2D, world_space: bool) -> void:
 
 
 func _new_drop(y: float) -> PackedFloat32Array:
-	var ground := _rng.randf_range(band.x - 40.0, band.y + 8.0)
-	return PackedFloat32Array([_cam_x + _rng.randf_range(-20.0, VIEW.x + 40.0), y, _rng.randf_range(5.5, 7.5), _rng.randf_range(5.0, 9.0), ground])
+	var ground := _rng.randf_range(band.x - 50.0, band.y + 10.0)
+	return PackedFloat32Array([_cam_x + _rng.randf_range(-25.0, VIEW.x + 50.0), y, _rng.randf_range(6.875, 9.375), _rng.randf_range(6.25, 11.25), ground])
 
 
 func tick(cam_x: int) -> void:
@@ -54,12 +54,12 @@ func tick(cam_x: int) -> void:
 		d[1] += d[2]
 		d[0] -= d[2] * SLANT
 		if d[1] >= d[4]:
-			if d[4] >= band.x - 2.0:
+			if d[4] >= band.x - 2.5:
 				_splashes.append(PackedFloat32Array([d[0], d[4], 0]))
-			d = _new_drop(_rng.randf_range(-30.0, -4.0))
+			d = _new_drop(_rng.randf_range(-38.0, -5.0))
 		var sx := d[0] - cam_x
-		if sx < -30.0 or sx > VIEW.x + 50.0:
-			d[0] = cam_x + posmod(int(sx), VIEW.x + 60) - 20
+		if sx < -38.0 or sx > VIEW.x + 63.0:
+			d[0] = cam_x + posmod(int(sx), VIEW.x + 75) - 25
 		_drops[i] = d
 	var keep: Array[PackedFloat32Array] = []
 	var splash: FxLayer.FxDef = fx.defs.get(&"rain_splash") if fx != null else null

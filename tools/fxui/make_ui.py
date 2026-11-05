@@ -226,7 +226,7 @@ def build() -> dict:
         old.unlink()
     ui = {
         "format": 1,
-        "note": ("Elementi d'interfaccia di CTRL+ALT REVENGE, in px del gioco (384x216). Ogni chiave "
+        "note": ("Elementi d'interfaccia di CTRL+ALT REVENGE, in px del gioco (480x270). Ogni chiave "
                  "è un elemento con 'image' e 'size'; nine_slice = margini [sinistra, sopra, destra, "
                  "sotto] da non stirare; frame/count/ticks = striscia orizzontale di fotogrammi da "
                  "'frame' px, ognuno per 'ticks' tick a 60 Hz. Le chiavi 'fonts', 'colors' e "
@@ -329,8 +329,8 @@ def build() -> dict:
         "gig_bar": [46, 15, W, 6],
         "enemy_name": [44, 21],
         "enemy_bar": [46, 34, W, 4],
-        "score_right": [378, 2],
-        "go_arrow_right_center_y": [381, 64],
+        "score_right": [474, 2],
+        "go_arrow_right_center_y": [477, 80],
     }
     (OUT / "ui.json").write_text(json.dumps(ui, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return ui

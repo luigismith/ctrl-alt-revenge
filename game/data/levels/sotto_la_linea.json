@@ -2,57 +2,57 @@
   "format": 1,
   "id": "sotto_la_linea",
   "title": "1 · SOTTO LA LINEA",
-  "width": 1920,
-  "floor_band": [150, 208],
-  "player_start": [56, 184],
+  "width": 2400,
+  "floor_band": [188, 260],
+  "player_start": [70, 230],
   "env": "res://assets/env/sotto_la_linea/layers.json",
   "waves": [
     {
       "id": "ondata_1",
-      "camera_x": 576,
+      "camera_x": 720,
       "spawns": [
-        {"type": "thug_punk", "delay": 20, "side": 1, "y": 176}
+        {"type": "thug_punk", "delay": 20, "side": 1, "y": 220}
       ]
     },
     {
       "id": "arena",
-      "camera_x": 1536,
+      "camera_x": 1920,
       "final": true,
       "music_layer": "arena",
       "spawns": [
-        {"type": "thug_punk", "delay": 20, "side": 1, "y": 170},
-        {"type": "thug_bruiser", "delay": 200, "side": -1, "y": 194}
+        {"type": "thug_punk", "delay": 20, "side": 1, "y": 213},
+        {"type": "thug_bruiser", "delay": 200, "side": -1, "y": 243}
       ]
     }
   ],
   "props": [
-    {"type": "bin", "x": 1050, "y": 160},
-    {"type": "cable", "x0": 1230, "x1": 1270}
+    {"type": "bin", "x": 1313, "y": 200},
+    {"type": "cable", "x0": 1538, "x1": 1588}
   ],
   "lights": [
-    {"kind": "neon", "x": 304, "y": 35, "color": "#ff665a", "energy": 0.83, "radius": 240, "height": 40},
-    {"kind": "neon", "x": 524, "y": 33, "color": "#ff8236", "energy": 0.6, "radius": 192, "height": 40},
-    {"kind": "neon", "x": 815, "y": 34, "color": "#ff8e44", "energy": 0.83, "radius": 256, "height": 40},
-    {"kind": "neon", "x": 1061, "y": 33, "color": "#ff5a5e", "energy": 0.68, "radius": 208, "height": 40},
-    {"kind": "neon", "x": 1397, "y": 34, "color": "#ff7d31", "energy": 0.75, "radius": 224, "height": 40},
-    {"kind": "neon", "x": 1529, "y": 64, "color": "#ff5258", "energy": 0.75, "radius": 224, "height": 35},
-    {"kind": "neon", "x": 1600, "y": 46, "color": "#ff983c", "energy": 0.45, "radius": 144, "height": 30},
-    {"kind": "neon", "x": 1884, "y": 46, "color": "#ff983c", "energy": 0.45, "radius": 144, "height": 30},
-    {"kind": "neon", "x": 274, "y": 92, "color": "#ff585f", "energy": 0.33, "radius": 128, "height": 20},
-    {"kind": "neon", "x": 515, "y": 93, "color": "#ff535a", "energy": 0.33, "radius": 128, "height": 20},
-    {"kind": "neon", "x": 778, "y": 85, "color": "#ff585f", "energy": 0.33, "radius": 128, "height": 20},
-    {"kind": "neon", "x": 1380, "y": 92, "color": "#ff8a3b", "energy": 0.33, "radius": 128, "height": 20},
-    {"kind": "lamp", "x": 52, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 285, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 518, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 751, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 984, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 1217, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 1450, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 1683, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 1916, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "lamp", "x": 2149, "y": 30, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 190, "height": 70},
-    {"kind": "cable", "x": 1250, "y": 168, "color": "#66e8ff", "energy": 1.2, "radius": 150, "height": 12},
-    {"kind": "lightning", "x": 192, "y": -60, "color": "#b8c8ff", "energy": 0.7, "radius": 500, "height": 120}
+    {"kind": "neon", "x": 380, "y": 44, "color": "#ff665a", "energy": 0.83, "radius": 300, "height": 50},
+    {"kind": "neon", "x": 655, "y": 41, "color": "#ff8236", "energy": 0.6, "radius": 240, "height": 50},
+    {"kind": "neon", "x": 1019, "y": 43, "color": "#ff8e44", "energy": 0.83, "radius": 320, "height": 50},
+    {"kind": "neon", "x": 1326, "y": 41, "color": "#ff5a5e", "energy": 0.68, "radius": 260, "height": 50},
+    {"kind": "neon", "x": 1746, "y": 43, "color": "#ff7d31", "energy": 0.75, "radius": 280, "height": 50},
+    {"kind": "neon", "x": 1911, "y": 80, "color": "#ff5258", "energy": 0.75, "radius": 280, "height": 44},
+    {"kind": "neon", "x": 2000, "y": 58, "color": "#ff983c", "energy": 0.45, "radius": 180, "height": 38},
+    {"kind": "neon", "x": 2355, "y": 58, "color": "#ff983c", "energy": 0.45, "radius": 180, "height": 38},
+    {"kind": "neon", "x": 343, "y": 115, "color": "#ff585f", "energy": 0.33, "radius": 160, "height": 25},
+    {"kind": "neon", "x": 644, "y": 116, "color": "#ff535a", "energy": 0.33, "radius": 160, "height": 25},
+    {"kind": "neon", "x": 973, "y": 106, "color": "#ff585f", "energy": 0.33, "radius": 160, "height": 25},
+    {"kind": "neon", "x": 1725, "y": 115, "color": "#ff8a3b", "energy": 0.33, "radius": 160, "height": 25},
+    {"kind": "lamp", "x": 65, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 356, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 648, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 939, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 1230, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 1521, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 1813, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 2104, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 2395, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "lamp", "x": 2686, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
+    {"kind": "cable", "x": 1563, "y": 210, "color": "#66e8ff", "energy": 1.2, "radius": 188, "height": 15},
+    {"kind": "lightning", "x": 240, "y": -75, "color": "#b8c8ff", "energy": 0.7, "radius": 625, "height": 150}
   ]
 }

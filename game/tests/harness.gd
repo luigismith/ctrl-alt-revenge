@@ -5,15 +5,15 @@ extends RefCounted
 ## tick massimi e descrizione. Il seme è lo stesso per tutti.
 const SEED := 7
 const SCENARIOS := {
-	"combo_punk": {"start_x": 780.0, "start_y": 178.0, "pilot": "combo", "max": 3600,
+	"combo_punk": {"start_x": 975.0, "start_y": 223.0, "pilot": "combo", "max": 3600,
 		"note": "GIG sconfigge da solo il punk dell'ondata 1 usando solo le combo."},
-	"grab_throw": {"start_x": 780.0, "start_y": 178.0, "pilot": "grab", "max": 2400,
+	"grab_throw": {"start_x": 975.0, "start_y": 223.0, "pilot": "grab", "max": 2400,
 		"note": "GIG afferra il punk, due ginocchiate e la proiezione."},
-	"cable_touch": {"start_x": 1150.0, "start_y": 182.0, "pilot": "walk_right", "max": 150,
+	"cable_touch": {"start_x": 1438.0, "start_y": 228.0, "pilot": "walk_right", "max": 150,
 		"note": "GIG cammina dentro il cavo: 10 di danno e atterramento."},
-	"cable_jump": {"start_x": 1150.0, "start_y": 182.0, "pilot": "cable_jump", "max": 150,
+	"cable_jump": {"start_x": 1438.0, "start_y": 228.0, "pilot": "cable_jump", "max": 150,
 		"note": "GIG salta il cavo e passa indenne."},
-	"arena": {"start_x": 1520.0, "start_y": 184.0, "pilot": "arena", "max": 7200,
+	"arena": {"start_x": 1900.0, "start_y": 230.0, "pilot": "arena", "max": 7200,
 		"note": "Arena: punk e bruto (entra dopo 3 s); dopo i KO la zona è liberata."},
 	"demo": {"start_x": -1.0, "start_y": -1.0, "pilot": "demo", "max": 5400, "seed": 13,
 		"note": "Dimostrazione: corsa, combo, presa, bidone e mela, salto del cavo, arena."},

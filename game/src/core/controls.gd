@@ -10,6 +10,7 @@ const KEYS := {
 	"move_down": [KEY_DOWN, KEY_S],
 	"attack": [KEY_J, KEY_Z],
 	"jump": [KEY_K, KEY_X],
+	"dash": [KEY_L, KEY_C],
 	"pause": [KEY_ESCAPE, KEY_ENTER],
 	"menu_confirm": [KEY_ENTER, KEY_SPACE, KEY_J, KEY_Z],
 	"menu_back": [KEY_ESCAPE, KEY_BACKSPACE],
@@ -18,6 +19,7 @@ const KEYS := {
 	"debug_freeze": [KEY_F3],
 	"debug_step": [KEY_F4],
 	"debug_lights": [KEY_F5],
+	"room_reset": [KEY_R],
 }
 
 const PAD_BUTTONS := {
@@ -27,9 +29,11 @@ const PAD_BUTTONS := {
 	"move_down": [JOY_BUTTON_DPAD_DOWN],
 	"attack": [JOY_BUTTON_X, JOY_BUTTON_Y],
 	"jump": [JOY_BUTTON_A, JOY_BUTTON_B],
+	"dash": [JOY_BUTTON_RIGHT_SHOULDER, JOY_BUTTON_LEFT_SHOULDER],
 	"pause": [JOY_BUTTON_START],
 	"menu_confirm": [JOY_BUTTON_A, JOY_BUTTON_START],
 	"menu_back": [JOY_BUTTON_B],
+	"room_reset": [JOY_BUTTON_BACK],
 }
 
 const PAD_AXES := {
@@ -40,7 +44,8 @@ const PAD_AXES := {
 }
 
 ## Azioni di gioco nello stesso ordine dei bit di InputFrame.
-const GAME_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down", &"attack", &"jump"]
+const GAME_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down", &"attack", &"jump",
+	&"dash"]
 
 
 func _ready() -> void:

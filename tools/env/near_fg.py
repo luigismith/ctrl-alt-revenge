@@ -17,10 +17,11 @@ import envlib as E  # noqa: E402
 import paint as P  # noqa: E402
 from materials import RAMPS  # noqa: E402
 
-NEAR_CFG = dict(amb=0.72, key=0.6, spill=0.9, spill_sigma=(1.5, 6.0), wet=0, dither=0.0, inner=True,
+# le sfocature (spill_sigma) sono in px: a 60 px/m (17,5 nel piano near) valgono 1,25 volte quelle di progetto
+NEAR_CFG = dict(amb=0.72, key=0.6, spill=0.9, spill_sigma=(1.5 * E.S, 6.0 * E.S), wet=0, dither=0.0, inner=True,
                 depth_thr=1.2, outline=True, fog=0.12, fogcol="#1c1f4e", cel=P.CEL_3TONI)
-FG_MAX_Y = 26
-FG_CFG = dict(amb=0.45, key=0.35, spill=1.2, spill_sigma=(2.0, 8.0), wet=0, dither=0.0, inner=True,
+FG_MAX_Y = E.px(26)    # 33
+FG_CFG = dict(amb=0.45, key=0.35, spill=1.2, spill_sigma=(2.0 * E.S, 8.0 * E.S), wet=0, dither=0.0, inner=True,
               depth_thr=0.25, outline=True, cel=P.CEL_3TONI)
 
 
@@ -121,7 +122,7 @@ def build_fg(out_dir=None):
     rgba = P.to_rgba(res, alpha)
     rows = np.nonzero(rgba[..., 3].any(1))[0]
     # il primo piano resta sopra FG_MAX_Y: sotto cominciano le insegne del fondale, che devono leggersi
-    # con la telecamera ferma in partenza e nelle ondate (y 27-45)
+    # con la telecamera ferma in partenza e nelle ondate (y 34-56)
     y1 = min(int(rows.max()) + 1, FG_MAX_Y)
     E.save_rgba(os.path.join(out_dir, "fg.png"), rgba[:y1], 3)
     E.save_rgba(os.path.join(out_dir, "fg_emis.png"), em[:y1], 0)

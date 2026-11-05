@@ -102,14 +102,14 @@ func _think_wait(p: Fighter) -> void:
 	var tx := p.px + _side * dist
 	var lane := lerpf(data.wait_lane_offset.x, data.wait_lane_offset.y, _wait_frac)
 	var ty := p.py + _lane_sign * lane
-	if ty < level.band_top + 2 or ty > level.band_bottom - 2:
+	if ty < level.band_top + 3 or ty > level.band_bottom - 3:
 		_lane_sign = -_lane_sign
 		ty = p.py + _lane_sign * lane
 	ty = clampf(ty, level.band_top, level.band_bottom)
 	# Il punto di attesa resta un poco dentro i muri invisibili.
-	var margin := Level.WALL_MARGIN + 6.0
+	var margin := Level.WALL_MARGIN + 7.5
 	tx = clampf(tx, level.view_left() + margin, level.view_right() - margin)
-	_walk_towards(tx, ty, 2.0)
+	_walk_towards(tx, ty, 2.5)
 
 
 ## Lato di attesa: quello attuale, salvo che un altro nemico in attesa (con uid minore)
@@ -144,7 +144,7 @@ func _think_approach(p: Fighter) -> void:
 	var tx := p.px + side * reach
 	var dx := absf(px - tx)
 	var dy := absf(py - p.py)
-	if dx <= 3.0 and dy <= 2.0:
+	if dx <= 3.75 and dy <= 2.5:
 		vx = 0.0
 		vy = 0.0
 		facing = -side
@@ -154,7 +154,7 @@ func _think_approach(p: Fighter) -> void:
 		return
 	# Chi ha il turno si avvicina con passo deciso: la camminata d'attesa era troppo lenta e
 	# allungava il turno (Luigi, 4 novembre 2026: nemici molto più aggressivi).
-	_walk_towards(tx, p.py, 0.5, APPROACH_SPEED)
+	_walk_towards(tx, p.py, 0.625, APPROACH_SPEED)
 
 
 ## Distanza a cui attaccare: la punta della hitbox poco dentro la hurtbox di GIG.
@@ -163,7 +163,7 @@ func _reach(atk: AttackData) -> float:
 	var r := c.max_reach()
 	if r <= 0:
 		r = atk.hitbox.position.x + atk.hitbox.size.x
-	return clampf(r - 10.0, 16.0, 56.0)
+	return clampf(r - 12.5, 20.0, 70.0)
 
 
 func _choose_attack() -> AttackData:

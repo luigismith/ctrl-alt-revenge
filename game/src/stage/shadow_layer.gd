@@ -16,17 +16,17 @@ func _draw() -> void:
 		if w <= 0 or not e.visible:
 			continue
 		if def != null and def.texture != null and def.count >= 3:
-			var k := 0 if w >= 34 else (1 if w >= 20 else 2)
+			var k := 0 if w >= 42 else (1 if w >= 25 else 2)
 			if e is Fighter and (e as Fighter).is_down():
 				k = 0
-			if e.ph > 36.0:
+			if e.ph > 45.0:
 				k = mini(k + 1, 2)
 			var o := Vector2(roundf(e.px) - def.anchor.x, roundf(e.py) - def.anchor.y)
 			draw_texture_rect_region(def.texture, Rect2(o, def.frame), Rect2(k * def.frame.x, 0, def.frame.x, def.frame.y))
 			continue
-		var s := clampf(1.0 - e.ph / 140.0, 0.45, 1.0)
-		var sw := maxi(6, int(round(w * s)))
-		var sh := maxi(2, int(round(sw * 0.26)))
+		var s := clampf(1.0 - e.ph / 175.0, 0.45, 1.0)
+		var sw := maxi(8, int(round(w * s)))
+		var sh := maxi(3, int(round(sw * 0.26)))
 		var x := roundf(e.px) - sw / 2
 		var y := roundf(e.py) - sh / 2
 		if def != null and def.texture != null:

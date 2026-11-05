@@ -8,6 +8,11 @@ Ogni colore della sorgente viene sostituito con una tabella esplicita verso la p
 (teal -> blu-viola, magenta -> rosso neon, finestre -> arancio caldo). Il piano lontano riceve l'unico
 punto cyan del livello: una torre con antenna disegnata qui (codice), come nella locandina.
 
+Dal 5 novembre 2026 lo schermo è 480x270 (60 px/m), ma questi piani sono pixel art fatta a mano da terzi: non si
+ricampionano mai. Restano della loro misura in pixel (quindi sembrano un po' più lontani) e si allungano solo
+componendo i pezzi: più ripetizioni in orizzontale e, in verticale, la riga di bordo piatta ripetuta (il cielo ha
+in cima e in fondo righe di un colore solo, lo skyline lontano ha l'ultima riga piena di un colore solo).
+
   python -I tools/env/warped.py <cartella ENVIRONMENT/background>   (predefinita: quella del laboratorio)
 Scrive in tools/env/out/layers/: sky.png, far.png, far_emis.png, mid.png, mid_emis.png (+ x3).
 """
@@ -140,21 +145,28 @@ def build(wc_dir=WC_DIR, out_dir=None):
     out_dir = out_dir or os.path.join(E.OUT, "layers")
     os.makedirs(out_dir, exist_ok=True)
     info = {}
-    # ---------------- cielo: a | b | a, statico (fattore 0), 384 x 216
+    # ---------------- cielo: a | b | a | a tagliato a 480, statico (fattore 0), 480 x 270 (la luna è in b: una sola;
+    # le giunzioni a|a, a|b e b|a hanno lo stesso scarto sul bordo, le nuvole proseguono)
     sa, _ = remap(load("skyline-a.png", wc_dir), MAP_SKY)
     sb, _ = remap(load("skyline-b.png", wc_dir), MAP_SKY)
     # togli il pianeta ad anelli di skyline-b (in alto a sinistra): copia il cielo stellato di skyline-a
     sb = sb.copy()
     sb[:40, :60] = sa[:40, :60]
-    strip = np.concatenate([sa, sb, sa], 1)
-    SKY_OFF = 22
-    sky = strip[SKY_OFF:SKY_OFF + E.SCREEN_H]
+    strip = np.concatenate([sa, sb, sa, sa], 1)[:, :E.SCREEN_W]
+    # le sorgenti sono alte 240: si parte dalla riga 10 (prima 22, così luna e stelle scendono di 12 px come i
+    # tetti del piano near) e sotto si ripete l'ultima riga, che è di un colore solo
+    SKY_OFF = 10
+    sky = strip[SKY_OFF:]
+    assert len(np.unique(sky[-1, :, :3].reshape(-1, 3), axis=0)) == 1
+    sky = np.concatenate([sky, np.repeat(sky[-1:], E.SCREEN_H - sky.shape[0], 0)], 0)
     E.save_rgba(os.path.join(out_dir, "sky.png"), sky, 3)
     info["sky"] = dict(y=0, w=sky.shape[1], h=sky.shape[0])
-    # ---------------- lontano: buildings-bg x4 (diritto/specchiato), 576 px, più la torre cyan
+    # ---------------- lontano: buildings-bg x5 (diritto/specchiato), 720 px, più la torre cyan
     fb, fe = remap(load("buildings-bg.png", wc_dir), MAP_FAR)
-    tiles = [fb, fb[:, ::-1], fb, fb[:, ::-1]]
-    etiles = [fe, fe[:, ::-1], fe, fe[:, ::-1]]
+    need_w = int(E.SCREEN_W + (E.LEVEL_W - E.SCREEN_W) * 0.125)
+    n = -(-need_w // fb.shape[1])
+    tiles = [fb if i % 2 == 0 else fb[:, ::-1] for i in range(n)]
+    etiles = [fe if i % 2 == 0 else fe[:, ::-1] for i in range(n)]
     far = np.concatenate(tiles, 1)
     far_e = np.concatenate(etiles, 1)
     tw, te = landmark_tower()
@@ -162,9 +174,16 @@ def build(wc_dir=WC_DIR, out_dir=None):
     pad = th - far.shape[0] + 6
     far = np.concatenate([np.zeros((pad, far.shape[1], 4), np.uint8), far], 0)
     far_e = np.concatenate([np.zeros((pad, far_e.shape[1], 4), np.uint8), far_e], 0)
-    paste(far, tw, 150 - tw.shape[1] // 2, far.shape[0] - th - 6)
-    paste(far_e, te, 150 - tw.shape[1] // 2, far.shape[0] - th - 6)
-    FAR_Y = 26
+    # la torre sta dove la si vede dal lotto della partenza (x 188, prima 150), con la base sulla vecchia riga
+    tx, ty = E.px(150) - tw.shape[1] // 2, far.shape[0] - th - 6
+    paste(far, tw, tx, ty)
+    paste(far_e, te, tx, ty)
+    # in fondo la riga piena di un colore solo si ripete fino al bordo della fascia (y OY), come prima a 48 px/m
+    FAR_Y = E.px(26)
+    ext = int(E.OY) - FAR_Y - far.shape[0]
+    assert ext >= 0 and (far[-1, :, 3] > 0).all() and len(np.unique(far[-1, :, :3].reshape(-1, 3), axis=0)) == 1
+    far = np.concatenate([far, np.repeat(far[-1:], ext, 0)], 0)
+    far_e = np.concatenate([far_e, np.zeros((ext,) + far_e.shape[1:], np.uint8)], 0)
     E.save_rgba(os.path.join(out_dir, "far.png"), far, 3)
     E.save_rgba(os.path.join(out_dir, "far_emis.png"), dim(far_e, 0.6), 0)
     info["far"] = dict(y=FAR_Y, w=far.shape[1], h=far.shape[0])
@@ -182,19 +201,27 @@ def build(wc_dir=WC_DIR, out_dir=None):
             start = None
     if start is not None:
         runs.append((start, mb.shape[1]))
-    W = 768
-    mid = np.zeros((mb.shape[0], W, 4), np.uint8)
+    W = int(E.SCREEN_W + (E.LEVEL_W - E.SCREEN_W) * 0.25)      # 960
+    MID_Y = E.px(14)
+    # in fondo ogni colonna dei palazzi ripete la sua ultima riga fino al bordo dello schermo
+    Hm = E.SCREEN_H - MID_Y + 7
+    mid = np.zeros((Hm, W, 4), np.uint8)
     mid_e = np.zeros_like(mid)
-    # posizioni fisse: varco libero fra x 90 e 260 (si vede la torre cyan nel lotto della partenza)
-    place = [(0, 4, False), (3, 262, False), (2, 372, False), (1, 490, False), (4, 580, False), (0, 676, True)]
+    # posizioni fisse: varco libero fra x 90 e 328 (si vede la torre cyan nel lotto della partenza, x 75-288),
+    # poi i palazzi a 16 px l'uno dall'altro come prima; con lo schermo più largo ne serve uno in più
+    # (il 3 specchiato)
+    place = [(0, 5, False), (3, 328, False), (2, 438, False), (1, 555, False), (4, 648, False), (0, 742, True),
+             (3, 843, True)]
     for i, x, fl in place:
         a, b = runs[i]
         piece, pe = mb[:, a:b], me[:, a:b]
         if fl:
             piece, pe = piece[:, ::-1], pe[:, ::-1]
+        ext = Hm - piece.shape[0]
+        piece = np.concatenate([piece, np.repeat(piece[-1:], ext, 0)], 0)
+        pe = np.concatenate([pe, np.zeros((ext,) + pe.shape[1:], np.uint8)], 0)
         paste(mid, piece, x, 0)
         paste(mid_e, pe, x, 0)
-    MID_Y = 14
     E.save_rgba(os.path.join(out_dir, "mid.png"), mid, 3)
     E.save_rgba(os.path.join(out_dir, "mid_emis.png"), dim(mid_e, 0.5), 0)
     info["mid"] = dict(y=MID_Y, w=mid.shape[1], h=mid.shape[0])

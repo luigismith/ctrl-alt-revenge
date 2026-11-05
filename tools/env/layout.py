@@ -7,10 +7,14 @@ Scrive i file di lavoro JSON per tools/blender/env_gbuffer.py (geometria) e le o
 casuale senza seme: ogni scelta usa random.Random con un seme fisso.
 
 Scene:
-  street : strada di periferia (x 0-1536) e arena sotto i piloni (1536-1920), piani backdrop + floor
+  street : strada di periferia (x 0-1920) e arena sotto i piloni (1920-2400), piani backdrop + floor
   near   : palazzi del secondo isolato (parallasse 0,5), densità ridotta
   fg     : impalcato della ferrovia visto dal basso (parallasse 1,25)
 Coordinate: vedi envlib.py (X lungo la strada, Y profondità, Z in alto, metri).
+
+Le posizioni lungo la strada sono scritte in px di progetto, a 48 px/m (schermo 384x216, come fino al 5 novembre
+2026): X() le converte in metri con envlib.design_X, quindi sullo schermo di oggi (60 px/m) cadono in xs * 1,25.
+Per esempio il palo della luce di progetto x 1292 sta a x 1615, l'arena di progetto x 1536-1920 a x 1920-2400.
 """
 from __future__ import annotations
 
@@ -81,7 +85,8 @@ class Scene:
 
 
 def X(xs, Y=YF):
-    return E.x_to_X(xs, Y)
+    """x di progetto (px a 48 px/m) -> metri lungo la strada alla profondità Y."""
+    return E.design_X(xs, Y)
 
 
 # ------------------------------------------------------------------ mappe dei materiali dei kit
@@ -364,7 +369,7 @@ def build_street():
     wall_lamp(S, X(1170), 2.22, NEON["warm"])
     sh = shutter(S, X(1206), X(1326))
     pier(S, X(1326), X(1340), "plaster_mauve", M_PLASTER_MAUVE)
-    # il graffito finisce prima del palo della luce (x 1292), che altrimenti copre l'ultima lettera
+    # il graffito finisce prima del palo della luce (progetto x 1292), che altrimenti copre l'ultima lettera
     S.op("graffiti", oid=sh, X0=X(1210), X1=X(1276), z0=0.15, z1=1.9, seed=101, word="SOTTO")
     S.op("posters", oid=sh, X0=X(1214), X1=X(1240), z0=1.1, z1=1.75, seed=102, n=2)
     S.op("plate", oid=sh, X0=X(1268), X1=X(1316), z0=1.85, z1=2.05, text="AFFITTASI", col="#20182a",
@@ -512,7 +517,8 @@ def alley(S, rng, xs0, xs1):
 
 def utility_pole(S, xs):
     """Palo della linea elettrica sul marciapiede, con il cavo strappato che pende fino a terra.
-    Il cavo arriva a terra in (x 1250, y 150): lì prosegue l'oggetto di scena 'cable'."""
+    Il cavo arriva a terra in (x 1563, y 188), l'ancora dell'oggetto di scena 'cable' (progetto x 1250, y 150):
+    lì prosegue l'oggetto."""
     Yp = 0.32
     Xp = X(xs, Yp)
     pole = S.cyl((Xp, Yp, 0.0), 0.12, 9.0, "POLE", M_POLE, COL["pole"], n=10, r2=0.09)
@@ -524,7 +530,7 @@ def utility_pole(S, xs):
     S.op("plate", oid=cab, X0=Xp - 0.22, X1=Xp + 0.22, z0=2.62, z1=2.98, text="⚡", col="#20182a", bg="#e0b040",
          face_Y=Yp - 0.34)
     # cavo strappato: dall'isolatore di sinistra giù fino a terra (punto di raccordo con l'oggetto 'cable')
-    Xg, Yg = E.x_to_X(1250, 0.06), 0.06
+    Xg, Yg = E.x_to_X(E.px(1250), 0.06), 0.06
     p0 = (Xp - 0.6, Yp, 4.5)
     pts = []
     for i in range(17):
@@ -543,9 +549,10 @@ def utility_pole(S, xs):
 
 
 def arena(S, rng):
-    """Spiazzo sotto il viadotto (x 1536-1920, telecamera ferma): due piloni di cemento ai lati, una trave
-    d'acciaio chiodata che li collega con le luci al sodio, una rete bassa con filo spinato. Al centro, sopra
-    e attraverso la rete, si vede la città (piani di parallasse). Fusti, bancali e gomme dietro la fascia."""
+    """Spiazzo sotto il viadotto (x 1920-2400, progetto 1536-1920, telecamera ferma): due piloni di cemento ai
+    lati, una trave d'acciaio chiodata che li collega con le luci al sodio, una rete bassa con filo spinato. Al
+    centro, sopra e attraverso la rete, si vede la città (piani di parallasse). Fusti, bancali e gomme dietro la
+    fascia."""
     Yfence = YF + 2.6
     # muretto e rete (1,45 m) con filo spinato
     S.box(X(1560, 0) - 1.0, Yfence + 0.05, ZROAD, 60.0, Yfence + 0.3, 0.25, "CONCRETE", M_CONCRETE, "#2c2836")
@@ -631,17 +638,20 @@ def floor_dressing(S, rng):
 
 
 # ------------------------------------------------------------------ SECONDO ISOLATO (near, parallasse 0,5)
-NEAR_PPM = 14.0
+NEAR_DESIGN_PPM = 14.0              # scala di progetto del piano lontano (con la strada a 48 px/m)
+NEAR_PPM = NEAR_DESIGN_PPM * E.S    # 17,5: cresce del 25% come la strada
 
 
 def build_near():
     """Palazzi di 5-6 piani del secondo isolato, visti dalla strada (pitch 0: facciate e sagome contro il
     cielo, niente superfici dei tetti): finestre accese o con persiane, balconi, insegne verticali al neon,
-    serbatoi, antenne con la luce rossa, qualche cartellone. Densità ridotta (14 px/m): stanno lontano."""
+    serbatoi, antenne con la luce rossa, qualche cartellone. Densità ridotta (17,5 px/m): stanno lontano.
+    Le misure in px qui sotto sono di progetto, a 14 px/m (piano largo 1152, oggi 1440): kx è quello di progetto,
+    così i palazzi restano gli stessi in metri."""
     S = Scene("near")
     r = random.Random(77)
     width_px = 1152 + 60
-    kx = NEAR_PPM * math.cos(math.radians(E.YAW))
+    kx = NEAR_DESIGN_PPM * math.cos(math.radians(E.YAW))
     x = -4.0
     Xmax = width_px / kx + 6
     cols = ["#2d3a62", "#3a2f5e", "#283456", "#3d3462", "#2a3a5c", "#352c50"]
@@ -653,7 +663,8 @@ def build_near():
         w = r.uniform(8.0, 15.0)
         h = r.choice([15.0, 15.5, 16.0, 16.5, 17.0, 18.0])
         y0 = r.uniform(0.0, 3.0)
-        # nel tratto visto dal lotto della partenza (x 70-240) palazzi bassi: si vede lo skyline dietro
+        # nel tratto visto dal lotto della partenza (progetto x 70-240, oggi 88-300) palazzi bassi: si vede lo
+        # skyline dietro
         low = kx * x < 240 and kx * (x + w) > 70
         if low:
             h = 15.0
@@ -731,7 +742,7 @@ def build_near():
 def build_fg():
     """Impalcato del viadotto visto dal basso (telecamera con pitch -12): della travata vediamo il bordo
     lontano, una trave reticolare d'acciaio (correnti, montanti, diagonali chiodati) attraverso cui si vede
-    la città; sotto pendono lampade al sodio e cavi. Nell'arena (x 1920-2304 del piano) un portale più pesante."""
+    la città; sotto pendono lampade al sodio e cavi. Nell'arena (x 2400-2880 del piano) un portale più pesante."""
     S = Scene("fg")
     r = random.Random(1250)
     Xa, Xb = -8.0, 75.0
@@ -747,7 +758,7 @@ def build_fg():
     panel = 1.4
     x = Xa
     k = 0
-    arena_X0 = (1920 - E.KYX * Yg) / E.KX
+    arena_X0 = E.design_X(1920, Yg)
     while x < Xb:
         heavy = arena_X0 - 0.5 < x < arena_X0 + 9.5 and k % 2 == 0
         wv = 0.22 if heavy else 0.1
@@ -760,7 +771,7 @@ def build_fg():
             p0, p1 = (x, Yg + 0.15, zb1 - ch), (x + panel, Yg + 0.15, zb0 + ch)
         S.tube([p0, p1], 0.032, "METAL", M_STEEL, COL["steel"], n=4)
         # lampada al sodio ogni 4 campate, piatta e attaccata sotto il corrente: non deve scendere sotto
-        # y 25 dello schermo, dove cominciano le insegne del fondale (y 27-45)
+        # y 32 dello schermo, dove cominciano le insegne del fondale (y 34-56)
         if k % 4 == 1:
             S.box(x + 0.36, Yg - 0.08, zb0 - 0.07, x + 0.7, Yg + 0.16, zb0 - 0.02, "METAL", M_METAL, "#262c3c")
             S.box(x + 0.40, Yg - 0.05, zb0 - 0.09, x + 0.66, Yg + 0.13, zb0 - 0.07, "LAMP", M_LAMP, NEON["sodium"],
@@ -768,7 +779,7 @@ def build_fg():
         k += 1
         x += panel
     S.op("rivets", oid=lo, X0=Xa, X1=Xb, z0=zb0, z1=zb0 + ch, face_Y=Yg)
-    # cavi tesi lungo la travata: pendono di poco, sempre sopra y 25 dello schermo (le insegne sono sotto)
+    # cavi tesi lungo la travata: pendono di poco, sempre sopra y 32 dello schermo (le insegne sono sotto)
     for i in range(10):
         xa = r.uniform(Xa, Xb - 6)
         xb = xa + r.uniform(2.5, 6.0)
@@ -788,16 +799,16 @@ def jobs_for(scene_name):
         return S, view
     if scene_name == "near":
         S = build_near()
-        # i tetti più bassi (13 m) cadono intorno a y 80 dello schermo; il fondo dell'immagine è nascosto
+        # i tetti più bassi (15 m) cadono intorno a y 95 dello schermo; il fondo dell'immagine è nascosto
         kz = NEAR_PPM
-        view = dict(yaw=E.YAW, pitch=0.0, ppm=NEAR_PPM, ss=E.SS, x0=0, x1=1152, y0=0, y1=168,
-                    oy=round(38 + kz * 18.0))
+        view = dict(yaw=E.YAW, pitch=0.0, ppm=NEAR_PPM, ss=E.SS, x0=0, x1=E.px(1152), y0=0, y1=E.px(168),
+                    oy=round(E.px(38) + kz * 18.0))
         return S, view
     if scene_name == "fg":
         S = build_fg()
-        # telecamera che guarda in su: y = oy + KYY*Y - KZ*Z; il fondo della trave lontana va a y 22
-        oy = round(21 - E.KYY * FG_YFAR + E.KZ * (FG_ZB - 0.5 - 0.03))
-        view = dict(yaw=E.YAW, pitch=-E.PITCH, ppm=E.PPM, ss=E.SS, x0=0, x1=2304, y0=0, y1=64, oy=oy)
+        # telecamera che guarda in su: y = oy + KYY*Y - KZ*Z; il fondo della trave lontana va a y 27
+        oy = round(E.px(21) - E.KYY * FG_YFAR + E.KZ * (FG_ZB - 0.5 - 0.03))
+        view = dict(yaw=E.YAW, pitch=-E.PITCH, ppm=E.PPM, ss=E.SS, x0=0, x1=E.px(2304), y0=0, y1=E.px(64), oy=oy)
         return S, view
     raise KeyError(scene_name)
 

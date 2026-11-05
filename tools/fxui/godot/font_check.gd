@@ -1,6 +1,6 @@
 extends Node2D
 ## Verifica dei font CAR Pixel in Godot: disegna frasi note in posizioni note, salva la
-## schermata a 384x216 e stampa DONE. godot_check.py la confronta pixel per pixel con il
+## schermata a 480x270 e stampa DONE. godot_check.py la confronta pixel per pixel con il
 ## disegno fatto in Python dagli stessi bitmap.
 
 const PHRASES: Array[String] = [
@@ -51,7 +51,7 @@ func _ready() -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 384, 216), Color("#120f24"))
+	draw_rect(Rect2(0, 0, 480, 270), Color("#120f24"))
 	var y := 2
 	for p in PHRASES:
 		draw_string(_reg, Vector2(2, y + 10), p, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)

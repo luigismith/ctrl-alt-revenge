@@ -18,7 +18,7 @@ func setup_bin(lvl: Level, id: int, x: float, y: float) -> void:
 	team = Team.NEUTRAL
 	px = x
 	py = y
-	shadow_w = 26
+	shadow_w = 33
 	_anim_intact = pick_anim([&"intact", &"intero", &"idle"])
 	_anim_hit = pick_anim([&"hit", &"colpito", &"intact"])
 	_anim_broken = pick_anim([&"break", &"broken", &"rotto", &"intact"])
@@ -26,12 +26,12 @@ func setup_bin(lvl: Level, id: int, x: float, y: float) -> void:
 	anim.take_events()
 
 
-## Il bidone si colpisce anche con i pugni: la sua hurtbox di gioco va dal suolo a 80 px,
+## Il bidone si colpisce anche con i pugni: la sua hurtbox di gioco va dal suolo a 100 px,
 ## qualunque sia l'altezza del disegno.
 func world_hurtboxes() -> Array[Rect2]:
 	var f := anim.frame()
-	var w := float(f.rect.size.x - 6)
-	return [Rect2(px - w / 2.0, py - 80.0, w, 82.0)]
+	var w := float(f.rect.size.x - 8)
+	return [Rect2(px - w / 2.0, py - 100.0, w, 103.0)]
 
 
 func sim_tick() -> void:
@@ -55,7 +55,7 @@ func receive_hit(_attacker: Entity, atk: AttackData, info: HitInfo) -> void:
 			Sfx.play_at(&"bin_break", px)
 		play_events()
 		level.fx.spawn(&"dust_land", px, py, 1, depth_z(1))
-		level.spawn_pickup(px + info.dir * 10.0, py + 2.0, 22.0)
+		level.spawn_pickup(px + info.dir * 12.5, py + 2.5, 27.5)
 		Game.count(&"bins_broken")
 	else:
 		anim.play(_anim_hit)

@@ -27,7 +27,7 @@ REQUIRED = {
                      "grabbed", "kneed", "thrown"],
 }
 # cicli: i tre dello slice più quelli delle mosse platform di prova (accovacciato, appeso alla sporgenza)
-LOOPS = {"idle", "walk", "run", "crouch", "ledge_hang"}
+LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_slide", "wall_run"}
 # (avvio, attivo, recupero) in tick a 60 Hz, §5; None = non controllato
 TIMING = {("gig", "jab1"): (3, 2, 9), ("gig", "jab2"): (3, 2, 9), ("gig", "hook"): (6, 3, 12),
           ("gig", "kick"): (10, 3, 20), ("gig", "air_kick"): (4, 8, None), ("gig", "knee"): (4, 3, 10),
@@ -62,6 +62,10 @@ class Report:
         self.warnings.append(" ".join(str(x) for x in a))
 
 
+
+# I limiti di plausibilità sono pensati a 48 px/m: crescono con la scala di tools/sprites/camera.json.
+S = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "camera.json"), encoding="utf-8"))["pixels_per_meter"] / 48.0
+
 def is_box(b):
     return isinstance(b, list) and len(b) == 4 and all(isinstance(v, int) for v in b) and b[2] > 0 and b[3] > 0
 
@@ -76,8 +80,9 @@ def check_char(cid, d, R, others):
         R.err(cid, ": id sbagliato", data.get("id"))
     if data.get("format") != 1:
         R.err(cid, ": format deve valere 1")
-    if data.get("pixels_per_meter") != 48:
-        R.err(cid, ": pixels_per_meter deve valere 48")
+    ppm = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "camera.json"), encoding="utf-8"))["pixels_per_meter"]
+    if data.get("pixels_per_meter") != ppm:
+        R.err(cid, ": pixels_per_meter deve valere", ppm, "(tools/sprites/camera.json)")
     ip = os.path.join(d, data.get("image", ""))
     if not os.path.exists(ip):
         R.err(cid, ": manca l'immagine", ip)
@@ -155,7 +160,7 @@ def check_char(cid, d, R, others):
             a = f.get("anchor", [0, 0])
             if not (isinstance(a, list) and len(a) == 2 and all(isinstance(v, int) for v in a)):
                 R.err(where, ": anchor non valido", a)
-            elif not (-80 <= a[0] <= w + 80 and -40 <= a[1] <= h + 80):
+            elif not (-80 * S <= a[0] <= w + 80 * S and -40 * S <= a[1] <= h + 80 * S):
                 R.err(where, ": anchor implausibile", a, "rect", rect)
             t = f.get("ticks")
             if not isinstance(t, int) or t < 1:
@@ -165,14 +170,14 @@ def check_char(cid, d, R, others):
             for b in f.get("hurt", []):
                 if not is_box(b):
                     R.err(where, ": hurtbox non valida", b)
-                elif not (-90 <= b[0] <= 90 and -150 <= b[1] <= 20 and b[2] <= 160 and b[3] <= 160):
+                elif not (-90 * S <= b[0] <= 90 * S and -150 * S <= b[1] <= 20 * S and b[2] <= 160 * S and b[3] <= 160 * S):
                     R.err(where, ": hurtbox implausibile", b)
             if not f.get("hurt"):
                 R.warn(where, ": nessuna hurtbox")
             for b in f.get("hit", []):
                 if not is_box(b):
                     R.err(where, ": hitbox non valida", b)
-                elif not (-30 <= b[0] <= 110 and -150 <= b[1] <= 10 and b[2] <= 90 and b[3] <= 90):
+                elif not (-30 * S <= b[0] <= 110 * S and -150 * S <= b[1] <= 10 * S and b[2] <= 90 * S and b[3] <= 90 * S):
                     R.err(where, ": hitbox implausibile", b)
             tags = set(f.get("tags", []))
             if not tags <= TAGS:
@@ -188,7 +193,7 @@ def check_char(cid, d, R, others):
                     R.warn(where, ": punto sconosciuto", pn)
                 if not (isinstance(pv, list) and len(pv) == 2 and all(isinstance(v, int) for v in pv)):
                     R.err(where, ": punto non valido", pn, pv)
-                elif not (-120 <= pv[0] <= 120 and -170 <= pv[1] <= 60):
+                elif not (-120 * S <= pv[0] <= 120 * S and -170 * S <= pv[1] <= 60 * S):
                     R.err(where, ": punto implausibile", pn, pv)
             for e in f.get("events", []):
                 if not EV_RE.match(e):

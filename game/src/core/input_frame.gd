@@ -11,9 +11,11 @@ const UP := 4
 const DOWN := 8
 const ATTACK := 16
 const JUMP := 32
+## Lo scatto in aria dei tratti platform (aggiunto il 5 novembre 2026; i replay di prima non lo usano).
+const DASH := 64
 
 ## Lettere usate nei file di replay, nello stesso ordine dei bit.
-const LETTERS := "LRUDAJ"
+const LETTERS := "LRUDAJS"
 
 var held: int = 0
 var pressed: int = 0

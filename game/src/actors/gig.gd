@@ -14,16 +14,16 @@ const BUFFER_TICKS := 8
 const RUN_TAP_WINDOW := 12
 ## Tick dopo la fine di un attacco andato a segno in cui il tasto attacco continua la combo.
 const COMBO_WINDOW := 30
-const GRAB_RANGE_X := 18.0
-const GRAB_RANGE_Y := 4.0
+const GRAB_RANGE_X := 22.5
+const GRAB_RANGE_Y := 5.0
 const GRAB_ESCAPE_TICKS := 90
 ## La presa scatta entro GRAB_RANGE_X, ma la posa la vuole a circa 30 px (voce victim): la
 ## vittima ci scivola in questi tick invece di scattare di 12-14 px in un tick.
 const GRAB_SETTLE_TICKS := 4
 const MAX_KNEES := 2
 ## Distanza della vittima al rilascio della proiezione se lo sprite non ha la voce victim.
-const THROW_RELEASE_DX := 18.0
-const RESPAWN_HEIGHT := 150.0
+const THROW_RELEASE_DX := 22.5
+const RESPAWN_HEIGHT := 187.5
 const RESPAWN_INVULN := 120
 const DEAD_BLINK_TICKS := 60
 
@@ -296,7 +296,7 @@ func _start_throw(back: bool) -> void:
 func _hit_victim(v: Fighter, atk: AttackData, dir: int) -> void:
 	hit_registry.clear()
 	var hb := v.world_hurtboxes()
-	var point := hb[0].get_center() if not hb.is_empty() else Vector2(v.px, v.py - 50)
+	var point := hb[0].get_center() if not hb.is_empty() else Vector2(v.px, v.py - 63)
 	level.combat.apply_hit(self, v, atk, point, dir)
 
 
@@ -347,7 +347,7 @@ func _place_victim() -> void:
 	var v := grab_partner
 	var f := anim.frame()
 	var e := f.victim_entry(v.data.id)
-	var dx := 18
+	var dx := 23
 	var dy := 0
 	var vanim: StringName = &"grabbed"
 	var vframe := 0
@@ -358,7 +358,7 @@ func _place_victim() -> void:
 				vframe = 1 if grab_action_tick >= attacks[&"gig_knee"].startup else 0
 			GrabAction.THROW:
 				vanim = &"thrown"
-				dy = -int(round(28.0 * grab_action_tick / maxf(1.0, attacks[&"gig_throw"].startup)))
+				dy = -int(round(35.0 * grab_action_tick / maxf(1.0, attacks[&"gig_throw"].startup)))
 	else:
 		dx = int(e[0])
 		dy = int(e[1])

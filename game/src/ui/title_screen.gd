@@ -5,15 +5,17 @@ extends Node2D
 
 signal start_game
 signal show_credits
+## Solo nelle build per PC: la stanza di prova del movimento non va nella demo web.
+signal test_room
 signal quit_game
 
-const ITEMS: PackedStringArray = ["GIOCA", "CREDITI", "ESCI"]
+const ITEMS: PackedStringArray = ["GIOCA", "STANZA DI PROVA", "CREDITI", "ESCI"]
 ## Punto a terra fra i piedi di GIG sullo schermo.
 const GIG_FEET := Vector2(66, 198)
 
 ## Voci del menu. Nel browser ESCI non c'è: chiudere il motore lascerebbe la pagina ferma
 ## sull'ultimo fotogramma, senza audio, finché non la si ricarica.
-var _items: PackedStringArray = ITEMS.slice(0, 2) if OS.has_feature("web") else ITEMS
+var _items: PackedStringArray = PackedStringArray(["GIOCA", "CREDITI"]) if OS.has_feature("web") else ITEMS
 
 var _backdrop: Backdrop
 var _rain: Rain
@@ -76,7 +78,7 @@ func _ready() -> void:
 	ui_layer.layer = 5
 	add_child(ui_layer)
 	_ui = Control.new()
-	_ui.size = Vector2(384, 216)
+	_ui.size = View.SIZE
 	_ui.draw.connect(_draw_ui)
 	ui_layer.add_child(_ui)
 	# Dopo un GAME OVER la musica è ancora abbassata (CONTINUA? la abbassa).
@@ -115,34 +117,36 @@ func _physics_process(_delta: float) -> void:
 	elif Input.is_action_just_pressed(&"menu_confirm") or Input.is_action_just_pressed(&"attack"):
 		Sfx.play(&"ui_confirm")
 		_locked = 1000
-		match _index:
-			0:
+		match _items[_index]:
+			"GIOCA":
 				start_game.emit()
-			1:
+			"STANZA DI PROVA":
+				test_room.emit()
+			"CREDITI":
 				show_credits.emit()
-			2:
+			"ESCI":
 				quit_game.emit()
 
 
 func _draw_ui() -> void:
 	# Velo scuro sullo sfondo, così il logo e il menu si leggono sopra le insegne.
-	_ui.draw_rect(Rect2(0, 0, 384, 216), Color(0.03, 0.01, 0.08, 0.38))
-	var y := 14.0
+	_ui.draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0.03, 0.01, 0.08, 0.38))
+	var y := 22.0
 	var logo := UiArt.texture("logo")
 	if logo != null:
-		_ui.draw_texture(logo, Vector2(roundf(192 - logo.get_width() / 2.0), y))
+		_ui.draw_texture(logo, Vector2(roundf(View.CX - logo.get_width() / 2.0), y))
 		y += logo.get_height() + 3
 	else:
-		UiFont.draw_text(_ui, Vector2(192, y), "CTRL+ALT", _text, 3, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
-		UiFont.draw_text(_ui, Vector2(192, y + 38), "REVENGE!", _text, 3, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
+		UiFont.draw_text(_ui, Vector2(View.CX, y), "CTRL+ALT", _text, 3, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
+		UiFont.draw_text(_ui, Vector2(View.CX, y + 38), "REVENGE!", _text, 3, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
 		y += 80
-	if not UiArt.draw_centered(_ui, "subtitle", 192, y):
-		UiFont.draw_text(_ui, Vector2(192, y), "TARANTO · 2087", _orange, 1, 1)
-	y = 150.0
+	if not UiArt.draw_centered(_ui, "subtitle", View.CX, y):
+		UiFont.draw_text(_ui, Vector2(View.CX, y), "TARANTO · 2087", _orange, 1, 1)
+	y = 186.0
 	for i in _items.size():
 		var sel := i == _index
 		var col := _gold if sel else _text
-		UiFont.draw_text(_ui, Vector2(192, y + i * 13), _items[i], col, 1, 1)
+		UiFont.draw_text(_ui, Vector2(View.CX, y + i * 13), _items[i], col, 1, 1)
 		if sel and (_t / 16) % 2 == 0:
-			UiFont.draw_text(_ui, Vector2(192 - UiFont.text_width(_items[i]) / 2.0 - 10, y + i * 13), "▶", col)
-	UiFont.draw_text(_ui, Vector2(379, 202), "© 2026 Luigi Massari", UiArt.color("text_dim", Color8(207, 174, 116)), 1, 2, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+			UiFont.draw_text(_ui, Vector2(View.CX - UiFont.text_width(_items[i]) / 2.0 - 10, y + i * 13), "▶", col)
+	UiFont.draw_text(_ui, Vector2(View.W - 5, View.H - 14), "© 2026 Luigi Massari", UiArt.color("text_dim", Color8(207, 174, 116)), 1, 2, Color(0, 0, 0, 0), UiFont.SHADOW, true)

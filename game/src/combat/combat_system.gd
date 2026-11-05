@@ -7,7 +7,7 @@ extends RefCounted
 ## Poi applica il colpo: danno, hitstop, reazione, punti, suoni, effetti, tremolio.
 
 ## Il punto di contatto sopra questa altezza dai piedi dà la reazione "alta".
-const HIGH_HIT_HEIGHT := 52.0
+const HIGH_HIT_HEIGHT := 65.0
 
 var level: Level
 ## Colpi applicati in questo tick: [uid attaccante, uid vittima, id attacco] (per test e debug).

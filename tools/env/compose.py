@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: MIT
 """CTRL+ALT REVENGE - verifica degli sfondi: composizione dei piani come farà il gioco.
 
-Legge layers.json (formato della specifica §6) e compone l'inquadratura 384x216 per una posizione
+Legge layers.json (formato della specifica §6) e compone l'inquadratura 480x270 per una posizione
 intera della telecamera: ogni piano sta in x = floor(-scroll * cam + 0.5) (+ ripetizione), y fisso;
 la maschera emissiva si somma (modo additivo). Strumenti:
-  mockup   inquadrature con i personaggi della prova v6.1 nella fascia calpestabile (1x e 3x)
-  pan      GIF dello scorrimento da 0 a 1536 a passo costante (e striscia di controllo)
+  mockup   inquadrature con gli sprite dei personaggi del gioco (game/assets/sprites, 60 px/m) nella fascia
+           calpestabile (1x e 3x)
+  pan      GIF dello scorrimento da 0 a 1920 a passo costante (e striscia di controllo)
   checks   giunzioni dei piani ripetuti, spostamenti interi dei piani (niente tremolio), colori
   sheet    tavola dei piani
   python -I tools/env/compose.py all <cartella con layers.json> <cartella di uscita>
@@ -21,8 +22,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import envlib as E  # noqa: E402
 
-LAB_CHARS = os.path.join(E.LAB, "ricerca-2026-11-03", "prove", "spike2-chars", "out", "v61", "frames", "v61")
-LINEUP = os.path.join(E.LAB, "ricerca-2026-11-03", "prove", "spike-anim", "deliverables", "lineup_bodies_final_1x.png")
+CHARS_DIR = os.path.join(E.ROOT, "game", "assets", "sprites")
 PROPS_DIR = os.path.join(E.OUT, "props")
 
 
@@ -95,33 +95,22 @@ _SPR = {}
 
 
 def sprite(key):
+    """'prop:<nome>/<animazione>/<fotogramma>' per gli oggetti di scena appena fatti (tools/env/out/props),
+    '<id>:<animazione>/<fotogramma>' per i personaggi del gioco (game/assets/sprites/<id>/<id>.json)."""
     if key in _SPR:
         return _SPR[key]
-    if key.startswith("gig:"):
-        anim, idx = key[4:].split("/")
-        im = np.asarray(Image.open(os.path.join(LAB_CHARS, anim, "%s_%02d.png" % (anim, int(idx)))).convert("RGBA"))
-        anchor = (63, 119)
-    elif key.startswith("prop:"):
-        name, anim, idx = key[5:].split("/")
-        meta = json.load(open(os.path.join(PROPS_DIR, name + ".json"), encoding="utf-8"))
-        atlas = np.asarray(Image.open(os.path.join(PROPS_DIR, meta["image"])).convert("RGBA"))
-        fr = meta["animations"][anim]["frames"][int(idx)]
-        x, y, w, h = fr["rect"]
-        im = atlas[y:y + h, x:x + w]
-        anchor = tuple(fr["anchor"])
+    if key.startswith("prop:"):
+        name, rest = key[5:].split("/", 1)
+        d, sid = PROPS_DIR, name
     else:
-        a = np.asarray(Image.open(LINEUP).convert("RGBA")).copy()
-        bg = a[0, 0, :3].copy()
-        a[(a[..., :3] == bg).all(-1), 3] = 0
-        cols = dict(punk=(82, 110), bruiser=(121, 154), punk_jab=(470, 522), bruiser_jab=(531, 586),
-                    punk_walk=(254, 282))[key]
-        im = a[:, cols[0] - 2:cols[1] + 2]
-        al = im[..., 3] > 0
-        ys, xs = np.nonzero(al)
-        fy = ys.max()
-        feet = np.nonzero(al[fy - 2:fy + 1].any(0))[0]
-        anchor = (int(feet.mean()), int(fy))
-    _SPR[key] = (im, anchor)
+        sid, rest = key.split(":", 1)
+        d = os.path.join(CHARS_DIR, sid)
+    anim, idx = rest.split("/")
+    meta = json.load(open(os.path.join(d, sid + ".json"), encoding="utf-8"))
+    atlas = np.asarray(Image.open(os.path.join(d, meta["image"])).convert("RGBA"))
+    fr = meta["animations"][anim]["frames"][int(idx)]
+    x, y, w, h = fr["rect"]
+    _SPR[key] = (atlas[y:y + h, x:x + w], tuple(fr["anchor"]))
     return _SPR[key]
 
 
@@ -136,7 +125,7 @@ def draw_actor(img, a, cam):
         blit(img, im, sx - ax, sy - ay)
         return
     # ombra: ellisse scura semitrasparente (il codice userà l'effetto 'ombra')
-    rx, ry = 13, 3
+    rx, ry = E.px(13), E.px(3)
     yy, xx = np.mgrid[-ry:ry + 1, -rx:rx + 1]
     m = (xx / rx) ** 2 + (yy / ry) ** 2 <= 1
     for dy in range(-ry, ry + 1):
@@ -164,16 +153,16 @@ def mockups(layers, out_dir, shots):
         save_png(os.path.join(out_dir, "mock_%s_3x.png" % name), f, 3)
 
 
-def pan(layers, out_dir, step=4, cam0=0, cam1=1536, scale=1, every=1):
+def pan(layers, out_dir, step=4, cam0=0, cam1=E.LEVEL_W - E.SCREEN_W, scale=1, every=1):
     """GIF dello scorrimento (passo costante in px per fotogramma, telecamera intera) + controlli."""
     os.makedirs(out_dir, exist_ok=True)
     frames = []
     cams = list(range(cam0, cam1 + 1, step))
-    gig = [("gig:Guard_Idle/%d" % (i % 4)) for i in range(4)]
+    gig = ["gig:idle/%d" % i for i in range(len(_frames("gig", "idle")))]
     prev_x = None
     report = dict(step=step, frames=len(cams), layer_steps={})
     for i, cam in enumerate(cams):
-        actors = [dict(spr=gig[(i // 6) % 4], x=cam + 150, y=184)]
+        actors = [dict(spr=gig[(i // 6) % len(gig)], x=cam + E.px(150), y=E.px(184))]
         f = frame(layers, cam, actors)
         if i % every == 0:
             im = Image.fromarray(f[..., :3]).resize((E.SCREEN_W * scale, E.SCREEN_H * scale), Image.NEAREST)
@@ -228,15 +217,25 @@ def checks(layers, meta):
     return rep
 
 
+def _frames(sid, anim):
+    meta = json.load(open(os.path.join(CHARS_DIR, sid, sid + ".json"), encoding="utf-8"))
+    return meta["animations"][anim]["frames"]
+
+
+# inquadrature di controllo: le posizioni di progetto (48 px/m) passano per E.px, come i dati del livello
+_p = E.px
 DEFAULT_SHOTS = [
-    ("partenza", 0, [dict(spr="gig:Guard_Idle/0", x=150, y=184)]),
-    ("ondata1", 620, [dict(spr="gig:Punch_Jab/2", x=760, y=172), dict(spr="punk_jab", x=812, y=174, flip=True)]),
-    ("bidone", 900, [dict(spr="gig:Guard_Idle/1", x=990, y=196), dict(spr="prop:bin/idle/0", x=1050, y=178),
-                     dict(spr="prop:apple/idle/1", x=1100, y=200)]),
-    ("ostacolo", 1100, [dict(spr="prop:cable/idle/0", x=1250, y=150, noshadow=True),
-                        dict(spr="gig:Guard_Idle/2", x=1196, y=182)]),
-    ("arena", 1536, [dict(spr="gig:Guard_Idle/0", x=1650, y=190), dict(spr="punk", x=1780, y=168, flip=True),
-                     dict(spr="bruiser", x=1840, y=200, flip=True)]),
+    ("partenza", 0, [dict(spr="gig:idle/0", x=_p(150), y=_p(184))]),
+    ("ondata1", _p(620), [dict(spr="gig:jab1/1", x=_p(760), y=_p(172)),
+                          dict(spr="thug_punk:jab/1", x=_p(812), y=_p(174), flip=True)]),
+    ("bidone", _p(900), [dict(spr="gig:idle/1", x=_p(990), y=_p(196)),
+                         dict(spr="prop:bin/idle/0", x=_p(1050), y=_p(160)),
+                         dict(spr="prop:apple/idle/1", x=_p(1100), y=_p(200))]),
+    ("ostacolo", _p(1100), [dict(spr="prop:cable/idle/0", x=_p(1250), y=_p(150), noshadow=True),
+                            dict(spr="gig:idle/2", x=_p(1196), y=_p(182))]),
+    ("arena", _p(1536), [dict(spr="gig:idle/0", x=_p(1650), y=_p(190)),
+                         dict(spr="thug_punk:idle/0", x=_p(1780), y=_p(168), flip=True),
+                         dict(spr="thug_bruiser:idle/0", x=_p(1840), y=_p(200), flip=True)]),
 ]
 
 if __name__ == "__main__":

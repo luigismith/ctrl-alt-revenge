@@ -57,7 +57,7 @@ func decide(tick: int) -> int:
 func _cable_jump() -> int:
 	var g := level.player
 	var c := _cable()
-	if c != null and g.ph <= 0.0 and g.is_free() and g.px >= c.x0 - 9.0 and g.px < c.x0 - 2.0:
+	if c != null and g.ph <= 0.0 and g.is_free() and g.px >= c.x0 - 11.25 and g.px < c.x0 - 2.5:
 		return R | J
 	return R
 
@@ -91,29 +91,29 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 	# Schivata: un attacco nemico in carica nella mia corsia.
 	for t in level.enemies():
 		if t.state == Fighter.State.ATTACK and t.attack != null and t.attack_tick < t.attack.startup \
-				and absf(t.py - g.py) < 14.0 and absf(t.px - g.px) < 80.0 and g.is_free():
+				and absf(t.py - g.py) < 17.5 and absf(t.px - g.px) < 100.0 and g.is_free():
 			return U if g.py > (level.band_top + level.band_bottom) * 0.5 else D
 	# Presa: stessa corsia, poi cammina contro il nemico. Da quando i nemici sono più aggressivi
 	# un nemico libero non resta fermo vicino a GIG: la presa si cerca sul nemico stordito da un
 	# colpo (HURT), oppure su quello libero già a portata, e altrimenti si combatte.
-	var grabbable := e.state == Fighter.State.HURT or (e.is_free() and absf(dx) < 30.0)
+	var grabbable := e.state == Fighter.State.HURT or (e.is_free() and absf(dx) < 37.5)
 	if grabs and not _grab_done.has(e.uid) and grabbable and not e.is_attacking():
-		if absf(dy) > 2.0:
-			return (D if dy > 0.0 else U) | (toward if absf(dx) > 30.0 else 0)
+		if absf(dy) > 2.5:
+			return (D if dy > 0.0 else U) | (toward if absf(dx) > 37.5 else 0)
 		return toward
-	if jumps and g.is_free() and e.is_free() and absf(dy) <= 3.0 and absf(dx) > 44.0 and absf(dx) < 60.0 \
+	if jumps and g.is_free() and e.is_free() and absf(dy) <= 3.75 and absf(dx) > 55.0 and absf(dx) < 75.0 \
 			and tick - _last_jump_kick > 360:
 		_last_jump_kick = tick
 		_jump_kick = 1
 		return toward | J
-	if absf(dy) > 3.0:
+	if absf(dy) > 3.75:
 		var v := D if dy > 0.0 else U
-		if absf(dx) < 24.0:
+		if absf(dx) < 30.0:
 			return v | away
-		return v | (toward if absf(dx) > 40.0 else 0)
-	if absf(dx) > 38.0:
+		return v | (toward if absf(dx) > 50.0 else 0)
+	if absf(dx) > 47.5:
 		return toward
-	if absf(dx) < 22.0:
+	if absf(dx) < 27.5:
 		return away
 	# Nemico a terra o invulnerabile dopo il rialzo: si aspetta in guardia, senza colpi a vuoto.
 	if e.is_down() or e.invuln > 0 or e.is_airborne():
@@ -128,7 +128,7 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 func _do_jump_kick() -> int:
 	var g := level.player
 	var dir := R if g.facing > 0 else L
-	if g.state == Fighter.State.JUMP and g.vh < 1.5:
+	if g.state == Fighter.State.JUMP and g.vh < 1.875:
 		_jump_kick = 0
 		_jump_kicks_done += 1
 		return dir | A
@@ -176,8 +176,8 @@ func _demo(tick: int) -> int:
 	match _beat:
 		0:
 			# Camminata sotto il cartello del livello, poi una pausa in guardia.
-			if g.px < 190.0:
-				return R | (D if g.py < 192.0 and tick % 3 == 0 else 0)
+			if g.px < 238.0:
+				return R | (D if g.py < 240.0 and tick % 3 == 0 else 0)
 			_next_beat(tick)
 			return 0
 		1:
@@ -190,7 +190,7 @@ func _demo(tick: int) -> int:
 			var k := tick - _beat_tick
 			if k < 3:
 				return 0
-			if g.px < 430.0:
+			if g.px < 538.0:
 				return R
 			_next_beat(tick)
 			return 0
@@ -202,7 +202,7 @@ func _demo(tick: int) -> int:
 		4:
 			# Dopo l'ondata 1: un salto con calcio a vuoto, per mostrarlo.
 			if g.state == Fighter.State.JUMP:
-				return A if g.vh < 1.0 else 0
+				return A if g.vh < 1.25 else 0
 			if tick - _beat_tick > 40 and _jump_kicks_done == 0:
 				_jump_kicks_done = 1
 				return J
@@ -211,25 +211,25 @@ func _demo(tick: int) -> int:
 			return 0
 		5:
 			# Profondità: verso il fondo della strada e poi verso lo schermo.
-			if g.py > level.band_top + 6.0:
+			if g.py > level.band_top + 7.5:
 				return R | U
 			_next_beat(tick)
 			return R
 		6:
-			if g.py < level.band_bottom - 8.0:
+			if g.py < level.band_bottom - 10.0:
 				return R | D
 			_next_beat(tick)
 			return R
 	# Bidone: allinearsi e colpirlo finché si rompe; poi la mela.
 	for p in level.props:
-		if p is PropBin and not (p as PropBin).broken and p.px > g.px - 40.0:
+		if p is PropBin and not (p as PropBin).broken and p.px > g.px - 50.0:
 			return _go_hit(tick, p.px, p.py)
 		if p is PropApple:
 			return _go_to(p.px, p.py)
 	var c := _cable()
-	if c != null and g.px < c.x1 + 10.0:
-		if absf(g.py - 182.0) > 2.0 and g.px < c.x0 - 40.0:
-			return R | (D if g.py < 182.0 else U)
+	if c != null and g.px < c.x1 + 12.5:
+		if absf(g.py - 228.0) > 2.5 and g.px < c.x0 - 50.0:
+			return R | (D if g.py < 228.0 else U)
 		return _cable_jump()
 	return R
 
@@ -243,15 +243,15 @@ func _go_hit(tick: int, x: float, y: float) -> int:
 	var g := level.player
 	var dx := x - g.px
 	var dy := y - g.py
-	if absf(dy) > 3.0:
-		return (D if dy > 0.0 else U) | (R if dx > 34.0 else 0)
-	if dx > 30.0:
+	if absf(dy) > 3.75:
+		return (D if dy > 0.0 else U) | (R if dx > 42.5 else 0)
+	if dx > 37.5:
 		return R
-	# Girarsi verso il bidone costa un passo di 1,5 px in avanti: lo si fa solo con un po' di margine,
+	# Girarsi verso il bidone costa un passo di quasi 2 px in avanti: lo si fa solo con un po' di margine,
 	# altrimenti destra e sinistra si alternano a ogni tick e GIG resta fermo lì per sempre.
 	if g.facing != 1:
-		return R if dx >= 20.0 else L
-	if dx < 18.0:
+		return R if dx >= 25.0 else L
+	if dx < 22.5:
 		return L
 	return A if tick % 8 == 0 else 0
 
@@ -259,12 +259,12 @@ func _go_hit(tick: int, x: float, y: float) -> int:
 func _go_to(x: float, y: float) -> int:
 	var g := level.player
 	var bits := 0
-	if x - g.px > 2.0:
+	if x - g.px > 2.5:
 		bits |= R
-	elif g.px - x > 2.0:
+	elif g.px - x > 2.5:
 		bits |= L
-	if y - g.py > 2.0:
+	if y - g.py > 2.5:
 		bits |= D
-	elif g.py - y > 2.0:
+	elif g.py - y > 2.5:
 		bits |= U
 	return bits

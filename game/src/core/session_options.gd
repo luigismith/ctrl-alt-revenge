@@ -3,6 +3,8 @@ extends RefCounted
 ## Opzioni della sessione lette dagli argomenti utente (quelli dopo "--").
 ##
 ##   --autostart            salta il titolo e parte dal livello
+##   --stanza               parte dalla stanza di prova in grigio (tappa 1)
+##   --skip-to <tick>       nella stanza, un replay corre senza disegnare fino a quel tick
 ##   --replay <file>        riproduce gli ingressi del file (res://, user:// o percorso assoluto)
 ##   --seed <n>             seme del livello (vince sul seme del replay)
 ##   --record <file>        alla fine del livello salva gli ingressi giocati in un replay
@@ -14,6 +16,8 @@ extends RefCounted
 ##   --no-lights            parte con le luci dinamiche spente (come F5)
 
 var autostart: bool = false
+var room: bool = false
+var skip_to: int = 0
 var replay_path: String = ""
 var record_path: String = ""
 var level_seed: int = 1
@@ -36,6 +40,11 @@ static func parse(args: PackedStringArray) -> SessionOptions:
 		match a:
 			"--autostart":
 				o.autostart = true
+			"--stanza":
+				o.room = true
+			"--skip-to":
+				o.skip_to = int(next)
+				i += 1
 			"--replay":
 				o.replay_path = next
 				o.autostart = true
@@ -54,6 +63,8 @@ static func parse(args: PackedStringArray) -> SessionOptions:
 			"--autopilot":
 				o.autopilot = next
 				o.autostart = true
+				if next == "stanza":
+					o.room = true
 				i += 1
 			"--quit-at-end":
 				o.quit_at_end = true

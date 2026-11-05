@@ -1,6 +1,6 @@
 # tools/fxui: effetti visivi, interfaccia e font
 
-Script Python (MIT) che disegnano gli effetti, l'interfaccia e i font del gioco alla risoluzione nativa (384×216). Non usano AI generativa né file scaricati. Gli script sono deterministici: semi fissi, niente antialiasing, PNG e TTF identici a ogni esecuzione.
+Script Python (MIT) che disegnano gli effetti, l'interfaccia e i font del gioco alla risoluzione nativa (480×270; fino al 5 novembre 2026 era 384×216). Non usano AI generativa né file scaricati. Gli script sono deterministici: semi fissi, niente antialiasing, PNG e TTF identici a ogni esecuzione.
 
 ```
 python -I tools/fxui/build_all.py                    # genera tutto in tools/fxui/out/

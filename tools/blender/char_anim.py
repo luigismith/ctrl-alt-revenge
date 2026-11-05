@@ -354,7 +354,83 @@ def keys_ledge_hang():
     return k
 
 
-KEYSETS = dict(idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang)
+def keys_wall_slide():
+    """freno col braccio (stanza di prova): GIG guarda il muro, che ha davanti; il braccio cyber (il sinistro,
+    lontano) è piantato nel muro all'altezza della testa, la gamba vicina puntata contro il muro, l'altra
+    piegata. Due chiavi appena diverse: il braccio che vibra frenando."""
+    k = {}
+    k["a"] = guard(hip=(0.0, 0.05, 0.95), pelvis=(-6, 0, 10), spine=(8, 0, -6), neck=(-14, 0, 0),
+                   arm_l=dict(ik=(0.12, -0.26, 1.60), pole=(0.6, 0.3, -0.3)),
+                   arm_r=dict(up=V(-0.55, 0.15, -0.82), lo=V(-0.25, -0.55, 0.80)),
+                   leg_l=dict(up=V(0.08, -0.62, -0.78), lo=V(0.05, 0.15, -0.99), foot=V(0, -0.6, -0.8)),
+                   leg_r=dict(up=V(-0.08, -0.35, -0.94), lo=V(-0.05, -0.30, -0.95), foot=V(0, -0.95, -0.3)))
+    k["b"] = guard(hip=(0.0, 0.05, 0.94), pelvis=(-5, 0, 10), spine=(9, 0, -6), neck=(-12, 0, 0),
+                   arm_l=dict(ik=(0.12, -0.26, 1.58), pole=(0.6, 0.3, -0.3)),
+                   arm_r=dict(up=V(-0.55, 0.20, -0.81), lo=V(-0.25, -0.50, 0.83)),
+                   leg_l=dict(up=V(0.08, -0.58, -0.81), lo=V(0.05, 0.18, -0.98), foot=V(0, -0.6, -0.8)),
+                   leg_r=dict(up=V(-0.08, -0.37, -0.93), lo=V(-0.05, -0.28, -0.96), foot=V(0, -0.95, -0.3)))
+    return k
+
+
+def keys_wall_run():
+    """corsa sul muro (stanza di prova), rifatta dopo il giudizio di Luigi (5 novembre 2026): il muro è davanti
+    e GIG ci sale sopra. Quattro chiavi per ciclo, due per passo:
+      contatto: il piede di testa si pianta sulla parete all'altezza delle anche, con la suola piatta sul
+                muro e il ginocchio piegato verso il muro; l'altra gamba ha appena spinto ed è distesa sotto;
+      passaggio: la gamba che ha spinto risale piegata sotto il corpo, quella piantata spinge in giù.
+    Il bacino sta indietro, lontano dal muro, e lo sguardo va in su; le braccia vanno a braccia e gambe
+    opposte, e la mano che sale si allunga lungo la parete. Più la posa di fine corsa ("top"), quando GIG
+    si stacca dal muro: le due gambe piegate contro la parete, il braccio cyber in alto."""
+    k = {}
+    plant = dict(up=V(0.0, -0.92, 0.25), lo=V(0.0, 0.05, -1.0), foot=V(0, -0.15, 0.99))
+    trail = dict(up=V(0.0, -0.15, -0.99), lo=V(0.0, 0.35, -0.94), foot=V(0, -0.5, -0.87))
+    swing_ = dict(up=V(0.0, -0.65, -0.76), lo=V(0.0, 0.55, -0.83), foot=V(0, 0.1, -0.99))
+    press = dict(up=V(0.0, -0.70, -0.71), lo=V(0.0, -0.25, -0.97), foot=V(0, -0.35, 0.94))
+
+    def L(d, x):
+        return dict(up=V(x, *d["up"][1:]), lo=V(x * 0.6, *d["lo"][1:]), foot=d["foot"])
+
+    reach = (-0.45, 0.86)
+    def arm(x, kind):
+        if kind == "reach":
+            return dict(up=V(x, -0.45, 0.86), lo=V(x * 0.4, -0.50, 0.86))
+        if kind == "back":
+            return dict(up=V(x, 0.45, -0.84), lo=V(x * 0.5, -0.40, 0.90))
+        return dict(up=V(x * 1.2, 0.05, -0.95), lo=V(x * 0.6, -0.70, 0.68))
+
+    body = dict(hip=(0.0, 0.12, 0.90), pelvis=(-24, 0, 6), spine=(10, 0, -4), neck=(-26, 0, 0))
+    k["ca"] = guard(**body, leg_l=L(plant, 0.08), leg_r=L(trail, -0.08), arm_l=arm(0.25, "back"), arm_r=arm(-0.25, "reach"))
+    k["pa"] = guard(**dict(body, hip=(0.0, 0.12, 0.92)), leg_l=L(press, 0.08), leg_r=L(swing_, -0.08),
+                    arm_l=arm(0.25, "mid"), arm_r=arm(-0.25, "mid"))
+    k["cb"] = guard(**body, leg_l=L(trail, 0.08), leg_r=L(plant, -0.08), arm_l=arm(0.25, "reach"), arm_r=arm(-0.25, "back"))
+    k["pb"] = guard(**dict(body, hip=(0.0, 0.12, 0.92)), leg_l=L(swing_, 0.08), leg_r=L(press, -0.08),
+                    arm_l=arm(0.25, "mid"), arm_r=arm(-0.25, "mid"))
+    k["top"] = guard(hip=(0.0, 0.14, 0.90), pelvis=(-30, 0, 6), spine=(12, 0, -4), neck=(-20, 0, 0),
+                     leg_l=L(plant, 0.08), leg_r=L(press, -0.08),
+                     arm_l=dict(up=V(0.25, -0.30, 0.92), lo=V(0.10, -0.35, 0.93)),
+                     arm_r=dict(up=V(-0.50, 0.40, -0.77), lo=V(-0.30, -0.20, 0.93)))
+    return k
+
+
+def keys_air_dash():
+    """scatto in aria (stanza di prova): il braccio cyber spara all'indietro e GIG schizza in avanti, il busto
+    lanciato, le gambe raccolte dietro, il pugno destro avanti. Poi il corpo si rilassa appena."""
+    k = {}
+    k["kick"] = guard(hip=(0.0, 0.02, 0.94), pelvis=(18, 0, 8), spine=(30, 0, -6), neck=(-24, 0, 0),
+                      arm_l=dict(up=V(0.15, 0.80, -0.58), lo=V(0.10, 0.90, -0.42)),
+                      arm_r=dict(up=V(-0.30, -0.70, -0.65), lo=V(-0.10, -0.92, 0.38)),
+                      leg_l=dict(up=V(0.10, 0.35, -0.93), lo=V(0.06, 0.92, -0.38)),
+                      leg_r=dict(up=V(-0.08, 0.10, -0.99), lo=V(-0.05, 0.85, -0.52)))
+    k["glide"] = guard(hip=(0.0, 0.02, 0.94), pelvis=(14, 0, 8), spine=(24, 0, -6), neck=(-18, 0, 0),
+                       arm_l=dict(up=V(0.25, 0.70, -0.67), lo=V(0.15, 0.80, -0.58)),
+                       arm_r=dict(up=V(-0.35, -0.60, -0.72), lo=V(-0.10, -0.85, 0.52)),
+                       leg_l=dict(up=V(0.10, 0.20, -0.97), lo=V(0.06, 0.85, -0.52)),
+                       leg_r=dict(up=V(-0.08, -0.10, -0.99), lo=V(-0.05, 0.75, -0.66)))
+    return k
+
+
+KEYSETS = dict(idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
+               wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
 TRACKS = dict(
@@ -366,6 +442,10 @@ TRACKS = dict(
     hook=[(0, "guard"), (3, "load", "dec"), (6, "load", "hold"), (7.2, "arc", "acc"), (8, "impact", "lin"),
           (11, "impact", "hold"), (14, "over", "dec"), (21, "back", "smooth"), (27, "guard", "smooth")],
     ledge_hang=[(0, "a"), (24, "b", "smooth"), (48, "a", "smooth")],
+    wall_slide=[(0, "a"), (6, "b", "smooth"), (12, "a", "smooth")],
+    wall_run=[(0, "ca"), (6, "pa", "smooth"), (12, "cb", "smooth"), (18, "pb", "smooth"), (24, "ca", "smooth"),
+              (30, "top", "step")],
+    air_dash=[(0, "kick"), (6, "glide", "dec")],
     hurt_high=[(0, "snap"), (5, "max", "dec"), (10, "rebound", "smooth"), (16, "guard", "smooth")],
     double_jump=[(0, "air"), (3, "coil", "dec"), (5, "coil", "hold"), (6.5, "thrust", "acc"), (9, "launch", "dec"),
                  (14, "open", "smooth"), (19, "tuck", "smooth"), (26, "fall", "smooth")],

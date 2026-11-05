@@ -48,14 +48,15 @@ func run(tree_root: Node) -> bool:
 	_test_credits_glyphs()
 	_test_json_files()
 	_test_replays()
+	_test_platform()
 	return failures == 0
 
 
 # --- Impostazioni ----------------------------------------------------------------------------------
 
 func _test_settings() -> void:
-	check(ProjectSettings.get_setting("display/window/size/viewport_width") == 384, "risoluzione interna larga 384")
-	check(ProjectSettings.get_setting("display/window/size/viewport_height") == 216, "risoluzione interna alta 216")
+	check(ProjectSettings.get_setting("display/window/size/viewport_width") == View.W and View.W == 480, "risoluzione interna larga 480")
+	check(ProjectSettings.get_setting("display/window/size/viewport_height") == View.H and View.H == 270, "risoluzione interna alta 270")
 	check(ProjectSettings.get_setting("display/window/stretch/scale_mode") == "integer", "scala intera")
 	check(Engine.physics_ticks_per_second == 60, "fisica a 60 tick")
 	check(not bool(ProjectSettings.get_setting("physics/common/physics_interpolation")), "interpolazione della fisica spenta")
@@ -170,8 +171,8 @@ func _test_replay_format() -> void:
 func _duel(script: Dictionary, dist: float) -> Dictionary:
 	var held: Dictionary = script
 	var input := PlayerInput.from_provider(func(t: int) -> int: return int(held.get(t, 0)))
-	var lvl := Harness.make_level(root, input, 300.0, 180.0)
-	var punk := lvl.spawn_thug(&"thug_punk", 1, 180.0, "")
+	var lvl := Harness.make_level(root, input, 375.0, 225.0)
+	var punk := lvl.spawn_thug(&"thug_punk", 1, 225.0, "")
 	punk.ai_enabled = false
 	punk.px = lvl.player.px + dist
 	punk.py = lvl.player.py
@@ -202,7 +203,7 @@ static func _attack_log(lvl: Level, ticks: int) -> Array:
 
 
 func _test_combo_chain() -> void:
-	var d := _duel(_taps(2, 4, 30), 30.0)
+	var d := _duel(_taps(2, 4, 30), 37.5)
 	var lvl: Level = d["level"]
 	var log := _attack_log(lvl, 110)
 	var ids: Array = log.map(func(e: Array) -> String: return e[1])
@@ -215,7 +216,7 @@ func _test_combo_chain() -> void:
 
 func _test_combo_miss_and_buffer() -> void:
 	# A vuoto: il tasto ripete sempre jab1.
-	var d := _duel(_taps(2, 4, 12), 120.0)
+	var d := _duel(_taps(2, 4, 12), 150.0)
 	var lvl: Level = d["level"]
 	var log := _attack_log(lvl, 60)
 	var ids: Array = log.map(func(e: Array) -> String: return e[1])
@@ -228,13 +229,13 @@ func _test_combo_miss_and_buffer() -> void:
 	# Buffer di 8 tick: un tocco vale nel tick in cui arriva e nei 7 seguenti.
 	# jab1 parte al tick P e lascia GIG libero al tick P + 14.
 	var start := 2
-	d = _duel({start: InputFrame.ATTACK, start + 7: InputFrame.ATTACK}, 120.0)
+	d = _duel({start: InputFrame.ATTACK, start + 7: InputFrame.ATTACK}, 150.0)
 	lvl = d["level"]
 	log = _attack_log(lvl, 40)
 	check(log.size() == 2 and int(log[1][0]) == int(log[0][0]) + 14, "Buffer: un tocco 7 tick prima della fine viene tenuto", str(log))
 	Harness.free_level(lvl)
 
-	d = _duel({start: InputFrame.ATTACK, start + 6: InputFrame.ATTACK}, 120.0)
+	d = _duel({start: InputFrame.ATTACK, start + 6: InputFrame.ATTACK}, 150.0)
 	lvl = d["level"]
 	log = _attack_log(lvl, 40)
 	check(log.size() == 1, "Buffer: un tocco 8 tick prima della fine scade", str(log))
@@ -242,7 +243,7 @@ func _test_combo_miss_and_buffer() -> void:
 
 
 func _test_hitstop() -> void:
-	var d := _duel({2: InputFrame.ATTACK}, 30.0)
+	var d := _duel({2: InputFrame.ATTACK}, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -271,11 +272,11 @@ func _test_hitstop() -> void:
 
 
 func _test_grab_conditions() -> void:
-	# Presa: entro 18 px e 4 px di profondità, camminando contro il nemico.
+	# Presa: entro 23 px e 5 px di profondità, camminando contro il nemico.
 	var held := {}
 	for t in 40:
 		held[t] = InputFrame.RIGHT
-	var d := _duel(held, 30.0)
+	var d := _duel(held, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var grabbed_at := -1
@@ -295,23 +296,23 @@ func _test_grab_conditions() -> void:
 		worst_step = maxf(worst_step, absf(now - last))
 		last = now
 	var e := lvl.player.anim.frame().victim_entry(&"thug_punk")
-	var want_dx := float(e[0]) if not e.is_empty() else 18.0
+	var want_dx := float(e[0]) if not e.is_empty() else 23.0
 	check(absf((punk.px - lvl.player.px) * lvl.player.facing - want_dx) < 0.01, "La vittima arriva all'offset del campo victim", "%.1f invece di %.1f" % [(punk.px - lvl.player.px) * lvl.player.facing, want_dx])
-	check(worst_step <= 4.0, "Presa: la vittima si avvicina senza scatti (al massimo 4 px per tick)", "%.1f px" % worst_step)
-	# Fuori corsia di 6 px: nessuna presa.
+	check(worst_step <= 5.0, "Presa: la vittima si avvicina senza scatti (al massimo 5 px per tick)", "%.1f px" % worst_step)
+	# Fuori corsia di 7,5 px: nessuna presa.
 	Harness.free_level(lvl)
-	d = _duel(held, 30.0)
+	d = _duel(held, 37.5)
 	lvl = d["level"]
 	punk = d["punk"]
-	punk.py += 6.0
+	punk.py += 7.5
 	var any := false
 	for i in 40:
 		lvl.step()
 		any = any or lvl.player.state == Fighter.State.GRAB
-	check(not any, "Nessuna presa fuori dai 4 px di profondità")
+	check(not any, "Nessuna presa fuori dai 5 px di profondità")
 	Harness.free_level(lvl)
 	# La vittima si libera dopo 90 tick.
-	d = _duel(held, 30.0)
+	d = _duel(held, 37.5)
 	lvl = d["level"]
 	punk = d["punk"]
 	var start := -1
@@ -334,12 +335,12 @@ func _test_thrown_body() -> void:
 		held[t] = InputFrame.RIGHT
 	for k in 3:
 		held[30 + k * 24] = InputFrame.ATTACK
-	var d := _duel(held, 30.0)
+	var d := _duel(held, 37.5)
 	var lvl: Level = d["level"]
 	var a: Thug = d["punk"]
-	var b := lvl.spawn_thug(&"thug_punk", 1, 180.0, "")
+	var b := lvl.spawn_thug(&"thug_punk", 1, 225.0, "")
 	b.ai_enabled = false
-	b.px = lvl.player.px + 110.0
+	b.px = lvl.player.px + 137.5
 	b.py = lvl.player.py
 	b.facing = -1
 	b.set_state(Fighter.State.IDLE)
@@ -376,7 +377,7 @@ func _test_throw_release() -> void:
 			held[30 + k * 24] = InputFrame.ATTACK
 		if back:
 			held[78] = InputFrame.ATTACK | InputFrame.LEFT
-		var d := _duel(held, 30.0)
+		var d := _duel(held, 37.5)
 		var lvl: Level = d["level"]
 		var punk: Thug = d["punk"]
 		var g := lvl.player
@@ -399,9 +400,9 @@ func _test_throw_release() -> void:
 ## Ogni attacco nemico, partendo dalla distanza scelta dall'intelligenza, colpisce GIG fermo.
 func _test_enemy_attacks() -> void:
 	for spec: Array in [[&"thug_punk", &"thug_punk_jab"], [&"thug_punk", &"thug_punk_haymaker"], [&"thug_bruiser", &"thug_bruiser_punch"]]:
-		var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 300.0, 180.0)
+		var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
 		var g := lvl.player
-		var t := lvl.spawn_thug(spec[0], 1, 180.0, "")
+		var t := lvl.spawn_thug(spec[0], 1, 225.0, "")
 		t.ai_enabled = false
 		var atk := load("res://data/attacks/%s.tres" % spec[1]) as AttackData
 		t.px = g.px + t._reach(atk)
@@ -424,11 +425,11 @@ func _test_enemy_attacks() -> void:
 
 ## Armatura del bruto: durante l'avvio del pugno i jab non lo fermano, il gancio sì.
 func _test_bruiser_armor() -> void:
-	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 300.0, 180.0)
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
 	var g := lvl.player
-	var b := lvl.spawn_thug(&"thug_bruiser", 1, 180.0, "")
+	var b := lvl.spawn_thug(&"thug_bruiser", 1, 225.0, "")
 	b.ai_enabled = false
-	b.px = g.px + 40.0
+	b.px = g.px + 50.0
 	b.py = g.py
 	b.facing = -1
 	b.set_state(Fighter.State.IDLE)
@@ -437,21 +438,21 @@ func _test_bruiser_armor() -> void:
 	for i in 4:
 		lvl.step()
 	var hp0 := b.hp
-	lvl.combat.apply_hit(g, b, g.attacks[&"gig_jab1"], Vector2(b.px, b.py - 60), 1)
+	lvl.combat.apply_hit(g, b, g.attacks[&"gig_jab1"], Vector2(b.px, b.py - 75), 1)
 	check(b.state == Fighter.State.ATTACK and b.hp == hp0 - 4, "Bruto con armatura: il jab fa danno ma non lo ferma")
-	lvl.combat.apply_hit(g, b, g.attacks[&"gig_hook"], Vector2(b.px, b.py - 60), 1)
+	lvl.combat.apply_hit(g, b, g.attacks[&"gig_hook"], Vector2(b.px, b.py - 75), 1)
 	check(b.state == Fighter.State.HURT, "Bruto con armatura: il gancio lo ferma")
 	Harness.free_level(lvl)
 
 
 func _test_lives() -> void:
-	var d := _duel({}, 200.0)
+	var d := _duel({}, 250.0)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
 	var hay := load("res://data/attacks/thug_punk_haymaker.tres") as AttackData
 	g.hp = 1
-	lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 60), -1)
+	lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 75), -1)
 	check(g.dead and g.state == Fighter.State.KNOCK_AIR, "GIG a 0 di vita vola a terra")
 	var respawned_at := -1
 	for i in 400:
@@ -460,14 +461,14 @@ func _test_lives() -> void:
 			respawned_at = i
 			break
 	check(respawned_at > 0 and g.hp == g.data.max_hp and g.invuln > 60, "Una vita in meno, poi rientra con la vita piena e invulnerabile", "tick %d, vita %d, invuln %d" % [respawned_at, g.hp, g.invuln])
-	check(g.ph > 100.0, "Il rientro avviene dall'alto")
+	check(g.ph > 125.0, "Il rientro avviene dall'alto")
 	# Ultima vita: CONTINUA?
 	for i in 200:
 		lvl.step()
 	Game.lives = 1
 	g.invuln = 0
 	g.hp = 1
-	lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 60), -1)
+	lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 75), -1)
 	for i in 400:
 		lvl.step()
 		if lvl.phase == Level.Phase.CONTINUE:
@@ -479,12 +480,12 @@ func _test_lives() -> void:
 # --- AttackDirector --------------------------------------------------------------------------------
 
 func _test_attack_director() -> void:
-	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 1560.0, 184.0)
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 1950.0, 230.0)
 	AttackDirector.keep_log = true
 	var thugs: Array[Thug] = []
-	thugs.append(lvl.spawn_thug(&"thug_punk", 1, 170.0, "prova"))
-	thugs.append(lvl.spawn_thug(&"thug_punk", -1, 196.0, "prova"))
-	thugs.append(lvl.spawn_thug(&"thug_bruiser", 1, 190.0, "prova"))
+	thugs.append(lvl.spawn_thug(&"thug_punk", 1, 213.0, "prova"))
+	thugs.append(lvl.spawn_thug(&"thug_punk", -1, 245.0, "prova"))
+	thugs.append(lvl.spawn_thug(&"thug_bruiser", 1, 238.0, "prova"))
 	var worst := 0
 	var attacks_seen := 0
 	for i in 2400:
@@ -523,7 +524,7 @@ func _test_attack_director() -> void:
 
 func _test_ko_freeze() -> void:
 	# L'ultimo KO di un'ondata congela tutto per 26 tick, poi 0,4 s al 35%.
-	var d := _duel({}, 30.0)
+	var d := _duel({}, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	lvl.active_wave = {"id": "prova"}
@@ -531,7 +532,7 @@ func _test_ko_freeze() -> void:
 	punk.hp = 4
 	var g := lvl.player
 	var atk: AttackData = g.attacks[&"gig_jab1"]
-	lvl.combat.apply_hit(g, punk, atk, Vector2(punk.px, punk.py - 60), 1)
+	lvl.combat.apply_hit(g, punk, atk, Vector2(punk.px, punk.py - 75), 1)
 	var a0 := lvl.actor_ticks
 	for i in 26:
 		lvl.step()
@@ -546,7 +547,7 @@ func _test_ko_freeze() -> void:
 ## Durante tutta la sequenza del KO finale (26 + 24 tick) GIG resta visibile anche se sta
 ## lampeggiando per l'invulnerabilità; la vittima non resta tutta bianca per 26 tick.
 func _test_ko_visibility() -> void:
-	var d := _duel({}, 30.0)
+	var d := _duel({}, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -557,7 +558,7 @@ func _test_ko_visibility() -> void:
 	# l'hitstop del jab, scende a 55 (fase spenta del lampeggio, 4 tick su 8).
 	g.invuln = 57
 	lvl.step()
-	lvl.combat.apply_hit(g, punk, g.attacks[&"gig_jab1"], Vector2(punk.px, punk.py - 60), 1)
+	lvl.combat.apply_hit(g, punk, g.attacks[&"gig_jab1"], Vector2(punk.px, punk.py - 75), 1)
 	var hidden := 0
 	var white := 0
 	var ticks := 0
@@ -578,7 +579,7 @@ func _test_ko_visibility() -> void:
 
 ## Un colpo leggero (jab del punk) che prende GIG in salto lo atterra: niente GIG sospeso.
 func _test_air_hit_lands() -> void:
-	var d := _duel({2: InputFrame.JUMP}, 200.0)
+	var d := _duel({2: InputFrame.JUMP}, 250.0)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -587,9 +588,9 @@ func _test_air_hit_lands() -> void:
 	var seen_down := false
 	for i in 220:
 		lvl.step()
-		if not hit and g.ph > 18.0:
-			punk.px = g.px + 30.0
-			lvl.combat.apply_hit(punk, g, jab, Vector2(g.px, g.py - g.ph - 60), 0)
+		if not hit and g.ph > 22.5:
+			punk.px = g.px + 37.5
+			lvl.combat.apply_hit(punk, g, jab, Vector2(g.px, g.py - g.ph - 75), 0)
 			hit = true
 		seen_down = seen_down or g.state == Fighter.State.KNOCK_DOWN
 	check(hit and seen_down, "Jab su GIG in salto: GIG viene atterrato", "stato %d" % g.state)
@@ -601,7 +602,7 @@ func _test_air_hit_lands() -> void:
 ## ZONA LIBERATA e il livello finisce lo stesso (prima restava bloccato dopo il continue).
 func _test_clear_and_last_life() -> void:
 	for gap in [0, 8]:
-		var d := _duel({}, 30.0)
+		var d := _duel({}, 37.5)
 		var lvl: Level = d["level"]
 		var punk: Thug = d["punk"]
 		var g := lvl.player
@@ -613,10 +614,10 @@ func _test_clear_and_last_life() -> void:
 		var ended := [false]
 		lvl.finished.connect(func(_r: Dictionary) -> void: ended[0] = true)
 		var hay := load("res://data/attacks/thug_punk_haymaker.tres") as AttackData
-		lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 60), -1)
+		lvl.combat.apply_hit(punk, g, hay, Vector2(g.px, g.py - 75), -1)
 		for i in gap:
 			lvl.step()
-		lvl.combat.apply_hit(g, punk, g.attacks[&"gig_jab1"], Vector2(punk.px, punk.py - 60), 1)
+		lvl.combat.apply_hit(g, punk, g.attacks[&"gig_jab1"], Vector2(punk.px, punk.py - 75), 1)
 		var went_continue := false
 		for i in 900:
 			lvl.step()
@@ -636,7 +637,7 @@ func _test_grab_at_wall() -> void:
 	held[40] = InputFrame.ATTACK
 	held[64] = InputFrame.ATTACK
 	held[88] = InputFrame.ATTACK
-	var d := _duel(held, 30.0)
+	var d := _duel(held, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -644,7 +645,7 @@ func _test_grab_at_wall() -> void:
 	lvl.camera.max_x = lvl.camera.x
 	var wall := lvl.view_right() - Level.WALL_MARGIN
 	punk.px = wall
-	g.px = wall - 40.0
+	g.px = wall - 50.0
 	var worst := 0.0
 	var released_at := -1.0
 	for i in 160:
@@ -665,7 +666,7 @@ func _test_knee_ko() -> void:
 	for t in 16:
 		held[t] = InputFrame.RIGHT
 	held[30] = InputFrame.ATTACK
-	var d := _duel(held, 30.0)
+	var d := _duel(held, 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -685,11 +686,11 @@ func _test_knee_ko() -> void:
 
 ## Un jab sul bruto durante l'avvio con armatura non gli toglie il turno d'attacco.
 func _test_armor_keeps_turn() -> void:
-	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 300.0, 180.0)
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
 	var g := lvl.player
-	var b := lvl.spawn_thug(&"thug_bruiser", 1, 180.0, "")
+	var b := lvl.spawn_thug(&"thug_bruiser", 1, 225.0, "")
 	b.ai_enabled = false
-	b.px = g.px + 40.0
+	b.px = g.px + 50.0
 	b.py = g.py
 	b.facing = -1
 	b.set_state(Fighter.State.IDLE)
@@ -698,15 +699,15 @@ func _test_armor_keeps_turn() -> void:
 	b.start_attack(load("res://data/attacks/thug_bruiser_punch.tres") as AttackData, lvl.next_attack_serial())
 	for i in 4:
 		lvl.step()
-	lvl.combat.apply_hit(g, b, g.attacks[&"gig_jab1"], Vector2(b.px, b.py - 60), 1)
+	lvl.combat.apply_hit(g, b, g.attacks[&"gig_jab1"], Vector2(b.px, b.py - 75), 1)
 	check(b.state == Fighter.State.ATTACK and lvl.director.is_holder(b), "Armatura: dopo il jab il bruto tiene il turno finché il pugno non finisce")
 	Harness.free_level(lvl)
 
 
 ## Un nemico che entra da fuori schermo non si può colpire finché non supera il muro.
 func _test_enter_not_hittable() -> void:
-	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 300.0, 180.0)
-	var t := lvl.spawn_thug(&"thug_punk", 1, 180.0, "")
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
+	var t := lvl.spawn_thug(&"thug_punk", 1, 225.0, "")
 	var jab: AttackData = lvl.player.attacks[&"gig_jab1"]
 	check(t.state == Fighter.State.ENTER and not t.can_be_hit_by(lvl.player, jab), "Nemico che entra: fuori dai muri non si può colpire")
 	for i in 120:
@@ -719,7 +720,7 @@ func _test_enter_not_hittable() -> void:
 
 ## Una combo interrotta da un colpo riparte da jab1.
 func _test_combo_reset_on_hurt() -> void:
-	var d := _duel(_taps(2, 4, 3), 30.0)
+	var d := _duel(_taps(2, 4, 3), 37.5)
 	var lvl: Level = d["level"]
 	var punk: Thug = d["punk"]
 	var g := lvl.player
@@ -727,7 +728,7 @@ func _test_combo_reset_on_hurt() -> void:
 		lvl.step()
 	var step_before := g.combo_step
 	var jab := load("res://data/attacks/thug_punk_jab.tres") as AttackData
-	lvl.combat.apply_hit(punk, g, jab, Vector2(g.px, g.py - 60), -1)
+	lvl.combat.apply_hit(punk, g, jab, Vector2(g.px, g.py - 75), -1)
 	check(step_before > 0 and g.combo_step == 0 and g.combo_timer == 0, "Combo interrotta da un colpo: riparte da jab1", "passo %d -> %d" % [step_before, g.combo_step])
 	Harness.free_level(lvl)
 
@@ -760,8 +761,10 @@ func _test_credits_glyphs() -> void:
 	if expected.is_empty():
 		music_ok = music_ok and texts.has(CreditsScreen.NO_MUSIC)
 	else:
+		# Un titolo lungo va a capo come ogni riga dei crediti: si cercano i suoi pezzi.
 		for t in expected:
-			music_ok = music_ok and texts.has(t)
+			for part in CreditsScreen.word_wrap(UiFont.safe_text(t, true), CreditsScreen.MAX_CHARS):
+				music_ok = music_ok and texts.has(part)
 	check(music_ok, "Crediti: la sezione MUSICA elenca i brani caricati", "%d brani" % expected.size())
 	c.free()
 
@@ -812,7 +815,7 @@ func _test_json_files() -> void:
 		var b := Backdrop.new()
 		check(b.load_json(env), "layers.json valido", "; ".join(b.errors))
 	var lv: Variant = JSON.parse_string(FileAccess.get_file_as_string(Level.LEVEL_JSON))
-	check(lv is Dictionary and int(lv.get("width", 0)) == 1920 and (lv["waves"] as Array).size() == 2, "Dati del livello leggibili")
+	check(lv is Dictionary and int(lv.get("width", 0)) == 2400 and (lv["waves"] as Array).size() == 2, "Dati del livello leggibili")
 	for name in ["gig", "thug_punk", "thug_bruiser"]:
 		var fd := load("res://data/fighters/%s.tres" % name) as FighterData
 		check(fd != null and fd.max_hp > 0, "FighterData %s" % name)
@@ -873,7 +876,7 @@ func _test_replays() -> void:
 		check(lvl.waves_cleared >= 1 and st.get(&"ko_thug_punk", 0) == 1, "Replay combo: GIG sconfigge il punk dell'ondata 1")
 		check(st.get(&"hit_gig_hook", 0) >= 1 and st.get(&"hit_gig_kick", 0) >= 1 and st.get(&"grabs", 0) == 0, "Replay combo: solo combo, con gancio e calcio finale", str(st))
 		check(lvl.player.is_alive(), "Replay combo: GIG resta in piedi")
-		check(res["cam_locked_at"] == 576, "Replay combo: la telecamera si blocca sull'ondata 1", str(res["cam_locked_at"]))
+		check(res["cam_locked_at"] == 720, "Replay combo: la telecamera si blocca sull'ondata 1", str(res["cam_locked_at"]))
 		check(not bool(res["go_with_bodies"]), "Replay combo: VAI compare solo dopo che il corpo del punk è sparito")
 		var first: String = res["hash"]
 		Harness.free_level(lvl)
@@ -898,17 +901,17 @@ func _test_replays() -> void:
 	if not res.is_empty():
 		var lvl: Level = res["level"]
 		var st: Dictionary = res["stats"]
-		check(st.get(&"cable_zaps_gig", 0) == 0 and lvl.player.hp == 120 and lvl.player.px > 1270.0, "Replay cavo saltato: nessun danno, GIG oltre il cavo", "x %.0f, vita %d" % [lvl.player.px, lvl.player.hp])
+		check(st.get(&"cable_zaps_gig", 0) == 0 and lvl.player.hp == 120 and lvl.player.px > 1588.0, "Replay cavo saltato: nessun danno, GIG oltre il cavo", "x %.0f, vita %d" % [lvl.player.px, lvl.player.hp])
 		Harness.free_level(lvl)
 	res = _play("arena.json")
 	if not res.is_empty():
 		var lvl: Level = res["level"]
 		var st: Dictionary = res["stats"]
-		check(res["cam_locked_at"] == 1536, "Replay arena: la telecamera si blocca sull'arena", str(res["cam_locked_at"]))
+		check(res["cam_locked_at"] == 1920, "Replay arena: la telecamera si blocca sull'arena", str(res["cam_locked_at"]))
 		check(st.get(&"ko_thug_punk", 0) >= 1 and st.get(&"ko_thug_bruiser", 0) == 1, "Replay arena: KO del punk e del bruto")
 		check(lvl.zone_cleared and lvl.active_wave.is_empty(), "Replay arena: dopo i KO la zona è liberata")
 		var cams: Array[int] = res["cam_after_clear"]
-		check(not cams.is_empty() and cams.all(func(x: int) -> bool: return x == 1536), "Replay arena: dopo ZONA LIBERATA la telecamera resta sull'arena", str(cams.slice(0, 3)))
+		check(not cams.is_empty() and cams.all(func(x: int) -> bool: return x == 1920), "Replay arena: dopo ZONA LIBERATA la telecamera resta sull'arena", str(cams.slice(0, 3)))
 		var first: String = res["hash"]
 		Harness.free_level(lvl)
 		var again := _play("arena.json")
@@ -924,3 +927,371 @@ func _test_replays() -> void:
 		check(lvl.zone_cleared, "Replay dimostrativo: zona liberata")
 		check(st.get(&"bins_broken", 0) == 1 and st.get(&"apples", 0) == 1 and st.get(&"throws", 0) >= 1 and st.get(&"cable_zaps_gig", 0) == 0, "Replay dimostrativo: bidone, mela, proiezione, cavo saltato", str(st))
 		Harness.free_level(lvl)
+
+
+# --- Platform: la stanza di prova --------------------------------------------------------------------
+
+const _L := InputFrame.LEFT
+const _R := InputFrame.RIGHT
+const _U := InputFrame.UP
+const _D := InputFrame.DOWN
+const _J := InputFrame.JUMP
+const _S := InputFrame.DASH
+
+
+## Una griglia vuota larga w e alta h celle, con il pavimento pieno dalla riga floor_row in giù.
+static func _room(w: int, h: int, floor_row: int) -> SolidGrid:
+	var g := SolidGrid.new(w, h)
+	for y in range(floor_row, h):
+		for x in w:
+			g.set_cell(x, y, SolidGrid.Cell.SOLID)
+	return g
+
+
+static func _box(g: SolidGrid, x0: int, x1: int, y0: int, y1: int, c: SolidGrid.Cell = SolidGrid.Cell.SOLID) -> void:
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			g.set_cell(x, y, c)
+
+
+## GIG fermo con i piedi sul pavimento alla colonna di pixel x.
+static func _pp(g: SolidGrid, x: int, floor_row: int) -> PlatformPlayer:
+	var p := PlatformPlayer.new(PlatformMoves.new(), g)
+	p.place(x, floor_row * SolidGrid.TILE)
+	return p
+
+
+## Fa girare `ticks` tick tenendo i tasti dati da fn(t) -> int; i tasti appena premuti si
+## calcolano come dal vivo. Restituisce gli eventi di tutti i tick, ognuno con il suo tick.
+static func _run_pp(p: PlatformPlayer, ticks: int, fn: Callable) -> Array:
+	var ev: Array = []
+	var prev := 0
+	for t in ticks:
+		var held: int = fn.call(t)
+		p.step(InputFrame.new(held, held & ~prev))
+		prev = held
+		for e in p.events:
+			ev.append([t, e])
+	return ev
+
+
+static func _count_events(ev: Array, event_name: String) -> int:
+	var n := 0
+	for e: Array in ev:
+		if e[1] == event_name:
+			n += 1
+	return n
+
+
+func _test_platform() -> void:
+	var m := PlatformMoves.new()
+	# Le misure sono a 60 px/m (blocchi da 20 px): T è un blocco.
+	var T := SolidGrid.TILE
+	# Fermo sul pavimento: non affonda e non cade.
+	var g := _room(40, 14, 10)
+	var p := _pp(g, 125, 10)
+	_run_pp(p, 60, func(_t: int) -> int: return 0)
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 10 * T, "Platform: fermo sul pavimento resta a terra", "stato %s, y %d" % [p.state_name(), p.py])
+
+	# Salto pieno e salto corto: il salto è variabile.
+	p = _pp(g, 125, 10)
+	_run_pp(p, 90, func(t: int) -> int: return _J if t < 40 else 0)
+	var full := p.last_peak
+	check(full >= 69 and full <= 94 and p.state == PlatformPlayer.State.GROUND and p.py == 10 * T,
+		"Platform: salto pieno fra 69 e 94 px, e si riatterra", "%d px, stato %s" % [full, p.state_name()])
+	p = _pp(g, 125, 10)
+	_run_pp(p, 90, func(t: int) -> int: return _J if t < 2 else 0)
+	check(p.last_peak > 0 and p.last_peak < full * 0.5, "Platform: lasciando subito SALTO il salto è basso", "%d px contro %d" % [p.last_peak, full])
+
+	# Spinta: un solo doppio salto per volta in aria, e va più in alto del salto da solo.
+	p = _pp(g, 125, 10)
+	var ev := _run_pp(p, 120, func(t: int) -> int: return _J if (t < 20 or (t >= 22 and t < 50) or (t >= 52 and t < 60)) else 0)
+	check(_count_events(ev, "spinta") == 1, "Platform: una sola Spinta per salto", "%d" % _count_events(ev, "spinta"))
+	check(p.last_peak > full + 38, "Platform: con la Spinta si arriva più in alto", "%d px contro %d" % [p.last_peak, full])
+
+	# Coyote time: subito dopo il bordo il salto vale ancora da terra e non consuma la Spinta.
+	var gc := _room(40, 14, 10)
+	_box(gc, 12, 39, 10, 12, SolidGrid.Cell.EMPTY)
+	var off := [0]
+	p = _pp(gc, 188, 10)
+	var pc := p
+	ev = _run_pp(p, 80, func(t: int) -> int:
+		if pc.state == PlatformPlayer.State.AIR and off[0] == 0:
+			off[0] = t
+		if off[0] > 0 and t == off[0] + 3:
+			return _R | _J
+		return _R)
+	check(off[0] > 0 and _count_events(ev, "jump") == 1 and _count_events(ev, "spinta") == 0,
+		"Platform: coyote time, salto da terra 3 tick dopo il bordo",
+		"lasciato al tick %d, salti %d, spinte %d" % [off[0], _count_events(ev, "jump"), _count_events(ev, "spinta")])
+	off = [0]
+	p = _pp(gc, 188, 10)
+	var pc2 := p
+	ev = _run_pp(p, 80, func(t: int) -> int:
+		if pc2.state == PlatformPlayer.State.AIR and off[0] == 0:
+			off[0] = t
+		if off[0] > 0 and t == off[0] + m.coyote_ticks + 3:
+			return _R | _J
+		return _R)
+	check(_count_events(ev, "jump") == 0 and _count_events(ev, "spinta") == 1, "Platform: dopo il coyote time SALTO è la Spinta",
+		"salti %d, spinte %d" % [_count_events(ev, "jump"), _count_events(ev, "spinta")])
+
+	# Buffer: senza Spinte, SALTO premuto poco prima di toccare terra salta all'atterraggio.
+	p = _pp(g, 125, 10)
+	var pb := p
+	var pressed_at := [0]
+	ev = _run_pp(p, 200, func(t: int) -> int:
+		if t < 30:
+			return _J if t < 20 or (t >= 22 and t < 28) else 0
+		# In discesa, a meno di 10 px dal pavimento: un tocco di SALTO.
+		if pressed_at[0] == 0 and pb.vy > 0 and pb.py >= 10 * T - 10 and pb.boosts_left == 0:
+			pressed_at[0] = t
+			return _J
+		return 0)
+	check(pressed_at[0] > 0 and _count_events(ev, "jump") == 2, "Platform: SALTO premuto prima di atterrare vale all'atterraggio",
+		"premuto al tick %d, salti %d" % [pressed_at[0], _count_events(ev, "jump")])
+
+	# Piattaforma sottile: si sale da sotto, ci si resta sopra, GIÙ + SALTO fa scendere.
+	var gt := _room(40, 16, 13)
+	_box(gt, 4, 12, 11, 11, SolidGrid.Cell.THIN)
+	p = _pp(gt, 160, 13)
+	_run_pp(p, 100, func(t: int) -> int: return _J if t < 30 else 0)
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 11 * T, "Platform: si sale da sotto su una piattaforma sottile", "stato %s, y %d" % [p.state_name(), p.py])
+	_run_pp(p, 60, func(t: int) -> int: return (_D | _J) if t == 2 else (_D if t < 2 else 0))
+	check(p.py == 13 * T, "Platform: GIÙ + SALTO scende dalla piattaforma sottile", "y %d" % p.py)
+
+	# Niente compenetrazioni: da molto in alto si atterra esattamente sul pavimento.
+	var gf := _room(10, 60, 58)
+	p = PlatformPlayer.new(PlatformMoves.new(), gf)
+	p.place(100, 125)
+	_run_pp(p, 200, func(_t: int) -> int: return 0)
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 58 * T, "Platform: cadendo forte si atterra sul pavimento, senza attraversarlo", "y %d" % p.py)
+
+	# Sporgenza: saltando verso un muro alto 6 blocchi ci si aggrappa e si sale.
+	var gl := _room(40, 20, 16)
+	_box(gl, 14, 20, 10, 15)
+	p = _pp(gl, 250, 16)
+	var pl := p
+	var hung := [false]
+	ev = _run_pp(p, 260, func(t: int) -> int:
+		if pl.state == PlatformPlayer.State.LEDGE_HANG:
+			hung[0] = true
+			return _U if t % 4 == 0 else 0
+		if hung[0]:
+			return 0
+		return (_R | _J) if t < 25 else _R)
+	check(hung[0], "Platform: saltando verso il muro ci si aggrappa alla sporgenza", "eventi %s" % str(ev))
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 10 * T and p.px > 14 * T, "Platform: dalla sporgenza si sale in cima al muro",
+		"stato %s, x %d, y %d" % [p.state_name(), p.px, p.py])
+
+	# Muro alto 5 blocchi (100 px), oltre il salto: lo spigolo arriva all'altezza del petto e,
+	# senza posto per stare appesi, GIG scavalca. Non ci sono muri impossibili fra 80 e 120 px.
+	for rows in [4, 5, 6]:
+		var gw := _room(40, 20, 16)
+		_box(gw, 14, 20, 16 - rows, 15)
+		p = _pp(gw, 250, 16)
+		var pw := p
+		var top_y: int = (16 - rows) * T
+		var on_top := [false]
+		_run_pp(p, 300, func(t: int) -> int:
+			if pw.state == PlatformPlayer.State.GROUND and pw.py == top_y:
+				on_top[0] = true
+			if on_top[0]:
+				return 0
+			if pw.state == PlatformPlayer.State.LEDGE_HANG:
+				return _U if t % 4 == 0 else 0
+			return (_R | _J) if (t % 60) < 25 else _R)
+		check(on_top[0], "Platform: muro di %d blocchi superato senza Spinta" % rows,
+			"stato %s, x %d, y %d" % [p.state_name(), p.px, p.py])
+
+	# Scivolata sotto un soffitto basso: si passa, e alla fine ci si rialza.
+	var gs := _room(60, 16, 13)
+	_box(gs, 20, 26, 0, 9)
+	p = _pp(gs, 150, 13)
+	var ps := p
+	var slid := [-1]
+	_run_pp(p, 320, func(t: int) -> int:
+		# GIÙ all'imbocco del cunicolo, a 50 px, come farebbe un giocatore.
+		if slid[0] < 0 and ps.px >= 338:
+			slid[0] = t
+		if slid[0] >= 0 and t < slid[0] + 3:
+			return _R | _D
+		return _R if t < 280 else 0)
+	check(p.px > 27 * T and p.state == PlatformPlayer.State.GROUND, "Platform: la scivolata passa sotto un soffitto basso",
+		"x %d, stato %s" % [p.px, p.state_name()])
+	p = _pp(gs, 150, 13)
+	_run_pp(p, 150, func(_t: int) -> int: return _R)
+	check(p.px < 20 * T, "Platform: in piedi non si entra nel cunicolo", "x %d" % p.px)
+
+	# Deterministico: gli stessi ingressi danno lo stesso stato.
+	var hashes: Array[int] = []
+	for i in 2:
+		var gd := SolidGrid.load_file(TestRoom.MAP)
+		var start: Vector2i = gd.marks["G"][0]
+		p = PlatformPlayer.new(PlatformMoves.new(), gd)
+		p.place(start.x, start.y)
+		_run_pp(p, 900, func(t: int) -> int:
+			var k := _R
+			if t % 70 < 22:
+				k |= _J
+			if t % 70 == 26:
+				k |= _J
+			if t % 211 == 100:
+				k |= _D
+			return k)
+		hashes.append(p.state_hash())
+	check(hashes[0] == hashes[1], "Platform: gli stessi ingressi danno lo stesso stato (hash)")
+
+	# La mappa della stanza si legge, con la partenza e i cartelli.
+	var gm := SolidGrid.load_file(TestRoom.MAP)
+	var signs_ok := true
+	for k: String in TestRoom.SIGNS:
+		signs_ok = signs_ok and gm.marks.has(k)
+	check(gm.width > 100 and gm.marks.has("G") and signs_ok, "Platform: la mappa della stanza ha partenza e cartelli", "%d×%d" % [gm.width, gm.height])
+
+	# Contro un muro, tenendo la direzione: velocità ferma a zero e animazione da fermo, senza
+	# scatti fra fermo e corsa (prima GIG "tremava").
+	var sheet := SpriteSheet.get_sheet(&"gig")
+	var gm2 := _room(40, 14, 10)
+	_box(gm2, 14, 20, 0, 9)
+	p = PlatformPlayer.new(PlatformMoves.new(), gm2, sheet)
+	p.place(225, 10 * T)
+	var pm := p
+	var still := [true]
+	_run_pp(p, 120, func(t: int) -> int:
+		if t >= 60 and (pm.vx != 0 or pm.anim.name != &"idle"):
+			still[0] = false
+		return _R)
+	check(still[0] and p.right() == 14 * T, "Platform: spingendo contro il muro GIG sta fermo, senza tremare",
+		"x %d, vx %d, animazione %s" % [p.px, p.vx, p.anim.name])
+
+	# Scivolata con GIÙ e la direzione anche da fermi, insieme o a pochi tick di distanza.
+	for gap in [0, 2]:
+		p = _pp(g, 125, 10)
+		ev = _run_pp(p, 40, func(t: int) -> int:
+			var k := _D if t < 20 else 0
+			if t >= gap and t < 20:
+				k |= _R
+			return k)
+		check(_count_events(ev, "slide") == 1, "Platform: GIÙ e DESTRA da fermi fanno scivolare (a %d tick)" % gap, "eventi %s" % str(ev))
+	# GIÙ da solo accovaccia; la direzione dopo un po' fa camminare accovacciati, senza scivolare.
+	p = PlatformPlayer.new(PlatformMoves.new(), g, sheet)
+	p.place(125, 10 * T)
+	ev = _run_pp(p, 60, func(t: int) -> int: return _D if t < 20 else _D | _R)
+	var cw_ok := not sheet.has_anim(&"crouch_walk") or p.anim.name == &"crouch_walk"
+	check(_count_events(ev, "slide") == 0 and p.state == PlatformPlayer.State.CROUCH and p.px > 125 and cw_ok,
+		"Platform: da accovacciati la direzione fa camminare accovacciati",
+		"stato %s, x %d, animazione %s" % [p.state_name(), p.px, p.anim.name])
+
+	# Aggancio e salita con lo sprite: le mani sullo spigolo, e alla fine della salita il busto e
+	# il piede più basso sono dove si trova GIG in cima, senza scatti.
+	var gk := _room(40, 20, 16)
+	_box(gk, 14, 22, 10, 15)
+	p = PlatformPlayer.new(PlatformMoves.new(), gk, sheet)
+	p.place(250, 16 * T)
+	var pk := p
+	var rec := {"grip": Vector2i(-99, -99), "hang": 0, "last_feet": Vector2(), "jump": 0.0, "prev_state": -1}
+	_run_pp(p, 260, func(t: int) -> int:
+		var a := pk.sprite_anchor()
+		var fr: AnimFrame = pk.anim.frame()
+		var pts: Dictionary = fr.points
+		var torso_x: float = fr.hurt[0].position.x + fr.hurt[0].size.x * 0.5
+		var feet := Vector2(a) + Vector2(pk.facing * torso_x, maxi(pts["foot_l"].y, pts["foot_r"].y))
+		if rec["prev_state"] == PlatformPlayer.State.LEDGE_CLIMB and pk.state == PlatformPlayer.State.GROUND:
+			rec["jump"] = feet.distance_to(rec["last_feet"])
+		rec["last_feet"] = feet
+		rec["prev_state"] = pk.state
+		if pk.state == PlatformPlayer.State.LEDGE_HANG:
+			rec["hang"] += 1
+			rec["grip"] = a + Vector2i(pk.facing * pts["grip"].x, pts["grip"].y)
+			return _U if rec["hang"] == 12 else 0
+		if rec["hang"] > 0:
+			return 0
+		return (_R | _J) if t < 25 else _R)
+	var corner := Vector2i(14 * T, 10 * T)
+	check(rec["hang"] > 0 and absi(rec["grip"].x - corner.x) <= 3 and absi(rec["grip"].y - corner.y) <= 3,
+		"Platform: appeso, le mani di GIG sono sullo spigolo", "mani %s, spigolo %s" % [str(rec["grip"]), str(corner)])
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 10 * T and rec["jump"] <= 7.5,
+		"Platform: a fine salita lo sprite non scatta", "stato %s, scatto di busto e piedi %.1f px, x %d" % [p.state_name(), rec["jump"], p.px])
+
+	# Freno col braccio: in caduta contro un muro GIG scivola piano.
+	var gw2 := _room(40, 30, 26)
+	_box(gw2, 14, 20, 0, 25)
+	p = _pp(gw2, 250, 26)
+	var pw2 := p
+	var max_fall := [0]
+	ev = _run_pp(p, 160, func(t: int) -> int:
+		if pw2.state == PlatformPlayer.State.WALL_SLIDE and t > 60:
+			max_fall[0] = maxi(max_fall[0], pw2.vy)
+		return (_R | _J) if t < 25 else _R)
+	check(_count_events(ev, "wall") >= 1 and max_fall[0] > 0 and max_fall[0] <= PlatformPlayer.to_sub(m.wall_slide_speed),
+		"Platform: contro il muro il braccio frena la caduta", "eventi %d, caduta massima %d" % [_count_events(ev, "wall"), max_fall[0]])
+
+	# Salto a muro: fra due muri vicini si risale un pozzo.
+	var gp := _room(30, 40, 36)
+	_box(gp, 8, 9, 0, 35)
+	_box(gp, 14, 15, 0, 35)
+	p = _pp(gp, 12 * T, 36)
+	var ppz := p
+	var dir := [1]
+	var hold := [0]
+	var last := [0]
+	_run_pp(p, 600, func(t: int) -> int:
+		var k := 0
+		if t < 20:
+			k = _J | _R
+		elif ppz.state == PlatformPlayer.State.WALL_SLIDE:
+			if last[0] & _J:
+				k = 0
+			else:
+				dir[0] = -ppz.wall_dir
+				hold[0] = 14
+				k = _J
+		else:
+			k = _R if dir[0] > 0 else _L
+			if hold[0] > 0:
+				hold[0] -= 1
+				k |= _J
+		last[0] = k
+		return k)
+	check(p.py < 36 * T - 312, "Platform: con il salto a muro si risale un pozzo", "y %d (partenza %d)" % [p.py, 36 * T])
+
+	# Scatto: in aria, 3 blocchi in avanti, dritto, uno solo per salto.
+	p = _pp(gc, 125, 10)
+	p.place(125, 125)
+	var pd := p
+	var d0 := [0, 0, false]
+	ev = _run_pp(p, 40, func(t: int) -> int:
+		if t == 2:
+			d0[0] = pd.px
+			d0[1] = pd.py
+			return _S | _R
+		if pd.state == PlatformPlayer.State.DASH and pd.py != d0[1]:
+			d0[2] = true
+		if t == 20:
+			return _S | _R
+		return _R)
+	check(_count_events(ev, "scatto") == 1 and not d0[2], "Platform: uno scatto per salto, dritto", "scatti %d, dritto %s" % [_count_events(ev, "scatto"), str(not d0[2])])
+	p = _pp(g, 125, 10)
+	p.place(125, 75)
+	var x0 := p.px
+	_run_pp(p, 9, func(t: int) -> int: return _S if t == 0 else 0)
+	check(absi(p.px - x0 - 60) <= 5, "Platform: lo scatto fa circa 3 blocchi", "%d px" % (p.px - x0))
+
+	# Corsa sul muro: di corsa contro il muro e SALTO si sale più che col salto; da fermi no.
+	var gr := _room(40, 30, 26)
+	_box(gr, 20, 25, 0, 25)
+	p = _pp(gr, 125, 26)
+	var pr := p
+	var hit_wall := [false]
+	var best := [0]
+	ev = _run_pp(p, 140, func(t: int) -> int:
+		best[0] = maxi(best[0], 26 * T - pr.py)
+		if pr.right() >= 20 * T:
+			hit_wall[0] = true
+		return (_R | _J) if hit_wall[0] and best[0] == 0 else _R)
+	check(_count_events(ev, "wallrun") == 1 and best[0] >= 106 and best[0] <= 150,
+		"Platform: la corsa sul muro sale di circa due blocchi più del salto", "corse %d, %d px" % [_count_events(ev, "wallrun"), best[0]])
+	p = _pp(gr, 20 * T - 14, 26)
+	ev = _run_pp(p, 80, func(t: int) -> int: return (_R | _J) if t < 30 else _R)
+	check(_count_events(ev, "wallrun") == 0, "Platform: da fermi contro il muro non c'è la corsa sul muro", "corse %d" % _count_events(ev, "wallrun"))

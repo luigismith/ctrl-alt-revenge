@@ -16,6 +16,9 @@ Cel shading (dal 4 novembre 2026, piani con la chiave "cel" nella configurazione
 ha toni con soglie uguali per tutti i materiali, la luce dei neon e i riflessi sul bagnato vanno a zone con il bordo
 netto, gli aloni sono anelli netti e la retinatura è spenta. Gli oggetti di scena (props.py) restano come prima.
 Tutto è deterministico: rumori e scelte da semi fissi.
+Misure in pixel: dal 5 novembre 2026 la vista ha 60 px/m (prima 48). I passi dei motivi che rappresentano misure vere
+(corsi dei mattoni, assi, casseforme, maglie della rete...) e le sfocature crescono del 25% con E.px(); le linee di
+1 px, i caratteri pixel (pixfont) e i piccoli dettagli disegnati a mano restano della loro misura in pixel.
 """
 from __future__ import annotations
 
@@ -188,8 +191,8 @@ def patterns(cv: Canvas, seed=7):
     A = cv.A
     M = cv.mat
     xx, yy = cv.xx, cv.yy
-    big = vnoise((cv.H, cv.W), 23, seed + 1, cv.x0, cv.y0)
-    mid = vnoise((cv.H, cv.W), 7, seed + 2, cv.x0, cv.y0)
+    big = vnoise((cv.H, cv.W), E.px(23), seed + 1, cv.x0, cv.y0)
+    mid = vnoise((cv.H, cv.W), E.px(7), seed + 2, cv.x0, cv.y0)
     fine = hash2(xx, yy, seed + 3)
     pos = cv.pos
     Z = pos[..., 2]
@@ -208,48 +211,52 @@ def patterns(cv: Canvas, seed=7):
         g = np.clip((0.55 - Z) / 0.55, 0, 1) * (0.75 + 0.5 * mid)
         f = f * np.where(g > 0.45 + cv.bay * 0.3, 0.8, 1.0)
         col[m] *= f[m][:, None]
-    # mattoni: corsi di 4 px, mattoni di 8 px sfalsati, giunti scuri, toni per mattone
+    # mattoni: corsi di 5 px, mattoni di 10 px sfalsati, giunti scuri, toni per mattone
     m = has("brick")
     if m.any():
-        row = (yy // 4)
-        off = (row % 2) * 4
-        bx = (xx + off) // 8
-        mortar = (yy % 4 == 0) | ((xx + off) % 8 == 0)
+        bh, bw = E.px(4), E.px(8)
+        row = (yy // bh)
+        off = (row % 2) * (bw // 2)
+        bx = (xx + off) // bw
+        mortar = (yy % bh == 0) | ((xx + off) % bw == 0)
         tone = 0.86 + 0.26 * hash2(bx, row, seed + 5)
         f = np.where(mortar, 0.62, tone)
         f *= np.where(big > 0.66, 0.9, 1.0)
         col[m] *= f[m][:, None]
-    # pietra: blocchi 14 x 7 px
+    # pietra: blocchi 18 x 9 px
     m = has("stone")
     if m.any():
-        row = yy // 7
-        off = (row % 2) * 7
-        joint = (yy % 7 == 0) | ((xx + off) % 14 == 0)
-        tone = 0.9 + 0.18 * hash2((xx + off) // 14, row, seed + 6)
+        sh, sw = E.px(7), E.px(14)
+        row = yy // sh
+        off = (row % 2) * (sw // 2)
+        joint = (yy % sh == 0) | ((xx + off) % sw == 0)
+        tone = 0.9 + 0.18 * hash2((xx + off) // sw, row, seed + 6)
         col[m] *= np.where(joint, 0.7, tone)[m][:, None]
-    # cemento (muri bassi, piloni): casseforme orizzontali ogni 22 px, colature
-    for p, step in (("concrete", 22), ("pillar", 18)):
+    # cemento (muri bassi, piloni): casseforme orizzontali ogni 28 px, colature
+    for p, step in (("concrete", E.px(22)), ("pillar", E.px(18))):
         m = has(p)
         if m.any():
             joint = (yy % step == 0)
             stain = (mid > 0.62) & (fine > 0.35)
             f = np.where(joint, 0.78, 1.0) * np.where(stain, 0.9, 1.0) * np.where(big > 0.6, 1.06, 1.0)
-            drip = (hash2(xx, 0, seed + 8) > 0.93) & (((yy + (hash2(xx, 1, seed) * 40).astype(int)) % 40) < 22)
+            dl = E.px(40)
+            drip = (hash2(xx, 0, seed + 8) > 0.93) & (((yy + (hash2(xx, 1, seed) * dl).astype(int)) % dl) < E.px(22))
             f = np.where(drip, f * 0.82, f)
             col[m] *= f[m][:, None]
-    # serrande: costole orizzontali di 2 px, barra in basso più scura
+    # serrande: costole orizzontali di 4 px (una riga scura, una chiara, due di lamiera)
     m = has("shutter")
     if m.any():
-        rib = np.where(yy % 3 == 0, 0.7, np.where(yy % 3 == 1, 1.12, 1.0))
+        rp = E.px(3)
+        rib = np.where(yy % rp == 0, 0.7, np.where(yy % rp == 1, 1.12, 1.0))
         rust = (mid > 0.7) & (fine > 0.5)
         f = rib * np.where(rust, 0.86, 1.0)
         col[m] *= f[m][:, None]
-    # legno (porte, palizzate): venature verticali, assi ogni 6 px
-    for p, step in (("wood", 5), ("hoarding", 9)):
+    # legno (porte, palizzate): venature verticali, assi ogni 6 px (porte) e 11 px (palizzate)
+    for p, step in (("wood", E.px(5)), ("hoarding", E.px(9))):
         m = has(p)
         if m.any():
             seam = (xx % step == 0)
-            grain = 0.92 + 0.12 * hash2(xx, yy // 6, seed + 9)
+            grain = 0.92 + 0.12 * hash2(xx, yy // E.px(6), seed + 9)
             col[m] *= np.where(seam, 0.66, grain)[m][:, None]
     # asfalto e marciapiede: granelli chiari radi, toni larghi, rattoppi più scuri
     for p, k in (("asphalt", 1.0), ("sidewalk", 1.0), ("dirt", 1.25)):
@@ -293,7 +300,7 @@ def patterns(cv: Canvas, seed=7):
     # tende: bordo di 1 px più chiaro in basso alla mantovana (fatto dalla luce); qui solo trama
     m = has("awning")
     if m.any():
-        col[m] *= np.where((xx % 6) < 3, 1.0, 0.94)[m][:, None]
+        col[m] *= np.where((xx % E.px(6)) < E.px(6) // 2, 1.0, 0.94)[m][:, None]
     # erbacce: due toni a ciuffi
     m = has("plant")
     if m.any():
@@ -301,17 +308,17 @@ def patterns(cv: Canvas, seed=7):
     # rivetti (travi d'acciaio): file di punti
     m = has("rivets")
     if m.any():
-        dots = ((xx % 6) == 0) & ((yy % 4) == 1)
+        dots = ((xx % E.px(6)) == 0) & ((yy % E.px(4)) == 1)
         col[m] *= np.where(dots, 1.35, 1.0)[m][:, None]
     m = has("cabinet")
     if m.any():
-        col[m] *= np.where((yy % 3) == 0, 0.75, 1.0)[m][:, None]
+        col[m] *= np.where((yy % E.px(3)) == 0, 0.75, 1.0)[m][:, None]
     m = has("rust")
     if m.any():
         col[m] *= np.where(mid > 0.6, 0.85, np.where(fine > 0.9, 1.2, 1.0))[m][:, None]
     m = has("bin_ribs")
     if m.any():
-        col[m] *= np.where((yy % 5) == 0, 0.78, 1.0)[m][:, None]
+        col[m] *= np.where((yy % E.px(5)) == 0, 0.78, 1.0)[m][:, None]
 
 
 # ------------------------------------------------------------------ 2. operazioni di pittura
@@ -555,14 +562,22 @@ def op_posters(cv: Canvas, o):
     n = o.get("n", 4)
     placed = 0
     tries = 0
+    # le estrazioni si fanno in px di progetto (48 px/m) e poi si portano a 60 px/m: così i manifesti restano dove
+    # erano, con gli stessi colori, solo più grandi in pixel
+    Wd, Hd = int(round(W_ / E.S)), int(round(H_ / E.S))
     while placed < n and tries < n * 8:
         tries += 1
-        pw = rng.randint(7, 13) if not o.get("dense") else rng.randint(8, 15)
-        ph = rng.randint(10, 17)
-        pw, ph = min(pw, W_), min(ph, H_)
-        px = x0 + rng.randint(0, max(W_ - pw, 0))
-        py = y0 + rng.randint(0, max(H_ - ph, 0))
-        img, msk = poster_bitmap(pw, ph, rng)
+        pwd = rng.randint(7, 13) if not o.get("dense") else rng.randint(8, 15)
+        phd = rng.randint(10, 17)
+        pwd, phd = min(pwd, Wd), min(phd, Hd)
+        pw, ph = min(E.px(pwd), W_), min(E.px(phd), H_)
+        px = x0 + min(E.px(rng.randint(0, max(Wd - pwd, 0))), W_ - pw)
+        py = y0 + min(E.px(rng.randint(0, max(Hd - phd, 0))), H_ - ph)
+        state = rng.getstate()
+        r2 = random.Random()
+        r2.setstate(state)
+        img, msk = poster_bitmap(pw, ph, r2)
+        poster_bitmap(pwd, phd, rng)        # fa avanzare il seme come prima
         cv.paste(px, py, img, msk, where, None, final=False, mat=25)
         placed += 1
 
@@ -609,13 +624,14 @@ def op_graffiti(cv: Canvas, o):
     hi[:hh // 2] = True
     img[shear & hi] = np.clip(rgb(fillc) * 1.12, 0, 1)
     msk = shear | sl
-    px = x0 + max(0, (W_ - w) // 2) + rng.randint(-3, 3)
+    px = x0 + max(0, (W_ - w) // 2) + E.px(rng.randint(-3, 3))
     py = y0 + max(0, (H_ - hh) // 2)
     cv.paste(px, py, img, msk, where, None, final=False, mat=25)
-    # tag a scarabocchio accanto
+    # tag a scarabocchio accanto (posizioni estratte in px di progetto, come prima, poi portate a 60 px/m)
+    Wd, Hd = int(round(W_ / E.S)), int(round(H_ / E.S))
     for k in range(rng.randint(1, 3)):
-        tx = x0 + rng.randint(0, max(1, W_ - 14))
-        ty = y0 + rng.randint(0, max(1, H_ - 6))
+        tx = x0 + E.px(rng.randint(0, max(1, Wd - 14)))
+        ty = y0 + E.px(rng.randint(0, max(1, Hd - 6)))
         tc = rgb(rng.choice(["#c8c0d8", "#140e1e", "#b8303f", "#d8b040"]))
         L = rng.randint(8, 14)
         pts = []
@@ -675,8 +691,8 @@ def op_interior(cv: Canvas, o):
     img[:] = back
     img[yy > h * 0.55] = back_lo
     img[yy < 3] = top
-    for lx in range(3, w - 3, max(8, w // 4)):
-        img[1, lx:lx + 3] = lamp
+    for lx in range(3, w - 3, max(E.px(8), w // 4)):
+        img[1, lx:lx + E.px(3)] = lamp
     msk = np.ones((h, w), bool)
     if style in ("bar", "tabacchi", "farmacia", "kebab", "osteria"):
         for k, fy in enumerate((0.2, 0.38)):
@@ -684,7 +700,7 @@ def op_interior(cv: Canvas, o):
             img[sy + 3, 1:w - 1] = sil
             for xi in range(2, w - 2, 2):
                 if rng.random() < 0.75:
-                    hgt = rng.randint(2, 3)
+                    hgt = rng.randint(3, 4)          # bottiglie: 2-3 px a 48 px/m, 3-4 a 60
                     if style == "farmacia":
                         c = rgb(rng.choice([W_[5], W_[2], "#cdc4d4"]))
                     elif style == "tabacchi":
@@ -692,7 +708,7 @@ def op_interior(cv: Canvas, o):
                     else:
                         c = rgb(rng.choice([W_[1], W_[0], W_[2], "#561a36"]))
                     img[sy + 3 - hgt:sy + 3, xi] = c
-                    if style in ("bar", "osteria") and hgt == 3:
+                    if style in ("bar", "osteria") and hgt == 4:
                         img[sy + 3 - hgt - 1, xi] = sil2
         cy = int(h * 0.62)
         img[cy:, :] = sil
@@ -700,26 +716,28 @@ def op_interior(cv: Canvas, o):
         img[cy + 1, :] = rgb(W_[2])
         if style == "bar":
             mx = int(w * 0.62)
-            img[cy - 5:cy, mx:mx + 7] = rgb("#3e4a60")
-            img[cy - 5, mx:mx + 7] = rgb("#7686a0")
-            img[cy - 3, mx + 2] = rgb("#e02a3a")
+            img[cy - 6:cy, mx:mx + 9] = rgb("#3e4a60")       # macchina del caffè
+            img[cy - 6, mx:mx + 9] = rgb("#7686a0")
+            img[cy - 4, mx + 2] = rgb("#e02a3a")
+            img[cy - 4, mx + 6] = rgb("#e02a3a")
         if style == "kebab":
             kx = int(w * 0.72)
-            img[int(h * 0.22):cy, kx - 2:kx + 3] = rgb("#86482a")
-            img[int(h * 0.22):cy, kx] = rgb("#b8663a")
-            img[int(h * 0.22) - 1, kx - 1:kx + 2] = rgb("#3e4a60")
-            img[int(h * 0.08):int(h * 0.08) + 6, 2:14] = rgb("#29252f")
-            img[int(h * 0.08) + 1:int(h * 0.08) + 5:2, 3:13:2] = rgb("#e08c4c")
+            img[int(h * 0.22):cy, kx - 3:kx + 4] = rgb("#86482a")      # spiedo
+            img[int(h * 0.22):cy, kx - 1:kx + 1] = rgb("#b8663a")
+            img[int(h * 0.22) - 1, kx - 2:kx + 3] = rgb("#3e4a60")
+            my = int(h * 0.08)                                          # menu luminoso
+            img[my:my + 8, 2:17] = rgb("#29252f")
+            img[my + 1:my + 7:2, 3:16:2] = rgb("#e08c4c")
         if style in ("bar", "osteria", "kebab", "tabacchi"):
-            px = int(w * (0.3 if style != "kebab" else 0.42))
-            head = (yy - int(h * 0.44)) ** 2 + (xx - px) ** 2 <= 5
-            body = (yy > int(h * 0.49)) & (np.abs(xx - px) <= 3) & (yy < cy + 1)
+            sx_ = int(w * (0.3 if style != "kebab" else 0.42))
+            head = (yy - int(h * 0.44)) ** 2 + (xx - sx_) ** 2 <= 8
+            body = (yy > int(h * 0.49)) & (np.abs(xx - sx_) <= 4) & (yy < cy + 1)
             img[head | body] = sil2
         if style == "tabacchi":
-            for bx in range(3, w - 7, 10):
-                img[cy + 3:cy + 8, bx:bx + 7] = rgb("#d8b040")
-                img[cy + 4, bx + 1:bx + 6] = rgb("#b8303f")
-                img[cy + 6, bx + 1:bx + 6] = rgb("#3b5fa0")
+            for bx in range(3, w - 9, 12):                              # gratta e vinci sul banco
+                img[cy + 3:cy + 9, bx:bx + 9] = rgb("#d8b040")
+                img[cy + 4, bx + 1:bx + 8] = rgb("#b8303f")
+                img[cy + 7, bx + 1:bx + 8] = rgb("#3b5fa0")
         if style == "farmacia":
             img[cy + 3:cy + 6, 3:w - 3] = rgb(W_[4])
             img[cy + 4, 4:w - 4:3] = rgb("#e02a3a")
@@ -730,7 +748,7 @@ def op_interior(cv: Canvas, o):
         img[:, 2] = sil
         img[:, w - 3] = sil
         img[int(h * 0.5), 3:w - 3] = rgb(W_[2])
-    diag = (((xx + yy) % 13) == 0) | (((xx + yy) % 13) == 1)
+    diag = (((xx + yy) % E.px(13)) == 0) | (((xx + yy) % E.px(13)) == 1)
     diag &= (yy < h * 0.55) & ((xx * 3 + yy) % 7 != 0)
     img[diag] = np.clip(img[diag] * 1.25 + 0.05, 0, 1)
     img[0, :] = sil
@@ -798,14 +816,14 @@ def op_fence(cv: Canvas, o):
     behind = ~cv.A[y0:y1, x0:x1] | (cv.depth[y0:y1, x0:x1] > dpanel + 0.02)
     gx, gy = xx + cv.x0, yy + cv.y0
     if o.get("style") == "bars":
-        wire = (gx % 4 == 0)
+        wire = (gx % E.px(4) == 0)
         col = rgb("#3a4256")
     else:
         sag = 0
-        wire = ((gx + gy) % 4 == 0) | ((gx - gy) % 4 == 0)
+        wire = ((gx + gy) % E.px(4) == 0) | ((gx - gy) % E.px(4) == 0)
         # qualche buco nella rete e un lembo piegato
         rng = np.random.default_rng(o.get("seed", 0))
-        holes = vnoise((y1 - y0, x1 - x0), 9, o.get("seed", 0) + 5, x0, y0) > 0.8
+        holes = vnoise((y1 - y0, x1 - x0), E.px(9), o.get("seed", 0) + 5, x0, y0) > 0.8
         wire &= ~holes
         col = rgb("#414a60")
     m = behind & wire
@@ -848,12 +866,13 @@ def op_barbed(cv: Canvas, o):
         cv.n[yy, x] = (-0.5, -0.18, 0.84)
         cv.is_em[yy, x] = False
 
+    tw = E.px(3)      # passo dell'attorcigliatura; le punte ogni due passi
     for x in range(max(x0, 0), min(x1, cv.W)):
-        y = ya + (2 if (x // 3) % 2 else 1)
+        y = ya + (2 if (x // tw) % 2 else 1)
         put(y, x, "#4a5266")
-        if (x % 3) == 1:
+        if (x % tw) == 1:
             put(y + 1, x, "#4a5266")
-        if x % 6 == 0:
+        if x % (2 * tw) == 0:
             put(ya, x, "#5a6278")
 
 
@@ -983,8 +1002,8 @@ def op_awning_text(cv: Canvas, o):
     xa = int(cv.sx(o["X0"], 0.0))
     xb = int(cv.sx(o["X1"], 0.0))
     m = cv.A & (cv.cls == C["AWNING"]) & (cv.n[..., 1] < 0.3)
-    m[:, :max(xa - 30, 0)] = False
-    m[:, xb + 40:] = False
+    m[:, :max(xa - E.px(30), 0)] = False
+    m[:, xb + E.px(40):] = False
     ys, xs = np.nonzero(m)
     if not len(ys):
         return
@@ -1103,17 +1122,17 @@ def wet_reflections(cv: Canvas, E_lin, cfg):
         if ys < 0:
             continue
         refl[y] = src[ys]
-    refl = ndi.uniform_filter1d(refl, 7, axis=0, origin=-3)
-    col_ph = (hash2(cv.xx, 0, 5) * 9).astype(int)
-    col_len = 2 + (hash2(cv.xx, 1, 6) * 4).astype(int)
-    streak = ((cv.yy + col_ph) % (col_len + 3)) < col_len
+    refl = ndi.uniform_filter1d(refl, E.px(7), axis=0, origin=-(E.px(7) // 2))
+    col_ph = (hash2(cv.xx, 0, 5) * E.px(9)).astype(int)
+    col_len = E.px(2) + (hash2(cv.xx, 1, 6) * E.px(4)).astype(int)
+    streak = ((cv.yy + col_ph) % (col_len + E.px(3))) < col_len
     streak &= (cv.xx % 2 == 0) | (hash2(cv.xx, 2, 7) > 0.6)
     road = cv.pos[..., 2] < -0.05
     k = np.where(road, cfg.get("wet", 0.2), cfg.get("wet", 0.2) * 0.6) * np.where(streak, 1.0, 0.25)
     pud = cv.mat == 39
     k = np.where(pud, 0.75, k)
     k = np.where(cv.wet > 0, np.maximum(k, cv.wet * 0.5 * np.where(streak, 1.0, 0.5)), k)
-    fade = np.clip(1.0 - (cv.yy - y_base - cv.y0) / 110.0, 0.3, 1.0)
+    fade = np.clip(1.0 - (cv.yy - y_base - cv.y0) / float(E.px(110)), 0.3, 1.0)
     out = refl * (k * fade)[..., None]
     out[~ground] = 0
     return out
@@ -1273,8 +1292,9 @@ def emissive_mask(cv: Canvas, rgb01, alpha, strength=0.55, cel=False):
     neon = cv.neon & cv.is_em
     E_n = np.where(neon[..., None], lin(cv.emi), 0)
     E_w = np.where((cv.is_em & ~neon)[..., None], lin(cv.emi), 0) * 0.35
-    near = blur(E_n, 1.6) * 2.4 + blur(E_w, 1.6) * 1.2
-    far = blur(E_n, 4.5) * 2.0 + blur(E_w, 4.5) * 1.0
+    s1, s2 = 1.6 * E.S, 4.5 * E.S      # misure di progetto (48 px/m) portate a 60 px/m
+    near = blur(E_n, s1) * 2.4 + blur(E_w, s1) * 1.2
+    far = blur(E_n, s2) * 2.0 + blur(E_w, s2) * 1.0
     I1 = near.max(-1)
     I2 = far.max(-1)
     hue1 = near / np.maximum(I1, 1e-6)[..., None]

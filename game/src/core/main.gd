@@ -20,10 +20,12 @@ func _ready() -> void:
 	add_child(_fade_layer)
 	_fade = ColorRect.new()
 	_fade.color = Color(0, 0, 0, 0)
-	_fade.size = Vector2(384, 216)
+	_fade.size = View.SIZE
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade_layer.add_child(_fade)
-	if Game.options.autostart:
+	if Game.options.room:
+		_start_room()
+	elif Game.options.autostart:
 		_start_level()
 	else:
 		_show_title()
@@ -80,6 +82,7 @@ func _show_title() -> void:
 	var t := TitleScreen.new()
 	t.start_game.connect(func() -> void: _go(_start_level))
 	t.show_credits.connect(func() -> void: _go(_show_credits))
+	t.test_room.connect(func() -> void: _go(_start_room))
 	t.quit_game.connect(func() -> void: Game.quit_clean())
 	_set_screen(t)
 
@@ -124,6 +127,35 @@ func _start_level() -> void:
 	lvl.restart_requested.connect(func() -> void: _go(_start_level))
 	lvl.game_over.connect(func() -> void: _go(_show_title))
 	_set_screen(lvl)
+
+
+## La stanza di prova in grigio: ESC o START torna al titolo.
+func _start_room() -> void:
+	var room := TestRoom.new()
+	var o := Game.options
+	var input := PlayerInput.live()
+	var pilot: RoomPilot = null
+	var record := ""
+	if o.replay_path != "":
+		var r := Replay.load_file(o.replay_path)
+		if r == null:
+			push_error("Replay non leggibile: %s" % o.replay_path)
+		else:
+			input = PlayerInput.from_replay(r)
+	elif o.autopilot == "stanza":
+		pilot = RoomPilot.new()
+		input = PlayerInput.from_provider(pilot.decide, pilot)
+	elif o.record_path != "":
+		record = o.record_path
+	elif OS.is_debug_build():
+		record = TestRoom.SESSION_DIR.path_join(Time.get_datetime_string_from_system().replace(":", "-") + ".json")
+	room.configure({"input": input, "pilot": pilot, "record": record})
+	room.quit_to_title.connect(func() -> void: _go(_show_title))
+	room.replay_done.connect(func() -> void:
+		if o.quit_at_end:
+			print("DONE")
+			Game.quit_clean(0))
+	_set_screen(room)
 
 
 func _on_level_finished(result: Dictionary) -> void:

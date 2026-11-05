@@ -228,8 +228,8 @@ func _test_sfx() -> void:
 	check(sfx._warned and _playing(sfx) == 1, "Sfx: suoni mancanti ignorati con un solo avviso")
 	var vp := root.get_viewport()
 	var width := vp.get_visible_rect().size.x
-	check(width == 384.0, "viewport larga 384 px (il pan usa questa misura)")
-	check(sfx._pan_slot(0.0) == 0 and sfx._pan_slot(383.0) == 4 and sfx._pan_slot(192.0) == 2
+	check(width == 480.0, "viewport larga 480 px (il pan usa questa misura)")
+	check(sfx._pan_slot(0.0) == 0 and sfx._pan_slot(479.0) == 4 and sfx._pan_slot(240.0) == 2
 		and sfx._pan_slot(-500.0) == 0 and sfx._pan_slot(5000.0) == 4, "Sfx: cinque posizioni di pan sullo schermo")
 	var idx := AudioServer.get_bus_index(&"SFX_L2")
 	var pan_ok := idx > 0 and AudioServer.get_bus_send(idx) == &"SFX" and AudioServer.get_bus_effect(idx, 0) is AudioEffectPanner

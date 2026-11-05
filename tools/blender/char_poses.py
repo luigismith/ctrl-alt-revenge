@@ -404,7 +404,7 @@ def victim_thrown():
 
 def hurt_high():
     """colpo alto: testa buttata indietro, busto inarcato, braccia che si aprono; poi ritorno verso la guardia.
-    Le clip UAL Hit_Head/Hit_Chest si muovono di 1 px a 48 px/m: troppo poco per leggersi in un picchiaduro."""
+    Le clip UAL Hit_Head/Hit_Chest si muovono di 1 px a 48 px/m (poco di più a 60): troppo poco per leggersi in combattimento."""
     P = []
     P.append(("snap", guard(hip=(0.0, 0.07, 0.89), pelvis=(-8, 0, 10), spine=(-18, 0, -4), neck=(-40, 0, 6),
                             arm_l=dict(up=V(0.62, 0.25, -0.74), lo=V(0.45, -0.35, -0.82)),

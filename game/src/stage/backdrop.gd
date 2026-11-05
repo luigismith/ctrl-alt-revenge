@@ -5,7 +5,7 @@ extends RefCounted
 ## qualche neon. Se il file manca usa i piani segnaposto di PlaceholderEnv.
 ## I piani con z < 0 vanno dietro agli attori, quelli con z ≥ 0 davanti.
 
-const VIEW_W := 384
+const VIEW_W := View.W
 const EMISSIVE_SHADER := """shader_type canvas_item;
 render_mode blend_add;
 uniform sampler2D group_map : filter_nearest;
@@ -39,8 +39,8 @@ class Layer:
 
 
 var layers: Array[Layer] = []
-var level_width: int = 1920
-var floor_band: Vector2i = Vector2i(150, 208)
+var level_width: int = 2400
+var floor_band: Vector2i = Vector2i(188, 260)
 var placeholder: bool = false
 var errors: PackedStringArray = []
 var warnings: PackedStringArray = []
@@ -60,8 +60,8 @@ func load_json(path: String) -> bool:
 	var d: Dictionary = data
 	if int(d.get("format", 0)) != 1:
 		errors.append("format deve essere 1")
-	level_width = int(d.get("level_width", 1920))
-	var band: Variant = d.get("floor_band", [150, 208])
+	level_width = int(d.get("level_width", 2400))
+	var band: Variant = d.get("floor_band", [188, 260])
 	if band is Array and (band as Array).size() == 2:
 		floor_band = Vector2i(int(band[0]), int(band[1]))
 	var list: Variant = d.get("layers")
@@ -208,13 +208,13 @@ func _neon_groups(tex: Texture2D) -> ImageTexture:
 			gap = 0
 		elif start >= 0:
 			gap += 1
-			if gap >= 4 or x == w:
+			if gap >= 5 or x == w:
 				runs.append(Vector2i(start, x - gap + 1))
 				start = -1
 				gap = 0
 	var small: Array[Vector2i] = []
 	for r in runs:
-		if r.y - r.x >= 4 and r.y - r.x <= 90:
+		if r.y - r.x >= 5 and r.y - r.x <= 113:
 			small.append(r)
 	var chosen: Array[Vector2i] = []
 	if not small.is_empty():

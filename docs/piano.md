@@ -13,7 +13,7 @@ Aggiornato il 4 novembre 2026. Il piano dice in che ordine si fa il gioco, cosa 
 | # | Tappa | Ore assistite | Ore di Luigi | Dipende da | Stato |
 |---|---|---|---|---|---|
 | 0 | Fondamenta: grafica nuova, GIG che non si specchia, volti dei murales | 15-25 | 2-3 | - | in corso |
-| 1 | Stanza di prova in grigio: tutto il movimento e l'arena | 25-40 | 3-5 | 0 | prossima |
+| 1 | Stanza di prova in grigio: tutto il movimento e l'arena | 25-40 | 3-5 | 0 | in corso |
 | 2 | Prologo, il pignoramento | 30-50 | 3-4 | 1 | |
 | 3 | Capitolo 1, «I tetti dei Tamburi» | 40-60 | 3-4 | 2 | |
 | **D2** | **Demo 2 sul sito: prologo più capitolo 1** | 5-10 | 1 | 3 | |
@@ -38,7 +38,7 @@ Servono a non rifare il lavoro dopo: tutto quello che viene si appoggia sulla gr
 
 **È finita quando** i test passano con la grafica nuova, Luigi l'ha vista in gioco e la vignetta di prova dei volti ha preso il voto dai giudici.
 
-### 1. Stanza di prova in grigio (prossima)
+### 1. Stanza di prova in grigio (in corso)
 
 Una stanza senza grafica in cui si tarano tutte le mosse con Luigi, prima di costruirci sopra i livelli:
 - doppio salto e Spinta;
@@ -47,6 +47,8 @@ Una stanza senza grafica in cui si tarano tutte le mosse con Luigi, prima di cos
 - il primo puzzle di hacking nel livello.
 
 **È finita quando** Luigi, con il pad, dice che il movimento è giusto. Le misure (altezze, distanze, tempi) diventano le regole per disegnare i livelli.
+
+**Fatto il 5 novembre 2026:** il primo blocco. Corsa, salto variabile con coyote time e buffer, Spinta, piattaforme sottili, accovacciarsi, scivolata, sporgenze e scavalco, con la fisica nostra a tick fissi (posizioni a sottopixel interi, quindi replay e hash restano validi) e 20 test. La stanza si apre dal titolo, voce STANZA DI PROVA; i valori di partenza sono in `game/src/platform/platform_moves.gd` e si cambiano in `game/data/platform/gig_moves.tres`. Dopo la prima prova di Luigi: salto meno lunare, aggancio e salita senza scatti, niente tremolio contro i muri, scivolata anche da fermi e camminata accovacciata. Poi il secondo blocco: salto a muro col freno del braccio, scatto in aria e corsa sui muri, con le loro pose. Poi, su richiesta di Luigi, la risoluzione è passata da 384×216 a 480×270 (60 px per metro, tutto più grande del 25%): stanza, sprite, combattimento, livello, sfondi, interfaccia, replay e test. Restano il Rampino, il passaggio all'arena e il primo hacking.
 
 ### 2. Prologo
 

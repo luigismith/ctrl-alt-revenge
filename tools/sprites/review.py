@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Luigi Massari
 # SPDX-License-Identifier: MIT
 """Tavole di controllo: miniature per scegliere le pose, tavole 4x per animazione (con ancora e box),
-GIF a velocità reale (i tick a 60 Hz diventano millisecondi), scena di prova 384x216 con i personaggi."""
+GIF a velocità reale (i tick a 60 Hz diventano millisecondi), scena di prova 480x270 con i personaggi."""
 import json
 import os
 

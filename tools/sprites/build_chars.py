@@ -151,7 +151,7 @@ def shader_for(cfg, meta):
     pcfg_cfg["rim_dir"] = cam["luce_di_contorno"]["camera"]
     pcfg_cfg["rim_thr"] = cam["luce_di_contorno"]["soglia"]
     pcfg_cfg["rim_mats"] = pcfg.get("rim_mats", [])
-    pcfg_cfg["p1"] = meta.get("p1", 1.0 / 48)
+    pcfg_cfg["p1"] = meta.get("p1", 1.0 / cam["pixels_per_meter"])
     sh = PX.Shader(pcfg_cfg, pcfg, meta["ids"])
     return sh, pcfg_cfg
 
@@ -483,7 +483,7 @@ def step_assemble(cid):
             frs.append(rec)
         out_anims[n] = {"loop": bool(an.get("loop", False)), "frames": frs}
         frames_out[n] = sprites[n]
-    data = {"id": cid, "format": 1, "image": cid + ".png", "pixels_per_meter": 48, "animations": out_anims}
+    data = {"id": cid, "format": 1, "image": cid + ".png", "pixels_per_meter": C.camera()["pixels_per_meter"], "animations": out_anims}
     fdir = final_dir(cid)
     os.makedirs(fdir, exist_ok=True)
     Image.fromarray(atlas, "RGBA").save(os.path.join(fdir, cid + ".png"), optimize=True)
@@ -516,7 +516,7 @@ def write_sprite_json(path, data):
     lines = ["{", f'  "id": "{data["id"]}",', '  "format": 1,', f'  "image": "{data["image"]}",']
     if data.get("normal_image"):
         lines.append(f'  "normal_image": "{data["normal_image"]}",')
-    lines += ['  "pixels_per_meter": 48,', '  "animations": {']
+    lines += ['  "pixels_per_meter": %d,' % C.camera()["pixels_per_meter"], '  "animations": {']
     names = list(data["animations"].keys())
     for k, n in enumerate(names):
         an = data["animations"][n]
@@ -638,16 +638,16 @@ def step_pairs_review(root=None):
 
 
 def step_scene(root=None):
-    """scena di prova 384x216: i tre personaggi rivolti a destra e specchiati, su fondo scuro."""
-    W, H = 384, 216
+    """scena di prova 480x270 (la risoluzione del gioco): i tre personaggi rivolti a destra e specchiati, su fondo scuro."""
+    W, H = 480, 270
     can = np.zeros((H, W, 4), np.uint8)
     can[..., :3] = (18, 15, 36)
     can[..., 3] = 255
-    can[150:209, :, :3] = (34, 26, 52)
+    can[188:261, :, :3] = (34, 26, 52)
     put = []
-    for cid, x, y, an, fi, mir in (("thug_punk", 52, 176, "idle", 0, False), ("gig", 132, 190, "idle", 0, False),
-                                   ("thug_bruiser", 218, 182, "idle", 0, True), ("thug_punk", 300, 168, "jab", 4, True),
-                                   ("gig", 344, 204, "jab1", 1, True), ("gig", 92, 206, "kick", 3, False)):
+    for cid, x, y, an, fi, mir in (("thug_punk", 65, 220, "idle", 0, False), ("gig", 165, 238, "idle", 0, False),
+                                   ("thug_bruiser", 273, 228, "idle", 0, True), ("thug_punk", 375, 210, "jab", 4, True),
+                                   ("gig", 430, 255, "jab1", 1, True), ("gig", 115, 258, "kick", 3, False)):
         try:
             data, atlas = frames_from_atlas(cid, root)
         except FileNotFoundError:
@@ -659,9 +659,9 @@ def step_scene(root=None):
         put.append((y, cid, x, f, atlas, mir))
     for y, cid, x, f, atlas, mir in sorted(put, key=lambda t: t[0]):
         # ombra
-        for dx in range(-9, 10):
-            for dy in (-1, 0, 1):
-                if (dx / 9.5) ** 2 + (dy / 1.6) ** 2 <= 1 and 0 <= y + dy < H and 0 <= x + dx < W:
+        for dx in range(-12, 13):
+            for dy in (-2, -1, 0, 1, 2):
+                if (dx / 12.0) ** 2 + (dy / 2.0) ** 2 <= 1 and 0 <= y + dy < H and 0 <= x + dx < W:
                     can[y + dy, x + dx, :3] = (can[y + dy, x + dx, :3] * 0.55).astype(np.uint8)
         place(can, sprite_of(atlas, f), x, y, f["anchor"], mirror=mir)
     rd = os.path.join(C.OUT, "review")

@@ -1,6 +1,6 @@
 # Interfaccia
 
-Tutto è generato da `tools/fxui/make_ui.py`, alla risoluzione del gioco (384×216) e senza ingrandimenti. `ui.json` elenca ogni elemento: file, dimensioni, margini 9-slice, fotogrammi e note. In più contiene i font da usare, i colori dei testi e la disposizione dell'HUD del mockup (`hud_layout`).
+Tutto è generato da `tools/fxui/make_ui.py`, alla risoluzione del gioco (480×270) e senza ingrandimenti. `ui.json` elenca ogni elemento: file, dimensioni, margini 9-slice, fotogrammi e note. In più contiene i font da usare, i colori dei testi e la disposizione dell'HUD del mockup (`hud_layout`).
 
 La cartella `portraits/` non nasce da qui: i ritratti 32×32 li fa la pipeline dei personaggi.
 

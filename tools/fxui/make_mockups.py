@@ -29,6 +29,11 @@ ASSETS = HERE / "out" / "assets"
 CHECK = HERE / "out" / "check"
 LAB = Path(os.environ.get("USERPROFILE", "")) / "ctrlaltrevenge-lab"
 SPIKE = LAB / "ricerca-2026-11-03" / "prove" / "spike-3d2pixel" / "out" / "frames"
+# Risoluzione del gioco, come View in game/src/core/view.gd (480x270 dal 5 novembre 2026).
+# I fotogrammi della prova spike sono ancora a 48 px/m: nei mockup i personaggi sembrano piccoli.
+W, H = 480, 270
+CX = W // 2
+OY = 188   # orizzonte: inizio della fascia calpestabile
 
 
 def ui() -> dict:
@@ -74,34 +79,34 @@ def text(img, x, y, s, face=bitfont.BOLD, color=P.CREAM, right=False, center=Fal
 def backdrop(seed: int = 7, floor: bool = True) -> np.ndarray:
     """Notte: cielo blu-viola, palazzi con finestre rosse e arancio, asfalto viola."""
     rng = np.random.default_rng(seed)
-    c = pix.new(384, 216, P.BG)
-    for y in range(216):
-        t = y / 215
+    c = pix.new(W, H, P.BG)
+    for y in range(H):
+        t = y / (H - 1)
         c[y, :] = (int(12 + 22 * t), int(10 + 10 * t), int(30 + 34 * t), 255)
     x = -6
-    while x < 390:
-        w = int(rng.integers(22, 46))
-        h = int(rng.integers(70, 140))
-        top = 150 - h
-        c[max(0, top):150, max(0, x):max(0, x + w)] = (26, 21, 52, 255)
-        for wy in range(top + 5, 146, 7):
-            for wx in range(x + 3, x + w - 3, 6):
-                if 0 <= wx < 382 and rng.random() < 0.25:
+    while x < W + 6:
+        w = int(rng.integers(28, 58))
+        h = int(rng.integers(88, 175))
+        top = OY - h
+        c[max(0, top):OY, max(0, x):max(0, x + w)] = (26, 21, 52, 255)
+        for wy in range(top + 6, OY - 5, 9):
+            for wx in range(x + 4, x + w - 4, 8):
+                if 0 <= wx < W - 2 and rng.random() < 0.25:
                     col = (226, 74, 58, 255) if rng.random() < 0.6 else (236, 160, 66, 255)
                     c[wy:wy + 2, wx:wx + 3] = col
         x += w + int(rng.integers(0, 6))
     if floor:
-        for y in range(150, 216):
-            t = (y - 150) / 66
+        for y in range(OY, H):
+            t = (y - OY) / (H - OY)
             c[y, :] = (int(46 - 14 * t), int(32 - 10 * t), int(66 - 18 * t), 255)
         # riflessi bagnati dei neon
         for _ in range(9):
-            rx = int(rng.integers(0, 370))
-            ry = int(rng.integers(160, 210))
+            rx = int(rng.integers(0, W - 14))
+            ry = int(rng.integers(OY + 12, H - 8))
             c[ry, rx:rx + int(rng.integers(6, 18))] = (120, 50, 70, 255)
     # trave della ferrovia in primo piano
-    c[0:12, :] = (18, 14, 30, 255)
-    c[12, :] = (40, 32, 62, 255)
+    c[0:15, :] = (18, 14, 30, 255)
+    c[15, :] = (40, 32, 62, 255)
     return c
 
 
@@ -197,21 +202,21 @@ def hud_mockup() -> np.ndarray:
     # scena: GIG colpisce il punk (scala dei personaggi ed effetti in contesto)
     gig = sprite("v5", "Punch_Cross", 2)
     thug = sprite("thug_v5", "Hit_Chest", 1)
-    put_fx(img, "ombra", 1, 150, 186)
-    put_fx(img, "ombra", 1, 205, 188)
-    put_sprite(img, gig, 150, 186)
-    put_sprite(img, thug, 205, 188, flip=True)
-    put_fx(img, "hit_spark_light", 1, 191, 128)
-    put_fx(img, "dust_skid", 2, 212, 188, flip=True)
-    put_fx(img, "ombra", 0, 300, 196)
-    put_sprite(img, sprite("thug_v5", "Guard_Idle", 0), 300, 196, flip=True)
-    put_fx(img, "glint", 3, 282, 132)
+    put_fx(img, "ombra", 1, 188, 233)
+    put_fx(img, "ombra", 1, 256, 235)
+    put_sprite(img, gig, 188, 233)
+    put_sprite(img, thug, 256, 235, flip=True)
+    put_fx(img, "hit_spark_light", 1, 239, 160)
+    put_fx(img, "dust_skid", 2, 265, 235, flip=True)
+    put_fx(img, "ombra", 0, 375, 245)
+    put_sprite(img, sprite("thug_v5", "Guard_Idle", 0), 375, 245, flip=True)
+    put_fx(img, "glint", 3, 353, 165)
     # pioggia leggera
     rng = np.random.default_rng(3)
     for _ in range(26):
         k = int(rng.integers(0, 4))
-        put_fx(img, "rain_streak", k, int(rng.integers(0, 384)), int(rng.integers(20, 200)))
-    for (sx, sy, k) in ((60, 175, 1), (250, 202, 2), (340, 170, 0)):
+        put_fx(img, "rain_streak", k, int(rng.integers(0, W)), int(rng.integers(25, 250)))
+    for (sx, sy, k) in ((75, 219, 1), (313, 253, 2), (425, 213, 0)):
         put_fx(img, "rain_splash", k, sx, sy)
     draw_hud(img)
     return img
@@ -225,14 +230,19 @@ def title_mockup() -> np.ndarray:
     img = backdrop(11)
     logo = ui_img("logo")
     sub = ui_img("subtitle")
-    lx = (384 - logo.shape[1]) // 2
-    pix.over(img, logo, lx, 14)
-    pix.over(img, sub, (384 - sub.shape[1]) // 2, 14 + logo.shape[0] + 3)
-    put_fx(img, "ombra", 1, 70, 204)
-    put_sprite(img, sprite("v5", "Guard_Idle", 0), 70, 204)
-    text(img, 192, 168, "PREMI INVIO", color=P.GOLD_HI, center=True)
-    text(img, 380, 203, "© 2026 Luigi Massari", face=bitfont.REGULAR, color=P.CREAM_LO2, right=True)
+    lx = (W - logo.shape[1]) // 2
+    pix.over(img, logo, lx, 22)
+    pix.over(img, sub, (W - sub.shape[1]) // 2, 22 + logo.shape[0] + 3)
+    put_fx(img, "ombra", 1, 88, 255)
+    put_sprite(img, sprite("v5", "Guard_Idle", 0), 88, 255)
+    text(img, CX, 186, "PREMI INVIO", color=P.GOLD_HI, center=True)
+    text(img, W - 5, H - 14, "© 2026 Luigi Massari", face=bitfont.REGULAR, color=P.CREAM_LO2, right=True)
     return img
+
+
+def _go_arrow_at(fw: int, fh: int) -> tuple[int, int]:
+    ax, ay = ui()["hud_layout"]["go_arrow_right_center_y"]
+    return ax - fw, ay - fh // 2
 
 
 def messages_mockup() -> np.ndarray:
@@ -241,29 +251,29 @@ def messages_mockup() -> np.ndarray:
                        ("msg_continue", "count"), ("msg_game_over", None), ("msg_demo_end", "end")):
         img = backdrop(5)
         im = ui_img(key)
-        y = 70 if key != "msg_pause" else 52
-        pix.over(img, im, (384 - im.shape[1]) // 2, y)
+        y = 88 if key != "msg_pause" else 65
+        pix.over(img, im, (W - im.shape[1]) // 2, y)
         if extra == "go":
             d = ui()["go_arrow"]
             fw, fh = d["frame"]
-            pix.over(img, ui_img("go_arrow")[:, :fw], 381 - fw, 64 - fh // 2 + 60)
+            pix.over(img, ui_img("go_arrow")[:, :fw], *_go_arrow_at(fw, fh))
         if extra == "menu":
             for i, s in enumerate(("RIPRENDI", "COMANDI", "ESCI AL TITOLO")):
                 col = P.GOLD_HI if i == 0 else P.CREAM
-                text(img, 150, 100 + 14 * i, s, color=col)
-            text(img, 140, 100, "▶", color=P.GOLD_HI)
+                text(img, CX - 42, 125 + 14 * i, s, color=col)
+            text(img, CX - 52, 125, "▶", color=P.GOLD_HI)
         if extra == "count":
-            text(img, 192, 110, "9", color=P.GOLD_HI, center=True)
-            text(img, 192, 150, "Premi ATTACCO per continuare", face=bitfont.REGULAR, center=True)
+            text(img, CX, 138, "9", color=P.GOLD_HI, center=True)
+            text(img, CX, 188, "Premi ATTACCO per continuare", face=bitfont.REGULAR, center=True)
         if extra == "end":
-            text(img, 192, 112, "PUNTEGGIO   004200", center=True)
-            text(img, 192, 140, "Grazie per aver giocato!", face=bitfont.REGULAR, center=True)
+            text(img, CX, 140, "PUNTEGGIO   004200", center=True)
+            text(img, CX, 175, "Grazie per aver giocato!", face=bitfont.REGULAR, center=True)
         draw_hud(img, arrow_frame=None, enemy="BRUTO", en=0.85, en_ghost=0.85)
         screens.append(img)
-    grid = pix.new(384 * 3 + 8, 216 * 2 + 4, P.INK)
+    grid = pix.new(W * 3 + 8, H * 2 + 4, P.INK)
     for i, s in enumerate(screens):
         r, c = divmod(i, 3)
-        pix.over(grid, s, c * 388, r * 220)
+        pix.over(grid, s, c * (W + 4), r * (H + 4))
     return grid
 
 
@@ -273,7 +283,7 @@ def main() -> int:
     pix.save(hud, CHECK / "hud_mockup_1x.png")
     pix.save(pix.upscale(hud, 3), CHECK / "hud_mockup_3x.png")
     # HUD da solo su fondo scuro uniforme (come chiede la verifica)
-    plain = pix.new(384, 216, P.BG)
+    plain = pix.new(W, H, P.BG)
     draw_hud(plain)
     pix.save(plain, CHECK / "hud_plain_1x.png")
     pix.save(placeholder_portrait(), CHECK / "portrait_placeholder.png")

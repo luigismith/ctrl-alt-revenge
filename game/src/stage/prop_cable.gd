@@ -4,8 +4,8 @@ extends Prop
 ## calpestabile: chiunque lo tocchi stando a terra prende 10 di danno e viene atterrato,
 ## chi lo salta passa indenne.
 
-var x0: float = 1230.0
-var x1: float = 1270.0
+var x0: float = 1538.0
+var x1: float = 1588.0
 var zap: AttackData
 ## Tick di ricarica per ogni vittima, così una scossa non si ripete a ogni tick.
 var _recharge: Dictionary[int, int] = {}
@@ -58,11 +58,11 @@ func _shock(f: Fighter) -> void:
 	var dir := 1 if f.px >= px else -1
 	if f is Gig:
 		dir = -f.facing
-	f.receive_hit(self, zap, HitInfo.new(Vector2(f.px, f.py - 30.0), dir, false))
+	f.receive_hit(self, zap, HitInfo.new(Vector2(f.px, f.py - 38.0), dir, false))
 	if level.sound_enabled:
 		Sfx.play_at(&"zap", f.px)
-	level.fx.spawn(&"cyber_spark", f.px, f.py - 20.0, 1, f.depth_z(2))
-	level.fx.spawn(&"cyber_spark", f.px - 6.0, f.py - 48.0, -1, f.depth_z(2))
+	level.fx.spawn(&"cyber_spark", f.px, f.py - 25.0, 1, f.depth_z(2))
+	level.fx.spawn(&"cyber_spark", f.px - 8.0, f.py - 60.0, -1, f.depth_z(2))
 	level.add_shake(0.25)
 	Game.count(&"cable_zaps")
 	if f is Gig:

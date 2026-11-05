@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "note": "Elementi d'interfaccia di CTRL+ALT REVENGE, in px del gioco (384x216). Ogni chiave è un elemento con 'image' e 'size'; nine_slice = margini [sinistra, sopra, destra, sotto] da non stirare; frame/count/ticks = striscia orizzontale di fotogrammi da 'frame' px, ognuno per 'ticks' tick a 60 Hz. Le chiavi 'fonts', 'colors' e 'hud_layout' non sono immagini. Le scritte variabili usano i font di res://assets/fonts/ (vedi il README lì).",
+  "note": "Elementi d'interfaccia di CTRL+ALT REVENGE, in px del gioco (480x270). Ogni chiave è un elemento con 'image' e 'size'; nine_slice = margini [sinistra, sopra, destra, sotto] da non stirare; frame/count/ticks = striscia orizzontale di fotogrammi da 'frame' px, ognuno per 'ticks' tick a 60 Hz. Le chiavi 'fonts', 'colors' e 'hud_layout' non sono immagini. Le scritte variabili usano i font di res://assets/fonts/ (vedi il README lì).",
   "logo": {
     "image": "title_logo.png",
     "size": [
@@ -318,12 +318,12 @@
       4
     ],
     "score_right": [
-      378,
+      474,
       2
     ],
     "go_arrow_right_center_y": [
-      381,
-      64
+      477,
+      80
     ]
   }
 }

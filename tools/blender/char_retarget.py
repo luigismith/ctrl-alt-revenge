@@ -668,7 +668,7 @@ def main():
 
     # -------- misura dello scivolamento dei piedi: un piede è in appoggio finché la pianta resta entro 2,5 cm dalla sua quota più bassa
     # nella clip; deriva = distanza orizzontale massima dal punto d'inizio del tratto. Destinazione contro sorgente (in scala).
-    px = 1.0 / 48.0        # metri per pixel dello sprite a 1x (48 px/m, vedi tools/sprites/camera.json)
+    px = 1.0 / 60.0        # metri per pixel dello sprite a 1x (60 px/m, vedi tools/sprites/camera.json)
 
     def runs_of(P):
         zmin = min(p.z for p in P)

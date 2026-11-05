@@ -29,6 +29,9 @@ import bitfont  # noqa: E402
 import pix  # noqa: E402
 
 PROJ = HERE / "out" / "godot_check"
+# Risoluzione del gioco (come View in game/src/core/view.gd) e riga del Label di font_check.gd.
+W, H = 480, 270
+LABEL_Y = 192
 
 
 def find_bash() -> str:
@@ -167,21 +170,21 @@ PHRASES = [
 
 def expected_fonts() -> tuple[np.ndarray, np.ndarray]:
     """Maschera attesa del testo bianco e maschera della zona confrontata."""
-    m = np.zeros((216, 384), bool)
+    m = np.zeros((H, W), bool)
     y = 2
     for face in (bitfont.REGULAR, bitfont.BOLD):
         for p in PHRASES:
             t = face.mask(p)
             h, w = t.shape
-            w = min(w, 384 - 2)
+            w = min(w, W - 2)
             m[y:y + h, 2:2 + w] |= t[:, :w]
             y += 13
-    region = np.zeros((216, 384), bool)
-    region[:190, :] = True
+    region = np.zeros((H, W), bool)
+    region[:LABEL_Y - 2, :] = True
     # il Label con l'ombra
     lab = bitfont.BOLD.mask("GIG \u00d73   PUNK   004200")
-    m[192:192 + lab.shape[0], 2:2 + lab.shape[1]] |= lab
-    region[190:216, :196] = True
+    m[LABEL_Y:LABEL_Y + lab.shape[0], 2:2 + lab.shape[1]] |= lab
+    region[LABEL_Y - 2:H, :196] = True
     return m, region
 
 
@@ -200,9 +203,9 @@ def check_fonts() -> int:
     red = (rgb[..., 0] == 255) & (rgb[..., 1] == 0) & (rgb[..., 2] == 0)
     lab = np.zeros_like(exp)
     lm = bitfont.BOLD.mask("GIG \u00d73   PUNK   004200")
-    lab[192:192 + lm.shape[0], 2:2 + lm.shape[1]] = lm
+    lab[LABEL_Y:LABEL_Y + lm.shape[0], 2:2 + lm.shape[1]] = lm
     exp_shadow = pix.shift(lab, 1, 1) & ~lab
-    nsh = int(((red != exp_shadow) & region & (np.arange(216)[:, None] >= 190)).sum())
+    nsh = int(((red != exp_shadow) & region & (np.arange(H)[:, None] >= LABEL_Y - 2)).sum())
     print(f"ombra del Label: pixel diversi {nsh}")
     vis = img.copy()
     vis[diff] = (255, 0, 255, 255)

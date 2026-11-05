@@ -6,7 +6,7 @@
   "Hair_Beard"
  ],
  "normals": "proxy",
- "frame_px": 208,
+ "frame_px": 260,
  "proportions": {
   "Head": {
    "scale": [
@@ -709,10 +709,10 @@
  ],
  "boxes": {
   "head_r": [
-   7,
-   8
+   9,
+   10
   ],
-  "torso_pad": 4
+  "torso_pad": 5
  },
  "portrait": {
   "action": "Idle_Loop",
@@ -1177,6 +1177,72 @@
       "air",
       "hold"
      ]
+    }
+   ]
+  },
+  "jump_arc": {
+   "src": "NinjaJump_Start",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "f": 3,
+     "t": 60,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 4,
+     "t": 60,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 5,
+     "t": 60,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 7,
+     "t": 60,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "f": 0,
+     "t": 60,
+     "tags": [
+      "air"
+     ],
+     "src": "NinjaJump_Land"
+    },
+    {
+     "f": 0.5,
+     "t": 60,
+     "tags": [
+      "air"
+     ],
+     "src": "NinjaJump_Land"
+    },
+    {
+     "f": 1,
+     "t": 60,
+     "tags": [
+      "air"
+     ],
+     "src": "NinjaJump_Land"
+    },
+    {
+     "f": 1.6,
+     "t": 60,
+     "tags": [
+      "air"
+     ],
+     "src": "NinjaJump_Land"
     }
    ]
   },
@@ -1656,6 +1722,45 @@
     }
    ]
   },
+  "crouch_walk": {
+   "src": "Crouch_Fwd_Loop",
+   "loop": true,
+   "period": 62,
+   "frames": [
+    {
+     "f": 0,
+     "t": 7
+    },
+    {
+     "f": 8,
+     "t": 7
+    },
+    {
+     "f": 16,
+     "t": 7
+    },
+    {
+     "f": 23,
+     "t": 7
+    },
+    {
+     "f": 31,
+     "t": 7
+    },
+    {
+     "f": 39,
+     "t": 7
+    },
+    {
+     "f": 47,
+     "t": 7
+    },
+    {
+     "f": 54,
+     "t": 7
+    }
+   ]
+  },
   "ledge_hang": {
    "src": "tl:ledge_hang",
    "loop": true,
@@ -1677,6 +1782,98 @@
     {
      "at": 36,
      "t": 12
+    }
+   ]
+  },
+  "wall_slide": {
+   "src": "tl:wall_slide",
+   "anchor": "pelvis_h",
+   "loop": true,
+   "period": 12,
+   "frames": [
+    {
+     "at": 0,
+     "t": 6
+    },
+    {
+     "at": 6,
+     "t": 6
+    }
+   ]
+  },
+  "wall_run": {
+   "src": "tl:wall_run",
+   "anchor": "pelvis_h",
+   "loop": true,
+   "period": 24,
+   "frames": [
+    {
+     "at": 0,
+     "t": 3,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 3,
+     "t": 3
+    },
+    {
+     "at": 6,
+     "t": 3
+    },
+    {
+     "at": 9,
+     "t": 3
+    },
+    {
+     "at": 12,
+     "t": 3,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 15,
+     "t": 3
+    },
+    {
+     "at": 18,
+     "t": 3
+    },
+    {
+     "at": 21,
+     "t": 3
+    }
+   ]
+  },
+  "wall_run_end": {
+   "src": "tl:wall_run",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "at": 30,
+     "t": 8
+    }
+   ]
+  },
+  "air_dash": {
+   "src": "tl:air_dash",
+   "anchor": "pelvis_h",
+   "frames": [
+    {
+     "at": 0,
+     "t": 3,
+     "tags": [
+      "air"
+     ]
+    },
+    {
+     "at": 4,
+     "t": 5,
+     "tags": [
+      "air"
+     ]
     }
    ]
   }
@@ -1724,7 +1921,7 @@
    ]
   },
   "ao_k": 0,
-  "min_cluster": 18,
+  "min_cluster": 28,
   "cel": {
    "thr": [
     0.22
@@ -1793,7 +1990,7 @@
      "TOP_SEAM",
      "TOP_DARK"
     ],
-    "min_px": 4
+    "min_px": 6
    },
    "head_mats": [
     "SKIN",

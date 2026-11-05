@@ -17,7 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import envlib as E  # noqa: E402
 import paint as P  # noqa: E402
 
-CFG = dict(amb=0.62, key=0.7, spill=1.0, spill_sigma=(2.5, 10.0), wet=0.2, wet_comp=0.5, dither=0.0,
+# sfocature in px a 60 px/m: 1,25 volte quelle di progetto (48 px/m)
+CFG = dict(amb=0.62, key=0.7, spill=1.0, spill_sigma=(2.5 * E.S, 10.0 * E.S), wet=0.2, wet_comp=0.5, dither=0.0,
            inner=True, depth_thr=0.3, outline=True, cel=P.CEL_3TONI)
 
 

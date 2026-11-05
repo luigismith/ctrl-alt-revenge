@@ -5,7 +5,7 @@ extends RefCounted
 ## piloni dell'arena e la ferrovia sopraelevata in primo piano. Si usa solo finché
 ## mancano gli sfondi veri (game/assets/env/sotto_la_linea/layers.json).
 
-const LEVEL_W := 1920
+const LEVEL_W := 2400
 
 const SKY_TOP := Color8(13, 10, 36)
 const SKY_LOW := Color8(46, 20, 66)
@@ -51,25 +51,25 @@ static func _rect(img: Image, x: int, y: int, w: int, h: int, c: Color) -> void:
 
 
 static func _sky() -> ImageTexture:
-	var img := Image.create_empty(384, 150, false, Image.FORMAT_RGBA8)
-	for y in 150:
-		var t := float(y) / 149.0
+	var img := Image.create_empty(View.W, 188, false, Image.FORMAT_RGBA8)
+	for y in 188:
+		var t := float(y) / 187.0
 		var c := SKY_TOP.lerp(SKY_LOW, t * t)
-		if y > 110:
-			c = c.lerp(Color8(70, 22, 58), (y - 110) / 80.0)
-		_rect(img, 0, y, 384, 1, c)
+		if y > 138:
+			c = c.lerp(Color8(70, 22, 58), (y - 138) / 100.0)
+		_rect(img, 0, y, View.W, 1, c)
 	return _tex(img)
 
 
 static func _far(rng: RandomNumberGenerator) -> Array[ImageTexture]:
-	var img := Image.create_empty(768, 150, false, Image.FORMAT_RGBA8)
-	var em := Image.create_empty(768, 150, false, Image.FORMAT_RGBA8)
+	var img := Image.create_empty(768, 188, false, Image.FORMAT_RGBA8)
+	var em := Image.create_empty(768, 188, false, Image.FORMAT_RGBA8)
 	var x := 0
 	while x < 760:
 		var w := rng.randi_range(26, 64)
 		w = mini(w, 768 - x)
 		var h := rng.randi_range(56, 128)
-		var top := 150 - h
+		var top := 188 - h
 		_rect(img, x, top, w, h, FAR)
 		_rect(img, x, top, 1, h, FAR_EDGE)
 		if rng.randf() < 0.4:
@@ -94,14 +94,14 @@ static func _far(rng: RandomNumberGenerator) -> Array[ImageTexture]:
 
 
 static func _mid(rng: RandomNumberGenerator) -> Array[ImageTexture]:
-	var img := Image.create_empty(768, 150, false, Image.FORMAT_RGBA8)
-	var em := Image.create_empty(768, 150, false, Image.FORMAT_RGBA8)
+	var img := Image.create_empty(768, 188, false, Image.FORMAT_RGBA8)
+	var em := Image.create_empty(768, 188, false, Image.FORMAT_RGBA8)
 	var x := 0
 	var cyan_done := false
 	while x < 740:
 		var w := mini(rng.randi_range(70, 150), 768 - x)
 		var h := rng.randi_range(66, 104)
-		var top := 150 - h
+		var top := 188 - h
 		_rect(img, x, top, w, h, MID)
 		_rect(img, x, top, w, 2, MID_EDGE)
 		_rect(img, x, top, 2, h, MID_EDGE)
@@ -157,14 +157,14 @@ static func _floor(rng: RandomNumberGenerator) -> ImageTexture:
 
 
 static func _pillars() -> ImageTexture:
-	var img := Image.create_empty(LEVEL_W, 150, false, Image.FORMAT_RGBA8)
-	for px: int in [1590, 1840]:
-		_rect(img, px, 14, 40, 136, Color8(28, 25, 50))
-		_rect(img, px, 14, 3, 136, Color8(48, 44, 78))
-		_rect(img, px + 36, 14, 4, 136, Color8(18, 16, 32))
-		for y in range(26, 146, 22):
+	var img := Image.create_empty(LEVEL_W, 188, false, Image.FORMAT_RGBA8)
+	for px: int in [1988, 2300]:
+		_rect(img, px, 18, 40, 170, Color8(28, 25, 50))
+		_rect(img, px, 18, 3, 170, Color8(48, 44, 78))
+		_rect(img, px + 36, 18, 4, 170, Color8(18, 16, 32))
+		for y in range(32, 182, 28):
 			_rect(img, px + 3, y, 33, 1, Color8(22, 20, 40))
-		_rect(img, px - 4, 140, 48, 10, Color8(34, 30, 58))
+		_rect(img, px - 4, 175, 48, 13, Color8(34, 30, 58))
 	return _tex(img)
 
 

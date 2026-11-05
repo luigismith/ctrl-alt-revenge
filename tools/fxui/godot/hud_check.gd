@@ -2,7 +2,7 @@ extends Node2D
 ## Verifica dell'HUD in Godot: ricostruisce il mockup "hud_plain" di make_mockups.py con le
 ## texture vere (res://assets/ui/), la disposizione di ui.json e il font CAR Pixel Bold.
 ## Disegna anche il fotogramma 0 di ogni effetto di fx.json (controllo d'importazione).
-## Salva la schermata a 384x216 e stampa DONE; godot_check.py confronta i pixel.
+## Salva la schermata a 480x270 e stampa DONE; godot_check.py confronta i pixel.
 
 const BG := Color8(0x12, 0x0f, 0x24)
 
@@ -79,7 +79,7 @@ func _bar(r: Array, ratio: float, ghost: float, suffix: String) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 384, 216), BG)
+	draw_rect(Rect2(0, 0, 480, 270), BG)
 	if _mode == "fx":
 		_draw_fx()
 		return

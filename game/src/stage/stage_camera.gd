@@ -5,17 +5,17 @@ extends RefCounted
 ## (non si usano i limiti di Camera2D). Il tremolio segue il modello a trauma: solo traslazione,
 ## al massimo 5 px, decadimento 1,5 al secondo, con rumore da un generatore con seme.
 
-const VIEW_W := 384
-const VIEW_H := 216
-const DEADZONE := 24
-const MAX_STEP := 4
-const SHAKE_MAX := 5.0
+const VIEW_W := View.W
+const VIEW_H := View.H
+const DEADZONE := 30
+const MAX_STEP := 5
+const SHAKE_MAX := 6.0
 const TRAUMA_DECAY := 1.5 / 60.0
 
 ## Bordo sinistro della vista nel mondo.
 var x: int = 0
 var min_x: int = 0
-var max_x: int = 1536
+var max_x: int = 1920
 var trauma: float = 0.0
 var shake: Vector2i = Vector2i.ZERO
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()

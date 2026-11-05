@@ -19,4 +19,4 @@
 
 ## Dove finiscono
 
-`tools/env/warped.py` li ricolora verso la palette della locandina (tabelle colore esplicite) e li ricompone nei piani `sky.png` (skyline-a, skyline-b senza il pianeta ad anelli), `far.png` (buildings-bg quattro volte, diritto e specchiato, più la torre cyan disegnata da noi) e `mid.png` (i cinque palazzi di near-buildings-bg in posizioni fisse) di `game/assets/env/sotto_la_linea/`.
+`tools/env/warped.py` li ricolora verso la palette della locandina (tabelle colore esplicite) e li ricompone nei piani `sky.png` (skyline-a, skyline-b senza il pianeta ad anelli), `far.png` (buildings-bg cinque volte, diritto e specchiato, più la torre cyan disegnata da noi) e `mid.png` (i cinque palazzi di near-buildings-bg in sette posizioni fisse, due specchiati) di `game/assets/env/sotto_la_linea/`. I pixel non si ricampionano mai: dal 5 novembre 2026, con lo schermo a 480×270, i piani si allungano solo ripetendo i pezzi e le righe di bordo di un colore solo.

@@ -3,7 +3,7 @@
 """CTRL+ALT REVENGE - pipeline v7: stivali da picchiaduro 16-bit (al posto dell'inviluppo convesso del piede).
 
 Lo stivale è fatto di tre pezzi chiusi che si sovrappongono:
-  * suola: sagoma a "stadio" più larga in punta, spessa (davanti 0,036 m, tacco 0,05 m: a 48 px/m sono 2 px),
+  * suola: sagoma a "stadio" più larga in punta, spessa (davanti 0,036 m, tacco 0,05 m: a 60 px/m sono 2-3 px),
     sporge di 1,2 cm dalla tomaia, così il suo bordo superiore prende luce e a 1x si legge una riga;
   * puntale: mezzo ellissoide basso e largo sulla parte anteriore (la punta arrotondata, non a cuneo);
   * gambale: tubo dal tallone fino a top_z, con un collarino più largo in cima (stacco dai pantaloni).

@@ -7,7 +7,7 @@ extends Control
 
 const PAUSE_ITEMS: PackedStringArray = ["RIPRENDI", "RICOMINCIA", "ESCI AL TITOLO"]
 const CARD_TICKS := 170
-const BANNER_Y := 88
+const BANNER_Y := 110
 
 var card_title: String = "1 · SOTTO LA LINEA"
 var card_ticks: int = 0
@@ -25,7 +25,7 @@ var _red := Color8(122, 23, 15)
 
 
 func _ready() -> void:
-	size = Vector2(384, 216)
+	size = View.SIZE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_text = UiArt.color("text", _text)
 	_gold = UiArt.color("menu_selected", _gold)
@@ -65,7 +65,7 @@ func _draw() -> void:
 	if continue_count >= 0:
 		_draw_continue()
 	if game_over_ticks >= 0:
-		draw_rect(Rect2(0, 0, 384, 216), Color(0, 0, 0, minf(0.6, game_over_ticks / 40.0)))
+		draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0, 0, 0, minf(0.6, game_over_ticks / 40.0)))
 		_banner("msg_game_over", "GAME OVER", 1.0)
 
 
@@ -88,8 +88,8 @@ func _draw_big_digit(d: int, cx: float, y: float) -> bool:
 func _banner(key: String, text: String, alpha: float) -> void:
 	if alpha <= 0.0:
 		return
-	if not UiArt.draw_centered(self, key, 192, BANNER_Y, alpha):
-		UiFont.draw_text(self, Vector2(192, BANNER_Y), text, Color(_text, alpha), 2, 1, Color(_red, alpha), Color(UiFont.SHADOW, alpha))
+	if not UiArt.draw_centered(self, key, View.CX, BANNER_Y, alpha):
+		UiFont.draw_text(self, Vector2(View.CX, BANNER_Y), text, Color(_text, alpha), 2, 1, Color(_red, alpha), Color(UiFont.SHADOW, alpha))
 
 
 func _draw_go() -> void:
@@ -108,7 +108,7 @@ func _draw_go() -> void:
 
 
 func _draw_pause() -> void:
-	draw_rect(Rect2(0, 0, 384, 216), Color(0.02, 0.0, 0.06, 0.55))
+	draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0.02, 0.0, 0.06, 0.55))
 	_banner("msg_pause", "PAUSA", 1.0)
 	var y0 := BANNER_Y + 40
 	for i in PAUSE_ITEMS.size():
@@ -120,9 +120,9 @@ func _draw_pause() -> void:
 
 
 func _draw_continue() -> void:
-	draw_rect(Rect2(0, 0, 384, 216), Color(0.02, 0.0, 0.06, 0.5))
+	draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0.02, 0.0, 0.06, 0.5))
 	_banner("msg_continue", "CONTINUA?", 1.0)
-	if not _draw_big_digit(continue_count, 192, BANNER_Y + 34):
-		UiFont.draw_text(self, Vector2(192, BANNER_Y + 36), str(continue_count), _gold, 2, 1)
+	if not _draw_big_digit(continue_count, View.CX, BANNER_Y + 34):
+		UiFont.draw_text(self, Vector2(View.CX, BANNER_Y + 36), str(continue_count), _gold, 2, 1)
 	if (_blink / 20) % 2 == 0:
-		UiFont.draw_text(self, Vector2(192, BANNER_Y + 70), "Premi ATTACCO per continuare", _text, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+		UiFont.draw_text(self, Vector2(View.CX, BANNER_Y + 70), "Premi ATTACCO per continuare", _text, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)

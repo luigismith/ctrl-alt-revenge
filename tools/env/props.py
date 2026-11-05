@@ -9,8 +9,12 @@ Scrive in tools/env/out/props/: bin.png/.json, apple.png/.json, cable.png/.json 
          l'ultimo 'hold'). Render 3D -> pixel con la stessa vista, luce e palette degli sfondi.
   apple  mela (+30 di vita): idle (2 fotogrammi, il secondo con il luccichio).
   cable  cavo dell'alta tensione strappato in una pozzanghera, scintille animate (6 fotogrammi, loop).
-         Si appoggia al pavimento: è dipinto sopra i pixel del piano floor fra x 1222 e 1282, così si
-         fonde col suolo; l'ancora è dove il cavo che scende dal palo tocca terra (x 1250, y 150).
+         Si appoggia al pavimento: è dipinto sopra i pixel del piano floor fra x 1528 e 1603, così si
+         fonde col suolo; l'ancora è dove il cavo che scende dal palo tocca terra (x 1563, y 188).
+
+Scala: 60 px/m (fino al 5 novembre 2026 erano 48). Le misure in pixel scritte qui sono di progetto, a 48 px/m, e
+passano per E.px() (floor(p * 1,25 + 0,5)), la stessa regola dei dati del livello; i rettangoli hurt/hit sono
+convertiti sui bordi, simmetrici rispetto all'ancora.
 """
 import json
 import math
@@ -27,6 +31,7 @@ import paint as P  # noqa: E402
 from materials import M_APPLE, M_BIN, M_BIN_LID, M_LEAF, M_METAL, M_PAPER, M_RUST, M_TRASH, RAMPS  # noqa: E402
 
 C = E.CLS
+px = E.px
 SCRIPT = os.path.join(E.ROOT, "tools", "blender", "env_gbuffer.py")
 OUT = os.path.join(E.OUT, "props")
 RAW = os.path.join(E.OUT, "raw_props")
@@ -241,7 +246,7 @@ def pack(frames, pad=1):
 
 
 def build_bin():
-    x0, x1, y0, y1 = -40, 56, -64, 12
+    x0, x1, y0, y1 = px(-40), px(56), px(-64), px(12)
     frames = []
     for name, spec in BIN_FRAMES:
         tag = "bin_" + name
@@ -249,7 +254,7 @@ def build_bin():
         img, cv = pixel_frame(tag)
         frames.append((name, img, (-x0, -y0)))
     atlas, rects = pack(frames)
-    hurt = [[-12, -38, 24, 38]]
+    hurt = [[-px(12), -px(38), 2 * px(12), px(38)]]          # [-15, -48, 30, 48]
 
     def fr(name, ticks, hurt_=hurt, events=(), tags=()):
         rect, anc = rects[name]
@@ -261,7 +266,7 @@ def build_bin():
         "break": dict(loop=False, frames=[fr("break0", 4, [], ["sfx:bin_break"]), fr("break1", 5, []),
                                           fr("break2", 6, []), fr("break3", 1, [], (), ["hold"])]),
     }
-    # bidone dell'immondizia (x 1050): 'break' finisce su un fotogramma 'hold' (rottame a terra);
+    # bidone dell'immondizia (x 1313): 'break' finisce su un fotogramma 'hold' (rottame a terra);
     # la mela compare dove era il bidone
     meta = {"id": "bin", "format": 1, "image": "bin.png", "pixels_per_meter": int(E.PPM), "animations": anims}
     save(atlas, meta, "bin")
@@ -269,7 +274,7 @@ def build_bin():
 
 
 def build_apple():
-    x0, x1, y0, y1 = -20, 20, -28, 6
+    x0, x1, y0, y1 = px(-20), px(20), px(-28), px(6)
     render_frame("apple", apple_objects(), x0, x1, y0, y1)
     img, cv = pixel_frame("apple")
     # foglia disegnata in 2D (a 1 px la geometria si perde): due toni di verde sopra a destra
@@ -294,7 +299,7 @@ def build_apple():
             img2[y, x] = (*E.hx("#f4eef8"), 255)
     frames = [("idle0", img, (-x0, -y0)), ("idle1", img2, (-x0, -y0))]
     atlas, rects = pack(frames)
-    hurt = [[-8, -14, 16, 14]]
+    hurt = [[-px(8), -px(14), 2 * px(8), px(14)]]            # [-10, -18, 20, 18]
 
     def fr(name, ticks):
         rect, anc = rects[name]
@@ -308,16 +313,17 @@ def build_apple():
 
 
 # ------------------------------------------------------------------ cavo nella pozzanghera
-CABLE_X0, CABLE_X1 = 1222, 1282
-CABLE_ANCHOR = (1250, 150)
-PUD_Y0, PUD_Y1 = 146, 212         # la pozza copre tutta la fascia calpestabile (y 150-208)
+CABLE_X0, CABLE_X1 = px(1222), px(1282)       # 1528, 1603
+CABLE_ANCHOR = (px(1250), px(150))            # (1563, 188)
+PUD_Y0, PUD_Y1 = px(146), px(212)             # (183, 265): la pozza copre tutta la fascia calpestabile (y 188-260)
+HAZ_X0, HAZ_X1 = px(1230), px(1270)           # zona del danno (prop_cable.gd): 1538-1588
 
 
 def build_cable(layers_dir=None, nframes=6):
-    """Pozzanghera unica e irregolare che attraversa tutta la fascia (y 146-214) fra x 1222 e 1282, con il cavo
-    dell'alta tensione che scende dal palo (ancora in x 1250, y 150), serpeggia nell'acqua e finisce col capo
+    """Pozzanghera unica e irregolare che attraversa tutta la fascia (y 183-265) fra x 1528 e 1603, con il cavo
+    dell'alta tensione che scende dal palo (ancora in x 1563, y 188), serpeggia nell'acqua e finisce col capo
     spezzato. Deve leggersi subito come un pericolo:
-      - archi elettrici bianco-azzurri di 16-24 px che saltano dal capo spezzato;
+      - archi elettrici bianco-azzurri di 20-30 px che saltano dal capo spezzato;
       - un lampo in 2 fotogrammi su 6 che illumina l'acqua e l'asfalto intorno (luce già dipinta nei fotogrammi,
         perché l'oggetto si disegna sotto gli attori, sopra il pavimento);
       - riflessi azzurri sull'acqua e un bordo chiaro sul cavo, che così si stacca dal fondo scuro.
@@ -326,33 +332,34 @@ def build_cable(layers_dir=None, nframes=6):
     split = json.load(open(os.path.join(layers_dir, "street_split.json")))
     floor = np.asarray(Image.open(os.path.join(layers_dir, "floor.png")).convert("RGBA"))
     fy = split["floor_y"]
-    # l'immagine è più larga della pozza (x 1222-1282): ci sta l'alone del lampo sull'asfalto
-    X0, X1 = CABLE_X0 - 18, CABLE_X1 + 18
-    Y0, Y1 = 140, 214
+    # l'immagine è più larga della pozza (x 1528-1603): ci sta l'alone del lampo sull'asfalto
+    X0, X1 = CABLE_X0 - px(18), CABLE_X1 + px(18)
+    Y0, Y1 = px(140), px(214)
     base = floor[Y0 - fy:Y1 - fy, X0:X1].astype(np.float32)
     h, w = base.shape[:2]
     yy, xx = np.mgrid[0:h, 0:w]
 
     ytop, ybot = PUD_Y0 - Y0, PUD_Y1 - Y0
     # una pozza lunga che attraversa la strada: un nucleo arrotondato che copre in ogni riga della fascia la zona
-    # del danno (x 1230-1270, vedi prop_cable.gd), così chi prende la scossa sta sempre dentro l'acqua che si
+    # del danno (x 1538-1588, vedi prop_cable.gd), così chi prende la scossa sta sempre dentro l'acqua che si
     # vede, più lobi sparsi sui lati e in cima e in fondo che rompono la sagoma
     from scipy import ndimage
-    hx0, hx1 = 1230 - X0 - 4, 1270 - X0 + 4
+    hx0, hx1 = HAZ_X0 - X0 - px(4), HAZ_X1 - X0 + px(4)
     cy0, cy1 = ytop, ybot
-    rad = 6.0
+    rad = 6.0 * E.S
     qx = np.clip(xx, hx0 + rad, hx1 - rad)
     qy = np.clip(yy, cy0 + rad, cy1 - rad)
     shape = (xx - qx) ** 2 + (yy - qy) ** 2 < rad ** 2
     # lobi di misure diverse: piccoli sul marciapiede (in alto), più grandi verso la strada (in basso)
     for (side, fy_, lrx, lry, out) in ((-1, 0.18, 4.0, 3.0, 0.4), (1, 0.30, 5.5, 3.5, 0.5), (-1, 0.55, 7.0, 5.0, 0.6),
                                        (1, 0.72, 9.0, 4.5, 0.7), (-1, 0.86, 11.0, 5.0, 0.8), (1, 0.93, 6.0, 3.0, 0.5)):
+        lrx, lry = lrx * E.S, lry * E.S
         ly = cy0 + fy_ * (cy1 - cy0)
         lx = (hx0 if side < 0 else hx1) + side * lrx * out
         shape |= ((xx - lx) / lrx) ** 2 + ((yy - ly) / lry) ** 2 < 1.0
     # bordo mosso a bassa frequenza su tutto il contorno (niente lati dritti)
     ang = np.arctan2(yy - (cy0 + cy1) / 2.0, (xx - (hx0 + hx1) / 2.0) * 1.4)
-    wob = 2.2 * np.sin(5 * ang + 0.8) + 1.4 * np.sin(9 * ang + 2.3)
+    wob = (2.2 * np.sin(5 * ang + 0.8) + 1.4 * np.sin(9 * ang + 2.3)) * E.S
     dist = ndimage.distance_transform_edt(~shape)
     shape |= dist < np.clip(wob, 0, None)
     inner = ndimage.distance_transform_edt(shape)
@@ -361,7 +368,7 @@ def build_cable(layers_dir=None, nframes=6):
     shape = ndimage.binary_closing(shape, structure=np.ones((3, 3), bool))
     shape = ndimage.binary_opening(shape, structure=np.ones((3, 3), bool))
     # controllo: la zona del danno è tutta dentro la pozza nella fascia calpestabile
-    hz = (xx >= 1230 - X0) & (xx <= 1270 - X0) & (yy >= 150 - Y0) & (yy <= 208 - Y0)
+    hz = (xx >= HAZ_X0 - X0) & (xx <= HAZ_X1 - X0) & (yy >= E.BAND[0] - Y0) & (yy <= E.BAND[1] - Y0)
     assert (shape | ~hz).all(), "la pozza non copre tutta la zona del danno del cavo"
     core = ndi_erode(shape)
     edge = shape & ~core
@@ -375,17 +382,17 @@ def build_cable(layers_dir=None, nframes=6):
     water[core & ((yy + xx) % 2 == 0) & (yy > h * 0.55)] = E.hx(W_["deep"])
     rr = np.random.default_rng(1250)
     ph = rr.integers(0, 9, size=h)
-    sheen = ((xx + ph[yy] * 3) % 11 < 4) & (yy % 3 == 1)
+    sheen = ((xx + ph[yy] * 3) % px(11) < px(4)) & (yy % px(3) == 1)
     water[sheen] = E.hx(W_["sheen"])
-    water[sheen & ((xx + 2 * yy) % 9 < 2)] = E.hx(W_["sheen2"])
+    water[sheen & ((xx + 2 * yy) % px(9) < 2)] = E.hx(W_["sheen2"])
 
     # percorso del cavo: dal palo (in alto) fino al capo spezzato nella parte vicina della pozza
     ax = CABLE_ANCHOR[0] - X0
     ay0 = CABLE_ANCHOR[1] - Y0
     path = []
     for tt in np.linspace(0, 1, 260):
-        y = ay0 - 1 + tt * 40
-        x = ax + 6 * math.sin(tt * 6.0) * (0.25 + tt) - 9 * tt
+        y = ay0 - 1 + tt * 40 * E.S
+        x = ax + (6 * math.sin(tt * 6.0) * (0.25 + tt) - 9 * tt) * E.S
         path.append((x, y))
     end = path[-1]
     ex, ey = int(round(end[0])), int(round(end[1]))
@@ -434,7 +441,7 @@ def build_cable(layers_dir=None, nframes=6):
         img = np.zeros((h, w, 4), np.uint8)
         # alone del lampo sull'asfalto intorno alla pozza (luce azzurra a gradini, senza sfumature)
         if flash:
-            d = np.sqrt(((xx - ex) / 1.7) ** 2 + ((yy - ey) * 1.25) ** 2)
+            d = np.sqrt(((xx - ex) / 1.7) ** 2 + ((yy - ey) * 1.25) ** 2) / E.S
             halo = (d < 24) & ~shape
             k1 = halo & (d < 14)
             lit = base[..., :3] * 0.62 + np.array(E.hx("#7fb8f0"), np.float32) * 0.38
@@ -451,7 +458,7 @@ def build_cable(layers_dir=None, nframes=6):
         img[top_hi & shape, :3] = E.hx(W_["sheen2"])
         if flash:
             # l'acqua si accende: riflessi chiari vicino al capo spezzato
-            dl = np.sqrt(((xx - ex) / 1.4) ** 2 + ((yy - ey) * 1.2) ** 2)
+            dl = np.sqrt(((xx - ex) / 1.4) ** 2 + ((yy - ey) * 1.2) ** 2) / E.S
             near = shape & (dl < 20)
             img[near & sheen, :3] = E.hx(W_["lit2"])
             img[near & ~sheen & ((xx + yy) % 2 == 0), :3] = E.hx(W_["lit"])
@@ -473,7 +480,7 @@ def build_cable(layers_dir=None, nframes=6):
                 img[yi - 1, xi, :3] = CABLE_EDGE
                 img[yi - 1, xi, 3] = 255
         # increspature intorno al capo
-        rad = 3 + (k % 3) * 3
+        rad = px(3) + (k % 3) * px(3)
         ring = (np.abs(np.sqrt((xx - ex) ** 2 + ((yy - ey) * 2.2) ** 2) - rad) < 0.6) & shape
         img[ring, :3] = E.hx(W_["sheen3"] if not flash else W_["lit2"])
         # capo spezzato: rame
@@ -485,7 +492,7 @@ def build_cable(layers_dir=None, nframes=6):
         if flash:
             # due o tre archi lunghi verso l'alto e di lato
             for i, a0 in enumerate((-math.pi * 0.62, -math.pi * 0.30, -math.pi * 0.85)[:3 if k == 0 else 2]):
-                arc(img, r, ex, ey - 1, r.randint(16, 24), a0 + r.uniform(-0.15, 0.15))
+                arc(img, r, ex, ey - 1, px(r.randint(16, 24)), a0 + r.uniform(-0.15, 0.15))
             for (dy, dx) in ((0, 0), (-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (-2, 0)):
                 yi, xi = ey - 1 + dy, ex + dx
                 if 0 <= yi < h and 0 <= xi < w:
@@ -494,10 +501,10 @@ def build_cable(layers_dir=None, nframes=6):
         else:
             # crepitio: archi corti e qualche scintilla
             for s_ in range(r.randint(2, 3)):
-                arc(img, r, ex, ey - 1, r.randint(5, 9), r.uniform(-math.pi * 0.95, -math.pi * 0.05), jag=0.9)
+                arc(img, r, ex, ey - 1, px(r.randint(5, 9)), r.uniform(-math.pi * 0.95, -math.pi * 0.05), jag=0.9)
             for s_ in range(r.randint(2, 4)):
-                xi = ex + r.randint(-6, 6)
-                yi = ey - r.randint(2, 9)
+                xi = ex + px(r.randint(-6, 6))
+                yi = ey - px(r.randint(2, 9))
                 if 0 <= yi < h and 0 <= xi < w:
                     img[yi, xi, :3] = ARC_MID
                     img[yi, xi, 3] = 255
@@ -511,15 +518,15 @@ def build_cable(layers_dir=None, nframes=6):
         atlas[pad:pad + h, x:x + w] = img
         rects.append([x, pad, w, h])
     anc = [CABLE_ANCHOR[0] - X0, CABLE_ANCHOR[1] - Y0]
-    hit = [[-22, -6, 44, 6]]
+    hit = [[-px(22), -px(6), 2 * px(22), px(6)]]             # [-28, -8, 56, 8]
     fr = []
     for k in range(nframes):
         ev = ["sfx:zap"] if k == 0 else []
         fr.append(dict(rect=rects[k], anchor=anc, ticks=3 if k in flash_frames else 4, hurt=[], hit=hit,
                        events=ev, tags=["active"], dx=0))
-    # ostacolo: si disegna con l'ancora in (x 1250, y 150), sotto gli attori (sta sul suolo), e copre tutta la
-    # fascia calpestabile fra x 1224 e 1280; 'hit' è a livello del suolo: il codice lo applica a tutta la
-    # profondità della fascia (y 150-208) fra x 1230 e 1270 quando l'attore non è in aria
+    # ostacolo: si disegna con l'ancora in (x 1563, y 188), sotto gli attori (sta sul suolo), e copre tutta la
+    # fascia calpestabile fra x 1528 e 1603; 'hit' è a livello del suolo: il codice lo applica a tutta la
+    # profondità della fascia (y 188-260) fra x 1538 e 1588 quando l'attore non è in aria
     meta = {"id": "cable", "format": 1, "image": "cable.png", "pixels_per_meter": int(E.PPM),
             "animations": {"idle": dict(loop=True, frames=fr)}}
     save(atlas, meta, "cable")

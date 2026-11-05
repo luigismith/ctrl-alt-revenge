@@ -30,10 +30,10 @@ gdscript/warnings/integer_division=0
 
 [display]
 
-window/size/viewport_width=384
-window/size/viewport_height=216
-window/size/window_width_override=1152
-window/size/window_height_override=648
+window/size/viewport_width=480
+window/size/viewport_height=270
+window/size/window_width_override=1440
+window/size/window_height_override=810
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 window/stretch/scale_mode="integer"

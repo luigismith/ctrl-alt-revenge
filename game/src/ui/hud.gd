@@ -19,7 +19,7 @@ var _gold := Color8(255, 226, 122)
 
 
 func _ready() -> void:
-	size = Vector2(384, 216)
+	size = View.SIZE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait = UiArt.portrait(&"gig")
 	_text = UiArt.color("text", _text)

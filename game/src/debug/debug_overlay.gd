@@ -26,8 +26,8 @@ func _draw() -> void:
 	var p := level.player
 	if p != null:
 		var y0 := roundf(p.py)
-		draw_rect(Rect2(level.view_left(), y0 - 10, 384, 1), LANE)
-		draw_rect(Rect2(level.view_left(), y0 + 10, 384, 1), LANE)
+		draw_rect(Rect2(level.view_left(), y0 - 10, View.W, 1), LANE)
+		draw_rect(Rect2(level.view_left(), y0 + 10, View.W, 1), LANE)
 
 
 func _box(r: Rect2, c: Color) -> void:

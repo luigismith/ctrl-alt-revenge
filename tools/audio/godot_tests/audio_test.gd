@@ -36,7 +36,7 @@ func _ready() -> void:
 		int(info.get("sample_rate", 0)), SEEK_MID_S, _seek_end, AudioServer.get_mix_rate()])
 	var bg := ColorRect.new()
 	bg.color = Color(0.07, 0.06, 0.14)
-	bg.size = Vector2(384, 216)
+	bg.size = Vector2(480, 270)
 	add_child(bg)
 	_label = Label.new()
 	_label.position = Vector2(8, 8)

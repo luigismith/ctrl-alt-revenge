@@ -59,7 +59,7 @@ var texture: Texture2D
 var image_size: Vector2i = Vector2i.ZERO
 ## La texture è una CanvasTexture con la normal map (campo normal_image): riceve le luci dinamiche.
 var has_normals: bool = false
-var pixels_per_meter: int = 48
+var pixels_per_meter: int = View.PPM
 var animations: Dictionary[StringName, AnimClip] = {}
 ## Errori di struttura: con errori il file non si usa.
 var errors: PackedStringArray = []
@@ -134,9 +134,9 @@ static func load_json(path: String) -> SpriteSheet:
 	s.id = StringName(str(d.get("id", path.get_file().get_basename())))
 	if int(d.get("format", 0)) != 1:
 		s.errors.append("format deve essere 1")
-	s.pixels_per_meter = int(d.get("pixels_per_meter", 48))
-	if s.pixels_per_meter != 48:
-		s.warnings.append("pixels_per_meter = %d invece di 48" % s.pixels_per_meter)
+	s.pixels_per_meter = int(d.get("pixels_per_meter", View.PPM))
+	if s.pixels_per_meter != View.PPM:
+		s.warnings.append("pixels_per_meter = %d invece di %d" % [s.pixels_per_meter, View.PPM])
 	var image_name := str(d.get("image", ""))
 	if image_name == "":
 		s.errors.append("manca image")

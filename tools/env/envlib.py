@@ -11,7 +11,12 @@ Sistema di riferimento della scena (metri): X lungo la strada, Y profondità (lo
 Z in alto. Sullo schermo (px, 1x):
     x = KX * X + KYX * Y
     y = OY - KYY * Y - KZ * Z
-con OY = 150: il bordo posteriore della fascia calpestabile (Y = 0, Z = 0) cade su y = 150.
+con OY = 188: il bordo posteriore della fascia calpestabile (Y = 0, Z = 0) cade su y = 188.
+
+Scala: dal 5 novembre 2026 lo schermo è 480x270 e la vista ha 60 px/m (prima 384x216 e 48 px/m), tutto più grande
+del 25%. Le posizioni di progetto del layout restano scritte in px a 48 px/m (DESIGN_PPM) e si convertono qui:
+design_X() le porta in metri, px() porta una misura in pixel di progetto ai pixel di oggi con floor(p * 1,25 + 0,5),
+la stessa regola dei dati del livello nel codice del gioco.
 """
 from __future__ import annotations
 
@@ -27,20 +32,29 @@ from PIL import Image
 # ------------------------------------------------------------------ vista (= tools/sprites/camera.json)
 YAW = 30.0
 PITCH = 12.0
-PPM = 48.0
+PPM = 60.0
+DESIGN_PPM = 48.0                                            # scala dei numeri di progetto in px (layout, props)
+S = PPM / DESIGN_PPM                                         # 1,25
 SS = 4
 KEY_CAM = np.array([0.3811, 0.702, 0.6017], np.float32)     # direzione verso la luce chiave, spazio telecamera
 KEY_CAM /= np.linalg.norm(KEY_CAM)
 OUTLINE = "#140e1e"                                          # contorno dei personaggi
 K_SHEAR = math.tan(math.radians(YAW)) * math.sin(math.radians(PITCH))
-KX = PPM * math.cos(math.radians(YAW))                       # 41.57 px per metro lungo la strada
-KYX = PPM * math.sin(math.radians(YAW))                      # 24.0 px a destra per metro di profondità
-KYY = PPM * math.sin(math.radians(PITCH)) / math.cos(math.radians(YAW))   # 11.52 px in su per metro di profondità
-KZ = PPM * math.cos(math.radians(PITCH))                     # 46.95 px per metro di altezza
-OY = 150.0
-LEVEL_W = 1920
-SCREEN_W, SCREEN_H = 384, 216
-BAND = (150, 208)
+KX = PPM * math.cos(math.radians(YAW))                       # 51.96 px per metro lungo la strada
+KYX = PPM * math.sin(math.radians(YAW))                      # 30.0 px a destra per metro di profondità
+KYY = PPM * math.sin(math.radians(PITCH)) / math.cos(math.radians(YAW))   # 14.40 px in su per metro di profondità
+KZ = PPM * math.cos(math.radians(PITCH))                     # 58.69 px per metro di altezza
+
+
+def px(p):
+    """Misura in pixel di progetto (48 px/m) -> pixel di oggi (60 px/m): floor(p * 1,25 + 0,5)."""
+    return int(math.floor(p * S + 0.5))
+
+
+OY = float(px(150))                                          # 188
+LEVEL_W = px(1920)                                           # 2400
+SCREEN_W, SCREEN_H = px(384), px(216)                        # 480 x 270
+BAND = (px(150), px(208))                                    # (188, 260)
 
 LAB = os.path.join(os.environ.get("USERPROFILE", os.path.expanduser("~")), "ctrlaltrevenge-lab")
 BLENDER = os.path.join(LAB, "tools", "blender-4.5.15", "blender.exe")
@@ -73,6 +87,12 @@ def to_screen(X, Y, Z=0.0):
 def x_to_X(x, Y=0.0):
     """x schermo (px del mondo) -> X lungo la strada, alla profondità Y."""
     return (x - KYX * Y) / KX
+
+
+def design_X(xs, Y=0.0):
+    """x di progetto (px del mondo a 48 px/m) -> X lungo la strada, alla profondità Y. Il punto resta dove era in
+    metri: sullo schermo di oggi cade in xs * 1,25."""
+    return x_to_X(xs * S, Y)
 
 
 # ------------------------------------------------------------------ colore

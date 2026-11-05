@@ -100,14 +100,14 @@
   "ombra": {
     "image": "ombra.png",
     "frame": [
-      48,
-      12
+      60,
+      15
     ],
     "count": 3,
     "ticks": 0,
     "anchor": [
-      24,
-      6
+      30,
+      7
     ],
     "loop": false,
     "mode": "variants",
@@ -116,7 +116,7 @@
       "media",
       "piccola"
     ],
-    "note": "Non è un'animazione: fotogramma 0 = ombra grande (46x10, riempie il fotogramma: bruto, corpi a terra; è anche quella da stirare se si vuole una larghezza qualsiasi), 1 = media (36x8: GIG e punk), 2 = piccola (24x6: oggetti, personaggi in alto nel salto). Ellisse semitrasparente centrata sull'ancora, da disegnare in (x, y) prima dello sprite; a 1x resta perfetta al pixel."
+    "note": "Non è un'animazione: fotogramma 0 = ombra grande (58x12, riempie il fotogramma: bruto, corpi a terra; è anche quella da stirare se si vuole una larghezza qualsiasi), 1 = media (44x10: GIG e punk), 2 = piccola (30x8: oggetti, personaggi in alto nel salto). Ellisse semitrasparente centrata sull'ancora, da disegnare in (x, y) prima dello sprite; a 1x resta perfetta al pixel."
   },
   "rain_streak": {
     "image": "rain_streak.png",

@@ -3,7 +3,7 @@
  "outfit": "punk",
  "hair_meshes": [],
  "normals": "proxy",
- "frame_px": 208,
+ "frame_px": 260,
  "reshape": {
   "pelvis": [
    0.8,
@@ -211,10 +211,10 @@
  "pose_params": {},
  "boxes": {
   "head_r": [
-   6,
-   7
+   8,
+   9
   ],
-  "torso_pad": 3
+  "torso_pad": 4
  },
  "portrait": {
   "action": "Idle_Loop",
@@ -890,7 +890,7 @@
    "eye": "dark"
   },
   "ao_k": 0,
-  "min_cluster": 18,
+  "min_cluster": 28,
   "cel": {
    "thr": [
     0.22
@@ -958,7 +958,7 @@
      "TOP_SEAM",
      "TOP_DARK"
     ],
-    "min_px": 4
+    "min_px": 6
    },
    "head_mats": [
     "SKIN",

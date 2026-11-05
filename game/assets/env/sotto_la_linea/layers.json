@@ -1,9 +1,9 @@
 {
   "format": 1,
-  "level_width": 1920,
+  "level_width": 2400,
   "floor_band": [
-    150,
-    208
+    188,
+    260
   ],
   "layers": [
     {
@@ -18,7 +18,7 @@
       "name": "far",
       "image": "far.png",
       "scroll": 0.125,
-      "y": 26,
+      "y": 33,
       "repeat_x": 0,
       "z": -90,
       "emissive": "far_emis.png"
@@ -27,7 +27,7 @@
       "name": "mid",
       "image": "mid.png",
       "scroll": 0.25,
-      "y": 14,
+      "y": 18,
       "repeat_x": 0,
       "z": -80,
       "emissive": "mid_emis.png"
@@ -54,7 +54,7 @@
       "name": "floor",
       "image": "floor.png",
       "scroll": 1.0,
-      "y": 130,
+      "y": 162,
       "repeat_x": 0,
       "z": -10,
       "emissive": "floor_emis.png"

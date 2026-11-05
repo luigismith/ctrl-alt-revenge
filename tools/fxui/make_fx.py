@@ -425,11 +425,12 @@ def dust_skid():
 # ------------------------------------------------------------------------------------
 
 def ombra():
-    W, H = 48, 12
-    cx, cy = 24.0, 6.0
+    # Misure a 60 px/m (dal 5 novembre 2026; prima 48x12 a 48 px/m).
+    W, H = 60, 15
+    cx, cy = 30.0, 7.0
     frames = []
     # fotogramma 0 = la più grande, che riempie il fotogramma: va bene anche a chi la stira
-    for (rx, ry) in ((23, 5), (18, 4), (12, 3)):
+    for (rx, ry) in ((29, 6), (22, 5), (15, 4)):
         img = pix.new(W, H)
         outer = pix.ellipse_mask(W, H, cx, cy, rx, ry)
         inner = pix.ellipse_mask(W, H, cx, cy, rx * 0.72, ry * 0.62)
@@ -438,7 +439,7 @@ def ombra():
         pix.paint(img, outer, pix.with_alpha(P.SHADOW, 150))
         pix.paint(img, inner, pix.with_alpha(P.SHADOW, 205))
         frames.append(img)
-    return frames, (W, H), (24, 6), 0
+    return frames, (W, H), (30, 7), 0
 
 
 RAIN_SLANT = 4   # la pioggia scende di 4 px per ogni px verso sinistra (pendenza 0,25)
@@ -611,9 +612,9 @@ EFFECTS = {
     "ombra": (ombra, {
         "loop": False, "mode": "variants",
         "variants": ["grande", "media", "piccola"],
-        "note": ("Non è un'animazione: fotogramma 0 = ombra grande (46x10, riempie il fotogramma: bruto, "
+        "note": ("Non è un'animazione: fotogramma 0 = ombra grande (58x12, riempie il fotogramma: bruto, "
                  "corpi a terra; è anche quella da stirare se si vuole una larghezza qualsiasi), "
-                 "1 = media (36x8: GIG e punk), 2 = piccola (24x6: oggetti, personaggi in alto nel "
+                 "1 = media (44x10: GIG e punk), 2 = piccola (30x8: oggetti, personaggi in alto nel "
                  "salto). Ellisse semitrasparente centrata sull'ancora, da disegnare in (x, y) prima "
                  "dello sprite; a 1x resta perfetta al pixel.")}),
     "rain_streak": (rain_streak, {

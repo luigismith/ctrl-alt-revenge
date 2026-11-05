@@ -36,10 +36,10 @@ func advance_anim() -> void:
 func play_events() -> void:
 	for e in anim.take_events():
 		if e.begins_with("sfx:"):
-			if level.sound_enabled and px > level.view_left() - 32.0 and px < level.view_right() + 32.0:
+			if level.sound_enabled and px > level.view_left() - 40.0 and px < level.view_right() + 40.0:
 				Sfx.play_at(StringName(e.substr(4)), px, 0.05, event_volume_db)
 		elif e.begins_with("fx:"):
-			level.fx.spawn(StringName(e.substr(3)), px, py - ph - 20.0, 1, depth_z(2))
+			level.fx.spawn(StringName(e.substr(3)), px, py - ph - 25.0, 1, depth_z(2))
 
 
 static func clip_has_sfx(c: AnimClip) -> bool:
