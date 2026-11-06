@@ -19,11 +19,12 @@ Aggiornato il 4 novembre 2026. Il piano dice in che ordine si fa il gioco, cosa 
 | **D2** | **Demo 2 sul sito: prologo più capitolo 1** | 5-10 | 1 | 3 | |
 | 4 | Gli altri capitoli dell'atto I | 140-200 | 10-15 | D2 | |
 | 5 | Atti II e III, con i boss | 350-500 | 25-35 | 4 | |
+| N | Regia delle scene: filmati, primi piani, presentazioni dei boss, musica delle scene | 20-30 | 3-5 | 1 | |
 | M | Murales: le circa 75 vignette della storia | 75-180 | 5-8 | 0 | in parallelo |
 | S | Musica: circa 12-15 brani | 20-30 | 6-10 | - | in parallelo |
 | T | Sistemi: menu, salvataggi, opzioni, accessibilità, inglese | 30-50 | 3-5 | 1 | in parallelo |
 | F | Rifinitura, prove su più PC, build per Windows, pagina del negozio | 40-60 | 10-15 | 5 | |
-| | **Totale** | **circa 770-1200** | **circa 70-105** | | |
+| | **Totale** | **circa 790-1230** | **circa 75-110** | | |
 
 ## Le tappe
 
@@ -53,14 +54,36 @@ Una stanza senza grafica in cui si tarano tutte le mosse con Luigi, prima di cos
 **Il resto della tappa, in quest'ordine** (scelto da Luigi il 5 novembre 2026):
 1. la taratura di tempi e distanze dell'hacking, alla prova col pad;
 2. l'esattore di professione, che para e carica (fatto il 5 novembre 2026: la guardia salta al terzo colpo parato, e la carica a vuoto lo lascia stordito contro il bordo; con le sue animazioni di guardia, carica e stordimento, e gli effetti sonori nuovi, montati da suoni già pronti con licenza libera);
-3. gli sprite veri del rider e dell'esattore dalla pipeline 3D (ora il rider usa quello del punk, ricolorato), poi le GIF e i video del sito rifatti con i nemici nuovi;
-4. la prova col pad che chiude la tappa.
+3. ~~gli sprite veri del rider e dell'esattore~~: spostati dopo il prologo in grigio, insieme alla grafica nuova (scelta di Luigi del 5 novembre 2026: prima il gameplay, poi la grafica, così gli sprite non si fanno due volte). Fino ad allora il rider usa lo sprite del punk e l'esattore quello del bruto, ricolorati;
+4. la prova col pad: si fa direttamente sul prologo in grigio, che parte subito (scelta di Luigi: «subito il prologo»).
 
 ### 2. Prologo
 
 Il cimitero di San Brunone e il garage. È il tutorial, e cresce con GIG: prima del riavvio del braccio niente acrobazie e niente hacking, dopo il riavvio arriva il doppio salto. Comprende gli Esattori con i loro segni di riconoscimento e le prime vignette a fumetto.
 
 **È finito quando** si gioca dall'inizio alla fine, i test e il replay passano, e la lista di coerenza (luoghi, ore, meteo, luna) non ha errori aperti.
+
+**Fatto il 5 novembre 2026:** il prologo in grigio si gioca dall'inizio alla fine, dal titolo (voce PROLOGO). Prima del riavvio GIG ha un braccio solo: corre, salta, scivola e si aggrappa alle sporgenze con la mano destra, a fatica. Il percorso va dal cimitero al garage passando per l'arena del pignoramento e per la fuga sotto la pioggia. Nel garage c'è il riavvio con i tre tasti, poi arriva la Spinta e si esce dal lucernario prima che gli Esattori sfondino la porta. Ci sono le ripartenze ai cartelli, il pilota automatico che lo finisce da solo in circa un minuto, e 7 test.
+
+**Fatto il 6 novembre 2026:** GIG col braccio morto. Finché il braccio è bloccato ha uno sprite suo, `gig_spento`: il braccio sinistro pende spento e lo muove una simulazione, con la gravità e il moto del corpo. Nell'arena combatte con la sola destra: diretto, diretto e, se i due colpi vanno a segno, la mazza, cioè il braccio morto sollevato con la destra e abbattuto sul nemico. Niente prese né calcio in salto.
+
+**Il resto della tappa:** il messo, l'inseguimento nella fuga, la Vista e il primo registro nascosto, le scene vere al posto delle vignette provvisorie (vedi la tappa N), poi la prova col pad.
+
+### N. Regia delle scene
+
+Il gioco non è tutto gameplay. Luigi, 6 novembre 2026: «la parte narrativa è importante». Servono filmati di presentazione e d'intermezzo, con i personaggi che parlano, le presentazioni dei boss, immagini animate e primi piani d'effetto.
+
+Lo stile è misto:
+- i murales di Totò, animati, per l'introduzione, i ricordi e i passaggi fra i capitoli;
+- le scene nel motore, con le bande nere e i primi piani grandi, per gli Esattori, i boss e le battute brevi.
+
+Le parti del lavoro:
+- **Il lettore delle scene.** Un formato di dati per ogni scena (inquadrature, livelli d'immagine, movimenti di camera, battute, suoni e musica) e il nodo che lo riproduce. Le battute avanzano a pressione. Durante una scena la simulazione si ferma, come nella pausa, quindi replay e test non cambiano. 14-20 ore.
+- **I testi.** Le battute non stanno nel repo pubblico: stanno in una cartella privata che entra solo nella build. La demo web ha quelle del prologo.
+- **I primi piani.** Partono dal nostro render 3D del volto, passato all'AI per lo stile dei murales; palpebre, bocca e luci le animano gli script.
+- **La musica delle scene,** con Suno. 3-5 ore.
+
+**È finita quando** le scene del prologo sostituiscono le vignette provvisorie, avanzano a pressione e i test passano.
 
 ### 3. Capitolo 1, «I tetti dei Tamburi»
 

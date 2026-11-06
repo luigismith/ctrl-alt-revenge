@@ -4,10 +4,10 @@
   - la specifica tecnica dello slice è `docs/specifica-slice.md`;
   - la storia è `docs/lore/storia.md`;
   - la ricerca su Taranto è `docs/lore/ricerca-taranto.md`;
-  - il gameplay è `docs/gameplay.md`.
+  - il gameplay è `docs/lore/gameplay.md`.
 
   Storia, ricerca e gameplay sono privati: vedi "Storia privata" più sotto.
-- **Lingua:** italiano, con gli accenti giusti, per testi, commenti e messaggi di commit.
+- **Lingua:** italiano, con gli accenti giusti, per testi, commenti e messaggi di commit. Con Luigi si parla sempre in italiano, anche nei resoconti e nelle domande. I prompt per Gemini, ChatGPT e gli altri strumenti AI invece si scrivono in inglese (Luigi, 6 novembre 2026: «anzi è meglio»).
 
 ## Come lavora Luigi
 
@@ -27,6 +27,17 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
   - i puzzle di hacking con il braccio cyber.
 
   Non chiamarlo "picchiaduro". Storia con intermezzi a fumetto: i murales di Totò, in pixel art con lo stile della street art.
+- **La parte narrativa conta.** Luigi, 6 novembre 2026: «non deve essere tutto tutto gameplay, la parte narrativa è importante». Servono:
+  - filmati di presentazione e d'intermezzo, con i personaggi che parlano;
+  - le presentazioni dei boss prima dei combattimenti;
+  - immagini animate e primi piani d'effetto.
+
+  Senza strafare: non è un gioco di Kojima. Come si fanno (Luigi, 6 novembre 2026; decisione 68 della storia):
+  - **stile misto:** i murales di Totò, animati, per l'introduzione, i ricordi e i passaggi fra i capitoli; le scene nel motore, con le bande nere e i primi piani grandi, per gli Esattori, i boss e le battute brevi;
+  - **i primi piani:** il nostro render 3D del volto passato a ChatGPT o a Gemini per lo stile dei murales; palpebre, bocca e luci le animano i nostri script;
+  - **le battute avanzano a pressione,** come in Celeste;
+  - **ogni scena ha la sua musica,** fatta con Suno (Luigi: «mi raccomando anche alle musiche per le scene»).
+- **Servizi AI:** Claude si aiuta con ChatGPT, Gemini o altri servizi gratuiti tutte le volte che serve (Luigi, 6 novembre 2026). Valgono le regole sulle immagini in "Licenze e file".
 - **Budget:** costo zero. Sono ammessi strumenti gratuiti anche solo per uso non commerciale; di ognuno si annotano la licenza e cosa servirebbe per vendere il gioco.
 - **Persone reali:** i nomi veri entrano nel gioco e nei file pubblici solo con il consenso.
   - Il MiniBar di Ignazio, il bar dei Tamburi, ce l'ha (Luigi, 4 novembre 2026).
@@ -39,13 +50,14 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
 
 Luigi ha deciso il 4 novembre 2026 che la storia completa non va nel repo pubblico.
 
-- **Dove sta:** `docs/lore/` e `docs/gameplay.md` restano nella cartella del repo, ma il repo pubblico li ignora con `.gitignore`.
+- **Dove sta:** `docs/lore/`, con il gameplay (`docs/lore/gameplay.md`), resta nella cartella del repo, ma il repo pubblico la ignora con `.gitignore`.
 - **La copia:** con la cronologia, sta nel repo GitHub privato `luigismith/ctrl-alt-revenge-storia`; `docs/lore/` è un repo git a parte.
 - **Fuori dai file privati** (repo pubblico, sito, messaggi dei commit):
   - niente spoiler: colpi di scena, finale, destino dei personaggi, identità dei boss;
   - niente sceneggiatura;
   - niente nomi veri senza consenso.
 - **Cosa resta pubblico:** il mondo e i personaggi, senza spoiler, stanno in `docs/mondo.md` e nel sito.
+- **L'eccezione del prologo:** la demo web contiene le battute delle scene del prologo (Luigi, 6 novembre 2026). Nel repo pubblico non ci sono: la build le prende dalla cartella privata, che git ignora.
 
 ## Musica
 
@@ -94,6 +106,9 @@ Le skill sono sotto licenza LGPL-3.0, il nostro codice è MIT. Non copiare il lo
 
 - Gli asset del gioco sono sotto LicenseRef-CAR-Assets, il codice è MIT, gli script bpy sono GPL (vedi `REUSE.toml`).
 - Nel repo non va la musica.
-- **Immagini generate con AI.** Dal 4 novembre 2026 Luigi le ammette come base dei volti dei murales, con i tool migliori che troviamo; vanno dichiarate nei crediti. Il resto della grafica nasce dalla nostra pipeline. Le due locandine fatte con ChatGPT restano fuori dal repo.
+- **Immagini generate con AI.** Dal 4 novembre 2026 Luigi le ammette come base dei volti dei murales, con i tool migliori che troviamo; vanno dichiarate nei crediti. Le due locandine fatte con ChatGPT restano fuori dal repo.
+  - Dal 6 novembre 2026 anche come base delle **ambientazioni** (Luigi: «cerca delle immagini di taranto pertinenti, dalle a gemini falle generare le ambientazioni»). Le basi si fanno con Gemini o con ChatGPT (Luigi ha l'abbonamento Plus, dal 6 novembre 2026) e diventano pixel art con `tools/ambienti/`; gli originali stanno nella cartella privata condivisa, non nel repo.
+  - A Gemini e a ChatGPT si caricano solo foto con licenza che lo permette senza obblighi sull'immagine nuova (CC0, pubblico dominio, CC BY) e i nostri render. Le foto CC BY-SA o con diritti riservati si guardano soltanto, per scrivere i prompt.
+  - Personaggi e oggetti animati restano della nostra pipeline 3D.
 - Prima di ogni commit gira `tools/guard_assets.py`, tramite l'hook in `tools/hooks`.
 - Sono ammessi anche strumenti gratuiti per uso non commerciale. Annota la licenza di ognuno e cosa servirebbe per vendere il gioco.

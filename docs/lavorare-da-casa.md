@@ -9,7 +9,7 @@ CTRL+ALT REVENGE si sviluppa su due PC: quello di **lavoro** e quello di **casa*
 | **Repo**: codice, grafica ed effetti sonori del gioco, documenti, script | `Documenti\ClaudeCode\ctrlaltrevenge`, nel OneDrive di lavoro | da solo, con OneDrive. GitHub ne tiene una copia di sicurezza |
 | **Laboratorio**: Godot, Blender, FFmpeg, Python, modelli 3D, musica segnaposto, ricerca | `%USERPROFILE%\ctrlaltrevenge-lab`, su ogni PC, **fuori** da OneDrive | lo crea lo script `prepara_laboratorio.ps1` (vedi sotto) |
 | **Cartella privata condivisa**: modelli CC0, note private, ricerca, locandine, skill di Claude | `Documenti\ClaudeCode\ctrlaltrevenge-lab-condiviso`, nel OneDrive di lavoro, accanto al repo | da sola, con OneDrive. La riempie lo script `aggiorna_condiviso.ps1` |
-| **Storia**: `docs\lore\` e `docs\gameplay.md` | nella cartella del repo, ma fuori dal repo pubblico | da sola, con OneDrive. La copia di sicurezza di `docs\lore\` è un repo privato su GitHub |
+| **Storia e gameplay**: `docs\lore\` (con `gameplay.md`) | nella cartella del repo, ma fuori dal repo pubblico | da sola, con OneDrive. La copia di sicurezza è un repo privato su GitHub |
 | **Brani di Suno** | solo nel laboratorio di ogni PC (`suno\` e `music\`) | non viaggiano: vedi la sezione 4 |
 
 Il **OneDrive di lavoro** è quello con l'account dell'azienda: in Esplora file la sua cartella si chiama "OneDrive -" seguito dal nome dell'azienda, in PowerShell è `$env:OneDriveCommercial`.
@@ -26,10 +26,10 @@ Il repo `ctrl-alt-revenge` su GitHub è pubblico.
 |---|---|
 | il codice del gioco e degli strumenti | la musica, sia quella segnaposto sia quella di Suno |
 | la grafica e gli effetti sonori fatti da noi | i modelli 3D e le animazioni CC0 di partenza (`sources`) |
-| i documenti pubblici: la specifica e questa guida | la storia completa: `docs\lore\` e `docs\gameplay.md` |
+| i documenti pubblici: la specifica e questa guida | la storia completa e il gameplay: `docs\lore\` |
 | `tools/setup`: l'elenco degli strumenti e gli script del laboratorio | le note private, la ricerca, le locandine fatte con ChatGPT, i programmi (Godot, Blender...), password e chiavi |
 
-La storia completa resta nella cartella del repo, ma il repo pubblico la ignora (è nel `.gitignore`). La copia di sicurezza di `docs\lore\`, con la cronologia, è il repo **privato** `ctrl-alt-revenge-storia`: come si aggiorna è nella sezione 3. `docs\gameplay.md` per ora non è in quel repo: arriva sull'altro PC con OneDrive, ma su GitHub non ne esiste una copia.
+La storia completa resta nella cartella del repo, ma il repo pubblico la ignora (è nel `.gitignore`). La copia di sicurezza di `docs\lore\`, con la cronologia e il gameplay (`docs\lore\gameplay.md`, dal 6 novembre 2026), è il repo **privato** `ctrl-alt-revenge-storia`: come si aggiorna è nella sezione 3.
 
 ## 2. La prima volta sul PC di casa
 
