@@ -266,7 +266,9 @@ def encode_ogg(x: np.ndarray, sr: int, dst: Path, meta_src: Path | None, tags: d
         cmd += ["-i", str(meta_src), "-map", "0:a", "-map_metadata", "1"]
     for k, v in tags.items():
         cmd += ["-metadata", f"{k}={v}"]
-    cmd += ["-c:a", "libvorbis", "-q:a", "6", "-f", "ogg", str(tmp_ogg)]
+    # bitexact: niente numero di serie Ogg a caso né tag dell'encoder, così lo stesso audio dà sempre
+    # lo stesso file (gli sha256 della musica segnaposto sono fissati in tools/setup/laboratorio.json)
+    cmd += ["-c:a", "libvorbis", "-q:a", "6", "-fflags", "+bitexact", "-f", "ogg", str(tmp_ogg)]
     r = run(cmd, timeout=900)
     if r.returncode != 0:
         raise RuntimeError("ffmpeg ha fallito:\n" + r.stderr[-2000:])

@@ -250,25 +250,6 @@
         "descrizione": "modelli e animazioni CC0 delle pipeline (Quaternius, Kenney, Warped City, Mesh2Motion, CMU, Rokoko, spike-out)"
       },
       {
-        "cartella": "music",
-        "descrizione": "musica segnaposto CC0: solo music.json, FONTI.md e i quattro OGG segnaposto (i brani veri, come quelli di Suno, non ci vanno)",
-        "regola": "musica",
-        "file_di_testo": [
-          "music.json",
-          "FONTI.md"
-        ],
-        "segnaposto_sha256": {
-          "title.ogg": "928e81ef21da9f73e80c92b4c08130b92d6859a9baf2088b551ed6d0a4db0073",
-          "stage1.ogg": "8c62ae5d2136ee155e3ed3149e32b51d4215eb4008858f429b54ef416a2f0e7e",
-          "stage1_arena.ogg": "ae81eaec950167649dacefc58e0550364a9bfb0c32d10c86afd6d46c6d507b03",
-          "clear.ogg": "b09e4a8daf60eb71fdf860797ac714c00891a70fa6258c3a3c31e533cad70ee8"
-        },
-        "nota_segnaposto": "sha256 dei brani segnaposto CC0 (Free VGMs di Safety Stoat Studios) preparati il 2026-11-03 con tools/audio/make_placeholder_music.py. Gli script copiano music solo se music.json elenca soltanto questi brani, ognuno con questo sha256, e se nella cartella non c'è nessun altro file (_work esclusa): altrimenti la trattano come privata e non la copiano. Se si rifà la musica segnaposto, si aggiornano qui gli hash.",
-        "escludi_cartelle": [
-          "_work"
-        ]
-      },
-      {
         "cartella": "note-private",
         "descrizione": "note private, fuori dal repo"
       },
@@ -331,6 +312,29 @@
         "godot-dialogue-system"
       ]
     }
+  },
+  "musica_segnaposto": {
+    "cartella": "music",
+    "descrizione": "musica segnaposto CC0 (Free VGMs di Safety Stoat Studios): music.json, FONTI.md e quattro OGG",
+    "nota": "Non viaggia nella cartella condivisa: prepara_laboratorio.ps1 la ricrea nel laboratorio con il generatore, se music\\ è vuota. Non tocca mai una music\\ con brani veri (per esempio di Suno) o file che non conosce.",
+    "generatore": "tools/audio/make_placeholder_music.py",
+    "argomenti": [
+      "--download"
+    ],
+    "file_di_testo": [
+      "music.json",
+      "FONTI.md"
+    ],
+    "segnaposto_sha256": {
+      "title.ogg": "f48b80dc4a85f993b70c1e1fc32cd88b8c720e4539e0d4470cd9abd306d33eda",
+      "stage1.ogg": "bbfefa3f440610ec374c95357c8038d9aa16a28656c0f7d63b7ffe736e817c71",
+      "stage1_arena.ogg": "bdb2881d6966cb430da1bf8f5750f69e96e1f691d90bd270b5c37330bad9835c",
+      "clear.ogg": "702779b1a77e54ea830792b45e2047e18c53852cda64d870df5f7d334ef5a964"
+    },
+    "nota_segnaposto": "sha256 degli OGG che il generatore rifà ogni volta uguali (ffmpeg con -fflags +bitexact), verificati il 2026-11-06 con due ricreazioni di fila. Una music\\ è segnaposto solo se music.json elenca soltanto questi brani, ognuno con questo sha256, e se non c'è nessun altro file (_work esclusa); la data \"prepared\" di music.json non conta. Se si cambia il generatore, si aggiornano qui gli hash.",
+    "escludi_cartelle": [
+      "_work"
+    ]
   },
   "verifica_finale": {
     "progetto_predefinito": "game",

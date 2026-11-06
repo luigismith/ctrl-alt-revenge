@@ -53,7 +53,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup\prepara_labora
 - Se manca qualcosa (git, Python 3.14 o uv), lo script si ferma e scrive i comandi per installarlo. Puoi anche lasciarlo fare a lui aggiungendo `-InstallaMancanti` in fondo al comando. Non servono i diritti di amministratore.
 - Se non trova la cartella condivisa si ferma subito, prima di scaricare qualsiasi cosa.
 - La prima volta ci vogliono da pochi minuti a un quarto d'ora, secondo la connessione: scarica circa 0,7 GB di programmi e copia circa 1,3 GB dalla cartella condivisa. Il laboratorio finito occupa circa 4 GB.
-- **Non tocca i tuoi file.** Dalla cartella condivisa prende solo i file più nuovi: non sostituisce mai un file del laboratorio con uno più vecchio, e quelli che sostituisce li mette prima da parte in `ctrlaltrevenge-lab\backup\<data>\`. Se in `music\` ci sono brani veri, non la tocca.
+- **Non tocca i tuoi file.** Dalla cartella condivisa prende solo i file più nuovi: non sostituisce mai un file del laboratorio con uno più vecchio, e quelli che sostituisce li mette prima da parte in `ctrlaltrevenge-lab\backup\<data>\`. La musica segnaposto la ricrea solo se `music\` è vuota: se ci sono brani veri o file che non conosce, non la tocca.
 - **Rifà da capo solo ciò che si può ricreare**, quando serve o con `-Forza`: i programmi, i due ambienti Python e Gioca.bat. Quando ricrea un ambiente Python, i pacchetti aggiunti a mano si perdono: l'elenco di quelli che c'erano finisce in `ctrlaltrevenge-lab\logs\`.
 - Alla fine scrive **Fatto** e un riepilogo. Se un passo non riesce, il riepilogo mostra anche i passi rimasti "non fatto". Per giocare: doppio clic su `%USERPROFILE%\ctrlaltrevenge-lab\Gioca.bat`.
 - Riavvia Claude Code, così vede le sei skill di Godot appena installate.
@@ -65,7 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup\prepara_labora
 | 1. Prerequisiti | controlla git con Git Bash, Python 3.14 (comando `py`) e uv |
 | 2-4. Godot, Blender, FFmpeg | li scarica dai siti ufficiali e controlla che siano identici agli originali (hash) |
 | 5-6. Python | crea il venv del laboratorio e installa PyMusicLooper, con le versioni fissate |
-| 7. Cartella condivisa | copia nel laboratorio `sources`, `music` (solo la musica segnaposto), `note-private`, `suno` (solo i testi) e `ricerca-2026-11-03` |
+| 7. Cartella condivisa e musica | copia nel laboratorio `sources`, `note-private`, `suno` (solo i testi) e `ricerca-2026-11-03`; se `music` è vuota, ricrea la musica segnaposto CC0 (scarica circa 40 MB) |
 | 8. Skill | installa le sei skill di Godot in `%USERPROFILE%\.claude\skills` |
 | 9. Gioca.bat | lo scrive con i percorsi di questo PC |
 | 10. Verifica | importa il gioco e lancia i test automatici: devono finire con `DONE` |
@@ -127,7 +127,8 @@ winget install --id astral-sh.uv -e
 
 ## 4. La musica (Suno)
 
-- **Oggi** il gioco usa musica segnaposto CC0 (Free VGMs di Safety Stoat Studios). Arriva con la cartella condivisa e sta in `%USERPROFILE%\ctrlaltrevenge-lab\music\`.
+- **Oggi** il gioco usa musica segnaposto CC0 (Free VGMs di Safety Stoat Studios). Non viaggia con la cartella condivisa: la ricrea `prepara_laboratorio.ps1` (passo 7) con `tools\audio\make_placeholder_music.py`, che riscarica i VGM originali, e viene sempre identica. Sta in `%USERPROFILE%\ctrlaltrevenge-lab\music\`.
+- **Sul Mac** `prepara_laboratorio.ps1` non c'è (è solo per Windows): finché non si prepara il laboratorio del Mac, la musica segnaposto si ricrea a mano dalla cartella del repo con `python3 -I tools/audio/make_placeholder_music.py --download`, con PyMusicLooper e un ffmpeg con libgme in `~/ctrlaltrevenge-lab/tools/ffmpeg/bin/`. Il gioco la cerca in `~/ctrlaltrevenge-lab/music/`.
 - **I brani veri** si faranno con Suno, con il tuo abbonamento Pro. Quando sarà il momento, Claude si collega e usa Suno direttamente nel tuo browser (Claude in Chrome), sul PC dove stai lavorando:
   1. genera le varianti con i prompt di `%USERPROFILE%\ctrlaltrevenge-lab\suno\PROMPT.md`;
   2. tu ascolti e scegli;
@@ -135,9 +136,8 @@ winget install --id astral-sh.uv -e
   4. lo prepara per il gioco con `tools\audio\prepare_music.py` (loop, volume, OGG in `ctrlaltrevenge-lab\music\`).
 - **I brani di Suno non vanno né nel repo né nella cartella condivisa.** Sull'altro PC si riscaricano dalla tua libreria di Suno, oppure lo fa Claude nel browser; poi si ripete il passo 4. Ricorda che ogni download conta nel limite del mese (vedi `PROMPT.md`).
 - **Come ti proteggono gli script.**
-  - `aggiorna_condiviso.ps1` copia da `music\` solo `music.json`, `FONTI.md` e i quattro OGG segnaposto, e solo se ognuno è identico (sha256) a quello fissato in `tools\setup\laboratorio.json`. Se trova un brano vero, un OGG diverso o un file che non conosce, non copia niente di `music\`.
-  - La cartella di lavoro `music\_work\` di `prepare_music.py` non viaggia mai. Da `suno\` si copiano solo i testi (`*.md`, `*.txt`).
-  - `prepara_laboratorio.ps1` fa gli stessi controlli: non tocca `music\` se ci sono brani veri, e non copia una `music\` condivisa che contiene file sconosciuti.
+  - `aggiorna_condiviso.ps1` non copia mai `music\` nella cartella condivisa. Da `suno\` copia solo i testi (`*.md`, `*.txt`).
+  - `prepara_laboratorio.ps1` ricrea la musica segnaposto solo se `music\` è vuota. Se ci sono già i quattro OGG segnaposto (sha256 uguali a quelli di `tools\setup\laboratorio.json`) non fa niente; se ci sono brani veri o file che non conosce, non tocca la cartella.
   - Gli script non possono riconoscere un brano salvato altrove: i brani tienili solo in `suno\` e in `music\`.
 - Durante lo sviluppo il gioco cerca la musica solo in `%USERPROFILE%\ctrlaltrevenge-lab\music\`: lascia il laboratorio nella sua cartella predefinita, altrimenti il gioco resta muto.
 
@@ -151,8 +151,8 @@ winget install --id astral-sh.uv -e
 | "Mancano dei prerequisiti" | manca git, Python 3.14 o uv | usa i comandi che lo script stampa, oppure rilancia con `-InstallaMancanti`; poi chiudi e riapri PowerShell |
 | "l'hash non torna" o "checksum ufficiale diverso" | download rovinato, oppure il file sul sito è cambiato | rilancia lo script, che riscarica. Se si ripete, non usare il file e chiedi a Claude |
 | Download lento o interrotto | la rete | rilancia: salta ciò che è già a posto e riparte da lì |
-| "music: nel laboratorio non c'è solo la musica segnaposto" | in `music\` ci sono brani veri, per esempio di Suno, o un brano preparato a metà | se hai preparato dei brani è normale: lo script non tocca la cartella. Altrimenti fai leggere il messaggio a Claude |
-| "music: nella cartella condivisa non c'è solo la musica segnaposto nota" | nella cartella condivisa è finito un file che non dovrebbe esserci | non copiarlo a mano: chiedi a Claude di controllare |
+| "musica: non toccata" nel riepilogo | in `music\` ci sono brani veri, per esempio di Suno, o un brano preparato a metà | se hai preparato dei brani è normale: lo script non tocca la cartella. Altrimenti fai leggere il messaggio a Claude |
+| "musica: ricreata, da controllare" | la musica segnaposto rifatta non è identica a quella fissata in `laboratorio.json` | il gioco suona lo stesso; fai leggere a Claude il log `ctrlaltrevenge-lab\logs\musica-segnaposto-<data>.log` |
 | "Prima di sostituirli ho messo da parte N file" | dalla cartella condivisa sono arrivate versioni più nuove di file del laboratorio | i file di prima sono in `ctrlaltrevenge-lab\backup\<data>\`: se ti servivano, recuperali da lì |
 | Il gioco parte ma è muto | manca `ctrlaltrevenge-lab\music\`, oppure il laboratorio non è nella cartella predefinita | rilancia `prepara_laboratorio.ps1` e lascia il laboratorio in `%USERPROFILE%\ctrlaltrevenge-lab` |
 | Gioca.bat dice "Godot non trovato" | il laboratorio non è pronto o è stato spostato | rilancia `prepara_laboratorio.ps1`: riscrive Gioca.bat con i percorsi giusti |
@@ -166,7 +166,7 @@ winget install --id astral-sh.uv -e
 
 ## 6. Dettagli per Claude
 
-- `tools/setup/laboratorio.json`: versioni, URL ufficiali e hash di tutto ciò che si scarica, più l'elenco delle cartelle che arrivano dalla cartella condivisa e le regole per `music` (gli sha256 dei quattro OGG segnaposto). Se si rifà la musica segnaposto, quegli hash vanno aggiornati, altrimenti gli script trattano `music` come privata e non la copiano più.
+- `tools/setup/laboratorio.json`: versioni, URL ufficiali e hash di tutto ciò che si scarica, più l'elenco delle cartelle che arrivano dalla cartella condivisa e la voce `musica_segnaposto` (il generatore e gli sha256 dei quattro OGG). Gli OGG si codificano con `-fflags +bitexact`, così due ricreazioni escono identiche; la data `prepared` di `music.json` non conta nel controllo. Se si cambia la musica segnaposto, quegli hash vanno aggiornati, altrimenti lo script la segnala "da controllare".
 - `tools/setup/prepara_laboratorio.ps1` e `tools/setup/aggiorna_condiviso.ps1`, con le funzioni comuni in `tools/setup/comune.ps1`. Funzionano in Windows PowerShell 5.1 e in PowerShell 7.
 - Le copie usano sempre robocopy `/XO`, anche con `-Forza`. `prepara_laboratorio.ps1`, prima di copiare, chiede a robocopy (`/L`) quali file sostituirebbe e li mette in `<laboratorio>\backup\<data>\`.
 - Variabili d'ambiente, tutte facoltative: `CAR_LAB` (laboratorio), `CAR_CONDIVISO` (cartella condivisa), `CAR_SKILLS_DIR` (skill). Gli stessi percorsi si possono dare agli script con `-Laboratorio`, `-Condiviso` e `-CartellaSkill`. `tools/env` e `tools/fxui` ignorano `CAR_LAB` e cercano solo `%USERPROFILE%\ctrlaltrevenge-lab`.
@@ -174,4 +174,4 @@ winget install --id astral-sh.uv -e
 - Nella verifica finale Godot gira con `APPDATA` spostata in `<laboratorio>\logs\verifica-<data>-appdata`: lì finisce `user://` del progetto (log, cache), non in `%APPDATA%\Godot\app_userdata`, dove stanno i dati del gioco. I log dell'importazione e dei test stanno in `<laboratorio>\logs\`.
 - Per provare gli script senza toccare il laboratorio vero: `-Laboratorio` (o `CAR_LAB`) e `-CartellaSkill` verso cartelle di prova, `-ProgettoGodot` verso una copia di `game` con accanto `THIRD-PARTY-NOTICES.md` (durante lo sviluppo i crediti lo cercano nella cartella sopra il progetto), `-Condiviso` verso una copia se si vuole provare anche la cartella condivisa.
 - Gli strumenti si verificano con i checksum ufficiali (SHA512-SUMS.txt di Godot, `.sha256` di Blender e di gyan.dev); i pacchetti Python si installano con `uv pip install --require-hashes --only-binary :all:` e gli sha256 di PyPI.
-- `downloads\free_vgms\` sta solo nel laboratorio del PC di lavoro: serve a `tools/audio/make_placeholder_music.py` per rifare la musica segnaposto, e si riscarica con `--download`.
+- `downloads\free_vgms\` (circa 40 MB, sha256 verificati) lo scarica `tools/audio/make_placeholder_music.py --download` in ogni laboratorio dove ricrea la musica segnaposto.

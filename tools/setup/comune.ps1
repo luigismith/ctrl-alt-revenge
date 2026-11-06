@@ -365,14 +365,8 @@ function Format-Elenco([string[]]$Voci, [int]$Massimo = 3) {
     return ('{0} e altri {1}' -f (($v[0..($Massimo - 1)]) -join ', '), ($v.Count - $Massimo))
 }
 
-# I soli file di music\ che gli script copiano: music.json, FONTI.md e gli OGG segnaposto del manifesto.
-function Get-FileMusica($Voce) {
-    $nomi = @(Get-Campo $Voce 'file_di_testo' @())
-    $nomi += @((Get-Campo $Voce 'segnaposto_sha256').PSObject.Properties | ForEach-Object { $_.Name })
-    return $nomi
-}
-
-# Stato di una cartella music\ (del laboratorio o della cartella condivisa), con le regole della voce "music" del manifesto.
+# Stato della cartella music\ del laboratorio, con le regole della voce "musica_segnaposto" del manifesto.
+# Conta solo quali file ci sono e lo sha256 degli OGG: la data "prepared" di music.json non conta.
 # Restituisce Stato e Motivo. Stato vale:
 #   'vuota'       niente music.json e nessun file che non sia un segnaposto noto;
 #   'segnaposto'  music.json elenca solo brani segnaposto che usano gli OGG del manifesto, ogni OGG ha lo sha256
@@ -380,7 +374,7 @@ function Get-FileMusica($Voce) {
 #   'privata'     c'è almeno un file che non è un segnaposto noto: un brano vero (per esempio di Suno), un OGG
 #                 diverso da quello fissato, un file di lavoro di prepare_music.py rimasto a metà;
 #   'illeggibile' music.json è rovinato.
-# Le sottocartelle in $EscludiCartelle (come _work di prepare_music.py) non contano: gli script non le copiano mai.
+# Le sottocartelle in $EscludiCartelle (come _work di prepare_music.py) non contano.
 # I file in $Ignora (desktop.ini, Thumbs.db...) non contano.
 function Get-StatoMusica {
     param([string]$Cartella, $Voce, [string[]]$EscludiCartelle = @(), [string[]]$Ignora = @())

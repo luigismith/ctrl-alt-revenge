@@ -13,8 +13,9 @@
           l'hash con i checksum ufficiali;
        5. crea il venv di Python con i pacchetti fissati (hash di PyPI);
        6. installa PyMusicLooper 3.6.0 (hash di PyPI);
-       7. copia dalla cartella privata condivisa in OneDrive: sources, music (solo la musica segnaposto),
-          note-private, suno (solo i testi), ricerca-2026-11-03;
+       7. copia dalla cartella privata condivisa in OneDrive: sources, note-private, suno (solo i testi),
+          ricerca-2026-11-03; se music\ è vuota, vi ricrea la musica segnaposto CC0 con
+          tools\audio\make_placeholder_music.py (non viaggia nella cartella condivisa);
        8. installa le sei skill di Godot per Claude Code;
        9. scrive Gioca.bat con i percorsi di questo PC;
       10. importa il progetto Godot e lancia i test: run_tests.gd deve stampare DONE.
@@ -22,7 +23,7 @@
     tools\setup\laboratorio.json. Non servono i diritti di amministratore.
     I file del laboratorio che arrivano dalla cartella condivisa (note, prompt, modelli, ricerca) non vengono mai
     sostituiti con file più vecchi; quelli che una copia più nuova sostituisce finiscono prima in backup\<data>.
-    music\ non si tocca se contiene brani veri o file che non sono la musica segnaposto nota.
+    music\ non si tocca se contiene già la musica segnaposto, brani veri o file che non conosce.
 
 .PARAMETER Forza
     Rifà da capo le cose che si possono ricreare: reinstalla Godot, Blender e FFmpeg (riusa gli archivi già
@@ -753,28 +754,45 @@ function Test-CondivisoCompleto([switch]$SoloAvviso) {
         'Per farla scaricare tutta subito: in Esplora file, tasto destro su ctrlaltrevenge-lab-condiviso > "Mantieni sempre su questo dispositivo".')
 }
 
-# Regole di music\: si copiano solo music.json, FONTI.md e gli OGG segnaposto del manifesto, e solo se la cartella
-# condivisa contiene esattamente la musica segnaposto nota e quella del laboratorio non ha brani veri.
-# Restituisce $true se si può copiare.
-function Test-MusicaCopiabile($Voce, [string]$Da, [string]$A, [string[]]$EscludiCartelle) {
-    $nome = [string]$Voce.cartella
+# La musica segnaposto non viaggia nella cartella condivisa: se music\ del laboratorio è vuota, la ricrea il
+# generatore del manifesto (scarica i brani CC0 da un commit fissato e ne controlla lo sha256), con il venv,
+# FFmpeg e PyMusicLooper del laboratorio. Una music\ con brani veri (per esempio di Suno) o file sconosciuti
+# non si tocca. Restituisce l'esito per il riepilogo.
+function Invoke-MusicaSegnaposto {
+    $m = $Manifesto.musica_segnaposto
+    $nome = [string]$m.cartella
+    $cartella = Join-Path $Lab $nome
+    $escludi = @($m.escludi_cartelle)
     $ignora = @($Manifesto.condiviso.escludi_file)
-    $qui = Get-StatoMusica $A $Voce $EscludiCartelle $ignora
-    if ($qui.Stato -eq 'privata' -or $qui.Stato -eq 'illeggibile') {
+    $qui = Get-StatoMusica $cartella $m $escludi $ignora
+    if ($qui.Stato -eq 'segnaposto') { Write-Ok "${nome}: c'è già la musica segnaposto."; return 'già a posto' }
+    if ($qui.Stato -ne 'vuota') {
         Write-Info "${nome}: nel laboratorio non c'è solo la musica segnaposto ($($qui.Motivo)): non la tocco."
-        return $false
+        return 'non toccata'
     }
-    $la = Get-StatoMusica $Da $Voce $EscludiCartelle $ignora
-    if ($la.Stato -eq 'vuota') {
-        Write-Avviso "${nome}: nella cartella condivisa non c'è la musica segnaposto ($($la.Motivo)): la salto."
-        return $false
+    $py = Join-Path (Join-Relativo $Lab $Manifesto.python.venv.cartella) 'Scripts\python.exe'
+    if (-not [System.IO.File]::Exists($py)) {
+        Stop-Errore "Per ricreare la musica segnaposto serve il venv del laboratorio, ma manca $py." @('Rilancia lo script con i passi venv e pymusiclooper.')
     }
-    if ($la.Stato -ne 'segnaposto') {
-        Write-Avviso "${nome}: nella cartella condivisa non c'è solo la musica segnaposto nota ($($la.Motivo)): non la copio. Avvisa Claude: lì non devono esserci brani veri."
-        return $false
+    $generatore = Join-Relativo $Radice $m.generatore
+    New-Cartella (Join-Path $Lab 'logs')
+    $log = Join-Path $Lab ('logs\musica-segnaposto-{0}.log' -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    Write-Info "${nome}: ricreo la musica segnaposto con $($m.generatore) (scarica circa 40 MB, ci vogliono un paio di minuti)..."
+    $argomenti = @('-I', $generatore) + @($m.argomenti)
+    $r = Invoke-Programma -Eseguibile $py -Argomenti $argomenti -TimeoutSec 3600 -Cartella $Radice -Ambiente @{ CAR_LAB = $Lab; PYTHONUTF8 = '1' }
+    Write-Testo $log ($r.Uscita + "`n" + $r.Errori)
+    if ($r.Codice -ne 0) {
+        Stop-Errore "Il generatore della musica segnaposto non è riuscito (codice $($r.Codice)); i messaggi sono in $log." @(
+            'Se è un problema di rete, rilancia lo script: riparte da qui.',
+            'Se dice che uno sha256 non corrisponde, non forzare: avvisa Claude.')
     }
-    Write-Info "${nome}: copio solo $((Get-FileMusica $Voce) -join ', ')."
-    return $true
+    $dopo = Get-StatoMusica $cartella $m $escludi $ignora
+    if ($dopo.Stato -ne 'segnaposto') {
+        Write-Avviso "${nome}: musica ricreata, ma non è quella fissata nel manifesto ($($dopo.Motivo)). Il gioco la usa lo stesso; avvisa Claude. Messaggi in $log."
+        return 'ricreata, da controllare'
+    }
+    Write-Ok "${nome}: musica segnaposto ricreata, uguale al manifesto (sha256)."
+    return 'ricreata'
 }
 
 function Invoke-Condivisi {
@@ -792,21 +810,16 @@ function Invoke-Condivisi {
         $escludiCartelle = @($c.escludi_cartelle) + @(Get-Campo $v 'escludi_cartelle' @())
         $escludiFile = @($c.escludi_file) + @(Get-Campo $v 'escludi_file' @())
         $soloFile = @(Get-Campo $v 'solo_file' @())
-        $senzaSottocartelle = $false
-        if ((Get-Campo $v 'regola' '') -eq 'musica') {
-            if (-not (Test-MusicaCopiabile $v $da $a $escludiCartelle)) { continue }
-            $soloFile = @(Get-FileMusica $v)
-            $senzaSottocartelle = $true
-        }
         $inv = Get-Inventario $da
         $nota = ''
         if ($inv.solo_online -gt 0) { $nota = "; $($inv.solo_online) sono ancora solo online e OneDrive li scarica adesso, può volerci un po'" }
         Write-Info ('{0}: {1} file, {2}{3}...' -f $nome, $inv.file, (Format-Dimensione $inv.byte), $nota)
-        $codice = Invoke-Copia -Da $da -A $a -SoloFile $soloFile -EscludiCartelle $escludiCartelle -EscludiFile $escludiFile -Backup (Join-Path $backup $nome) -SenzaSottocartelle:$senzaSottocartelle
+        $codice = Invoke-Copia -Da $da -A $a -SoloFile $soloFile -EscludiCartelle $escludiCartelle -EscludiFile $escludiFile -Backup (Join-Path $backup $nome)
         if (Test-Copiato $codice) { Write-Ok "$nome copiata (file nuovi o più recenti)."; $copiate++ } else { Write-Ok "$nome è già aggiornata." }
     }
-    if ($copiate -gt 0) { return 'copiato' }
-    return 'già a posto'
+    $musica = Invoke-MusicaSegnaposto
+    if ($copiate -gt 0) { return "copiato; musica: $musica" }
+    return "già a posto; musica: $musica"
 }
 
 function Invoke-Skill {
@@ -1060,7 +1073,7 @@ try {
     Show-Configurazione
     Test-Preliminari
 
-    $titoloCondivisi = 'File dalla cartella condivisa ({0})' -f (@($Manifesto.condiviso.nel_laboratorio | ForEach-Object { [string]$_.cartella }) -join ', ')
+    $titoloCondivisi = 'File dalla cartella condivisa ({0}) e musica segnaposto' -f (@($Manifesto.condiviso.nel_laboratorio | ForEach-Object { [string]$_.cartella }) -join ', ')
     $passi = @(
         @{ Nome = 'prerequisiti'; Titolo = 'Prerequisiti: git, Git Bash, Python 3.14, uv'; Azione = { Invoke-Prerequisiti } },
         @{ Nome = 'godot'; Titolo = 'Godot 4.7.2'; Azione = { Invoke-Strumento 'godot' } },

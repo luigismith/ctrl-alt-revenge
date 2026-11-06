@@ -8,13 +8,12 @@
 .DESCRIPTION
     La cartella condivisa è ctrlaltrevenge-lab-condiviso, accanto al repo (oppure $env:CAR_CONDIVISO).
     Lo script ci copia:
-      - dal laboratorio ($env:CAR_LAB o %USERPROFILE%\ctrlaltrevenge-lab): sources, music, note-private,
+      - dal laboratorio ($env:CAR_LAB o %USERPROFILE%\ctrlaltrevenge-lab): sources, note-private,
         suno (solo i testi, mai i brani), ricerca-2026-11-03;
       - le sei skill di Godot da %USERPROFILE%\.claude\skills (oppure $env:CAR_SKILLS_DIR);
       - le due locandine di riferimento da docs\riferimenti-estetica del repo, finché ci sono.
-    Da music copia solo music.json, FONTI.md e i quattro OGG segnaposto, e solo se ognuno ha lo sha256 fissato in
-    laboratorio.json e nella cartella non c'è nient'altro (la sottocartella _work di prepare_music.py non viaggia mai).
-    Se trova un brano vero, un OGG diverso o un file che non conosce, non copia music.
+    La musica non ci va mai: quella segnaposto la ricrea prepara_laboratorio.ps1 in ogni laboratorio, i brani di Suno
+    stanno solo nel laboratorio di ogni PC.
     Copia solo i file nuovi o più recenti: non cancella mai niente e non sostituisce mai un file della cartella
     condivisa con uno più vecchio. Alla fine scrive LEGGIMI.md e inventario.json.
     La cartella è privata: mai nel repo, mai condivisa con altri, niente brani di Suno.
@@ -118,36 +117,12 @@ function Copy-Voce($Voce, [string]$Destinazione, [switch]$SoloCondiviso) {
     $escludiCartelle = @($c.escludi_cartelle) + @(Get-Campo $Voce 'escludi_cartelle' @())
     $escludiFile = @($c.escludi_file) + @(Get-Campo $Voce 'escludi_file' @())
     $soloFile = @(Get-Campo $Voce 'solo_file' @())
-    $musica = ((Get-Campo $Voce 'regola' '') -eq 'musica')
-    if ($musica) {
-        $stato = Get-StatoMusica $da $Voce $escludiCartelle @($c.escludi_file)
-        if ($stato.Stato -ne 'segnaposto') {
-            $perche = @{
-                privata     = 'nel laboratorio non c''è solo la musica segnaposto nota'
-                illeggibile = 'music.json nel laboratorio è rovinato'
-                vuota       = 'nel laboratorio non c''è la musica segnaposto'
-            }[$stato.Stato]
-            Write-Avviso "${perche} ($($stato.Motivo)): non copio music. I brani veri, per esempio di Suno, non vanno nella cartella condivisa; lì resta la copia segnaposto di prima."
-            Add-Riga $nome $descrizione $Destinazione "non copiata: $($stato.Stato)"
-            return
-        }
-        # Solo music.json, FONTI.md e gli OGG segnaposto, e niente sottocartelle (_work).
-        $soloFile = @(Get-FileMusica $Voce)
-    }
     if ($soloFile.Count -gt 0) { Write-Info "Copio solo: $($soloFile -join ' ')" }
-    $codice = Invoke-Copia -Da $da -A $a -SoloFile $soloFile -EscludiCartelle $escludiCartelle -EscludiFile $escludiFile -SenzaSottocartelle:$musica -Forza:$Forza -Prova:$Prova
+    $codice = Invoke-Copia -Da $da -A $a -SoloFile $soloFile -EscludiCartelle $escludiCartelle -EscludiFile $escludiFile -Forza:$Forza -Prova:$Prova
     $esito = 'già aggiornata'
     if (Test-Copiato $codice) { $esito = 'aggiornata' }
     if ($Prova) { $esito = 'prova' }
     Write-Ok "$nome`: $esito."
-    if ($musica -and -not $Prova) {
-        # Un controllo anche sulla cartella condivisa: prepara_laboratorio.ps1 la copierà solo se è pulita.
-        $la = Get-StatoMusica $a $Voce $escludiCartelle @($c.escludi_file)
-        if ($la.Stato -ne 'segnaposto') {
-            Write-Avviso "Nella cartella condivisa, music\ non contiene solo la musica segnaposto nota ($($la.Motivo)): prepara_laboratorio.ps1 non la copierà. Controllala e togli i file in più."
-            $esito = "$esito, da controllare"
-        }
-    }
     Add-Riga $nome $descrizione $Destinazione $esito
 }
 
@@ -244,12 +219,11 @@ function Write-Leggimi($Totale) {
     $t += ''
     $t += '## Cosa NON contiene, mai'
     $t += ''
-    $t += '- **I brani di Suno**: né i WAV scaricati né gli OGG preparati per il gioco. Su ogni PC si riscaricano dall''account Suno'
-    $t += '  (in `%USERPROFILE%\ctrlaltrevenge-lab\suno\`), oppure li genera Claude direttamente nel browser, con Claude in Chrome; poi si'
-    $t += '  preparano nel laboratorio con `tools\audio\prepare_music.py`. Per questo da `music\` gli script copiano solo `music.json`,'
-    $t += '  `FONTI.md` e i quattro OGG segnaposto, e solo se ognuno ha lo sha256 fissato in `tools\setup\laboratorio.json`: se c''è un brano'
-    $t += '  vero, un OGG diverso o un file che non conoscono, non copiano `music\`. La cartella di lavoro `music\_work\` non viaggia mai.'
-    $t += '  Da `suno\` copiano solo i testi (`*.md`, `*.txt`).'
+    $t += '- **La musica**: né i brani di Suno (WAV scaricati e OGG preparati per il gioco) né quella segnaposto. I brani di Suno su ogni'
+    $t += '  PC si riscaricano dall''account Suno (in `%USERPROFILE%\ctrlaltrevenge-lab\suno\`), oppure li genera Claude direttamente nel'
+    $t += '  browser, con Claude in Chrome; poi si preparano nel laboratorio con `tools\audio\prepare_music.py`. La musica segnaposto CC0'
+    $t += '  la ricrea `prepara_laboratorio.ps1` nel laboratorio, con `tools\audio\make_placeholder_music.py`, sempre uguale (sha256'
+    $t += '  fissati in `tools\setup\laboratorio.json`). Da `suno\` gli script copiano solo i testi (`*.md`, `*.txt`).'
     $t += '- **Gli strumenti** (Godot, Blender, FFmpeg, PyMusicLooper, Python): li scarica e li verifica `prepara_laboratorio.ps1`, dagli'
     $t += '  indirizzi ufficiali e con gli hash scritti in `tools\setup\laboratorio.json`.'
     $t += '- **Password, token, chiavi API**: mai, né qui né nel repo.'
