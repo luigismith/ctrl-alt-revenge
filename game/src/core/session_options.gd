@@ -4,6 +4,7 @@ extends RefCounted
 ##
 ##   --autostart            salta il titolo e parte dal livello
 ##   --stanza               parte dalla stanza di prova in grigio (tappa 1)
+##   --prologo              parte dal prologo in grigio (tappa 2)
 ##   --skip-to <tick>       nella stanza, un replay corre senza disegnare fino a quel tick
 ##   --replay <file>        riproduce gli ingressi del file (res://, user:// o percorso assoluto)
 ##   --seed <n>             seme del livello (vince sul seme del replay)
@@ -17,6 +18,7 @@ extends RefCounted
 
 var autostart: bool = false
 var room: bool = false
+var prologue: bool = false
 var skip_to: int = 0
 var replay_path: String = ""
 var record_path: String = ""
@@ -42,6 +44,9 @@ static func parse(args: PackedStringArray) -> SessionOptions:
 				o.autostart = true
 			"--stanza":
 				o.room = true
+			"--prologo":
+				o.room = true
+				o.prologue = true
 			"--skip-to":
 				o.skip_to = int(next)
 				i += 1

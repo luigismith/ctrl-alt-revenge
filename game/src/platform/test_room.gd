@@ -34,7 +34,7 @@ const SIGNS := {
 	"g": ["FINE DELLA STANZA", "R o SELECT per ricominciare"],
 }
 
-## L'hacking "Collega e corri" (decisione del 5 novembre 2026, in docs/gameplay.md): GIG tiene SU
+## L'hacking "Collega e corri" (decisione del 5 novembre 2026, in docs/lore/gameplay.md): GIG tiene SU
 ## sotto una centralina e appoggia il pugno cyber alla presa; dopo HACK_TICKS il cancello del
 ## pannello si apre per `open` tick, poi si richiude. Il puzzle è il percorso: arrivarci in tempo e,
 ## con più pannelli, scegliere l'ordine giusto.
@@ -82,8 +82,14 @@ const C_BOX := Color8(255, 80, 80)
 const C_FLOOR := Color8(66, 66, 80)
 const C_FLOOR_LINE := Color8(84, 84, 100)
 const C_KERB := Color8(30, 30, 38)
+## Dove c'è la grafica i cartelli sono didascalie a fumetto, con il fondo e il bordo delle vignette.
+const C_CAPTION := Color8(18, 16, 24)
+const C_CAPTION_INK := Color8(240, 232, 210)
+## Da quanti px prima a quanti px dopo il suo segno (rispetto a GIG) si vede una didascalia.
+const CAPTION_FROM := -260
+const CAPTION_TO := 140
 
-## L'arena della stanza (decisione del 4 novembre 2026, in docs/gameplay.md): quando GIG entra la
+## L'arena della stanza (decisione del 4 novembre 2026, in docs/lore/gameplay.md): quando GIG entra la
 ## telecamera si blocca e si inclina un po' dall'alto, il pavimento si allarga in profondità e si
 ## combatte con il sistema dello slice (un Level ospitato, a corsie); a scontro finito compare VAI,
 ## la telecamera torna laterale e si riprende a saltare.
@@ -110,6 +116,33 @@ const ARENA_SPAWNS := [
 	{"type": "rider", "delay": 55, "side": -1, "y": 240},
 	{"type": "esattore", "delay": 320, "side": 1, "y": 243},
 ]
+
+## Il tratto che si gioca: la stanza di prova usa le costanti qui sopra, il prologo (e i livelli
+## che verranno) le sue, impostate in _setup_stage().
+var map_path: String = MAP
+var signs: Dictionary = SIGNS
+var panels: Dictionary = PANELS
+var arena_spawns: Array = ARENA_SPAWNS
+## Nome dell'ondata dell'arena (per i conteggi e i replay) e scritta in alto a sinistra.
+var arena_id: String = "arena_prova"
+var hud_title: String = "STANZA DI PROVA"
+## La grafica del tratto (un layers.json, vedi Backdrop): i piani dello sfondo con la parallasse e la
+## scena disegnata sui blocchi. Vuota nella stanza di prova, che resta in grigio.
+var env_path: String = ""
+## Fin dove arriva la grafica, in px del mondo: lì non si disegnano i blocchi grigi né il fondo grigio.
+var art_until_x: int = 0
+## Quanto si schiaccia la stanza a telecamera inclinata. Con la grafica niente: la pixel art schiacciata
+## perderebbe righe.
+var tilt_squash: float = TILT_SQUASH
+var backdrop: Backdrop
+## I pezzi della scena disegnata, uno dopo l'altro (il prologo: il cimitero, poi i Tamburi).
+var _scene_art: Array[Sprite2D] = []
+## Quanto si vede ogni didascalia (0-1): solo disegno, fuori dalla simulazione.
+var _caption_alpha: Dictionary = {}
+## I colori del pavimento in profondità dell'arena (il prologo ci mette la ghiaia del viale) e, se non
+## è trasparente, il colore dei sassolini sparsi.
+var floor_colors: Dictionary = {"floor": C_FLOOR, "line": C_FLOOR_LINE, "top": C_SOLID_TOP, "kerb": C_KERB,
+	"speck": Color(0, 0, 0, 0)}
 
 var grid: SolidGrid
 var player: PlatformPlayer
@@ -173,10 +206,11 @@ func configure(opts: Dictionary) -> void:
 func _ready() -> void:
 	if input == null:
 		input = PlayerInput.live()
+	_setup_stage()
 	moves = load(MOVES) as PlatformMoves
 	if moves == null:
 		moves = PlatformMoves.new()
-	grid = SolidGrid.load_file(MAP)
+	grid = SolidGrid.load_file(map_path)
 	if grid.marks.has("G"):
 		_start = grid.marks["G"][0]
 	if Game.options.start_x >= 0.0:
@@ -202,6 +236,7 @@ func _ready() -> void:
 	_floor_node.z_index = 1
 	_floor_node.draw.connect(_draw_floor)
 	_view.add_child(_floor_node)
+	_build_art()
 	var sheet := SpriteSheet.get_sheet(&"gig")
 	player = PlatformPlayer.new(moves, grid, sheet)
 	if pilot != null:
@@ -216,6 +251,11 @@ func _ready() -> void:
 	fx.z_index = 5
 	fx.draw.connect(func() -> void: _draw_fx(fx))
 	_view.add_child(fx)
+	# I cartelli sopra tutto il mondo, anche sopra il primo piano della grafica (z 1000).
+	var signs_node := Node2D.new()
+	signs_node.z_index = 1100
+	signs_node.draw.connect(func() -> void: _draw_signs(signs_node))
+	_view.add_child(signs_node)
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
@@ -238,6 +278,84 @@ func _ready() -> void:
 		while tick < Game.options.skip_to and not input.replay_finished(tick):
 			_sim_tick()
 		_cam = _cam_target()
+	_update_art()
+
+
+## Da ridefinire nei tratti che non sono la stanza di prova: mappa, cartelli, pannelli, arena.
+func _setup_stage() -> void:
+	pass
+
+
+## La grafica del tratto, se c'è: i piani dello sfondo in un nodo prima del mondo, la scena dentro la
+## stanza (dietro a quello che la stanza disegna, come i segni di SU e la pioggia).
+func _build_art() -> void:
+	if env_path == "" or not FileAccess.file_exists(env_path):
+		return
+	var bd := Backdrop.new()
+	if not bd.load_json(env_path):
+		push_warning("Grafica del tratto non valida (%s): resta il grigio" % "; ".join(bd.errors))
+		return
+	backdrop = bd
+	art_until_x = bd.level_width
+	tilt_squash = 0.0
+	var back := Node2D.new()
+	back.name = "Sfondo"
+	add_child(back)
+	move_child(back, 0)
+	var front := Node2D.new()
+	front.name = "PrimoPiano"
+	add_child(front)
+	bd.build(back, front, 1)
+	for sc: Dictionary in bd.scenes:
+		var tex := SpriteSheet.load_texture(bd.dir.path_join(str(sc["image"])))
+		if tex == null:
+			push_warning("Scena mancante: %s" % sc["image"])
+			continue
+		var s := Sprite2D.new()
+		s.name = "Scena_%d" % _scene_art.size()
+		s.centered = false
+		s.texture = tex
+		s.position = Vector2(int(sc.get("x", 0)), int(sc.get("y", 0)))
+		s.show_behind_parent = true
+		_room_node.add_child(s)
+		_scene_art.append(s)
+
+
+## I piani dello sfondo seguono la telecamera (posizioni intere, come il mondo).
+func _update_art() -> void:
+	if backdrop == null:
+		return
+	var c := _cam.round()
+	backdrop.update(int(c.x), tick, c.y - backdrop.cam_ref_y)
+
+
+## Il tick del tratto, prima di GIG: può cambiare l'ingresso (per esempio vuoto durante una vignetta).
+func _stage_tick(frame: InputFrame) -> InputFrame:
+	return frame
+
+
+## Il tick del tratto, dopo GIG.
+func _stage_after_step() -> void:
+	pass
+
+
+## I tasti del pilota automatico per i momenti con una regia (vignette, riavvio...); -1 = decide lui.
+func pilot_keys(_t: int) -> int:
+	return -1
+
+
+## Lo stato del tratto per l'impronta dei test.
+func _stage_hash() -> Array:
+	return []
+
+
+## Disegno del tratto: nel mondo (sopra i blocchi) e sull'interfaccia.
+func _draw_stage(_v: Node2D) -> void:
+	pass
+
+
+func _draw_stage_hud(_h: Control) -> void:
+	pass
 
 
 func _reset() -> void:
@@ -266,6 +384,7 @@ func _physics_process(_delta: float) -> void:
 	_sim_tick()
 	_tick_sparks()
 	_follow_camera()
+	_update_art()
 	_sync_visual()
 	_overlay.tick()
 	_view.queue_redraw()
@@ -284,6 +403,7 @@ func _sim_tick() -> void:
 	if arena_phase != ArenaPhase.NONE:
 		_arena_tick(frame)
 		return
+	frame = _stage_tick(frame)
 	var hack_events := PackedStringArray()
 	frame = _hack_tick(frame, hack_events)
 	# Collegato al pannello, GIG alza il braccio cyber verso la cassetta.
@@ -293,6 +413,7 @@ func _sim_tick() -> void:
 		_on_event(e)
 	for e in hack_events:
 		_on_event(e)
+	_stage_after_step()
 	if player.py > grid.pixel_height() + 80:
 		_reset()
 	elif _arena_starts():
@@ -338,7 +459,7 @@ func _follow_camera() -> void:
 
 func _sync_visual() -> void:
 	# A telecamera inclinata la stanza dietro il pavimento si schiaccia verso la linea del pavimento.
-	var s := 1.0 - TILT_SQUASH * tilt
+	var s := 1.0 - tilt_squash * tilt
 	_room_node.scale = Vector2(1, s)
 	_room_node.position = Vector2(0, _floor_y * (1.0 - s))
 	_body.visible = arena == null
@@ -355,6 +476,8 @@ func _sync_visual() -> void:
 		var fist := _cyber_fist()
 		_spark(fist.x + _spark_rng.randf_range(-4, 4), fist.y - 6, _spark_rng.randf_range(-1.2, 1.2), -_spark_rng.randf_range(0.4, 1.6), _spark_rng.randi_range(8, 14), C_CYAN)
 	var f := player.anim.frame()
+	if _body.texture != player.anim.sheet.texture:
+		_body.texture = player.anim.sheet.texture
 	_body.region_rect = Rect2(f.rect)
 	_body.offset = Vector2(-f.anchor)
 	_body.scale = Vector2(player.facing, 1)
@@ -362,12 +485,15 @@ func _sync_visual() -> void:
 
 
 func _draw_back() -> void:
-	_view.draw_rect(Rect2(_cam.x - 8, _cam.y - 8, View.W + 16, View.H + 16), C_BG)
+	var x0 := maxf(_cam.x - 8, float(art_until_x))
+	var x1 := _cam.x + View.W + 8
+	if x1 > x0:
+		_view.draw_rect(Rect2(x0, _cam.y - 8, x1 - x0, View.H + 16), C_BG)
 
 
 func _draw_room() -> void:
 	var v := _room_node
-	var x0 := maxi(int(_cam.x) / SolidGrid.TILE - 1, 0)
+	var x0 := maxi(int(_cam.x) / SolidGrid.TILE - 1, art_until_x / SolidGrid.TILE)
 	var x1 := mini(int(_cam.x + View.W) / SolidGrid.TILE + 1, grid.width - 1)
 	# Con la stanza schiacciata dall'inclinazione si vedono un paio di file in più in alto.
 	var y0 := maxi(int(_cam.y) / SolidGrid.TILE - 3, 0)
@@ -393,6 +519,7 @@ func _draw_room() -> void:
 					v.draw_rect(Rect2(cx * t, cy * t, t, 4), C_THIN)
 					v.draw_rect(Rect2(cx * t, cy * t, t, 1), C_SOLID_TOP)
 	_draw_hacking(v)
+	_draw_stage(v)
 	if show_boxes and arena == null:
 		var r := Rect2(player.left(), player.top(), moves.body_width, player.height)
 		v.draw_rect(Rect2(r.position, Vector2(r.size.x, 1)), C_BOX)
@@ -402,19 +529,50 @@ func _draw_room() -> void:
 
 
 ## I cartelli non si schiacciano con la stanza (il testo in pixel verrebbe storto): si sposta
-## solo la loro altezza, come i blocchi.
+## solo la loro altezza, come i blocchi. In grigio stanno sempre sopra il loro segno; dove c'è la
+## grafica sono didascalie a fumetto che compaiono quando GIG si avvicina.
 func _draw_signs(v: Node2D) -> void:
-	var s := 1.0 - TILT_SQUASH * tilt
-	for k: String in SIGNS:
+	var s := 1.0 - tilt_squash * tilt
+	for k: String in signs:
 		if not grid.marks.has(k):
 			continue
 		var p: Vector2i = grid.marks[k][0]
 		if p.x < _cam.x - 250 or p.x > _cam.x + View.W + 250:
+			_caption_alpha.erase(k)
 			continue
-		var lines: Array = SIGNS[k]
+		var lines: Array = signs[k]
 		var y := roundf(_floor_y - (_floor_y - (p.y - 150)) * s)
+		if backdrop != null:
+			_draw_caption(v, k, p, y, lines)
+			continue
 		UiFont.draw_text(v, Vector2(p.x, y), str(lines[0]), C_TEXT, 1, 1)
 		UiFont.draw_text(v, Vector2(p.x, y + 12), str(lines[1]), C_DIM, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+
+
+## Una didascalia: il riquadro con il titolo e il consiglio, una punta verso il segno, e una
+## dissolvenza breve in entrata e in uscita. Resta dentro lo schermo anche col segno vicino al bordo.
+func _draw_caption(v: Node2D, k: String, p: Vector2i, y: float, lines: Array) -> void:
+	var dx := player.px - p.x
+	var want := 1.0 if dx > CAPTION_FROM and dx < CAPTION_TO else 0.0
+	var a := move_toward(float(_caption_alpha.get(k, 0.0)), want, 0.08)
+	_caption_alpha[k] = a
+	if a <= 0.0:
+		return
+	var t0 := str(lines[0])
+	var t1 := str(lines[1])
+	var w := float(maxi(UiFont.text_width(t0), UiFont.text_width(t1, 1, true)) + 14)
+	var x := clampf(roundf(p.x - w / 2.0), _cam.x + 4.0, _cam.x + View.W - 4.0 - w)
+	# Entrando sale di qualche px, come un fumetto che si posa.
+	var r := Rect2(x, y - 5.0 + roundf((1.0 - a) * 4.0), w, 29.0)
+	var ink := Color(C_CAPTION_INK, a)
+	v.draw_rect(r.grow(1.0), ink)
+	v.draw_rect(r, Color(C_CAPTION, 0.9 * a))
+	var tip := clampf(float(p.x), r.position.x + 7.0, r.end.x - 7.0)
+	v.draw_colored_polygon(PackedVector2Array([Vector2(tip - 4.0, r.end.y + 1.0), Vector2(tip + 4.0, r.end.y + 1.0),
+		Vector2(tip, r.end.y + 6.0)]), ink)
+	var cx := roundf(r.get_center().x)
+	UiFont.draw_text(v, Vector2(cx, r.position.y + 3.0), t0, Color(C_TEXT, a), 1, 1, Color(0, 0, 0, 0), Color(UiFont.SHADOW, a))
+	UiFont.draw_text(v, Vector2(cx, r.position.y + 15.0), t1, Color(C_DIM, a), 1, 1, Color(0, 0, 0, 0), Color(UiFont.SHADOW, a), true)
 
 
 ## Il pavimento in profondità dell'arena: si apre sotto la linea del pavimento mentre la telecamera
@@ -422,45 +580,63 @@ func _draw_signs(v: Node2D) -> void:
 func _draw_floor() -> void:
 	var v := _floor_node
 	if tilt > 0.0:
+		var c_floor: Color = floor_colors["floor"]
+		var c_line: Color = floor_colors["line"]
+		var c_speck: Color = floor_colors["speck"]
 		var top := float(_floor_y)
 		var depth := roundf((View.H - ARENA_BAND.x + 8.0) * tilt)
 		var band := roundf((ARENA_BAND.y - ARENA_BAND.x) * tilt)
 		var x0 := _cam.x - 8.0
 		var w := View.W + 16.0
-		v.draw_rect(Rect2(x0, top, w, depth), C_FLOOR)
+		v.draw_rect(Rect2(x0, top, w, depth), c_floor)
 		var vp_x := _cam.x + View.CX
 		var m := float(View.PPM)
+		# Sassolini fermi nel mondo, più radi in fondo e più grandi davanti (solo con la grafica).
+		if c_speck.a > 0.0:
+			var x_from := int(floorf(x0 / 16.0))
+			for gx in range(x_from, x_from + int(w / 16.0) + 2):
+				for r in 6:
+					var hsh := (gx * 73856093) ^ (r * 19349663)
+					var fy := float(posmod(hsh, 997)) / 997.0
+					var ry := roundf(band * (r + fy) / 6.0)
+					var sx := gx * 16.0 + float(posmod(hsh >> 4, 16))
+					var xr := vp_x + (sx - vp_x) * (1.0 + ry / PERSP)
+					v.draw_rect(Rect2(roundf(xr), top + ry, 1.0 + float(r >= 3), 1), c_speck)
 		var lx := floorf((x0 - 200.0) / m) * m
 		while lx < x0 + w + 200.0:
 			for r in int(band):
 				var xr := vp_x + (lx - vp_x) * (1.0 + r / PERSP)
-				v.draw_rect(Rect2(roundf(xr), top + r, 1, 1), C_FLOOR_LINE)
+				v.draw_rect(Rect2(roundf(xr), top + r, 1, 1), c_line)
 			lx += m
 		# Linee di traverso: più fitte in fondo, più larghe davanti.
 		for k: float in [0.2, 0.43, 0.7]:
-			v.draw_rect(Rect2(x0, roundf(top + band * k), w, 1), C_FLOOR_LINE)
-		v.draw_rect(Rect2(x0, top, w, 2), C_SOLID_TOP)
+			v.draw_rect(Rect2(x0, roundf(top + band * k), w, 1), c_line)
+		v.draw_rect(Rect2(x0, top, w, 2), floor_colors["top"])
 		# Il bordo davanti della fascia calpestabile, poi il marciapiede scuro fino al fondo dello schermo.
 		if depth > band:
-			v.draw_rect(Rect2(x0, top + band, w, depth - band), C_KERB)
-			v.draw_rect(Rect2(x0, top + band, w, 1), C_FLOOR_LINE)
-	_draw_signs(v)
+			v.draw_rect(Rect2(x0, top + band, w, depth - band), floor_colors["kerb"])
+			v.draw_rect(Rect2(x0, top + band, w, 1), c_line)
 
 
 func _draw_hud() -> void:
 	var h := _hud
 	if arena_phase != ArenaPhase.NONE:
 		# Nell'arena c'è l'interfaccia dello slice, con la vita di GIG e del nemico.
+		_draw_stage_hud(h)
 		return
 	h.draw_rect(Rect2(0, 0, View.W, 15), Color(0, 0, 0, 0.55))
-	UiFont.draw_text(h, Vector2(4, 2), "STANZA DI PROVA", C_CYAN)
+	UiFont.draw_text(h, Vector2(4, 2), hud_title, C_CYAN)
 	var st := "COLLEGATO" if hack_panel != "" else player.state_name()
 	UiFont.draw_text(h, Vector2(View.W - 4, 2), st, C_CYAN if hack_panel != "" else C_TEXT, 1, 2)
+	if backdrop != null and not show_boxes:
+		_draw_stage_hud(h)
+		return
 	var sub := float(PlatformPlayer.SUB)
 	var info := "vel %.1f · %.1f px/tick   salto %d px (%.2f m)   in aria %d tick   spinte %d" % [
 		player.vx / sub, player.vy / sub, player.last_peak, player.last_peak / float(View.PPM), player.air_ticks, player.boosts_left]
 	h.draw_rect(Rect2(0, View.H - 15, View.W, 15), Color(0, 0, 0, 0.55))
 	UiFont.draw_text(h, Vector2(4, View.H - 13), info, C_DIM, 1, 0, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+	_draw_stage_hud(h)
 
 
 # ------------------------------------------------------------------ arena
@@ -480,7 +656,7 @@ func _arena_data() -> Dictionary:
 		"id": "stanza_arena",
 		"width": grid.pixel_width(),
 		"floor_band": [ARENA_BAND.x, ARENA_BAND.y],
-		"waves": [{"id": "arena_prova", "camera_x": _arena_cam_x, "music_layer": "arena", "spawns": ARENA_SPAWNS}],
+		"waves": [{"id": arena_id, "camera_x": _arena_cam_x, "music_layer": "arena", "spawns": arena_spawns}],
 	}
 
 
@@ -585,8 +761,8 @@ static func _ease(k: float) -> float:
 func _build_gates() -> void:
 	gates.clear()
 	_gate_cells.clear()
-	for id: String in PANELS:
-		var s: String = PANELS[id]["gate"]
+	for id: String in panels:
+		var s: String = panels[id]["gate"]
 		if not grid.marks.has(s):
 			continue
 		var cells: Array[Vector2i] = []
@@ -627,8 +803,8 @@ func hack_spot(id: String) -> int:
 
 ## Il pannello a portata di GIG (sotto la centralina, sullo stesso piano), o "".
 func panel_in_reach() -> String:
-	for id: String in PANELS:
-		if not grid.marks.has(id) or not gates.has(PANELS[id]["gate"]):
+	for id: String in panels:
+		if not grid.marks.has(id) or not gates.has(panels[id]["gate"]):
 			continue
 		if absi(player.px - hack_spot(id)) <= HACK_REACH and player.py == _panel_pos(id).y:
 			return id
@@ -658,9 +834,9 @@ func _hack_tick(frame: InputFrame, events: PackedStringArray) -> InputFrame:
 					_set_gate(s, false)
 					events.append("gate_close")
 	var on_ground := player.state == PlatformPlayer.State.GROUND
-	if hack_panel == "":
+	if hack_panel == "" and not player.arm_locked:
 		var id := panel_in_reach()
-		if id != "" and on_ground and frame.is_held(InputFrame.UP) and gates[PANELS[id]["gate"]]["timer"] == 0:
+		if id != "" and on_ground and frame.is_held(InputFrame.UP) and gates[panels[id]["gate"]]["timer"] == 0:
 			hack_panel = id
 			hack_t = 0
 			events.append("hack_start")
@@ -677,8 +853,8 @@ func _hack_tick(frame: InputFrame, events: PackedStringArray) -> InputFrame:
 	if dx != 0 and not grid.rect_hits_solid(player.left() + dx, player.top(), player.right() + dx, player.py):
 		player.px += dx
 	if hack_t >= HACK_TICKS:
-		var s: String = PANELS[hack_panel]["gate"]
-		gates[s]["timer"] = int(PANELS[hack_panel]["open"])
+		var s: String = panels[hack_panel]["gate"]
+		gates[s]["timer"] = int(panels[hack_panel]["open"])
 		_set_gate(s, true)
 		hacks_done[hack_panel] = int(hacks_done.get(hack_panel, 0)) + 1
 		last_hacked = hack_panel
@@ -693,18 +869,18 @@ func state_hash() -> int:
 	var g: Array = []
 	for s: String in gates:
 		g.append(gates[s]["timer"])
-	return hash([player.state_hash(), hack_panel, hack_t, g, hacks_done])
+	return hash([player.state_hash(), hack_panel, hack_t, g, hacks_done] + _stage_hash())
 
 
 ## I pannelli sul muro di fondo e i cancelli, con il conto alla rovescia.
 func _draw_hacking(v: Node2D) -> void:
-	for id: String in PANELS:
-		if not grid.marks.has(id) or not gates.has(PANELS[id]["gate"]):
+	for id: String in panels:
+		if not grid.marks.has(id) or not gates.has(panels[id]["gate"]):
 			continue
 		var m := _panel_pos(id)
 		if m.x < _cam.x - 60 or m.x > _cam.x + View.W + 60:
 			continue
-		_draw_panel(v, id, gates[PANELS[id]["gate"]])
+		_draw_panel(v, id, gates[panels[id]["gate"]])
 	for s: String in gates:
 		var gt: Dictionary = gates[s]
 		var g: Rect2i = gt["rect"]
@@ -735,9 +911,9 @@ func _draw_hacking(v: Node2D) -> void:
 
 
 func _open_ticks(gate: String) -> int:
-	for id: String in PANELS:
-		if PANELS[id]["gate"] == gate:
-			return int(PANELS[id]["open"])
+	for id: String in panels:
+		if panels[id]["gate"] == gate:
+			return int(panels[id]["open"])
 	return 1
 
 
@@ -922,7 +1098,7 @@ const EVENT_SFX := {
 
 
 func _event_sound(e: String) -> void:
-	if not EVENT_SFX.has(e):
+	if not sound or not EVENT_SFX.has(e):
 		return
 	var s: Array = EVENT_SFX[e]
 	var x := player.px

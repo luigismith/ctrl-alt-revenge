@@ -49,10 +49,12 @@ func run(tree_root: Node) -> bool:
 	_test_json_files()
 	_test_replays()
 	_test_platform()
+	_test_arm_locked()
 	_test_room_arena()
 	_test_room_hacking()
 	_test_rider()
 	_test_esattore()
+	_test_prologue()
 	return failures == 0
 
 
@@ -1071,9 +1073,9 @@ func _test_platform() -> void:
 	_run_pp(p, 200, func(_t: int) -> int: return 0)
 	check(p.state == PlatformPlayer.State.GROUND and p.py == 58 * T, "Platform: cadendo forte si atterra sul pavimento, senza attraversarlo", "y %d" % p.py)
 
-	# Sporgenza: saltando verso un muro alto 6 blocchi ci si aggrappa e si sale.
+	# Sporgenza: saltando verso un muro alto 7 blocchi ci si aggrappa e si sale.
 	var gl := _room(40, 20, 16)
-	_box(gl, 14, 20, 10, 15)
+	_box(gl, 14, 20, 9, 15)
 	p = _pp(gl, 250, 16)
 	var pl := p
 	var hung := [false]
@@ -1085,11 +1087,12 @@ func _test_platform() -> void:
 			return 0
 		return (_R | _J) if t < 25 else _R)
 	check(hung[0], "Platform: saltando verso il muro ci si aggrappa alla sporgenza", "eventi %s" % str(ev))
-	check(p.state == PlatformPlayer.State.GROUND and p.py == 10 * T and p.px > 14 * T, "Platform: dalla sporgenza si sale in cima al muro",
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 9 * T and p.px > 14 * T, "Platform: dalla sporgenza si sale in cima al muro",
 		"stato %s, x %d, y %d" % [p.state_name(), p.px, p.py])
 
-	# Muro alto 5 blocchi (100 px), oltre il salto: lo spigolo arriva all'altezza del petto e,
-	# senza posto per stare appesi, GIG scavalca. Non ci sono muri impossibili fra 80 e 120 px.
+	# Muri da 5 e 6 blocchi (100 e 120 px), oltre il salto: lo spigolo arriva all'altezza del petto o
+	# della testa e sotto non c'è posto per le gambe da appeso, così GIG scavalca. Non ci sono muri
+	# impossibili fra 80 e 120 px.
 	for rows in [4, 5, 6]:
 		var gw := _room(40, 20, 16)
 		_box(gw, 14, 20, 16 - rows, 15)
@@ -1190,7 +1193,7 @@ func _test_platform() -> void:
 	# Aggancio e salita con lo sprite: le mani sullo spigolo, e alla fine della salita il busto e
 	# il piede più basso sono dove si trova GIG in cima, senza scatti.
 	var gk := _room(40, 20, 16)
-	_box(gk, 14, 22, 10, 15)
+	_box(gk, 14, 22, 9, 15)
 	p = PlatformPlayer.new(PlatformMoves.new(), gk, sheet)
 	p.place(250, 16 * T)
 	var pk := p
@@ -1212,11 +1215,37 @@ func _test_platform() -> void:
 		if rec["hang"] > 0:
 			return 0
 		return (_R | _J) if t < 25 else _R)
-	var corner := Vector2i(14 * T, 10 * T)
+	var corner := Vector2i(14 * T, 9 * T)
 	check(rec["hang"] > 0 and absi(rec["grip"].x - corner.x) <= 3 and absi(rec["grip"].y - corner.y) <= 3,
 		"Platform: appeso, le mani di GIG sono sullo spigolo", "mani %s, spigolo %s" % [str(rec["grip"]), str(corner)])
-	check(p.state == PlatformPlayer.State.GROUND and p.py == 10 * T and rec["jump"] <= 7.5,
+	check(p.state == PlatformPlayer.State.GROUND and p.py == 9 * T and rec["jump"] <= 7.5,
 		"Platform: a fine salita lo sprite non scatta", "stato %s, scatto di busto e piedi %.1f px, x %d" % [p.state_name(), rec["jump"], p.px])
+
+	# Appeso, le scarpe non entrano mai nel pavimento: contro muri da 5 a 8 blocchi, se GIG si
+	# appende, il piede più basso dello sprite resta sopra la riga del pavimento.
+	var feet_ok := true
+	var feet_info := ""
+	var hangs := 0
+	for rows in [5, 6, 7, 8]:
+		var gh := _room(40, 20, 16)
+		_box(gh, 14, 22, 16 - rows, 15)
+		p = PlatformPlayer.new(PlatformMoves.new(), gh, sheet)
+		p.place(250, 16 * T)
+		var ph := p
+		var low := [-999]
+		_run_pp(p, 120, func(t: int) -> int:
+			if ph.state == PlatformPlayer.State.LEDGE_HANG:
+				var pts: Dictionary = ph.anim.frame().points
+				low[0] = maxi(low[0], ph.sprite_anchor().y + maxi(pts["foot_l"].y, pts["foot_r"].y))
+				return 0
+			return (_R | _J) if t < 25 else _R)
+		if low[0] > -999:
+			hangs += 1
+			if low[0] > 16 * T - 2:
+				feet_ok = false
+				feet_info += "muro di %d blocchi: piedi a %d, pavimento a %d; " % [rows, low[0], 16 * T]
+	check(feet_ok and hangs >= 2, "Platform: appeso, i piedi di GIG restano sopra il pavimento",
+		"%s appeso su %d muri" % [feet_info, hangs])
 
 	# Freno col braccio: in caduta contro un muro GIG scivola piano.
 	var gw2 := _room(40, 30, 26)
@@ -1348,6 +1377,83 @@ func _arena_run(max_ticks: int) -> Dictionary:
 	room.get_parent().remove_child(room)
 	room.free()
 	return out
+
+
+## GIG col braccio bloccato (il prologo prima del riavvio): solo il salto semplice e le sporgenze
+## con una mano, che chiedono di tenere SU.
+func _test_arm_locked() -> void:
+	var T := SolidGrid.TILE
+	var g := _room(40, 14, 10)
+	var p := _pp(g, 125, 10)
+	_run_pp(p, 90, func(t: int) -> int: return _J if t < 40 else 0)
+	var full := p.last_peak
+	p = _pp(g, 125, 10)
+	p.arm_locked = true
+	var ev := _run_pp(p, 120, func(t: int) -> int: return _J if (t < 20 or (t >= 22 and t < 50)) else 0)
+	check(_count_events(ev, "spinta") == 0 and absi(p.last_peak - full) <= 1, "Braccio bloccato: niente Spinta, il salto resta quello semplice",
+		"spinte %d, %d px contro %d" % [_count_events(ev, "spinta"), p.last_peak, full])
+	p = _pp(g, 125, 10)
+	p.arm_locked = true
+	var dashed := [false]
+	var pd := p
+	_run_pp(p, 80, func(t: int) -> int:
+		if pd.state == PlatformPlayer.State.DASH:
+			dashed[0] = true
+		return _R | (_J if t < 20 else 0) | (_S if t == 12 else 0))
+	check(not dashed[0], "Braccio bloccato: niente scatto in aria", "")
+
+	# Contro un muro alto: niente freno col braccio né salto a muro.
+	var gw := _room(40, 30, 26)
+	_box(gw, 20, 21, 0, 25)
+	p = PlatformPlayer.new(PlatformMoves.new(), gw)
+	p.arm_locked = true
+	p.place(370, 10 * T)
+	var pw := p
+	var walled := [false]
+	ev = _run_pp(p, 150, func(t: int) -> int:
+		if pw.state == PlatformPlayer.State.WALL_SLIDE or pw.state == PlatformPlayer.State.WALL_RUN:
+			walled[0] = true
+		return _R | (_J if t % 10 < 5 else 0))
+	var wj := _count_events(ev, "walljump") + _count_events(ev, "wallrun") + _count_events(ev, "wall")
+	check(not walled[0] and wj == 0, "Braccio bloccato: niente freno col braccio né salto a muro",
+		"al muro %s, eventi dei muri %d" % [str(walled[0]), wj])
+
+	# Sporgenza con una mano: i colpetti di SU non bastano, tenendolo si sale dopo lo sforzo.
+	var gl := _room(40, 20, 16)
+	_box(gl, 14, 20, 9, 15)
+	p = _pp(gl, 250, 16)
+	p.arm_locked = true
+	var pl := p
+	var hung := [-1]
+	_run_pp(p, 200, func(t: int) -> int:
+		if pl.state == PlatformPlayer.State.LEDGE_HANG and hung[0] < 0:
+			hung[0] = t
+		if hung[0] >= 0:
+			return _U if t % 4 == 0 else 0
+		return (_R | _J) if t < 25 else _R)
+	check(hung[0] >= 0 and p.state == PlatformPlayer.State.LEDGE_HANG, "Braccio bloccato: ci si appende, e i colpetti di SU non fanno salire",
+		"appeso al tick %d, stato %s" % [hung[0], p.state_name()])
+	var held_from := [-1]
+	var climbed := [-1]
+	_run_pp(p, 120, func(t: int) -> int:
+		if held_from[0] < 0:
+			held_from[0] = t
+		if pl.state == PlatformPlayer.State.LEDGE_CLIMB and climbed[0] < 0:
+			climbed[0] = t
+		return _U)
+	_run_pp(p, 60, func(_t: int) -> int: return 0)
+	check(climbed[0] - held_from[0] >= PlatformPlayer.ONE_HAND_STRAIN - 1 and p.state == PlatformPlayer.State.GROUND and p.py == 9 * T,
+		"Braccio bloccato: tenendo SU si sale, dopo lo sforzo", "salita dopo %d tick, stato %s, y %d" % [climbed[0] - held_from[0], p.state_name(), p.py])
+
+	# Col braccio bloccato non si forza la centralina.
+	var gm := SolidGrid.load_file(TestRoom.MAP)
+	var pm: Vector2i = gm.marks["P"][0]
+	var room := _hack_room(Vector2i(pm.x - TestRoom.HACK_FIST_X, pm.y), func(_t: int) -> int: return _U)
+	room.player.arm_locked = true
+	for t in 90:
+		room._sim_tick()
+	check(room.hacks_done.is_empty() and room.hack_panel == "", "Braccio bloccato: niente hacking", "forzati %s" % str(room.hacks_done))
+	_free_room(room)
 
 
 func _test_room_arena() -> void:
@@ -1714,3 +1820,81 @@ func _test_esattore() -> void:
 	check(e.stun >= st - 1 and e.state == Fighter.State.HURT, "Esattore: stordito, i pugni non lo svegliano prima")
 	Harness.free_level(lvl)
 
+
+# --- Il prologo -------------------------------------------------------------------------------------
+
+## Il prologo pronto, col pilota automatico o con gli ingressi di `input_fn`.
+func _prologue_room(input_fn: Callable = Callable()) -> Prologue:
+	Game.reset_run()
+	SpriteSheet.clear_cache()
+	var room := Prologue.new()
+	if input_fn.is_valid():
+		room.configure({"input": PlayerInput.from_provider(input_fn), "sound": false})
+	else:
+		var pilot := RoomPilot.new()
+		room.configure({"input": PlayerInput.from_provider(pilot.decide, pilot), "pilot": pilot, "sound": false})
+	root.add_child(room)
+	room.set_physics_process(false)
+	room._reset()
+	return room
+
+
+## Il prologo intero col pilota: dove passa e quando finisce.
+func _prologue_run(max_ticks: int) -> Dictionary:
+	var room := _prologue_room()
+	var out := {"end": -1, "locked_ok": true, "mimmo": -1, "arena": -1, "door": -1, "reboot": -1, "rain_arena": false}
+	for t in max_ticks:
+		room._sim_tick()
+		room._follow_camera()
+		if not room.rebooted:
+			out["locked_ok"] = out["locked_ok"] and room.player.arm_locked and room.player.boosts_left == 0
+		if room.seen_mimmo and out["mimmo"] < 0:
+			out["mimmo"] = t
+		if room.arena_done and out["arena"] < 0:
+			out["arena"] = t
+		if room.raining and out["arena"] < 0:
+			out["rain_arena"] = true
+		if room.door_closed and out["door"] < 0:
+			out["door"] = t
+		if room.rebooted and out["reboot"] < 0:
+			out["reboot"] = t
+		if room.finished:
+			out["end"] = t
+			break
+	out["raining"] = room.raining
+	out["unlocked"] = not room.player.arm_locked
+	out["hash"] = room.state_hash()
+	_free_room(room)
+	return out
+
+
+func _test_prologue() -> void:
+	var gm := SolidGrid.load_file(Prologue.PROLOGUE_MAP)
+	var missing: Array[String] = []
+	for m: String in ["M", "X", "Z", "/"] + Prologue.CHECKPOINT_SIGNS:
+		if not gm.marks.has(m):
+			missing.append(m)
+	check(missing.is_empty(), "Prologo: la mappa ha la tomba, il banco, il tetto, la porta e i cartelli delle ripartenze", ", ".join(missing))
+	var a := _prologue_run(9000)
+	check(a["mimmo"] >= 0 and a["mimmo"] < a["arena"], "Prologo: la vignetta della tomba di Mimmo, poi il pignoramento", "tomba %d, arena %d" % [a["mimmo"], a["arena"]])
+	check(a["locked_ok"], "Prologo: fino al riavvio il braccio sinistro è bloccato e la Spinta non c'è")
+	check(not a["rain_arena"] and a["raining"], "Prologo: dopo il pignoramento piove")
+	check(a["arena"] < a["door"] and a["door"] < a["reboot"] and a["unlocked"],
+		"Prologo: nel garage la porta si chiude, poi il riavvio sblocca il braccio", "porta %d, riavvio %d" % [a["door"], a["reboot"]])
+	check(a["end"] > a["reboot"] and a["end"] - a["reboot"] < Prologue.DOOR_BREAK,
+		"Prologo: dal lucernario sul tetto prima che la porta ceda, ed è la fine", "riavvio %d, fine %d" % [a["reboot"], a["end"]])
+	var b := _prologue_run(9000)
+	check(a["end"] == b["end"] and a["hash"] == b["hash"], "Prologo: due giri uguali finiscono allo stesso tick e nello stesso stato", "%d / %d" % [a["end"], b["end"]])
+	# Con GIG ancora dentro quando la porta cede, si riparte dal banco.
+	var room := _prologue_room(func(t: int) -> int: return _L if t < 40 else 0)
+	room.rebooted = true
+	room.checkpoint = Prologue.CHECKPOINT_SIGNS.find("j")
+	room._reset()
+	var x: Vector2i = room.grid.marks["X"][0]
+	var moved := false
+	for t in Prologue.DOOR_BREAK + 2:
+		room._sim_tick()
+		moved = moved or room.player.px != x.x
+	check(moved and room.player.px == x.x and room.player.py == x.y and room.door_t > Prologue.DOOR_BREAK - 10,
+		"Prologo: se la porta cede con GIG nel garage, si riparte dal banco", "x %d (banco %d), porta %d" % [room.player.px, x.x, room.door_t])
+	_free_room(room)

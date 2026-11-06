@@ -5,11 +5,13 @@ extends Node2D
 
 signal start_game
 signal show_credits
-## Solo nelle build per PC: la stanza di prova del movimento non va nella demo web.
+## Solo nelle build per PC: la stanza di prova del movimento e il prologo in grigio non vanno
+## nella demo web.
 signal test_room
+signal prologue
 signal quit_game
 
-const ITEMS: PackedStringArray = ["GIOCA", "STANZA DI PROVA", "CREDITI", "ESCI"]
+const ITEMS: PackedStringArray = ["GIOCA", "PROLOGO", "STANZA DI PROVA", "CREDITI", "ESCI"]
 ## Punto a terra fra i piedi di GIG sullo schermo.
 const GIG_FEET := Vector2(66, 198)
 
@@ -120,6 +122,8 @@ func _physics_process(_delta: float) -> void:
 		match _items[_index]:
 			"GIOCA":
 				start_game.emit()
+			"PROLOGO":
+				prologue.emit()
 			"STANZA DI PROVA":
 				test_room.emit()
 			"CREDITI":

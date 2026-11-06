@@ -23,7 +23,9 @@ func _ready() -> void:
 	_fade.size = View.SIZE
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade_layer.add_child(_fade)
-	if Game.options.room:
+	if Game.options.prologue:
+		_start_prologue()
+	elif Game.options.room:
 		_start_room()
 	elif Game.options.autostart:
 		_start_level()
@@ -83,6 +85,7 @@ func _show_title() -> void:
 	t.start_game.connect(func() -> void: _go(_start_level))
 	t.show_credits.connect(func() -> void: _go(_show_credits))
 	t.test_room.connect(func() -> void: _go(_start_room))
+	t.prologue.connect(func() -> void: _go(_start_prologue))
 	t.quit_game.connect(func() -> void: Game.quit_clean())
 	_set_screen(t)
 
@@ -129,9 +132,15 @@ func _start_level() -> void:
 	_set_screen(lvl)
 
 
+## Il prologo in grigio: gira sul motore della stanza di prova.
+func _start_prologue() -> void:
+	_start_room(Prologue.new())
+
+
 ## La stanza di prova in grigio: ESC o START torna al titolo.
-func _start_room() -> void:
-	var room := TestRoom.new()
+func _start_room(room: TestRoom = null) -> void:
+	if room == null:
+		room = TestRoom.new()
 	var o := Game.options
 	var input := PlayerInput.live()
 	var pilot: RoomPilot = null

@@ -40,6 +40,10 @@ const CLIMB_EASE := 9
 ## Da appeso, quanto più in basso parte lo sprite: così le mani del terzo fotogramma restano
 ## sullo spigolo invece di saltare in alto.
 const HANG_DROP := 14
+## Appeso, il corpo è più lungo che in piedi: nella clip ledge_hang le scarpe arrivano 128 px sotto
+## lo spigolo (le mani a -125 dall'ancora, più la suola). Ci si appende solo se fin lì è tutto
+## libero; con il pavimento più vicino (un muro alto meno di 7 blocchi) GIG scavalca.
+const HANG_LEGS := 128
 ## Tick dopo GIÙ in cui una direzione fa ancora partire la scivolata (GIÙ e la direzione insieme
 ## sul pad arrivano spesso a un tick o due di distanza).
 const SLIDE_GRACE := 6
@@ -50,6 +54,9 @@ const WALL_SPARK_EVERY := 5
 ## Tick dopo la corsa sul muro in cui SALTO è ancora la Spinta (non il salto a muro) e il braccio
 ## non frena: in cima alla corsa si sale ancora.
 const WALLRUN_GRACE := 8
+## Col braccio bloccato (il prologo, prima del riavvio) ci si tira su con la sola destra: bisogna
+## tenere SU (o la direzione del muro) per tanti tick prima che la salita parta.
+const ONE_HAND_STRAIN := 16
 
 var moves: PlatformMoves
 var grid: SolidGrid
@@ -106,6 +113,12 @@ var events: PackedStringArray = []
 ## Una posa imposta da fuori (per esempio l'hacking della stanza), al posto di quella dello stato.
 ## Solo disegno: non entra nell'impronta dello stato.
 var pose_override: StringName = &""
+## Braccio cyber bloccato (decisione 34 e scelta di Luigi del 5 novembre 2026: «base + appeso»):
+## corsa, salto semplice, accovacciarsi, scivolata e sporgenze con la sola destra. Niente Spinta,
+## muri, scatto né corsa sul muro.
+var arm_locked: bool = false
+## Tick di sforzo già fatti per tirarsi su con una mano (0 = non sta salendo).
+var strain: int = 0
 var anim: FrameAnim
 
 ## Misure per la taratura, mostrate dalla stanza di prova: altezza massima dell'ultimo salto
@@ -138,7 +151,7 @@ func place(x: int, y: int) -> void:
 	vy = 0
 	height = moves.body_height
 	state = State.GROUND if _on_floor() else State.AIR
-	boosts_left = moves.boosts
+	boosts_left = boosts_max()
 	dash_left = 1
 	wallrun_used = false
 	wall_lock = 0
@@ -261,7 +274,7 @@ func _tick_ground(input: InputFrame) -> void:
 	_run(ax, to_sub(moves.run_speed), to_sub(moves.ground_accel), to_sub(moves.ground_decel), to_sub(moves.ground_turn))
 	if absi(vx) >= to_sub(moves.wallrun_min_speed):
 		momentum = moves.wallrun_momentum
-	if buf_jump > 0 and _can_wall_run(ax):
+	if buf_jump > 0 and not arm_locked and _can_wall_run(ax):
 		_start_wall_run()
 		return
 	if buf_jump > 0:
@@ -354,6 +367,9 @@ func _tick_air(input: InputFrame) -> void:
 	var ax := input.axis_x()
 	if ax != 0:
 		facing = ax
+	if arm_locked:
+		_tick_air_one_arm(input, ax)
+		return
 	if input.was_pressed(InputFrame.DASH) and dash_left > 0:
 		_start_dash(ax)
 		return
@@ -378,6 +394,17 @@ func _tick_air(input: InputFrame) -> void:
 			_jump()
 		elif boosts_left > 0:
 			_boost()
+	if coyote > 0:
+		coyote -= 1
+	_tick_air_motion(input)
+
+
+## In aria col braccio bloccato: solo il salto semplice (anche col coyote time), niente acrobazie.
+func _tick_air_one_arm(input: InputFrame, ax: int) -> void:
+	_run(ax, to_sub(moves.run_speed), to_sub(moves.air_accel), to_sub(moves.air_decel), to_sub(moves.air_accel))
+	_stop_at_wall(ax)
+	if buf_jump > 0 and coyote > 0:
+		_jump()
 	if coyote > 0:
 		coyote -= 1
 	_tick_air_motion(input)
@@ -464,10 +491,15 @@ func _takeoff() -> void:
 	_peak_y = py
 
 
+## Le Spinte a disposizione a ogni ricarica: nessuna col braccio bloccato.
+func boosts_max() -> int:
+	return 0 if arm_locked else moves.boosts
+
+
 func _land() -> void:
 	vy = 0
 	ry = 0
-	boosts_left = moves.boosts
+	boosts_left = boosts_max()
 	coyote = 0
 	dash_left = 1
 	wallrun_used = false
@@ -520,23 +552,24 @@ func _try_grab(ax: int, wall: int) -> bool:
 		if grid.rect_hits_solid(left(), edge - 5, right(), edge):
 			continue
 		facing = ax
+		strain = 0
 		ledge_x = col_px
 		ledge_y = edge
 		vx = 0
 		vy = 0
 		rx = 0
 		ry = 0
-		boosts_left = moves.boosts
+		boosts_left = boosts_max()
 		dash_left = 1
 		last_peak = _takeoff_y - _peak_y
 		buf_jump = 0
 		var hang_py := edge + moves.body_height - 8
-		if _fits(moves.body_height, px, hang_py):
+		if _fits(HANG_LEGS + 8, px, edge + HANG_LEGS):
 			py = hang_py
 			state = State.LEDGE_HANG
 			events.append("grab")
 			return true
-		# Spigolo basso, all'altezza del petto, e sotto non c'è posto per stare appesi:
+		# Spigolo basso, e sotto non c'è posto per le gambe (i piedi finirebbero nel pavimento):
 		# GIG scavalca subito, senza fermarsi.
 		if _pick_climb():
 			_start_climb(false)
@@ -604,7 +637,30 @@ func _tick_hang(input: InputFrame) -> void:
 		_jump()
 		vx = ax * to_sub(moves.run_speed)
 		return
+	if arm_locked:
+		_tick_hang_one_arm(input)
+		return
 	if input.was_pressed(InputFrame.UP) or buf_jump > 0 or _hang_push(input):
+		if _pick_climb():
+			_start_climb(true)
+
+
+## Appeso con una mano sola: la salita parte dopo ONE_HAND_STRAIN tick di sforzo, tenendo SU,
+## SALTO o la direzione del muro; lasciando, lo sforzo riparte da capo.
+func _tick_hang_one_arm(input: InputFrame) -> void:
+	var toward := InputFrame.RIGHT if facing > 0 else InputFrame.LEFT
+	var pushing := input.is_held(InputFrame.UP) or input.is_held(InputFrame.JUMP) or input.is_held(toward)
+	if strain == 0 and not (input.was_pressed(InputFrame.UP) or buf_jump > 0 or _hang_push(input)):
+		return
+	if not pushing and strain > 0:
+		strain = 0
+		return
+	buf_jump = 0
+	strain += 1
+	if strain == 1:
+		events.append("strain")
+	if strain >= ONE_HAND_STRAIN:
+		strain = 0
 		if _pick_climb():
 			_start_climb(true)
 
@@ -649,7 +705,7 @@ func _wall_contact(dir: int) -> bool:
 
 ## In caduta, spingendo contro un muro: GIG pianta il braccio e frena.
 func _enter_wall_slide(ax: int) -> bool:
-	if ax == 0 or height < moves.body_height or wallrun_end_t > 0:
+	if arm_locked or ax == 0 or height < moves.body_height or wallrun_end_t > 0:
 		return false
 	# Il muro deve arrivare all'altezza della testa: se lo spigolo è già più in basso, GIG cade
 	# ancora un po' e si aggrappa con le mani invece di frenare.
@@ -661,7 +717,7 @@ func _enter_wall_slide(ax: int) -> bool:
 	wall_stick_t = moves.wall_stick
 	vx = 0
 	rx = 0
-	boosts_left = moves.boosts
+	boosts_left = boosts_max()
 	dash_left = 1
 	events.append("wall")
 	return true
@@ -916,7 +972,11 @@ func state_name() -> String:
 
 ## Impronta dello stato per i test e i replay.
 func state_hash() -> int:
-	return hash([px, py, rx, ry, vx, vy, facing, state, height, boosts_left, coyote, buf_jump,
+	var h := [px, py, rx, ry, vx, vy, facing, state, height, boosts_left, coyote, buf_jump,
 		drop_timer, slide_timer, slide_cd, ledge_cd, climb_timer, climb_total, climb_dx, climb_yoff, crouch_age,
 		ledge_x, ledge_y, tick, wall_dir, wall_stick_t, wall_coyote_t, wall_lock, dash_left, dash_timer,
-		wallrun_used, wallrun_end_t, momentum, _jump_fast])
+		wallrun_used, wallrun_end_t, momentum, _jump_fast]
+	# Solo col braccio bloccato, così le impronte dei replay di prima non cambiano.
+	if arm_locked:
+		h.append_array([arm_locked, strain])
+	return hash(h)

@@ -60,6 +60,16 @@ Il resto è nostro:
 
 Non sono usati Mixamo, Reallusion, CraftPix, Oonquil, Shapeforms, Sonniss, i file grezzi Rokoko né altro materiale che non si può ridistribuire.
 
+## Basi generate con l'AI (fuori dal repository)
+
+Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi e il garage, in `game/assets/env/prologo/`) partono da sfondi dipinti e fogli di oggetti generati con l'intelligenza artificiale. Gli script di `tools/ambienti/` li portano alla scala, alle palette e ai blocchi del gioco. Gli originali e i prompt non sono in questo repository.
+
+- **App Gemini di Google** (gemini.google.com), dal 6 novembre 2026. Google dichiara di non rivendicare la proprietà dei contenuti generati.
+- **ChatGPT di OpenAI** (chatgpt.com), dal 6 novembre 2026. I termini di OpenAI cedono all'utente i diritti sull'output e ne ammettono l'uso commerciale.
+- I prompt sono di solo testo: nessuna foto né immagine di altri è stata caricata. Le foto di Taranto sono servite soltanto a scriverli.
+- Personaggi, nemici e oggetti animati non vengono da qui: nascono dalla pipeline da 3D a pixel.
+- Le immagini generate con l'AI potrebbero non essere proteggibili col diritto d'autore. Prima di vendere il gioco si ricontrollano i termini dei due servizi.
+
 ## Codice nostro sotto GPL
 
 - **Script bpy della pipeline** (`tools/blender/`): codice nostro sotto GPL-3.0-or-later, come chiede blender.org per gli script che usano l'API di Blender. Testo in `LICENSES/GPL-3.0-or-later.txt`.

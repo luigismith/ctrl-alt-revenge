@@ -68,7 +68,8 @@ RISERVATA = "gioca"          # cartella della demo web, la riempie il workflow
 # ------------------------------------------------------------------ parole vietate
 # Spoiler, nomi veri, il genere sbagliato e altre cose che il sito non deve dire (brief del sito,
 # regole di rispetto di docs/lore/storia.md e decisioni del 4 novembre 2026). Si cercano nel testo
-# e negli attributi delle pagine finite, URL esclusi.
+# e negli attributi delle pagine finite, URL esclusi. ChatGPT si può nominare dal 6 novembre 2026:
+# le basi delle ambientazioni del prologo fatte con Gemini e con ChatGPT si dichiarano nei crediti.
 VIETATE_SENSIBILI = [  # maiuscole e minuscole contano: sono nomi
     "Dario", "Altamura", "Caporale", "Cosimo", "Warden", "Custode", "Custodi", "TUTORE", "Teresa", "EFESTO", "Leonida", "Vito",
     "Riva", "Jindal", "Flacks", "Mittal", "ArcelorMittal", "Federacciai", "Iacovone", "Mostro",
@@ -78,7 +79,7 @@ VIETATE = [  # maiuscole e minuscole non contano
     r"picchia\s*duro", "picchiaduro", "brawler", r"beat[\s\-']*'?em[\s\-']*up", r"16[\s\-]?bit",
     "ilva", "acciaierie", "sonnambul", "finta bonifica", "inganno", "cantiere segreto", "fisioterapia",
     r"modalit[àa] turno", r"aggiornamento 3\.0", "delfin", "dolphin", "2107", "2062", "2064", "2065",
-    "2067", "riaccension", "altiforni ricostruiti", "agosto 2026", "safety stoat", "chatgpt",
+    "2067", "riaccension", "altiforni ricostruiti", "agosto 2026", "safety stoat",
     "sleepwalk", "città dei veleni", "città morta",
 ]
 

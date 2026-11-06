@@ -44,6 +44,11 @@ func _decide(_tick: int) -> int:
 	var p := player
 	if p == null:
 		return 0
+	# I tratti con una regia loro (il prologo: vignette, riavvio, garage) decidono prima.
+	if room != null:
+		var sk := room.pilot_keys(_tick)
+		if sk >= 0:
+			return sk
 	var hk := _hack_keys()
 	if hk >= 0:
 		return hk
@@ -53,6 +58,9 @@ func _decide(_tick: int) -> int:
 	match p.state:
 		PlatformPlayer.State.LEDGE_HANG:
 			_dir = 1
+			# Con una mano sola bisogna tenere SU per tirarsi su.
+			if p.arm_locked:
+				return InputFrame.UP
 			return InputFrame.UP if _tick % 6 == 0 else 0
 		PlatformPlayer.State.LEDGE_CLIMB:
 			return 0

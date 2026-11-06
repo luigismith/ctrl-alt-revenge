@@ -1,0 +1,99 @@
+{
+  "format": 1,
+  "level_width": 7200,
+  "cam_ref_y": 230,
+  "layers": [
+    {
+      "name": "cielo",
+      "image": "cielo.png",
+      "scroll": 0.04,
+      "scroll_y": 0.02,
+      "y": -70,
+      "z": -100,
+      "x_to": 3160,
+      "fade_out": 100
+    },
+    {
+      "name": "medio",
+      "image": "medio.png",
+      "scroll": 0.3,
+      "scroll_y": 0.12,
+      "y": 56,
+      "z": -90,
+      "x_to": 3210,
+      "fade_out": 100
+    },
+    {
+      "name": "vicino",
+      "image": "vicino.png",
+      "scroll": 0.6,
+      "scroll_y": 0.3,
+      "y": 81,
+      "z": -80,
+      "x_to": 3260,
+      "fade_out": 100
+    },
+    {
+      "name": "davanti",
+      "image": "davanti.png",
+      "scroll": 1.4,
+      "scroll_y": 1.35,
+      "y": -15,
+      "z": 1000,
+      "x_to": 3260,
+      "fade_out": 100
+    },
+    {
+      "name": "cielo_fuga",
+      "image": "cielo_fuga.png",
+      "scroll": 0.04,
+      "scroll_y": 0.02,
+      "y": -72,
+      "z": -105,
+      "x_from": 3060,
+      "origin_x": 3060
+    },
+    {
+      "name": "medio_fuga",
+      "image": "medio_fuga.png",
+      "scroll": 0.3,
+      "scroll_y": 0.12,
+      "y": 22,
+      "z": -104,
+      "x_from": 3060,
+      "origin_x": 3060
+    },
+    {
+      "name": "vicino_fuga",
+      "image": "vicino_fuga.png",
+      "scroll": 0.6,
+      "scroll_y": 0.3,
+      "y": 125,
+      "z": -103,
+      "x_from": 3060,
+      "origin_x": 3060
+    },
+    {
+      "name": "davanti_fuga",
+      "image": "davanti_fuga.png",
+      "scroll": 1.4,
+      "scroll_y": 1.35,
+      "y": -15,
+      "z": 1001,
+      "x_from": 3060,
+      "origin_x": 3060
+    }
+  ],
+  "scenes": [
+    {
+      "image": "scena.png",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "image": "scena_fuga.png",
+      "x": 3380,
+      "y": 0
+    }
+  ]
+}

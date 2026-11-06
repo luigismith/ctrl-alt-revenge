@@ -4,12 +4,19 @@ extends RefCounted
 ## intere, ripetizione orizzontale e maschere emissive in additivo, con lo sfarfallio di
 ## qualche neon. Se il file manca usa i piani segnaposto di PlaceholderEnv.
 ## I piani con z < 0 vanno dietro agli attori, quelli con z ≥ 0 davanti.
+## Nei tratti platform la telecamera sale e scende: ogni piano scende di scroll_y px per ogni px che
+## la telecamera sale sopra cam_ref_y (lo slice non la muove in verticale e non li usa).
+## Un livello può cambiare ambiente a metà (il prologo passa dal cimitero ai Tamburi): ogni piano può
+## valere solo per un tratto della telecamera (x_from-x_to), comparire e sparire in dissolvenza
+## (fade_in, fade_out, in px della telecamera) e partire da origin_x invece che da 0.
 
 const VIEW_W := View.W
+const FAR := 1 << 30
 const EMISSIVE_SHADER := """shader_type canvas_item;
 render_mode blend_add;
 uniform sampler2D group_map : filter_nearest;
 uniform vec4 levels = vec4(1.0);
+uniform float fade = 1.0;
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	float g = floor(texture(group_map, vec2(UV.x, 0.5)).r * 255.0 + 0.5);
@@ -17,7 +24,7 @@ void fragment() {
 	if (g > 0.5 && g < 1.5) { k = levels.y; }
 	else if (g > 1.5 && g < 2.5) { k = levels.z; }
 	else if (g > 2.5) { k = levels.w; }
-	COLOR = vec4(c.rgb * k, c.a);
+	COLOR = vec4(c.rgb * k, c.a * fade);
 }
 """
 
@@ -25,9 +32,17 @@ void fragment() {
 class Layer:
 	var name: String = ""
 	var scroll: float = 1.0
+	var scroll_y: float = 0.0
 	var y: int = 0
 	var repeat_x: int = 0
 	var z: int = 0
+	## Il tratto della telecamera in cui il piano si vede, e le dissolvenze ai due capi.
+	var x_from: int = -FAR
+	var x_to: int = FAR
+	var fade_in: int = 0
+	var fade_out: int = 0
+	## La x della telecamera per cui il bordo sinistro del piano sta sul bordo dello schermo.
+	var origin_x: int = 0
 	var texture: Texture2D
 	var emissive: Texture2D
 	var node: Node2D
@@ -41,6 +56,12 @@ class Layer:
 var layers: Array[Layer] = []
 var level_width: int = 2400
 var floor_band: Vector2i = Vector2i(188, 260)
+## La y della telecamera per cui valgono le "y" dei piani.
+var cam_ref_y: float = 0.0
+## La scena del campo di gioco, se c'è: uno o più pezzi {"image": file, "x": px, "y": px}, alla scala
+## del mondo, uno dopo l'altro (nel json "scenes", o "scene" se è uno solo).
+var scenes: Array[Dictionary] = []
+var dir: String = ""
 var placeholder: bool = false
 var errors: PackedStringArray = []
 var warnings: PackedStringArray = []
@@ -61,6 +82,12 @@ func load_json(path: String) -> bool:
 	if int(d.get("format", 0)) != 1:
 		errors.append("format deve essere 1")
 	level_width = int(d.get("level_width", 2400))
+	cam_ref_y = float(d.get("cam_ref_y", 0.0))
+	var sc: Variant = d.get("scenes", [d.get("scene", {})])
+	if sc is Array:
+		for s: Variant in sc:
+			if s is Dictionary and (s as Dictionary).has("image"):
+				scenes.append(s)
 	var band: Variant = d.get("floor_band", [188, 260])
 	if band is Array and (band as Array).size() == 2:
 		floor_band = Vector2i(int(band[0]), int(band[1]))
@@ -68,7 +95,7 @@ func load_json(path: String) -> bool:
 	if not (list is Array) or (list as Array).is_empty():
 		errors.append("layers vuoto")
 		return false
-	var dir := path.get_base_dir()
+	dir = path.get_base_dir()
 	for lv: Variant in list:
 		if not (lv is Dictionary):
 			errors.append("piano non valido")
@@ -76,9 +103,15 @@ func load_json(path: String) -> bool:
 		var l := Layer.new()
 		l.name = str(lv.get("name", "piano"))
 		l.scroll = float(lv.get("scroll", 1.0))
+		l.scroll_y = float(lv.get("scroll_y", 0.0))
 		l.y = int(lv.get("y", 0))
 		l.repeat_x = int(lv.get("repeat_x", 0))
 		l.z = int(lv.get("z", 0))
+		l.x_from = int(lv.get("x_from", -FAR))
+		l.x_to = int(lv.get("x_to", FAR))
+		l.fade_in = maxi(0, int(lv.get("fade_in", 0)))
+		l.fade_out = maxi(0, int(lv.get("fade_out", 0)))
+		l.origin_x = int(lv.get("origin_x", 0))
 		l.texture = SpriteSheet.load_texture(dir.path_join(str(lv.get("image", ""))))
 		if l.texture == null:
 			errors.append("%s: immagine mancante" % l.name)
@@ -87,7 +120,8 @@ func load_json(path: String) -> bool:
 			l.emissive = SpriteSheet.load_texture(dir.path_join(str(lv["emissive"])))
 			if l.emissive == null:
 				warnings.append("%s: maschera emissiva mancante" % l.name)
-		var need := int(VIEW_W + (level_width - VIEW_W) * l.scroll)
+		var cam_end := mini(l.x_to, level_width - VIEW_W)
+		var need := int(VIEW_W + (cam_end - l.origin_x) * l.scroll)
 		if l.repeat_x == 0 and l.texture.get_width() < need:
 			warnings.append("%s: largo %d px, ne servono %d" % [l.name, l.texture.get_width(), need])
 		layers.append(l)
@@ -147,10 +181,19 @@ func _sprite(tex: Texture2D, parent: Node) -> Sprite2D:
 	return s
 
 
-## Aggiorna le posizioni (intere) per la telecamera in `cam_x` e lo sfarfallio dei neon.
-func update(cam_x: int, tick: int) -> void:
+## Aggiorna le posizioni (intere) per la telecamera in `cam_x` e lo sfarfallio dei neon; `cam_dy` è
+## quanto la telecamera sta sotto cam_ref_y (negativo quando sale).
+func update(cam_x: int, tick: int, cam_dy: float = 0.0) -> void:
 	for l in layers:
-		var base := -roundi(cam_x * l.scroll)
+		var a := alpha(l, cam_x)
+		l.node.visible = a > 0.0
+		if a <= 0.0:
+			continue
+		l.node.modulate.a = a
+		if l.emis_mat != null:
+			l.emis_mat.set_shader_parameter(&"fade", a)
+		var base := -roundi((cam_x - l.origin_x) * l.scroll)
+		var ly := l.y - roundi(cam_dy * l.scroll_y)
 		var all: Array[Sprite2D] = l.sprites + l.emis_sprites
 		var n := l.sprites.size()
 		for i in all.size():
@@ -158,9 +201,22 @@ func update(cam_x: int, tick: int) -> void:
 			var x := base
 			if l.repeat_x > 0:
 				x = posmod(base, l.repeat_x) - l.repeat_x + k * l.repeat_x
-			all[i].position = Vector2(x, l.y)
+			all[i].position = Vector2(x, ly)
 		if l.emis_mat != null:
 			l.emis_mat.set_shader_parameter(&"levels", _levels(l, tick))
+
+
+## Quanto si vede il piano con la telecamera in `cam_x` (0-1): fuori dal suo tratto niente, e
+## dissolvenze lineari ai due capi.
+static func alpha(l: Layer, cam_x: int) -> float:
+	if cam_x < l.x_from or cam_x > l.x_to:
+		return 0.0
+	var a := 1.0
+	if l.fade_in > 0:
+		a = minf(a, float(cam_x - l.x_from) / l.fade_in)
+	if l.fade_out > 0:
+		a = minf(a, float(l.x_to - cam_x) / l.fade_out)
+	return clampf(a, 0.0, 1.0)
 
 
 ## Intensità dei neon: il piano respira piano, tre gruppi ogni tanto sfarfallano.

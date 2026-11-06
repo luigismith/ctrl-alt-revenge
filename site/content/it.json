@@ -237,10 +237,10 @@
     {"titolo": "Modelli CC0", "testo": "I personaggi partono da modelli e animazioni 3D gratuiti con licenza CC0, di Quaternius e Mesh2Motion."},
     {"titolo": "Blender", "testo": "Blender li anima e li renderizza. Le mosse più importanti, cioè la presa, le ginocchiate, la proiezione, il gancio cyber e il calcio volante, sono pose scritte negli script."},
     {"titolo": "Python", "testo": "Script in Python li trasformano in pixel art, con una tavolozza per ogni materiale, timbri per i dettagli del viso, il codino con la molla, stivali costruiti dal codice e una normal map per ogni atlante."},
-    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
+    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi dello slice sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne; quelli del prologo partono da basi dipinte con Gemini e ChatGPT, che i nostri script portano alla pixel art del gioco. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
     {"titolo": "Godot", "testo": "Godot mette insieme tutto, con le luci dinamiche e la logica a tick fissi."}
    ],
-   "chiusa": "Niente ritocchi a mano e nessuna immagine generata da un’intelligenza artificiale: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository."
+   "chiusa": "Niente ritocchi a mano: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository. Le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo, da prompt di solo testo; personaggi e nemici nascono dalla pipeline 3D."
   },
   "colori": {
    "titolo": "I colori dicono di chi è la scena",
@@ -262,8 +262,8 @@
    {"tipo": "fatto", "stato": "FATTO", "titolo": "Le basi del gameplay", "testo": "Decise e scritte: platform e arene, mosse, combattimento, puzzle di hacking, vita e checkpoint, recuperi, segreti, capitoli e pericoli."},
    {"tipo": "fatto", "stato": "FATTO", "titolo": "Taranto, con le fonti", "testo": "Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e perfino la luna di quella notte."},
    {"tipo": "fatto", "stato": "FATTO", "titolo": "Lo slice «Sotto la Linea»", "testo": "Giocabile dal titolo alla fine della demo: GIG contro il punk e il bruto, con combo, prese, ginocchiate, proiezioni, calcio volante, un cavo elettrico da saltare e un’arena fino a ZONA LIBERATA. Sprite alla versione 7 con normal map e luci dinamiche, effetti sonori sintetizzati (poi sostituiti con suoni già pronti), logica a tick fissi controllata da test automatici e replay deterministici."},
-   {"tipo": "prossima", "stato": "▶ PROSSIMA", "titolo": "La stanza di prova", "testo": "Tutta grigia, per tarare le mosse: salti, doppio salto, muri, scatto, rampino e il passaggio all’arena con la telecamera inclinata."},
-   {"tipo": "poi", "stato": "POI", "titolo": "Il prologo", "testo": "Il cimitero di San Brunone e il garage, con il riavvio del braccio."},
+   {"tipo": "fatto", "stato": "FATTO", "titolo": "La stanza di prova", "testo": "Tutta grigia, per tarare le mosse: salti, doppio salto, sporgenze, scivolata, muri e scatto, il passaggio all’arena con la telecamera inclinata, i primi Esattori e il primo hacking."},
+   {"tipo": "prossima", "stato": "▶ IN CORSO", "titolo": "Il prologo", "testo": "Il cimitero di San Brunone, la fuga per i Tamburi e il garage, con il riavvio del braccio. Fino al riavvio GIG combatte col braccio morto."},
    {"tipo": "poi", "stato": "POI", "titolo": "Capitolo 1, «I tetti dei Tamburi»", "testo": "Con il primo registro, il cibo e l’introduzione a murales."},
    {"tipo": "parallelo", "stato": "IN PARALLELO", "titolo": "Murales e colonna sonora", "testo": "La prova di stile dei murales e la colonna sonora: suono anni ’90, ma non per forza chiptune."}
   ],
@@ -276,13 +276,13 @@
    "titolo": "Chi lo fa",
    "voci": [
     {"ruolo": "Progetto e direzione", "testo": "Luigi Massari.", "mostra": true},
-    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0. È la stessa riga dei crediti del gioco.", "mostra": true},
+    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo, da basi generate con Gemini e ChatGPT. È la stessa riga dei crediti del gioco.", "mostra": true},
     {"ruolo": "Storia", "testo": "la scrivono insieme Luigi Massari e Claude, un assistente AI: Claude propone, Luigi decide.", "mostra": false},
     {"ruolo": "Font CAR Pixel, effetti e interfaccia", "testo": "disegnati da script per CTRL+ALT REVENGE.", "mostra": true},
     {"ruolo": "Motore", "testo": "Godot Engine.", "mostra": true}
    ]
   },
-  "ai": "Nessuna immagine di questo sito è generata da un’intelligenza artificiale: c’è la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script, quelli sì, sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository.",
+  "ai": "Le immagini di questo sito sono la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository. Nel gioco, le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo: sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, poi portati alla pixel art dagli script.",
   "licenze": {
    "titolo": "Licenze",
    "voci": [

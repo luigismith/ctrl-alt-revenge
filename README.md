@@ -61,8 +61,9 @@ In sviluppo, novembre 2026. Il gioco si sta rifacendo da zero in Godot 4.7.2, pr
 | Le basi del gameplay: platform e arene, mosse, combattimento, puzzle di hacking, recuperi, segreti | fatte |
 | Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e luna | fatta |
 | Lo slice verticale «Sotto la Linea», giocabile dal titolo alla fine della demo | fatto |
-| La stanza di prova per tarare le mosse: corsa, salto, Spinta, piattaforme sottili, sporgenze, scivolata, salto a muro, scatto e corsa sui muri | in corso |
-| Il prologo (il cimitero di San Brunone e il garage) e il capitolo 1, «I tetti dei Tamburi» | poi |
+| La stanza di prova per tarare le mosse: corsa, salto, Spinta, piattaforme sottili, sporgenze, scivolata, salto a muro, scatto e corsa sui muri, con i primi Esattori e il primo hacking | fatta |
+| Il prologo, dal cimitero di San Brunone al garage della madre, con GIG che combatte col braccio morto | in corso |
+| Il capitolo 1, «I tetti dei Tamburi» | poi |
 | La prova di stile dei murales e la colonna sonora (i primi due brani sono già nella demo) | in parallelo |
 
 Lo slice è una prova tecnica: la sua strada è ancora generica, e la rifaremo perché racconti i Tamburi la sera del Giovedì Santo del 2087. Nessuna data di uscita, per ora: tappe, stime in ore e cosa blocca cosa sono nel [piano](docs/piano.md). La specifica dello slice è in [`docs/specifica-slice.md`](docs/specifica-slice.md).
@@ -89,6 +90,7 @@ Argomenti utili, da scrivere dopo `--`:
 | `--autostart` | salta il titolo e parte dal livello |
 | `--stanza` | parte dalla stanza di prova in grigio (anche dal titolo: STANZA DI PROVA) |
 | `--autopilot stanza` | GIG percorre da solo la stanza di prova |
+| `--prologo` | parte dal prologo (anche dal titolo: PROLOGO, solo nelle versioni per PC) |
 | `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 67 s (GIG gioca da solo) |
 | `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |
@@ -168,12 +170,12 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 **CTRL+ALT REVENGE!** · © 2026 Luigi Massari
 
 - **Progetto e direzione:** Luigi Massari.
-- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0.
+- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo, da basi generate con Gemini e ChatGPT.
 - **Musica della demo:** Luigi Massari, con Suno (piano Pro).
 - **Font CAR Pixel, effetti e interfaccia:** disegnati da script per CTRL+ALT REVENGE.
 - **Motore:** [Godot Engine](https://godotengine.org).
 
-Nessuna immagine è generata da un’intelligenza artificiale: la grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano.
+La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo: sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. Gli originali non sono nel repository.
 
 **Sorgenti CC0** (il credito non è obbligatorio, lo diamo lo stesso):
 - [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro).
