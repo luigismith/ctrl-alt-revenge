@@ -41,8 +41,10 @@ export_credentials.cfg
 *.pyc
 .venv/
 
-# --- Claude Code: impostazioni locali ---
+# --- Claude Code: impostazioni locali, sessioni e agenti del progetto (restano su OneDrive) ---
 .claude/settings.local.json
+.claude/sessioni/
+.claude/agents/
 
 # --- sistema ---
 Thumbs.db

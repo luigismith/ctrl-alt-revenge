@@ -36,7 +36,9 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
   - **stile misto:** i murales di Totò, animati, per l'introduzione, i ricordi e i passaggi fra i capitoli; le scene nel motore, con le bande nere e i primi piani grandi, per gli Esattori, i boss e le battute brevi;
   - **i primi piani:** il nostro render 3D del volto passato a ChatGPT o a Gemini per lo stile dei murales; palpebre, bocca e luci le animano i nostri script;
   - **le battute avanzano a pressione,** come in Celeste;
-  - **ogni scena ha la sua musica,** fatta con Suno (Luigi: «mi raccomando anche alle musiche per le scene»).
+  - **ogni scena ha la sua musica,** fatta con Suno (Luigi: «mi raccomando anche alle musiche per le scene»);
+  - **la regia c'è sempre,** in tutti i filmati del gioco: intermezzi, presentazioni e finale. Dove l'estetica e la regia lo chiedono servono primi piani, inquadrature strette o larghissime e cambi di inquadratura. Un filmato non è mai gameplay che va da solo (Luigi, 6 novembre 2026: «in sostanza i filmati di intermezzo, presentazione, ending, non sono mai delle sessioni di gameplay automatico»);
+  - **i passaggi fra gioco e filmato sono morbidi,** nei due sensi (Luigi: «Mi raccomando alla transizione tra gameplay e filmati e viceversa»).
 - **Servizi AI:** Claude si aiuta con ChatGPT, Gemini o altri servizi gratuiti tutte le volte che serve (Luigi, 6 novembre 2026). Valgono le regole sulle immagini in "Licenze e file".
 - **Budget:** costo zero. Sono ammessi strumenti gratuiti anche solo per uso non commerciale; di ognuno si annotano la licenza e cosa servirebbe per vendere il gioco.
 - **Persone reali:** i nomi veri entrano nel gioco e nei file pubblici solo con il consenso.
@@ -74,6 +76,26 @@ Luigi ha deciso il 4 novembre 2026 che la storia completa non va nel repo pubbli
 - **Il laboratorio** (strumenti, modelli 3D, musica segnaposto) sta su ogni PC in `%USERPROFILE%\ctrlaltrevenge-lab` e si crea con `tools/setup/prepara_laboratorio.ps1`. La guida è `docs/lavorare-da-casa.md`.
 - **Le cose private** stanno nella cartella sorella del repo `ctrlaltrevenge-lab-condiviso`: modelli CC0, note, ricerca, locandine di riferimento. Non vanno mai nel repo.
 - **Regola d'uso:** non lavorare sui due PC nello stesso momento, e prima di cambiare PC aspettare che OneDrive abbia finito di sincronizzare.
+
+## Sessioni e token
+
+Luigi ha deciso il 6 novembre 2026 di lavorare con una regia e una scheda per lavoro («Regia + schede»), risparmiando token senza perdere qualità.
+
+- **Le sessioni** sono sei: regia, gioco, storia, grafica, mappe e musica.
+  - I ruoli e i file di ognuna stanno in `.claude/sessioni/`.
+  - Le apre il lanciatore del second brain, ognuna in una scheda di Windows Terminal.
+  - Luigi parla con la regia.
+- **I compiti della regia** valgono come richieste di Luigi, ma solo nell'ambito della sessione che li riceve e senza permessi in più.
+  - Le domande per Luigi passano dalla regia, una alla volta.
+  - I messaggi fra sessioni sono brevi: i dettagli stanno nei file.
+- **I file e i commit:** ogni sessione lavora sui suoi file. I commit li fa la regia, quando Luigi lo chiede.
+- **Una sessione per lavoro:** a lavoro finito la si chiude e se ne apre una nuova. La nota del second brain fa da ponte.
+- **Agenti:** per i lavori meccanici c'è l'agente `meccanico`, con Sonnet (PDF, conversioni, ricerche nei file, controlli, elenchi). Scrittura, regia, grafica e codice difficile restano a Opus.
+- **Letture:**
+  - dei file sopra le 300 righe si legge solo la parte che serve (prima Grep, poi `offset` e `limit`);
+  - un file già letto non si rilegge, se non è cambiato;
+  - `storia.md`, `sceneggiatura.md`, `test_room.gd` e la nota del second brain sono grandi: si cerca la sezione e si legge quella;
+  - Grep si usa con `head_limit`, e le uscite lunghe dei comandi si filtrano o si salvano su file.
 
 ## Direzione estetica: retro, con la tecnologia di oggi
 

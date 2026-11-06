@@ -85,11 +85,21 @@ Le parti del lavoro:
 
 **È finita quando** le scene del prologo sostituiscono le vignette provvisorie, avanzano a pressione e i test passano.
 
+**Fatto il 6 novembre 2026:**
+- la sceneggiatura del prologo e del capitolo 1 è approvata, con la scaletta di tutti i filmati e i passaggi fra i capitoli; i testi stanno nella cartella privata;
+- il logo di SIDERA è scelto: lo scudo con lo scorpione dello stemma di Taranto del 1589, e un sigillo per i certificati;
+- il piano dei brani delle scene è pronto per Suno;
+- c'è la guida pubblica al mondo, [`mondo.md`](mondo.md).
+
+**Prossimo passo:** le scelte sulle voci (quanta voce, sintesi vocale, pronunce), poi i primi brani con Suno.
+
 ### 3. Capitolo 1, «I tetti dei Tamburi»
 
 Di pomeriggio, sotto la pioggia, con Totò che fa da guida. Dentro ci sono il primo registro segreto, il cibo come recupero e il murale del capitolo, che fa da mappa e da salvataggio.
 
 **È finito quando** vale lo stesso criterio del prologo, e la durata sta fra 6 e 10 minuti.
+
+**Fatto il 6 novembre 2026:** il livello è sulla carta, in due mappe divise dal covo di Totò: la fuga sui tetti, con la prima arena, e la strada verso la Linea fino al tramonto. Sono stimati 8-10 minuti di gioco più 3 di scene. Cadere nel vuoto costa una vita intera.
 
 ### D2. Demo 2
 
