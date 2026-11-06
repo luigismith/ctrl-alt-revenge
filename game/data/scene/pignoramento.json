@@ -1,0 +1,69 @@
+{
+ "formato": 1,
+ "id": "pignoramento",
+ "nota": "Il pignoramento al cancello di San Brunone (prologo; decisioni 63, 64, 68 e 70). Regia proposta da Claude il 6 novembre 2026, da rivedere in gioco. Le battute sono nel file privato delle battute del prologo.",
+ "spazio": "arena",
+ "battute": "prologo",
+ "musica": "pignoramento",
+ "attori": {
+  "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "x": 140, "y": 214, "verso": 1,
+   "nome": "GIG", "colore": "#e8c07a", "primo_piano": "gig_spento"},
+  "messo": {"tipo": "messo", "x": -100, "y": 200, "verso": 1, "anim": "idle",
+   "nome": "MESSO", "colore": "#e0484f", "primo_piano": "messo"},
+  "rider": {"tipo": "rider", "x": -135, "y": 236, "verso": 1, "anim": "idle", "variante": 0,
+   "nome": "RIDER", "primo_piano": "rider"}
+ },
+ "esito": {
+  "gig": {"x": 330, "y": 214, "verso": -1},
+  "messo": {"x": 90, "y": 200, "verso": 1},
+  "rider": {"x": 205, "y": 236, "verso": 1}
+ },
+ "passi": [
+  {"fai": "attendi", "tick": 18},
+
+  {"fai": "camera", "su": "gig", "alto": 56, "scarto": [40, 0], "zoom": 2, "tick": 50, "segui": true, "aspetta": false},
+  {"fai": "cammina", "chi": "gig", "a": [330, 214], "vel": 1.6},
+  {"fai": "inquadra", "centro": [413, 132], "zoom": 3},
+  {"fai": "suono", "nome": "bin_hit", "vol": -8},
+  {"fai": "attendi", "tick": 50},
+
+  {"fai": "inquadra", "su": "gig", "alto": 56, "zoom": 2},
+  {"fai": "suono", "nome": "step_a", "vol": -8},
+  {"fai": "attendi", "tick": 16},
+  {"fai": "suono", "nome": "step_b", "vol": -8},
+  {"fai": "attendi", "tick": 20},
+  {"fai": "verso", "chi": "gig", "verso": -1},
+  {"fai": "attendi", "tick": 24},
+  {"fai": "inquadra", "centro": [100, 135], "zoom": 1},
+  {"fai": "camera", "centro": [150, 140], "zoom": 1, "tick": 150, "aspetta": false},
+  {"fai": "cammina", "chi": "rider", "a": [205, 236], "vel": 3.0, "aspetta": false},
+  {"fai": "cammina", "chi": "messo", "a": [90, 200], "vel": 1.3},
+
+  {"fai": "anim", "chi": "messo", "anim": "read"},
+  {"fai": "inquadra", "su": "messo", "alto": 62, "scarto": [30, 0], "zoom": 2},
+  {"fai": "attendi", "tick": 20},
+  {"fai": "battuta", "chi": "messo", "id": "atto_1"},
+  {"fai": "battuta", "chi": "messo", "id": "atto_2"},
+
+  {"fai": "inquadra", "su": "gig", "alto": 70, "zoom": 3},
+  {"fai": "battuta", "chi": "gig", "id": "gig_1", "pieno": true},
+  {"fai": "battuta", "chi": "messo", "id": "atto_3", "pieno": true},
+
+  {"fai": "inquadra", "centro": [210, 150], "zoom": 1},
+  {"fai": "battuta", "chi": "messo", "id": "atto_4"},
+  {"fai": "battuta", "chi": "messo", "id": "atto_5"},
+
+  {"fai": "camera", "su": "gig", "alto": 66, "scarto": [-24, 0], "zoom": 3, "tick": 24, "aspetta": false},
+  {"fai": "laser", "da": "messo", "a": "gig", "tick": 60, "segno": true},
+  {"fai": "suono", "nome": "ui_move", "vol": -4},
+  {"fai": "attendi", "tick": 40},
+
+  {"fai": "camera", "centro": [240, -110], "zoom": 1, "tick": 110, "aspetta": false},
+  {"fai": "attendi", "tick": 30},
+  {"fai": "evento", "nome": "pioggia"},
+  {"fai": "attendi", "tick": 130},
+
+  {"fai": "inquadra", "centro": [240, 135], "zoom": 1},
+  {"fai": "attendi", "tick": 10}
+ ]
+}

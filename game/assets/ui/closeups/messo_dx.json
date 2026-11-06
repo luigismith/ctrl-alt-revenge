@@ -1,0 +1,17 @@
+{
+ "size": [
+  96,
+  96
+ ],
+ "faces": "right",
+ "mouth": [
+  59,
+  53,
+  9,
+  3
+ ],
+ "mouth_dark": "#3a0e16",
+ "variants": [
+  "talk"
+ ]
+}

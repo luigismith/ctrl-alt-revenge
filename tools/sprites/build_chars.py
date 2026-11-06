@@ -7,7 +7,8 @@ Uso (sempre con il Python del laboratorio e -I, dalla radice del repo):
       render (Blender) -> pixel -> atlante + JSON -> validazione -> tavole di controllo -> ritratti -> scena
   python -I tools/sprites/build_chars.py publish [id ...]
       copia in game/assets i file già validati (nome temporaneo + rinomina, così il gioco non li legge a metà)
-Passi singoli: retarget, render, bones, pixel, assemble, validate, review, portrait, scene, explore, preview.
+Passi singoli: retarget, render, bones, pixel, assemble, validate, review, portrait, scene, explore, preview,
+closeup (primi piani 96x96 per le scene nel motore, in game/assets/ui/closeups).
 Il lavoro intermedio va in tools/sprites/out/ (ignorata da git). Configurazione: tools/sprites/chars/<id>.json
 (una variante, come gig_spento, parte da "base" e cambia solo quello che scrive), telecamera e luci comuni:
 tools/sprites/camera.json.
@@ -757,6 +758,352 @@ def snap_to_palette(sp, pal):
     return out
 
 
+# ============================================================== primi piani per le scene nel motore
+# Valori di partenza di un primo piano; ogni voce di "closeups" nel JSON del personaggio cambia quello che scrive.
+# faces: dove guarda il volto nell'immagine. Verso sinistra (GIG nelle scene, che non si specchia mai) si rende dal
+# lato opposto (yaw 180 - yaw) e le luci si specchiano, così la luce chiave resta dal lato del viso.
+# face_px: altezza della testa (dalla cima al mento, senza capelli) in pixel; la densità si calcola da questa,
+# perché le teste hanno proporzioni diverse (quella di GIG è più grande). blink_eyes: gli occhi che si chiudono.
+CLOSEUP_DEFAULT = dict(action="Idle_Loop", frame=1, face_px=60, frame_px=128, yaw_deg=55.0, pitch_deg=4.0,
+                       dz=0.0, size=96, top_px=3, look_px=5, faces="right", variants=["blink", "talk"],
+                       blink_eyes=["eye_l", "eye_r"], beauty=True, beauty_px=1536)
+CLOSEUP_DIR = os.path.join(C.ASSETS, "ui", "closeups")
+BG_SCENE = (18, 15, 36)
+
+
+def condiviso_dir(*parts):
+    """cartella privata condivisa fra i PC (mai nel repo): CAR_CONDIVISO o ctrlaltrevenge-lab-condiviso accanto
+    al repo."""
+    base = os.environ.get("CAR_CONDIVISO") or os.path.join(os.path.dirname(C.REPO), "ctrlaltrevenge-lab-condiviso")
+    return os.path.join(base, *parts)
+
+
+def closeup_specs(cfg):
+    out = []
+    for s in cfg.get("closeups") or []:
+        sp = dict(CLOSEUP_DEFAULT)
+        sp.update(s)
+        if sp["faces"] == "left" and "yaw_deg" not in s:
+            sp["yaw_deg"] = 180.0 - CLOSEUP_DEFAULT["yaw_deg"]
+        out.append(sp)
+    return out
+
+
+def closeup_pixel_cfg(cfg, meta, sp):
+    """pixel_cfg degli sprite + "closeup_pixel_cfg" del personaggio + "pixel_cfg" del primo piano. Niente timbri
+    del viso (sono disegnati per la scala degli sprite) e luci specchiate per chi guarda a sinistra."""
+    pc = C._merge(dict(PX.DEFAULT_CFG), cfg.get("pixel_cfg", {}))
+    pc = C._merge(pc, cfg.get("closeup_pixel_cfg", {}))
+    pc = C._merge(pc, sp.get("pixel_cfg", {}))
+    cam = C.camera()
+    key = list(cam["luce_chiave"]["camera"])
+    rim = list(cam["luce_di_contorno"]["camera"])
+    if sp["faces"] == "left":
+        key[0], rim[0] = -key[0], -rim[0]
+    pc.update(key=key, rim_dir=rim, rim_thr=cam["luce_di_contorno"]["soglia"],
+              rim_mats=cfg["palette"].get("rim_mats", []), p1=meta["p1"], stamps=None)
+    return pc
+
+
+def disk_mask(shape, centres, r):
+    yy, xx = np.mgrid[0:shape[0], 0:shape[1]]
+    m = np.zeros(shape, bool)
+    for cx, cy in centres:
+        m |= (xx + 0.5 - cx) ** 2 + (yy + 0.5 - cy) ** 2 <= r * r
+    return m
+
+
+def bbox_of(m):
+    ys, xs = np.nonzero(m)
+    if len(xs) == 0:
+        return None
+    return [int(xs.min()), int(ys.min()), int(xs.max() - xs.min() + 1), int(ys.max() - ys.min() + 1)]
+
+
+def main_colour(im, m, darkest=False):
+    """colore più frequente dei pixel della maschera (o il più scuro fra i due più frequenti)."""
+    px = im[m][:, :3]
+    if len(px) == 0:
+        return None
+    cols, cnt = np.unique(px, axis=0, return_counts=True)
+    order = np.argsort(-cnt)
+    pick = cols[order[0]]
+    if darkest and len(order) > 1:
+        two = cols[order[:2]]
+        pick = two[np.argmin(two.astype(int).sum(1))]
+    return PX.tohex(tuple(int(c) for c in pick))
+
+
+def crop_frame(im, x0, y0, n):
+    out = np.zeros((n, n) + im.shape[2:], im.dtype)
+    h, w = im.shape[:2]
+    xa, ya, xb, yb = max(0, x0), max(0, y0), min(w, x0 + n), min(h, y0 + n)
+    if xa < xb and ya < yb:
+        out[ya - y0:yb - y0, xa - x0:xb - x0] = im[ya:yb, xa:xb]
+    return out
+
+
+def eye_regions(img, ids, ID, centres, r):
+    """i pixel degli occhi veri (EYE_DARK) attorno a ogni centro proiettato: una maschera per occhio."""
+    eye = (ids == ID["EYE_DARK"]) & (img[..., 3] > 0)
+    out = []
+    for c in centres:
+        reg = eye & disk_mask(eye.shape, [c], r)
+        if reg.sum() >= 2:
+            out.append(reg)
+    return out
+
+
+def dark_tones(pal):
+    """(linea, iride): il colore del contorno e il più scuro degli altri colori della tavolozza."""
+    P = sorted(pal, key=lambda c: 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2])
+    return P[0], (P[1] if len(P) > 1 else P[0])
+
+
+def paint_eyes(img, regions, lash, iris):
+    """occhi aperti a questa scala, come i timbri degli sprite: la riga alta di ogni colonna è la linea delle ciglia
+    (colore del contorno), il resto è l'iride scura. Nel cel l'occhio verrebbe un ovale bruno poco leggibile."""
+    out = img.copy()
+    for reg in regions:
+        ys, xs = np.nonzero(reg)
+        out[reg, :3] = iris
+        for x in np.unique(xs):
+            out[ys[xs == x].min(), x, :3] = lash
+    return out
+
+
+def paint_blink(img, ids, ID, regions, lash):
+    """occhi chiusi: i pixel dell'occhio prendono il colore della palpebra (la pelle subito sopra l'occhio) e la
+    riga più bassa di ogni colonna diventa la linea delle ciglia. -> (immagine, [rettangoli], colore palpebra)"""
+    out = img.copy()
+    skin = np.isin(ids, [ID[k] for k in ("SKIN", "EYE_SOCKET", "SKIN_DARK", "NOSE_SHADOW") if k in ID])
+    rects, lids = [], []
+    for reg in regions:
+        above = np.zeros_like(reg)
+        for k in (1, 2, 3):
+            above[:-k] |= reg[k:]
+        above &= ~reg & skin
+        if not above.any():
+            above = skin & ~reg
+        lid = main_colour(img, above)
+        ys, xs = np.nonzero(reg)
+        out[reg, :3] = PX.hx(lid)
+        for x in np.unique(xs):
+            out[ys[xs == x].max(), x, :3] = lash
+        rects.append(bbox_of(reg))
+        lids.append(lid)
+    return out, rects, (lids[0] if lids else None)
+
+
+def mouth_line(img, ids, ID, centre, r, thin=True):
+    """la bocca chiusa a questa scala è una riga, come negli sprite: la banda MOUTH del cel (alta 2-3 pixel, che
+    sembra già aperta) resta scura solo nel pixel più alto di ogni colonna, sotto torna il colore del labbro (il
+    primo pixel sotto la banda) e i buchi fra gli angoli si chiudono. Con thin=False (la bocca nella barba di GIG,
+    che è già un taglio frastagliato) la banda resta com'è e la riga è il suo bordo basso.
+    -> (immagine, {x: y della riga}, scuro)"""
+    M = (ids == ID["MOUTH"]) & (img[..., 3] > 0) & disk_mask(ids.shape, [centre], r)
+    if M.sum() < 2:
+        return None, None, None
+    px = img[M][:, :3].astype(int)
+    dark = px[np.argmin(px.sum(1))]
+    out = img.copy()
+    ys, xs = np.nonzero(M)
+    pick = np.min if thin else np.max
+    line = {int(x): int(pick(ys[xs == x])) for x in np.unique(xs)}
+    known = sorted(line)
+    for x in range(known[0], known[-1] + 1):
+        if x not in line:
+            a = max(k for k in known if k < x)
+            b = min(k for k in known if k > x)
+            line[x] = int(round(line[a] + (line[b] - line[a]) * (x - a) / (b - a)))
+    if not thin:
+        return out, line, dark
+    for x, y0 in line.items():
+        below = [int(y) for y in ys[xs == x] if y > y0]
+        if below:
+            yl = max(below) + 1
+            lip = img[yl, x, :3] if yl < img.shape[0] and img[yl, x, 3] > 0 else img[y0 - 1, x, :3]
+            for y in below:
+                out[y, x, :3] = lip
+        if out[y0, x, 3] > 0:
+            out[y0, x, :3] = dark
+    return out, line, dark
+
+
+def paint_talk(img, line, dark, open_px):
+    """bocca aperta: sotto la riga della bocca chiusa un ovale scuro, alto open_px al centro e niente agli angoli.
+    -> (immagine, maschera della bocca aperta)"""
+    out = img.copy()
+    opened = np.zeros(img.shape[:2], bool)
+    xa, xb = min(line), max(line)
+    span = xb - xa + 1
+    for x, y0 in line.items():
+        opened[y0, x] = img[y0, x, 3] > 0
+        t = (x - xa + 0.5) / span
+        k = int(round(open_px * (1.0 - abs(2.0 * t - 1.0) ** 2)))
+        for y in range(y0 + 1, min(img.shape[0], y0 + 1 + k)):
+            if img[y, x, 3] > 0:
+                out[y, x, :3] = dark
+                opened[y, x] = True
+    return out, opened
+
+
+def closeup_sheet(tiles, title, sub, path, scale=4):
+    """tavola di controllo: i fotogrammi interi a 4x sul colore di fondo delle scene, con i nomi."""
+    from PIL import ImageDraw
+    n = tiles[0][1].shape[0] * scale
+    gap, top, lab = 12, 52, 26
+    sheet = Image.new("RGB", (gap + len(tiles) * (n + gap), top + n + lab), (58, 58, 74))
+    dr = ImageDraw.Draw(sheet)
+    dr.text((gap, 6), title, fill=(235, 235, 245), font=RV.font(18))
+    dr.text((gap, 30), sub, fill=(170, 170, 190), font=RV.font(12))
+    for i, (label, im) in enumerate(tiles):
+        x = gap + i * (n + gap)
+        bg = Image.new("RGB", (n, n), BG_SCENE)
+        t = Image.fromarray(im, "RGBA").resize((n, n), Image.NEAREST)
+        bg.paste(t, (0, 0), t)
+        sheet.paste(bg, (x, top))
+        dr.text((x, top + n + 6), label, fill=(220, 220, 235), font=RV.font(12))
+    sheet.save(path)
+
+
+def step_closeup(cid):
+    """primi piani per le scene nel motore (chiave "closeups" in tools/sprites/chars/<id>.json): il volto di tre
+    quarti dal 3D a densità alta, pixelizzato come gli sprite e portato sulla tavolozza finale dello sprite.
+    Il modello non ha un rig facciale: occhi chiusi ("blink") e bocca aperta ("talk") si disegnano sui pixel della
+    base (paint_blink, paint_talk), così il resto dei pixel è identico e lo scambio delle immagini non sfarfalla.
+    Si chiudono solo gli occhi veri (l'occhio cyber spento di GIG resta aperto). Con talk_mode "3d" la bocca
+    aperta la rende invece char_build.py con un incavo scuro, e si ricompone sulla base solo attorno alla bocca.
+    Accanto al PNG un JSON con i rettangoli di occhi e bocca e i loro colori, per animarli anche a rettangoli.
+    Il render a colori ad alta risoluzione (base per lo stile dei murales) va nella cartella privata condivisa."""
+    cfg = C.char_cfg(cid)
+    specs = closeup_specs(cfg)
+    if not specs:
+        C.say(f"  {cid}: nessun primo piano nel JSON")
+        return
+    dbg = os.path.join(final_dir(cid), cid + ".debug.json")
+    pal = [PX.hx(c) for c in C.load_json(dbg)["palette"]] if os.path.exists(dbg) else None
+    if pal is None:
+        C.say(f"AVVISO: {cid}: manca la tavolozza finale dello sprite ({dbg}), primo piano con i colori del cel")
+    os.makedirs(CLOSEUP_DIR, exist_ok=True)
+    rvd = os.path.join(C.OUT, "review", "closeups")
+    os.makedirs(rvd, exist_ok=True)
+    for sp in specs:
+        name, n = sp["name"], sp["size"]
+        out = os.path.join(C.OUT, "raw_closeup", name)
+        job = C.base_job(cid, cfg, "closeup", out)
+        job["closeup"] = sp
+        job["beauty_png"] = os.path.join(out, "closeup", "beauty_full.png") if sp.get("beauty") else None
+        C.run_blender("char_build.py", job, timeout=900, tag=f"closeup-{name}")
+        d = os.path.join(out, "closeup")
+        meta = C.load_json(os.path.join(d, "meta.json"))
+        fdata = C.load_json(os.path.join(d, "frames.json"))
+        pcfg = closeup_pixel_cfg(cfg, meta, sp)
+        sh = PX.Shader(pcfg, cfg["palette"], meta["ids"])
+        full, ids_full = {}, None
+        for fd in fdata:
+            # una sequenza per variante: l'isteresi fra fotogrammi non deve cancellare i cambi piccoli
+            spr, lab = PX.pixelize_sequence(d, [fd], meta["ss"], sh, pcfg, loop=False)
+            full[fd["variant"]] = snap_to_palette(spr[0], pal) if pal is not None else spr[0]
+            if fd["variant"] == "base":
+                ids_full = lab[0][0]
+        base = full["base"]
+        face = fdata[0]["face"]
+        ppm = fdata[0]["ppm"]
+        # inquadratura: la cima della figura (capelli, casco, codino) a top_px dal bordo, il centro della testa
+        # spostato di look_px verso la nuca, così davanti al viso resta aria
+        hc_u = face["head_c"][0]
+        half = 0.16 * ppm
+        cols = slice(max(0, int(hc_u - half)), int(hc_u + half) + 1)
+        rows = np.nonzero(base[:, cols, 3].max(1) > 0)[0]
+        top = int(rows.min()) if len(rows) else int(face["crown"][1])
+        y0 = top - sp["top_px"]
+        sgn = 1 if sp["faces"] == "right" else -1
+        x0 = int(round(hc_u - sgn * sp["look_px"])) - n // 2
+        imgs = {k: crop_frame(v, x0, y0, n) for k, v in full.items()}
+        ids = crop_frame(ids_full, x0, y0, n)
+        uv = {k: (p[0] - x0, p[1] - y0) for k, p in face.items()}
+        res = dict(size=[n, n], faces=sp["faces"])
+        outimg = {"base": imgs["base"]}
+        notes = []
+        # occhi veri disegnati come negli sprite (linea delle ciglia e iride scura), poi la variante chiusa
+        regions = eye_regions(imgs["base"], ids, meta["ids"], [uv[k] for k in sp["blink_eyes"]], max(3.0, 0.035 * ppm))
+        lash, iris = dark_tones(pal) if pal is not None else ((20, 14, 30), (74, 28, 38))
+        if regions and sp.get("paint_eyes", True):
+            for k in imgs:
+                imgs[k] = paint_eyes(imgs[k], regions, lash, iris)
+            outimg["base"] = imgs["base"]
+        if "blink" in sp["variants"]:
+            comp, rects, lid = paint_blink(imgs["base"], ids, meta["ids"], regions, lash)
+            if rects:
+                outimg["blink"] = comp
+                res["eyes"] = rects
+                res["lid"] = lid
+            notes.append(f"occhi chiusi {len(rects)}")
+        if "talk" in sp["variants"] and "talk" not in imgs:
+            # bocca chiusa ridotta a una riga (anche nella base), poi la variante aperta
+            mth = sp.get("mouth_thin", True)
+            thin, line, dark = mouth_line(imgs["base"], ids, meta["ids"], uv["mouth"], max(5.0, 0.035 * ppm), mth)
+            if thin is not None:
+                imgs["base"] = outimg["base"] = thin
+                if "blink" in outimg:
+                    outimg["blink"], _, _ = mouth_line(outimg["blink"], ids, meta["ids"], uv["mouth"],
+                                                       max(5.0, 0.035 * ppm), mth)
+                comp, opened = paint_talk(thin, line, dark, sp.get("open_px", 2))
+                outimg["talk"] = comp
+                res["mouth"] = bbox_of(opened)
+                res["mouth_dark"] = PX.tohex(tuple(int(c) for c in dark))
+                notes.append(f"bocca aperta {int((comp != thin).any(-1).sum())} px")
+            else:
+                notes.append("bocca non trovata")
+        if "talk" in imgs:
+            # bocca aperta resa in 3D (talk_mode "3d")
+            reg = disk_mask((n, n), [uv["mouth"]], max(5.0, 0.03 * ppm))
+            m = np.any(imgs["talk"] != imgs["base"], -1) & reg
+            comp = imgs["base"].copy()
+            comp[m] = imgs["talk"][m]
+            outimg["talk"] = comp
+            b = bbox_of(m)
+            if b:
+                res["mouth"] = b
+                res["mouth_dark"] = main_colour(comp, m, darkest=True)
+            notes.append(f"bocca {int(m.sum())} px")
+        if job["beauty_png"] and os.path.exists(job["beauty_png"]):
+            # render a colori ritagliato come il primo piano (stessa inquadratura, k pixel per pixel): i rettangoli
+            # del JSON valgono anche lì, moltiplicati per k. Va nella cartella privata, mai nel repo.
+            bim = np.array(Image.open(job["beauty_png"]).convert("RGBA"))
+            k = bim.shape[0] // meta["W1"]
+            bd = condiviso_dir("primi-piani")
+            os.makedirs(bd, exist_ok=True)
+            Image.fromarray(crop_frame(bim, x0 * k, y0 * k, n * k), "RGBA").save(os.path.join(bd, name + ".png"))
+            notes.append(f"render a colori {n * k}px")
+        res["variants"] = [k for k in outimg if k != "base"]
+        for k, im in outimg.items():
+            fn = name + ("" if k == "base" else "_" + k) + ".png"
+            Image.fromarray(im, "RGBA").save(os.path.join(CLOSEUP_DIR, fn))
+        C.save_json(os.path.join(CLOSEUP_DIR, name + ".json"), res)
+        # controllo: GIG prima del riavvio non ha niente di cyan (stessa prova dello shader del gioco)
+        cy = 0
+        for im in outimg.values():
+            rgb = im[..., :3].astype(int)
+            cy += int(((im[..., 3] > 0) & (rgb[..., 2] - rgb[..., 0] >= 0.4 * 255)
+                       & (rgb[..., 1] - rgb[..., 0] >= 0.3 * 255)).sum())
+        face_px = face["chin"][1] - face["crown"][1]
+        sub = (f"{ppm:.0f} px/m, testa (cima-mento) {face_px:.0f} px su {n}, yaw {sp['yaw_deg']}, guarda a "
+               f"{'destra' if sgn > 0 else 'sinistra'}; " + ", ".join(notes) + f"; pixel cyan: {cy}")
+        tiles = [(k, im) for k, im in outimg.items()]
+        ov = imgs["base"].copy()
+        for r in res.get("eyes", []) + ([res["mouth"]] if "mouth" in res else []):
+            x, y, w, h = r
+            ov[y, x:x + w] = ov[y + h - 1, x:x + w] = (255, 230, 0, 255)
+            ov[y:y + h, x] = ov[y:y + h, x + w - 1] = (255, 230, 0, 255)
+        tiles.append(("rettangoli del JSON", ov))
+        closeup_sheet(tiles, f"primo piano {name} ({cid})", sub, os.path.join(rvd, name + "_4x.png"))
+        C.say(f"  primo piano {name}: {sub}")
+        if cy and cid == "gig_spento":
+            C.say(f"AVVISO: {name}: {cy} pixel cyan su GIG prima del riavvio")
+
+
 # ============================================================== validazione e pubblicazione
 def step_validate(root=None, portraits=False):
     args = [sys.executable, "-I", os.path.join(C.HERE, "validate_sprites.py"), root or os.path.join(C.OUT, "final")]
@@ -834,6 +1181,8 @@ def main():
             step_review(cid)
         elif a.step == "portrait":
             step_portrait(cid)
+        elif a.step == "closeup":
+            step_closeup(cid)
         elif a.step == "post":
             step_pixel(cid, only)
             step_assemble(cid)

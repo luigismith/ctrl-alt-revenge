@@ -32,6 +32,10 @@ const DEAD_BLINK_TICKS := 60
 const ESCAPE_PRESSES := 8
 const ARM_OFF_TICKS := 240
 const ESCAPE_INVULN := 24
+## Il segno del laser del messo sul braccio sinistro: finché c'è i rider attaccano tutti insieme
+## (decisione 63; 5 secondi, da tarare col pad). Gli ultimi MARK_BLINK tick il puntino lampeggia.
+const MARK_TICKS := 300
+const MARK_BLINK := 60
 
 const CHAIN: Array[StringName] = [&"gig_jab1", &"gig_jab2", &"gig_hook", &"gig_kick"]
 ## Col braccio bloccato (scelta di Luigi del 6 novembre 2026): la mazza chiude la combo se i due diretti
@@ -58,6 +62,9 @@ var escape_presses: int = 0
 var arm_off: int = 0
 ## Braccio sinistro bloccato, prima del riavvio: lo mette chi apre l'arena insieme al foglio gig_spento.
 var one_arm: bool = false
+## Tick rimasti al segno del laser del messo (0 = nessun segno).
+var marked: int = 0
+var _mark_node: Node2D
 
 var _run_dir: int = 0
 var _last_tap_dir: int = 0
@@ -107,6 +114,8 @@ func _think() -> void:
 		_grab_cooldown -= 1
 	if arm_off > 0:
 		arm_off -= 1
+	if marked > 0:
+		marked -= 1
 	if input.axis_x() != _run_dir:
 		_run_dir = 0
 	match state:
@@ -459,6 +468,40 @@ func arm_greyed() -> bool:
 	return arm_off > 0
 
 
+## Il laser del messo ha preso il braccio: il segno resta per `ticks` tick.
+func mark(ticks: int = MARK_TICKS) -> void:
+	marked = ticks
+
+
+## Il punto del braccio sinistro dove resta il segno, nel mondo dell'arena (lo stesso delle
+## comparse delle scene: ArmMark.offset).
+func arm_point() -> Vector2:
+	return Vector2(roundf(px), roundf(py) - roundf(ph) + draw_dy) + ArmMark.offset(anim.frame(), facing)
+
+
+func sync_visual() -> void:
+	super.sync_visual()
+	if marked <= 0 and _mark_node == null:
+		return
+	if _mark_node == null:
+		# Il puntino sopra lo sprite, come nelle comparse delle scene.
+		_mark_node = Node2D.new()
+		_mark_node.name = "Segno"
+		_mark_node.z_index = 1
+		_mark_node.draw.connect(_draw_mark)
+		add_child(_mark_node)
+	_mark_node.position = body.position
+	_mark_node.queue_redraw()
+
+
+func _draw_mark() -> void:
+	if marked <= 0 or not body.visible or not visible:
+		return
+	if marked < MARK_BLINK and (marked / 6) % 2 == 1:
+		return
+	ArmMark.draw(_mark_node, ArmMark.offset(anim.frame(), facing), level.tick)
+
+
 ## Una combo interrotta da un colpo riparte da jab1.
 func _on_state_changed(_prev: State, next: State) -> void:
 	if next == State.HURT or next == State.KNOCK_AIR:
@@ -503,6 +546,7 @@ func respawn() -> void:
 	grav = data.gravity
 	invuln = RESPAWN_INVULN
 	arm_off = 0
+	marked = 0
 	escape_presses = 0
 	combo_step = 0
 	combo_timer = 0

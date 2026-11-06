@@ -193,6 +193,23 @@ var last_hacked: String = ""
 var _sparks: Array = []
 var _spark_rng := RandomNumberGenerator.new()
 
+## La scena nel motore in corso (decisione 68), o null. La chiede il tratto con request_scene() nel
+## tick in cui parte, dopo averne applicato l'esito alla simulazione; parte nello stesso fotogramma.
+var scene: ScenePlayer
+## Le scene si recitano solo dove c'è chi guarda: i test chiamano _sim_tick() e non le vedono.
+var scenes_enabled: bool = true
+## Quello che le scene hanno già fatto vedere (per esempio "pioggia"): solo disegno.
+var scene_flags: Dictionary = {}
+var _scene_request: Dictionary = {}
+## Le comparse rimaste nel mondo a scena finita: solo disegno.
+var _extras: Array[ScenePuppet] = []
+## Lo zoom del disegno (1 nel gioco; durante le scene lo decide il lettore).
+var zoom: float = 1.0
+var _view_c: Vector2 = Vector2.ZERO
+var _art_back: Node2D
+var _art_front: Node2D
+var _signs_node: Node2D
+
 
 func configure(opts: Dictionary) -> void:
 	input = opts.get("input", null)
@@ -258,6 +275,7 @@ func _ready() -> void:
 	signs_node.z_index = 1100
 	signs_node.draw.connect(func() -> void: _draw_signs(signs_node))
 	_view.add_child(signs_node)
+	_signs_node = signs_node
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
@@ -307,6 +325,8 @@ func _build_art() -> void:
 	var front := Node2D.new()
 	front.name = "PrimoPiano"
 	add_child(front)
+	_art_back = back
+	_art_front = front
 	bd.build(back, front, 1)
 	for sc: Dictionary in bd.scenes:
 		var tex := SpriteSheet.load_texture(bd.dir.path_join(str(sc["image"])))
@@ -327,7 +347,7 @@ func _build_art() -> void:
 func _update_art() -> void:
 	if backdrop == null:
 		return
-	var c := _cam.round()
+	var c := (_view_c - View.SIZE / 2.0).round()
 	backdrop.update(int(c.x), tick, c.y - backdrop.cam_ref_y)
 
 
@@ -362,6 +382,7 @@ func _draw_stage_hud(_h: Control) -> void:
 
 func _reset() -> void:
 	_close_arena()
+	_clear_extras()
 	arena_done = false
 	_reset_hacking()
 	player.place(_start.x, _start.y)
@@ -371,6 +392,10 @@ func _reset() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	# Durante una scena la simulazione è ferma: recita il lettore (START la salta).
+	if scene != null and scene.holds_sim():
+		_scene_frame()
+		return
 	if input.mode == PlayerInput.Mode.LIVE:
 		if Input.is_action_just_pressed(&"pause"):
 			quit_to_title.emit()
@@ -384,20 +409,35 @@ func _physics_process(_delta: float) -> void:
 		replay_done.emit()
 		return
 	_sim_tick()
+	# Una scena chiesta in questo tick parte subito, nello stesso fotogramma: niente salti.
+	if not _scene_request.is_empty():
+		_start_scene()
+		if scene != null and scene.holds_sim():
+			_scene_frame()
+			return
 	_tick_sparks()
 	_follow_camera()
+	if scene != null:
+		# L'uscita della scena: il gioco è già ripartito, la telecamera torna morbida a quella del gioco.
+		scene.tick()
 	_update_art()
 	_sync_visual()
 	_overlay.tick()
+	_tick_extras()
+	_redraw_all()
+
+
+func _redraw_all() -> void:
 	_view.queue_redraw()
 	_hud.queue_redraw()
 	for c in _view.get_children():
-		if c is Node2D and c != _body:
+		if c is Node2D and c != _body and not (c is ScenePuppet):
 			(c as Node2D).queue_redraw()
 
 
 ## Un tick della simulazione: ingressi, GIG, eventi. Il disegno resta fuori.
 func _sim_tick() -> void:
+	_scene_request = {}
 	if input.mode == PlayerInput.Mode.REPLAY and (_replay_resets.has(float(tick)) or _replay_resets.has(tick)):
 		_reset()
 	var frame := input.next_frame(tick)
@@ -454,7 +494,28 @@ func _follow_camera() -> void:
 	_cam.y += (t.y - _cam.y) * k
 	_cam.x = clampf(_cam.x, 0.0, float(grid.pixel_width() - View.W))
 	_cam.y = clampf(_cam.y, float(-80), float(grid.pixel_height() - View.H))
-	_view.position = -_cam.round()
+	_place_view(_cam.round() + View.SIZE / 2.0, 1.0)
+
+
+## Mette la vista: il punto `center` del mondo al centro dello schermo, ingrandito `z` volte intorno al
+## centro (lo zoom delle scene). A zoom 1 è la telecamera di sempre, a posizioni intere; i piani dello
+## sfondo si ingrandiscono allo stesso modo. Con zoom intero i pixel restano quadrati e netti.
+func _place_view(center: Vector2, z: float, shake: Vector2 = Vector2.ZERO) -> void:
+	zoom = z
+	_view_c = center
+	var half := View.SIZE / 2.0
+	_view.scale = Vector2(z, z)
+	_view.position = half - (center * z).round() + shake
+	for n: Node2D in [_art_back, _art_front]:
+		if n != null:
+			n.scale = Vector2(z, z)
+			n.position = (half * (1.0 - z)).round() + shake
+
+
+## Quello che si vede del mondo adesso (con lo zoom delle scene è più piccolo dello schermo).
+func _visible_rect() -> Rect2:
+	var size := View.SIZE / zoom
+	return Rect2(_view_c - size / 2.0, size)
 
 
 # ------------------------------------------------------------------ disegno
@@ -487,19 +548,21 @@ func _sync_visual() -> void:
 
 
 func _draw_back() -> void:
-	var x0 := maxf(_cam.x - 8, float(art_until_x))
-	var x1 := _cam.x + View.W + 8
+	var r := _visible_rect()
+	var x0 := maxf(r.position.x - 8, float(art_until_x))
+	var x1 := r.end.x + 8
 	if x1 > x0:
-		_view.draw_rect(Rect2(x0, _cam.y - 8, x1 - x0, View.H + 16), C_BG)
+		_view.draw_rect(Rect2(x0, r.position.y - 8, x1 - x0, r.size.y + 16), C_BG)
 
 
 func _draw_room() -> void:
 	var v := _room_node
-	var x0 := maxi(int(_cam.x) / SolidGrid.TILE - 1, art_until_x / SolidGrid.TILE)
-	var x1 := mini(int(_cam.x + View.W) / SolidGrid.TILE + 1, grid.width - 1)
+	var vr := _visible_rect()
+	var x0 := maxi(int(vr.position.x) / SolidGrid.TILE - 1, art_until_x / SolidGrid.TILE)
+	var x1 := mini(int(vr.end.x) / SolidGrid.TILE + 1, grid.width - 1)
 	# Con la stanza schiacciata dall'inclinazione si vedono un paio di file in più in alto.
-	var y0 := maxi(int(_cam.y) / SolidGrid.TILE - 3, 0)
-	var y1 := mini(int(_cam.y + View.H) / SolidGrid.TILE + 1, grid.height - 1)
+	var y0 := maxi(int(vr.position.y) / SolidGrid.TILE - 3, 0)
+	var y1 := mini(int(vr.end.y) / SolidGrid.TILE + 1, grid.height - 1)
 	# Una riga ogni metro (3 blocchi), per leggere le misure a occhio.
 	var t := SolidGrid.TILE
 	for cx in range(x0, x1 + 1):
@@ -588,10 +651,11 @@ func _draw_floor() -> void:
 		var top := float(_floor_y)
 		var depth := roundf((View.H - ARENA_BAND.x + 8.0) * tilt)
 		var band := roundf((ARENA_BAND.y - ARENA_BAND.x) * tilt)
-		var x0 := _cam.x - 8.0
-		var w := View.W + 16.0
+		var vr := _visible_rect()
+		var x0 := vr.position.x - 8.0
+		var w := vr.size.x + 16.0
 		v.draw_rect(Rect2(x0, top, w, depth), c_floor)
-		var vp_x := _cam.x + View.CX
+		var vp_x := _view_c.x
 		var m := float(View.PPM)
 		# Sassolini fermi nel mondo, più radi in fondo e più grandi davanti (solo con la grafica).
 		if c_speck.a > 0.0:
@@ -701,6 +765,7 @@ func _arena_tick(frame: InputFrame) -> void:
 				g.set_state(Fighter.State.IDLE, &"idle")
 				arena_phase = ArenaPhase.FIGHT
 				_arena_t = 0
+				_on_arena_fight()
 		ArenaPhase.FIGHT:
 			arena.step(frame)
 			# Zona liberata (il livello ha già acceso VAI): si esce appena GIG è libero e coi piedi a terra.
@@ -753,12 +818,165 @@ func _arena_camera() -> void:
 			back.x = clampf(back.x, 0.0, float(grid.pixel_width() - View.W))
 			back.y = clampf(back.y, -80.0, float(grid.pixel_height() - View.H))
 			_cam = lock.lerp(back, _ease(float(_arena_t) / TILT_OUT))
-	_view.position = -_cam.round() + Vector2(arena.camera.shake)
+	_place_view(_cam.round() + View.SIZE / 2.0, 1.0, Vector2(arena.camera.shake))
 
 
 static func _ease(k: float) -> float:
 	k = clampf(k, 0.0, 1.0)
 	return k * k * (3.0 - 2.0 * k)
+
+
+# ------------------------------------------------------------------ scene nel motore
+
+## Da ridefinire nei tratti: l'arena passa dall'entrata allo scontro (qui si applica l'esito di una
+## scena di presentazione e la si chiede con request_scene()).
+func _on_arena_fight() -> void:
+	pass
+
+
+## Chiede la scena `id`, dalla simulazione, nel tick in cui parte: chi la chiede ne ha già applicato
+## l'esito. `poses` sono le pose degli attori veri prima dell'esito (scene_pose_*), per le comparse.
+## La scena parte nello stesso fotogramma, dopo il tick; nei test (che chiamano _sim_tick) non parte.
+func request_scene(id: String, poses: Dictionary) -> void:
+	if scenes_enabled:
+		_scene_request = {"id": id, "poses": poses}
+
+
+## La posa di un combattente dell'arena, in coordinate della scena dell'arena.
+func scene_pose_fighter(f: Fighter) -> Dictionary:
+	return {"x": f.px - _arena_cam_x, "y": f.py, "verso": f.facing, "anim": String(f.anim.name),
+		"index": f.anim.index, "frame_tick": f.anim.frame_tick, "foglio": String(f.sheet.id)}
+
+
+## La posa di GIG nel platform, rispetto al segno `rif` della mappa.
+func scene_pose_player(rif: String) -> Dictionary:
+	var r := Vector2i(grid.marks[rif][0]) if grid.marks.has(rif) else Vector2i.ZERO
+	var a := player.sprite_anchor()
+	return {"x": a.x - r.x, "y": a.y - r.y, "verso": player.facing, "anim": String(player.anim.name),
+		"index": player.anim.index, "frame_tick": player.anim.frame_tick, "foglio": String(player.anim.sheet.id)}
+
+
+func _start_scene() -> void:
+	var req := _scene_request
+	_scene_request = {}
+	var sd := SceneData.load_scene(str(req["id"]))
+	if not sd.errors.is_empty():
+		push_warning("Scena %s non valida: %s" % [req["id"], "; ".join(sd.errors)])
+		return
+	scene_flags = {}
+	scene = ScenePlayer.new()
+	scene.name = "Scena"
+	add_child(scene)
+	# Gli attori veri restano fermi e nascosti: al loro posto recitano le comparse.
+	_body.visible = false
+	if arena != null:
+		for f in arena.fighters:
+			f.visible = false
+	_sparks.clear()
+	scene.start(sd, self, req["poses"], input.mode != PlayerInput.Mode.LIVE, sound)
+
+
+## Un fotogramma con la simulazione ferma: recita la scena, il resto si ridisegna e basta.
+func _scene_frame() -> void:
+	scene.tick()
+	_update_art()
+	if arena != null:
+		arena.shadows.queue_redraw()
+	_tick_extras()
+	_redraw_all()
+
+
+## Dove sta una scena: l'origine delle sue coordinate nel nodo delle comparse, lo scarto di quel nodo
+## nel mondo della stanza e il nodo stesso ("arena": il mondo dell'arena; "stanza": il mondo platform,
+## rispetto al segno `rif`).
+func scene_frame(space: String, rif: String) -> Dictionary:
+	if space == "arena" and arena != null:
+		return {"origin": Vector2(_arena_cam_x, 0), "offset": arena.position, "parent": arena.world}
+	var r := Vector2(grid.marks[rif][0]) if rif != "" and grid.marks.has(rif) else Vector2.ZERO
+	return {"origin": r, "offset": Vector2.ZERO, "parent": _view}
+
+
+## Il centro dell'inquadratura del gioco, nel mondo della stanza.
+func scene_camera_center() -> Vector2:
+	return _cam.round() + View.SIZE / 2.0
+
+
+## Quello che una scena può mostrare, nel mondo della stanza: sotto, non oltre il fondo dell'arena (o
+## della mappa), sopra fin dove sale la telecamera del gioco.
+func scene_bounds() -> Rect2:
+	var bottom := float(grid.pixel_height())
+	if arena != null:
+		bottom = float(_floor_y - ARENA_BAND.x + View.H)
+	return Rect2(0, -80, grid.pixel_width(), bottom + 80)
+
+
+func scene_apply_camera(center: Vector2, z: float) -> void:
+	_place_view(center, z)
+
+
+func scene_shadow_def() -> FxLayer.FxDef:
+	return arena.fx.defs.get(&"ombra") if arena != null else null
+
+
+## L'interfaccia del gioco (scritte, barre, cartelli) sfuma durante la scena.
+func scene_ui_alpha(a: float) -> void:
+	for c: CanvasItem in [_hud, _overlay, _signs_node]:
+		if c != null:
+			c.modulate.a = a
+	if arena != null:
+		arena.hud.modulate.a = a
+		arena.overlay.modulate.a = a
+
+
+## Un evento della regia (per esempio "pioggia"): il disegno del tratto lo legge da scene_flags.
+func scene_event(e: String) -> void:
+	scene_flags[e] = true
+	_on_scene_event(e)
+
+
+func _on_scene_event(_e: String) -> void:
+	pass
+
+
+## La scena restituisce il gioco: gli attori veri ricompaiono al posto delle comparse, che erano già
+## nel loro punto; le comparse che restano diventano parte del mondo; i tasti tenuti per l'ultima
+## battuta non diventano pressioni. Da qui la simulazione riparte.
+func scene_handoff(sp: ScenePlayer) -> void:
+	sp.hide_handed_over()
+	for p in sp.take_extras():
+		_extras.append(p)
+	_body.visible = arena == null
+	if arena != null:
+		for f in arena.fighters:
+			f.sync_visual()
+		arena.shadows.queue_redraw()
+	else:
+		_sync_visual()
+	input.resync()
+	_on_scene_handoff(sp.data.id)
+
+
+func _on_scene_handoff(_id: String) -> void:
+	pass
+
+
+func scene_end(_sp: ScenePlayer) -> void:
+	scene = null
+	scene_ui_alpha(1.0)
+	_place_view(_cam.round() + View.SIZE / 2.0, 1.0)
+
+
+func _tick_extras() -> void:
+	for p in _extras:
+		if is_instance_valid(p):
+			p.tick()
+
+
+func _clear_extras() -> void:
+	for p in _extras:
+		if is_instance_valid(p):
+			p.queue_free()
+	_extras.clear()
 
 
 # ------------------------------------------------------------------ hacking

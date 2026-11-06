@@ -91,8 +91,10 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 	var dy := e.py - g.py
 	var toward := R if dx > 0.0 else L
 	var away := L if dx > 0.0 else R
-	# Schivata: un attacco nemico in carica nella mia corsia.
+	# Schivata: un attacco nemico in carica nella mia corsia, o il messo che mira col laser lungo la sua.
 	for t in level.enemies():
+		if t is Messo and (t as Messo).act == Messo.Act.AIM and absf(t.py - g.py) < Messo.LASER_LANE + 6.0 and g.is_free():
+			return U if g.py > (level.band_top + level.band_bottom) * 0.5 else D
 		if t.state == Fighter.State.ATTACK and t.attack != null and t.attack_tick < t.attack.startup \
 				and absf(t.py - g.py) < 17.5 and absf(t.px - g.px) < 100.0 and g.is_free():
 			return U if g.py > (level.band_top + level.band_bottom) * 0.5 else D
@@ -100,7 +102,9 @@ func _fight(tick: int, grabs: bool, jumps: bool) -> int:
 	# un nemico libero non resta fermo vicino a GIG: la presa si cerca sul nemico stordito da un
 	# colpo (HURT), oppure su quello libero già a portata, e altrimenti si combatte.
 	var grabbable := e.state == Fighter.State.HURT or (e.is_free() and absf(dx) < 37.5)
-	if grabs and not _grab_done.has(e.uid) and grabbable and not e.is_attacking():
+	# Col braccio bloccato (prologo) o sospeso le prese non ci sono: si combatte e basta.
+	var can_grab := grabs and not g.one_arm and g.arm_off == 0
+	if can_grab and not _grab_done.has(e.uid) and grabbable and not e.is_attacking():
 		if absf(dy) > 2.5:
 			return (D if dy > 0.0 else U) | (toward if absf(dx) > 37.5 else 0)
 		return toward
@@ -153,10 +157,15 @@ func _in_grab(tick: int) -> int:
 	return 0
 
 
+## Il nemico da colpire: il più vicino, ma prima il messo, che finché è in piedi chiama i rinforzi
+## (è la lezione del prologo: il regista si ferma per primo).
 func _target() -> Thug:
 	var g := level.player
 	var best: Thug = null
 	var best_d := 1e9
+	for t in level.enemies():
+		if t is Messo and not t.dead and not t.removed and t.state != Fighter.State.ENTER:
+			return t
 	for t in level.enemies():
 		if t.dead or t.removed or t.state == Fighter.State.ENTER:
 			continue

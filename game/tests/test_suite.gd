@@ -59,7 +59,11 @@ func run(tree_root: Node) -> bool:
 	_test_room_hacking()
 	_test_rider()
 	_test_esattore()
+	_test_messo()
+	_test_rider_frenzy()
 	_test_prologue()
+	_test_scene_files()
+	_test_pignoramento()
 	return failures == 0
 
 
@@ -1934,7 +1938,8 @@ func _prologue_room(input_fn: Callable = Callable()) -> Prologue:
 ## Il prologo intero col pilota: dove passa e quando finisce.
 func _prologue_run(max_ticks: int) -> Dictionary:
 	var room := _prologue_room()
-	var out := {"end": -1, "locked_ok": true, "mimmo": -1, "arena": -1, "door": -1, "reboot": -1, "rain_arena": false}
+	var out := {"end": -1, "locked_ok": true, "mimmo": -1, "arena": -1, "door": -1, "reboot": -1, "rain_before": false,
+		"rain_fight": false, "fight": -1}
 	for t in max_ticks:
 		room._sim_tick()
 		room._follow_camera()
@@ -1944,8 +1949,11 @@ func _prologue_run(max_ticks: int) -> Dictionary:
 			out["mimmo"] = t
 		if room.arena_done and out["arena"] < 0:
 			out["arena"] = t
-		if room.raining and out["arena"] < 0:
-			out["rain_arena"] = true
+		if room.arena_phase == TestRoom.ArenaPhase.FIGHT and out["fight"] < 0:
+			out["fight"] = t
+			out["rain_fight"] = room.raining
+		if room.raining and room.arena == null and out["arena"] < 0:
+			out["rain_before"] = true
 		if room.door_closed and out["door"] < 0:
 			out["door"] = t
 		if room.rebooted and out["reboot"] < 0:
@@ -1970,7 +1978,8 @@ func _test_prologue() -> void:
 	var a := _prologue_run(9000)
 	check(a["mimmo"] >= 0 and a["mimmo"] < a["arena"], "Prologo: la vignetta della tomba di Mimmo, poi il pignoramento", "tomba %d, arena %d" % [a["mimmo"], a["arena"]])
 	check(a["locked_ok"], "Prologo: fino al riavvio il braccio sinistro è bloccato e la Spinta non c'è")
-	check(not a["rain_arena"] and a["raining"], "Prologo: dopo il pignoramento piove")
+	check(not a["rain_before"] and a["rain_fight"] and a["raining"], "Prologo: piove dall'arrivo degli Esattori (decisione 54)",
+		"prima %s, allo scontro %s, alla fine %s" % [a["rain_before"], a["rain_fight"], a["raining"]])
 	check(a["arena"] < a["door"] and a["door"] < a["reboot"] and a["unlocked"],
 		"Prologo: nel garage la porta si chiude, poi il riavvio sblocca il braccio", "porta %d, riavvio %d" % [a["door"], a["reboot"]])
 	check(a["end"] > a["reboot"] and a["end"] - a["reboot"] < Prologue.DOOR_BREAK,
@@ -1989,4 +1998,248 @@ func _test_prologue() -> void:
 		moved = moved or room.player.px != x.x
 	check(moved and room.player.px == x.x and room.player.py == x.y and room.door_t > Prologue.DOOR_BREAK - 10,
 		"Prologo: se la porta cede con GIG nel garage, si riparte dal banco", "x %d (banco %d), porta %d" % [room.player.px, x.x, room.door_t])
+	_free_room(room)
+
+
+# --- Il messo e i rider col braccio segnato (decisione 63) ------------------------------------------
+
+## Il messo: compare al suo posto, mira lungo la corsia e segna il braccio, si evita uscendo dalla
+## corsia, un colpo interrompe la mira, scappa da GIG, chiama i rider (al massimo tre), una combo e giù.
+func _test_messo() -> void:
+	var keys := [0]
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return keys[0]), 375.0, 225.0)
+	var g := lvl.player
+	g.hp = 100000
+	var m := lvl.spawn_thug(&"messo", -1, g.py, "", {"x": g.px - lvl.camera.x + 160.0, "verso": -1}) as Messo
+	check(m != null and m.state == Fighter.State.IDLE and is_equal_approx(m.px, g.px + 160.0) and m.facing == -1,
+		"Messo: con \"x\" compare già al suo posto, fermo")
+	if m == null:
+		Harness.free_level(lvl)
+		return
+	m._call_timer = 100000
+	m._aim_timer = 0
+	var marked_at := -1
+	for i in 200:
+		lvl.step()
+		if g.marked > 0:
+			marked_at = i
+			break
+	check(marked_at >= Messo.AIM_TICKS - 5 and marked_at < 160, "Messo: mira lungo la corsia di GIG e il laser gli segna il braccio", "tick %d" % marked_at)
+	check(lvl.director.holder_uid != m.uid, "Messo: non chiede il turno d'attacco")
+	# Uscendo dalla corsia mentre mira, il laser va a vuoto.
+	g.marked = 0
+	m._aim_timer = 0
+	var aimed := false
+	for i in 240:
+		lvl.step()
+		if m.act == Messo.Act.AIM and not aimed:
+			aimed = true
+			keys[0] = _D
+		if aimed and m.act != Messo.Act.AIM:
+			break
+	keys[0] = 0
+	check(aimed and g.marked == 0, "Messo: uscendo dalla corsia il laser va a vuoto", "mira %s, segno %d" % [aimed, g.marked])
+	# Colpito mentre mira: il laser si interrompe.
+	m._aim_timer = 0
+	var hit := false
+	for i in 240:
+		lvl.step()
+		if m.act == Messo.Act.AIM and m.act_t > 20:
+			m.set_state(Fighter.State.HURT, &"hurt_high")
+			m.stun = 12
+			hit = true
+			break
+	for i in Messo.AIM_TICKS + 20:
+		lvl.step()
+	check(hit and g.marked == 0 and m.act != Messo.Act.AIM, "Messo: colpito mentre mira, il laser si interrompe", "colpito %s, segno %d" % [hit, g.marked])
+	# GIG si avvicina: il messo si allontana.
+	m._aim_timer = 100000
+	m.px = g.px + 70.0
+	m.py = g.py
+	var d0 := absf(m.px - g.px)
+	for i in 60:
+		lvl.step()
+	check(absf(m.px - g.px) > d0 + 30.0, "Messo: se GIG si avvicina si allontana", "%.0f → %.0f" % [d0, absf(m.px - g.px)])
+	for i in 60:
+		lvl.step()
+	# I rinforzi: un rider a chiamata, ma non più di MAX_RIDERS in campo.
+	m._call_timer = 0
+	var riders0 := m.riders_alive()
+	for i in Messo.CALL_AT + 2:
+		lvl.step()
+	check(m.riders_alive() == riders0 + 1, "Messo: chiama un rider ogni %d tick" % Messo.CALL_EVERY, "%d → %d" % [riders0, m.riders_alive()])
+	for i in Messo.MAX_RIDERS:
+		var r := lvl.spawn_thug(&"rider", 1, g.py, "")
+		r.ai_enabled = false
+	m._call_timer = 0
+	var before := m.riders_alive()
+	for i in Messo.CALL_TICKS + 5:
+		lvl.step()
+	check(before >= Messo.MAX_RIDERS and m.riders_alive() == before, "Messo: con %d rider in campo non ne chiama altri" % Messo.MAX_RIDERS,
+		"%d → %d" % [before, m.riders_alive()])
+	var dmg := 0
+	for id in Gig.CHAIN_ONE_ARM:
+		dmg += (load("res://data/attacks/%s.tres" % id) as AttackData).damage
+	check(dmg >= m.data.max_hp, "Messo: una combo col braccio bloccato lo mette KO", "combo %d, vita %d" % [dmg, m.data.max_hp])
+	Harness.free_level(lvl)
+
+
+## Col braccio segnato i rider non aspettano il turno: attaccano insieme, ognuno col suo recupero.
+func _test_rider_frenzy() -> void:
+	var res: Array[int] = []
+	for marked: bool in [false, true]:
+		var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
+		var g := lvl.player
+		g.hp = 100000
+		lvl.director.keep_log = true
+		lvl.spawn_thug(&"rider", 1, g.py, "", {"x": g.px - lvl.camera.x + 110.0, "verso": -1})
+		lvl.spawn_thug(&"rider", -1, g.py, "", {"x": g.px - lvl.camera.x - 110.0, "verso": 1})
+		for i in 600:
+			if marked:
+				g.marked = 100
+			lvl.step()
+		var starts: Array = lvl.director.events.filter(func(e: Array) -> bool: return e[2] == "start")
+		var together := 0
+		for a in starts.size():
+			for b in range(a + 1, starts.size()):
+				if starts[b][1] != starts[a][1] and int(starts[b][0]) - int(starts[a][0]) < AttackDirector.GLOBAL_GAP:
+					together += 1
+		res.append(together)
+		lvl.director.keep_log = false
+		Harness.free_level(lvl)
+	check(res[0] == 0, "Rider: senza segno attaccano uno alla volta", "%d attacchi ravvicinati" % res[0])
+	check(res[1] > 0, "Rider: col braccio di GIG segnato attaccano insieme", "%d attacchi ravvicinati" % res[1])
+
+
+# --- Le scene nel motore (decisione 68) ------------------------------------------------------------
+
+## I copioni delle scene: formato, attori, fogli e primi piani. Le battute: nel copione pubblico solo
+## gli id, il testo nel file privato (se c'è: durante lo sviluppo), uguale alla sceneggiatura e lungo
+## al massimo due righe.
+func _test_scene_files() -> void:
+	var ids: Array[String] = []
+	for f in DirAccess.get_files_at(SceneData.DIR):
+		if f.ends_with(".json"):
+			ids.append(f.get_basename())
+	check(ids.has(Prologue.PIGNORAMENTO), "Scene: c'è il copione del pignoramento", ", ".join(ids))
+	for id in ids:
+		SceneData.clear_cache()
+		var sd := SceneData.load_scene(id)
+		check(sd.errors.is_empty(), "Scene: il copione %s è valido" % id, "; ".join(sd.errors))
+		var bad: Array[String] = []
+		var faces: Array[String] = []
+		for actor: String in sd.actors:
+			var a: Dictionary = sd.actors[actor]
+			var tipo := str(a.get("tipo", ""))
+			if tipo != "" and not ResourceLoader.exists("res://data/fighters/%s.tres" % tipo):
+				bad.append("%s: tipo %s" % [actor, tipo])
+			var foglio := str(a.get("foglio", ""))
+			if foglio != "" and not FileAccess.file_exists("res://assets/sprites/%s/%s.json" % [foglio, foglio]):
+				bad.append("%s: foglio %s" % [actor, foglio])
+			var cu := str(a.get("primo_piano", ""))
+			if cu != "" and not faces.has(cu):
+				faces.append(cu)
+		for st: Dictionary in sd.steps:
+			var cu2 := str(st.get("primo_piano", ""))
+			if cu2 != "" and not faces.has(cu2):
+				faces.append(cu2)
+		for cu in faces:
+			var found := false
+			for n: String in [cu + "_dx", cu + "_sx", cu]:
+				found = found or ResourceLoader.exists("res://assets/ui/closeups/%s.png" % n)
+			if not found:
+				bad.append("primo piano %s" % cu)
+		check(bad.is_empty(), "Scene: attori, fogli e primi piani del copione %s ci sono" % id, ", ".join(bad))
+		if sd.lines_file == "" or not SceneLines.available(sd.lines_file):
+			check(true, "Scene: le battute del copione %s (file privato assente: controllo saltato)" % id)
+			continue
+		var raw := FileAccess.get_file_as_string(SceneData.path_of(id))
+		var md_path := SceneLines.private_dir().path_join("../sceneggiatura.md").simplify_path()
+		var md := FileAccess.get_file_as_string(md_path) if FileAccess.file_exists(md_path) else ""
+		var missing: Array[String] = []
+		var leaked: Array[String] = []
+		var long: Array[String] = []
+		var differ: Array[String] = []
+		for lid in sd.line_ids():
+			var text := SceneLines.find(sd.lines_file, id, lid)
+			if text == "":
+				missing.append(lid)
+				continue
+			if raw.contains(text):
+				leaked.append(lid)
+			if ScenePlayer._wrap(text, View.W - 2 * ScenePlayer.TEXT_X).size() > 2:
+				long.append(lid)
+			if md != "" and not md.contains("«%s»" % text):
+				differ.append(lid)
+		check(missing.is_empty(), "Scene: ogni battuta del copione %s ha il suo testo nel file privato" % id, ", ".join(missing))
+		check(leaked.is_empty(), "Scene: il copione pubblico %s non contiene il testo delle battute" % id, ", ".join(leaked))
+		check(long.is_empty(), "Scene: le battute del copione %s stanno in due righe" % id, ", ".join(long))
+		check(md != "" and differ.is_empty(), "Scene: le battute del copione %s sono quelle della sceneggiatura" % id, ", ".join(differ))
+
+
+## La scena del pignoramento nel prologo: entrando nell'arena la simulazione ne applica l'esito e la
+## chiede; recitata in automatico finisce da sola senza far avanzare la simulazione, con le comparse
+## dove riprendono gli attori veri; poi le bande escono e la telecamera torna quella del gioco.
+func _test_pignoramento() -> void:
+	SceneData.clear_cache()
+	var room := _prologue_room()
+	var asked := false
+	for t in 4000:
+		room._sim_tick()
+		room._follow_camera()
+		if room.arena_phase == TestRoom.ArenaPhase.FIGHT:
+			asked = str(room._scene_request.get("id", "")) == Prologue.PIGNORAMENTO
+			break
+	check(asked, "Pignoramento: allo scontro la stanza chiede la scena")
+	if room.arena == null:
+		_free_room(room)
+		return
+	var sd := SceneData.load_scene(Prologue.PIGNORAMENTO)
+	var cam_x := float(room._arena_cam_x)
+	var at := func(f: Fighter, who: String) -> bool:
+		var e := sd.end_of(who)
+		return not e.is_empty() and is_equal_approx(f.px - cam_x, float(e["x"])) and is_equal_approx(f.py, float(e["y"])) \
+			and f.facing == int(e["verso"])
+	var g := room.arena.player
+	var messo: Messo = null
+	var rider: Rider = null
+	for f in room.arena.fighters:
+		if f is Messo:
+			messo = f
+		elif f is Rider:
+			rider = f
+	check(at.call(g, "gig") and g.marked == Gig.MARK_TICKS and room.raining,
+		"Pignoramento: GIG davanti al cancello, girato verso il viale, col segno sul braccio, e piove",
+		"x %.0f y %.0f verso %d segno %d" % [g.px - cam_x, g.py, g.facing, g.marked])
+	check(messo != null and rider != null and at.call(messo, "messo") and at.call(rider, "rider") and messo.state != Fighter.State.ENTER,
+		"Pignoramento: il messo e il rider sono già al loro posto")
+	var sim_tick := room.tick
+	var arena_tick := room.arena.tick
+	room._start_scene()
+	var sp := room.scene
+	check(sp != null and sp.holds_sim(), "Pignoramento: la scena parte")
+	if sp == null:
+		_free_room(room)
+		return
+	var last := {}
+	var frames := 0
+	while sp.holds_sim() and frames < 6000:
+		for who: String in sp.puppets:
+			var p: ScenePuppet = sp.puppets[who]
+			last[who] = Vector2(p.px - cam_x, p.py)
+		room._scene_frame()
+		frames += 1
+	check(not sp.holds_sim() and frames > 600 and frames < 4000, "Pignoramento: la scena finisce da sola, in automatico", "%d fotogrammi" % frames)
+	check(room.tick == sim_tick and room.arena.tick == arena_tick, "Pignoramento: durante la scena la simulazione resta ferma")
+	var off: Array[String] = []
+	for who: String in sd.outcome:
+		var e := sd.end_of(who)
+		if not last.has(who) or (last[who] as Vector2).distance_to(Vector2(float(e["x"]), float(e["y"]))) > 1.0:
+			off.append("%s %s" % [who, last.get(who, "?")])
+	check(off.is_empty(), "Pignoramento: a fine scena le comparse sono dove riprendono gli attori veri", ", ".join(off))
+	check(sp.events_sent.has("pioggia") and sp.puppets.has("gig") and (sp.puppets["gig"] as ScenePuppet).marked,
+		"Pignoramento: nella scena il laser lascia il segno e il cielo si chiude")
+	for i in ScenePlayer.OUTRO + 2:
+		sp.tick()
+	check(room.scene == null and is_equal_approx(room.zoom, 1.0), "Pignoramento: le bande escono e la telecamera torna quella del gioco")
 	_free_room(room)

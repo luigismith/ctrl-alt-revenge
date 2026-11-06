@@ -1,5 +1,6 @@
 {
  "id": "messo",
+ "closeups": [{"name": "messo_dx", "faces": "right", "variants": ["talk"]}],
  "base": "thug_punk",
  "outfit": "messo",
  "hair_meshes": [

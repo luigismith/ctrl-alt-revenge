@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="FighterData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/fighter_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"messo"
+display_name = "MESSO"
+sprite_id = &"messo"
+max_hp = 20
+walk_speed = Vector2(1.125, 0.75)
+run_speed = 1.875
+jump_velocity = 4.375
+gravity = 0.325
+getup_invuln = 20
+down_ticks = 40
+ko_score = 800
+shadow_width = 33
+attacks = PackedStringArray()
+attack_weights = PackedFloat32Array()
+wait_distance = Vector2(130.0, 175.0)
+wait_lane_offset = Vector2(17.5, 30.0)
+cooldown_ticks = Vector2i(60, 90)
+approach_timeout = 150
+palette_variants = []

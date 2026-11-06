@@ -30,6 +30,12 @@ func can_request(thug: Entity, tick: int) -> bool:
 		return false
 	if tick - last_release_tick < GLOBAL_GAP or tick - last_attack_start_tick < GLOBAL_GAP:
 		return false
+	return cooldown_over(thug, tick)
+
+
+## Il recupero di questo nemico fra due suoi attacchi è finito. Vale anche per chi attacca senza
+## turno (i rider con il braccio di GIG segnato dal messo).
+func cooldown_over(thug: Entity, tick: int) -> bool:
 	return tick >= _cooldowns.get(thug.uid, -100000)
 
 

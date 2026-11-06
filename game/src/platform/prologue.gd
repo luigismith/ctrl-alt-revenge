@@ -49,8 +49,9 @@ const DOOR_BANG := 60
 
 ## Le ripartenze: i cartelli superati coi piedi a terra. Quelle dopo l'arena non rifanno lo scontro.
 const CHECKPOINT_SIGNS: Array[String] = ["e", "f", "i", "j"]
+## La scena nel motore del pignoramento (decisione 68): game/data/scene/pignoramento.json.
+const PIGNORAMENTO := "pignoramento"
 
-const C_RAIN := Color8(150, 170, 200, 120)
 const C_VIGNETTE := Color8(18, 16, 24)
 const C_INK := Color8(240, 232, 210)
 ## La vecchia tastiera beige del padre, sul banco.
@@ -76,7 +77,8 @@ var door_t: int = -1
 ## Piove da quando arrivano gli Esattori (decisione 54).
 var raining: bool = false
 var _door_cells: Array[Vector2i] = []
-var _rain_seed: int = 0
+## Il tempo (solo disegno): il cielo che si chiude, la pioggia, la luce sugli attori.
+var weather: Weather
 
 
 func _setup_stage() -> void:
@@ -87,20 +89,37 @@ func _setup_stage() -> void:
 		"kerb": Color8(96, 48, 38), "speck": Color8(158, 148, 138)}
 	signs = PROLOGUE_SIGNS
 	panels = {}
-	arena_id = "pignoramento"
+	arena_id = PIGNORAMENTO
 	hud_title = "PROLOGO"
-	# I due Esattori del pignoramento: il messo e un rider. Il messo non c'è ancora: per ora
-	# arrivano due rider.
-	arena_spawns = [
-		{"type": "rider", "delay": 40, "side": 1, "y": 215},
-		{"type": "rider", "delay": 90, "side": 1, "y": 245},
-	]
+	arena_spawns = _pignoramento_spawns()
+
+
+## I due Esattori del pignoramento, il messo e un rider, compaiono dove li lascia la scena (l'esito
+## del copione). Senza copione entrano da sinistra, dal viale.
+static func _pignoramento_spawns() -> Array:
+	var sd := SceneData.load_scene(PIGNORAMENTO)
+	var out: Array = []
+	for who: String in ["messo", "rider"]:
+		var e := sd.end_of(who)
+		var s := {"type": str((sd.actors.get(who, {}) as Dictionary).get("tipo", who)), "delay": 0, "side": -1,
+			"y": float(e.get("y", 200.0 if who == "messo" else 236.0))}
+		if not e.is_empty():
+			s["x"] = float(e["x"])
+			s["verso"] = int(e.get("verso", 1))
+		out.append(s)
+	return out
 
 
 func _ready() -> void:
 	super._ready()
 	for p: Vector2i in grid.marks.get("/", []):
 		_door_cells.append(Vector2i(p.x / SolidGrid.TILE, p.y / SolidGrid.TILE - 1))
+	# Il tempo: la pioggia a strati (quello alla profondità di GIG dietro gli attori, subito dopo la
+	# stanza dei blocchi), il cielo e i piani del cimitero che si chiudono; nel garage non piove.
+	weather = Weather.new()
+	weather.setup(grid, [GARAGE_INSIDE], 1)
+	weather.attach(self, _view, _room_node)
+	weather.grade_backdrop(backdrop, [_scene_art[0]] if not _scene_art.is_empty() else [])
 	_reset()
 
 
@@ -113,6 +132,8 @@ func _reset() -> void:
 	# Il cartello dell'arena si supera solo a scontro finito (l'arena si apre 40 px prima).
 	arena_done = cp >= CHECKPOINT_SIGNS.find("f")
 	raining = cp >= CHECKPOINT_SIGNS.find("f")
+	if weather != null:
+		weather.set_rain(raining, true)
 	vignette = ""
 	finished = false
 	player.arm_locked = not rebooted
@@ -191,9 +212,6 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 func _stage_after_step() -> void:
 	if finished:
 		return
-	# Finito il pignoramento comincia a piovere (durante l'arena questo passo non gira).
-	if arena_done and not raining:
-		raining = true
 	var on_ground := player.state == PlatformPlayer.State.GROUND
 	# Ripartenze: il cartello superato coi piedi a terra.
 	var nxt := checkpoint + 1
@@ -227,6 +245,38 @@ func _finish_reboot() -> void:
 	player.boosts_left = player.boosts_max()
 	door_t = DOOR_BREAK
 	_on_event("reboot")
+
+
+## GIG è entrato nell'arena del cancello: parte la scena del pignoramento (decisione 68; Luigi: «La
+## presentazione del messo è un filmato»). La simulazione ne applica subito l'esito, nello stesso tick:
+## GIG davanti al cancello chiuso, girato verso il viale, col segno del laser sul braccio; il messo e
+## il rider al loro posto; comincia a piovere (decisione 54). La scena è solo disegno: nei test, che
+## non la recitano, lo scontro comincia uguale.
+func _on_arena_fight() -> void:
+	var g := arena.player
+	var poses := {"gig": scene_pose_fighter(g)}
+	var e := SceneData.load_scene(PIGNORAMENTO).end_of("gig")
+	if not e.is_empty():
+		g.px = _arena_cam_x + float(e["x"])
+		g.py = float(e["y"])
+		g.facing = 1 if int(e.get("verso", g.facing)) >= 0 else -1
+	g.mark()
+	raining = true
+	arena.start_next_wave()
+	request_scene(PIGNORAMENTO, poses)
+
+
+## Il gioco riparte dopo la scena del pignoramento: lo scontro ha la sua musica.
+func _on_scene_handoff(id: String) -> void:
+	if id == PIGNORAMENTO and sound and arena != null and not arena.active_wave.is_empty():
+		# Il brano della scena ha preso il posto di quello del livello: lo strato dell'arena riparte.
+		Music.set_layer(&"arena", true)
+
+
+## La pioggia si vede: fuori dalle scene sempre, quando piove; in una scena da quando il cielo si
+## chiude (l'evento "pioggia" della regia).
+func _rain_shown() -> bool:
+	return raining and (scene == null or not scene.holds_sim() or bool(scene_flags.get("pioggia", false)))
 
 
 func _open_vignette(id: String) -> void:
@@ -367,8 +417,6 @@ func _draw_stage(v: Node2D) -> void:
 			v.draw_rect(Rect2(r.position.x, k, r.size.x, 1), C_GATE)
 		if door_t > 0 and door_t % DOOR_BANG > DOOR_BANG - 14:
 			UiFont.draw_text(v, Vector2(r.position.x - 24, r.position.y - 16), "BUM!", C_LED_RED, 1, 1)
-	if raining:
-		_draw_rain(v)
 
 
 ## Il segno di un punto dove premere SU: un triangolo cyan che pulsa e ondeggia sopra la testa di
@@ -398,18 +446,35 @@ func _draw_keyboard(v: Node2D, at: Vector2i) -> void:
 			v.draw_rect(Rect2(r.end.x - 3, top - 4, 2, 1), C_CYAN)
 
 
-## La pioggia in grigio: righe corte che cadono sullo schermo (solo disegno).
-func _draw_rain(v: Node2D) -> void:
-	_rain_seed += 1
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1234
-	for i in 90:
-		var x := _cam.x + rng.randf_range(-20.0, View.W + 20.0)
-		var speed := rng.randf_range(5.0, 8.0)
-		var y := fposmod(rng.randf_range(0.0, View.H) + _rain_seed * speed, View.H + 40.0) + _cam.y - 20.0
-		if GARAGE_INSIDE.has_point(Vector2(x, y)):
-			continue
-		v.draw_line(Vector2(x - y * 0.05 + _cam.y * 0.05, y), Vector2(x - y * 0.05 + _cam.y * 0.05 - 2, y + 7), C_RAIN, 1.0)
+## Ogni fotogramma, dopo la telecamera e anche durante le scene: il tempo segue quello che si vede.
+## Il cielo comincia a chiudersi quando la pioggia si vede (nella scena del pignoramento all'evento
+## "pioggia"), e la sua luce tinge gli attori e il pavimento (solo disegno).
+func _tick_extras() -> void:
+	super._tick_extras()
+	if weather == null:
+		return
+	if _rain_shown() and not weather.raining:
+		weather.set_rain(true)
+	elif not raining and weather.raining:
+		weather.set_rain(false)
+	var vr := _visible_rect()
+	var band := Rect2()
+	if tilt > 0.0:
+		band = Rect2(vr.position.x - 8.0, _floor_y, vr.size.x + 16.0, roundf((ARENA_BAND.y - ARENA_BAND.x) * tilt))
+	weather.tick(vr, zoom, band)
+	var tint := weather.actor_tint()
+	_body.modulate = tint
+	_floor_node.modulate = weather.ground_tint()
+	if arena != null:
+		for f in arena.fighters:
+			f.body.modulate = tint
+	if scene != null:
+		for p: ScenePuppet in scene.puppets.values():
+			if is_instance_valid(p):
+				p.body.modulate = tint
+	for p in _extras:
+		if is_instance_valid(p):
+			p.body.modulate = tint
 
 
 func _draw_stage_hud(h: Control) -> void:

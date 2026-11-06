@@ -1,5 +1,6 @@
 {
  "id": "rider",
+ "closeups": [{"name": "rider_dx", "faces": "right", "variants": ["talk"]}],
  "base": "thug_punk",
  "outfit": "rider",
  "hair_meshes": [],

@@ -17,6 +17,9 @@ var attack_options: Array[AttackData] = []
 var ai_enabled: bool = true
 ## Ondata a cui appartiene (per sapere quando è finita).
 var wave_id: String = ""
+## Tick in cui resta fermo a guardare GIG prima di muoversi (chi compare già in campo, per esempio
+## alla fine di una scena).
+var grace: int = 0
 
 var _enter_x: float = 0.0
 var _chosen: AttackData
@@ -67,17 +70,26 @@ func _think() -> void:
 		_walk_towards(px, py, 0.0)
 		return
 	facing = 1 if p.px >= px else -1
+	if grace > 0:
+		grace -= 1
+		_walk_towards(px, py, 0.0)
+		return
 	if mind == Mind.APPROACH:
 		_think_approach(p)
 	else:
 		mind = Mind.WAIT
-		if level.director.request(self, level.tick):
+		if _request_turn():
 			mind = Mind.APPROACH
 			_approach_ticks = 0
 			_chosen = _choose_attack()
 			_think_approach(p)
 		else:
 			_think_wait(p)
+
+
+## Chiede il turno d'attacco all'AttackDirector (i rider a volte non aspettano: vedi Rider).
+func _request_turn() -> bool:
+	return level.director.request(self, level.tick)
 
 
 func _think_enter() -> void:

@@ -3,6 +3,8 @@
  "id": "gig_spento",
  "_nota": "GIG prima del riavvio (decisione 34 e richiesta di Luigi del 6 novembre 2026): il braccio cyber è spento (luci e occhio grigi, il cyan arriva col riavvio, decisione 7) e pende morto, simulato in Blender (char_anim.DeadArm). Solo le mosse che GIG ha nel prologo: corsa, salto semplice, accovacciarsi, scivolata, appeso con la destra; nell'arena il diretto destro e la mazza.",
  "portrait": null,
+ "closeups": [{"name": "gig_spento_sx", "faces": "left", "blink_eyes": ["eye_l"], "mouth_thin": false, "beauty_glow": false,
+               "_nota": "primo piano per le scene: GIG a destra che guarda a sinistra, reso dal lato opposto (non si specchia mai); si chiude solo l'occhio vero, quello cyber spento resta aperto"}],
  "beauty_cols": {"EYE_GLOW": "#7a7f87", "GLOW_LINE": "#7a7f87"},
  "palette": {
   "protect": ["#140e1e", "#e0559b", "#7a7f87", "#4f545c"],

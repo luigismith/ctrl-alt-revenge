@@ -14,6 +14,8 @@ extends Node
 ##   Music.set_layer(layer_id, on)             strato in più, es. "arena" durante l'arena
 ##   Music.play_jingle(track_id)               non in loop, es. "clear"; poi silenzio
 ##   Music.duck(on)                            abbassa la musica (pausa, schermate)
+##   Music.has_track(track_id)                 il brano c'è (per esempio la musica di una scena)
+##   Music.current_track()                     il brano in loop che suona adesso, o &""
 ## Il player gira con PROCESS_MODE_ALWAYS: la pausa del gioco non ferma la musica.
 ##
 ## Dettagli:
@@ -151,6 +153,14 @@ func play_jingle(track_id: StringName) -> void:
 	_gain[_jingle] = float(_tracks[track_id]["gain_db"])
 	_set_amp(1.0, _jingle)
 	_jingle.play()
+
+
+func has_track(track_id: StringName) -> bool:
+	return _tracks.has(track_id)
+
+
+func current_track() -> StringName:
+	return _current_id if _current != null else &""
 
 
 func duck(on: bool) -> void:

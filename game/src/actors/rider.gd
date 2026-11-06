@@ -50,12 +50,25 @@ func _approach_speed() -> float:
 	return DASH_SPEED
 
 
+## Col braccio di GIG segnato dal laser del messo i rider non aspettano il turno: attaccano tutti
+## insieme, ognuno col suo recupero fra un attacco e l'altro (decisione 63, «Rider all'attacco»).
+func _request_turn() -> bool:
+	if level.player_marked():
+		return level.director.cooldown_over(self, level.tick)
+	return super._request_turn()
+
+
 func _choose_attack() -> AttackData:
 	_grab_try = rng.randf() < GRAB_CHANCE
 	return super._choose_attack()
 
 
 func _think_approach(p: Fighter) -> void:
+	# Partito senza turno mentre il braccio era segnato: spento il segno torna ad aspettare.
+	if not level.director.is_holder(self) and not level.player_marked():
+		mind = Mind.WAIT
+		_walk_towards(px, py, 0.0)
+		return
 	if not _grab_try:
 		super._think_approach(p)
 		return

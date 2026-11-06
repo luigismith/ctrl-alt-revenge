@@ -2050,6 +2050,9 @@ def main():
     if mode == "portrait":
         render_portrait(job, scene, arm, actions, objs, cam, L, aux_mat, meta)
         return
+    if mode == "closeup":
+        render_closeup(job, scene, arm, actions, objs, cam, L, aux_mat, meta, mats)
+        return
     import char_render
     char_render.run(globals(), job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, ground_z, t0)
     with open(os.path.join(job["out"], "meta.json"), "w") as fh:
@@ -2218,6 +2221,160 @@ def render_portrait(job, scene, arm, actions, objs, cam, L, aux_mat, meta):
     with open(os.path.join(d, "meta.json"), "w") as fh:
         json.dump(meta, fh, indent=1)
     log("ritratto fatto")
+
+
+def freeze_pose(arm):
+    """la posa corrente resta ferma senza l'azione (così si può ritoccare a mano): si copiano i valori delle ossa."""
+    vals = {pb.name: (pb.rotation_mode, pb.location.copy(), pb.rotation_quaternion.copy(), pb.rotation_euler.copy(),
+                      pb.scale.copy()) for pb in arm.pose.bones}
+    use_action(arm, None)
+    for pb in arm.pose.bones:
+        mode, loc, q, e, sc = vals[pb.name]
+        pb.rotation_mode = mode
+        pb.location, pb.rotation_quaternion, pb.rotation_euler, pb.scale = loc, q, e, sc
+    bpy.context.view_layer.update()
+
+
+def level_head(arm, pitch_deg=0.0):
+    """raddrizza la testa: lo sguardo orizzontale (più pitch_deg verso il basso) e niente inclinazione di lato,
+    tenendo la rotazione destra-sinistra della posa. Restituisce (beccheggio, rollio) tolti, in gradi."""
+    Rh = bone_rot(arm, "Head")
+    F = (Rh @ Vector((0, -1, 0))).normalized()
+    U = Rh @ Vector((0, 0, 1))
+    U = (U - F * U.dot(F)).normalized()
+    Z = Vector((0, 0, 1))
+    Fh = Vector((F.x, F.y, 0.0)).normalized()
+    t = math.radians(pitch_deg)
+    F2 = (Fh * math.cos(t) - Z * math.sin(t)).normalized()
+    U2 = (Z - F2 * F2.dot(Z)).normalized()
+    B1 = Matrix((F, U, F.cross(U))).transposed()
+    B2 = Matrix((F2, U2, F2.cross(U2))).transposed()
+    Rd = B2 @ B1.inverted()
+    pb = arm.pose.bones["Head"]
+    Mw = arm.matrix_world @ pb.matrix
+    P = Mw.translation.copy()
+    D = Matrix.Translation(P) @ Rd.to_4x4() @ Matrix.Translation(-P)
+    pb.matrix = arm.matrix_world.inverted() @ D @ Mw
+    bpy.context.view_layer.update()
+    pitch0 = math.degrees(math.asin(max(-1.0, min(1.0, -F.z))))
+    roll0 = math.degrees(math.atan2(U.dot(Fh.cross(Z)), U.dot(Z)))
+    return round(pitch0, 1), round(roll0, 1)
+
+
+def render_closeup(job, scene, arm, actions, objs, cam, L, aux_mat, meta, mats):
+    """primo piano per le scene nel motore: il volto di tre quarti a densità alta come G-buffer (la stessa pipeline
+    dei pixel), più i punti del viso proiettati. La posa (di solito il primo fotogramma di Idle_Loop) si ferma e la
+    testa si raddrizza, così il personaggio guarda avanti e non in basso. Con "face_px" la densità si calcola perché
+    la testa (dalla cima al mento, senza capelli) occupi quei pixel: le teste hanno proporzioni diverse.
+    Il modello non ha un rig facciale (niente shape key, niente ossa di palpebre e mascella): occhi chiusi e bocca
+    aperta li disegna build_chars.py sui pixel; con talk_mode "3d" la bocca aperta si rende invece con un piccolo
+    incavo scuro solidale con la testa. Con "beauty_png" salva anche un render a colori della stessa inquadratura
+    ad alta risoluzione (build_chars.py lo ritaglia come il primo piano): la base per lo stile dei murales.
+    Chi guarda a sinistra (GIG nelle scene, che non si specchia mai) si rende dal lato opposto: yaw = 180 - yaw."""
+    cc = job["closeup"]
+    act = find_action(actions, cc.get("action", "Idle_Loop"))
+    use_action(arm, act)
+    scene.frame_set(int(cc.get("frame", act.frame_range[0])))
+    freeze_pose(arm)
+    if cc.get("level_head", True):
+        log("testa raddrizzata: tolti beccheggio e rollio", level_head(arm, cc.get("head_pitch_deg", 0.0)))
+    W = cc.get("frame_px", 128)
+    hh, ht = bone_world(arm, "Head")
+    c = (hh + ht) / 2 + Vector((0, 0, cc.get("dz", 0.0)))
+    cam.set_view(cc.get("yaw_deg", 55.0), cc.get("pitch_deg", 4.0), c)
+    pbH = arm.pose.bones["Head"]
+    Mh = arm.matrix_world @ pbH.matrix @ arm.data.bones["Head"].matrix_local.inverted() @ arm.matrix_world.inverted()
+    head_m = (Mh @ L["crown"] - Mh @ L["chin"]).dot(cam.up)
+    ppm = cc["face_px"] / head_m if cc.get("face_px") else cc.get("pixels_per_meter", 280)
+    log("primo piano: testa %.3f m sullo schermo, %.1f px/m" % (head_m, ppm))
+    cam.set_frame(W, 1.0 / ppm, cam.ss)
+    cam.place(0, 0)
+    scene.render.resolution_x = W * cam.ss
+    scene.render.resolution_y = W * cam.ss
+    d = os.path.join(job["out"], "closeup")
+    os.makedirs(d, exist_ok=True)
+
+    def project_rest(P):
+        u, v, dpt = cam.project(Mh @ P)
+        return [round(u, 3), round(v, 3), round(dpt, 4)]
+
+    face = {k: project_rest(L[k]) for k in ("eye_l", "eye_r", "mouth", "nose", "chin", "crown", "back")}
+    hc_rest = Vector((0.0, -0.01, (L["chin"].z + L["crown_z"]) / 2))
+    face["head_c"] = project_rest(hc_rest)
+    frames = []
+    fd = frame_data(arm, cam, L, job.get("ground_z", -0.024))
+    fd.update(frame=1, file="base.npz", face=face, variant="base", ppm=round(ppm, 2))
+    log("testa vista dalla telecamera", fd["head"])
+    render_gbuffer(scene, aux_mat, os.path.join(d, "base"))
+    frames.append(fd)
+    talk = cc.get("talk", {})
+    if "talk" in cc.get("variants", []) and cc.get("talk_mode") == "3d":
+        # bocca aperta in 3D (a richiesta): un incavo scuro davanti alla linea della bocca (davanti alla barba)
+        mo = L["mouth"]
+        ctr = mo + Vector((0.0, -talk.get("front", 0.006), -talk.get("down", 0.004)))
+        rad = (talk.get("rx", 0.013), talk.get("ry", 0.006), talk.get("rz", 0.0065))
+        added = [rigid_object("Talk", sphere_bm(ctr, rad, mat=0), "Head", arm, ["MOUTH"], mats, part="head")]
+        bpy.context.view_layer.update()
+        render_gbuffer(scene, aux_mat, os.path.join(d, "talk"))
+        fv = dict(fd)
+        fv.update(frame=len(frames) + 1, file="talk.npz", variant="talk")
+        frames.append(fv)
+        delete_objects(added)
+        bpy.context.view_layer.update()
+    with open(os.path.join(d, "frames.json"), "w") as fh:
+        json.dump(frames, fh)
+    meta.update(W1=W, p1=1.0 / ppm, closeup=cc)
+    meta["anims"]["closeup"] = dict(src="closeup", frames=[f["frame"] for f in frames])
+    with open(os.path.join(d, "meta.json"), "w") as fh:
+        json.dump(meta, fh, indent=1)
+    out_png = job.get("beauty_png")
+    if out_png:
+        render_closeup_beauty(job, scene, objs, cam, cc, out_png)
+    log("primo piano fatto", [f["variant"] for f in frames])
+
+
+def render_closeup_beauty(job, scene, objs, cam, cc, path):
+    """render a colori del primo piano (stessa inquadratura), con la luce chiave dal davanti del volto."""
+    bmats = make_beauty_mats(job.get("beauty_cols", {}))
+    if not cc.get("beauty_glow", True):
+        # occhio cyber spento (GIG prima del riavvio): niente emissione
+        for k in ("EYE_GLOW", "GLOW_LINE"):
+            if k in bmats:
+                bmats[k].node_tree.nodes.get("Principled BSDF").inputs["Emission Strength"].default_value = 0.0
+    # tutte le mesh della scena, anche quelle legate alla testa che non stanno in objs
+    for o in scene.objects:
+        if o.type != "MESH":
+            continue
+        for s in o.material_slots:
+            if s.material is None:
+                continue
+            k = s.material["label"] if "label" in s.material else s.material.name[2:]
+            s.material = bmats.get(k, s.material)
+    sun = link(bpy.data.objects.new("SunCU", bpy.data.lights.new("SunCU", "SUN")))
+    sun.data.energy = 3.0
+    key = Vector(job["camera"]["luce_chiave"]["camera"])
+    if cc.get("faces") == "left":
+        key.x = -key.x
+    # dalla luce in spazio telecamera a quella nel mondo, così vale anche dal lato opposto
+    kw = (cam.right * key.x + cam.up * key.y + cam.back * key.z).normalized()
+    sun.rotation_euler = kw.to_track_quat("Z", "Y").to_euler()
+    w = bpy.data.worlds.new("Wcu")
+    w.color = (0.10, 0.09, 0.14)
+    scene.world = w
+    scene.eevee.taa_render_samples = 32
+    scene.render.filter_size = 1.5
+    res = cc.get("beauty_px", 1536)
+    scene.render.resolution_x = res
+    scene.render.resolution_y = res
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.render.image_settings.color_depth = "8"
+    scene.view_settings.view_transform = "AgX"
+    scene.render.film_transparent = True
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+    log("render a colori", path)
 
 
 if __name__ == "__main__":

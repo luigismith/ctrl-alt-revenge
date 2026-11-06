@@ -288,25 +288,34 @@ func _spawn_player() -> void:
 	world.add_child(player)
 
 
-## Crea un nemico che entra da fuori schermo (side +1 da destra, -1 da sinistra).
-func spawn_thug(type_id: StringName, side: int, y: float, wave_id: String) -> Thug:
+## Crea un nemico che entra da fuori schermo (side +1 da destra, -1 da sinistra). Con "x" in `at`
+## (px dal bordo sinistro della telecamera) compare già lì, fermo, col "verso" dato e "grace" tick
+## prima di muoversi: è chi c'era già alla fine di una scena di presentazione.
+func spawn_thug(type_id: StringName, side: int, y: float, wave_id: String, at: Dictionary = {}) -> Thug:
 	var t: Thug
 	match type_id:
 		&"rider":
 			t = Rider.new()
 		&"esattore":
 			t = Esattore.new()
+		&"messo":
+			t = Messo.new()
 		_:
 			t = Thug.new()
 	t.setup_thug(type_id, self, _next_uid(), rng.randi())
 	t.set_palette_variant(_spawned.get(type_id, 0))
 	_spawned[type_id] = _spawned.get(type_id, 0) + 1
 	t.wave_id = wave_id
-	t.px = camera.x + VIEW_W + 28.0 if side > 0 else camera.x - 28.0
 	t.py = clampf(y, band_top, band_bottom)
 	fighters.append(t)
 	world.add_child(t)
-	t.enter_from(camera.x + VIEW_W - 56.0 if side > 0 else camera.x + 56.0)
+	if at.has("x"):
+		t.px = camera.x + float(at["x"])
+		t.facing = 1 if int(at.get("verso", side)) >= 0 else -1
+		t.grace = int(at.get("grace", 0))
+	else:
+		t.px = camera.x + VIEW_W + 28.0 if side > 0 else camera.x - 28.0
+		t.enter_from(camera.x + VIEW_W - 56.0 if side > 0 else camera.x + 56.0)
 	t.sync_visual()
 	return t
 
@@ -469,17 +478,37 @@ func _update_waves() -> void:
 			_start_wave(waves[wave_index])
 		return
 	_wave_tick += 1
-	var still: Array[Dictionary] = []
-	for s in _pending:
-		if _wave_tick >= int(s.get("delay", 0)):
-			spawn_thug(StringName(str(s.get("type", "thug_punk"))), int(s.get("side", 1)), float(s.get("y", 180)), str(active_wave.get("id", "")))
-		else:
-			still.append(s)
-	_pending = still
+	_spawn_due()
 	# L'ondata finisce quando l'ultimo nemico è sparito (dopo la caduta e il lampeggio),
 	# non appena va KO: "VAI" e "ZONA LIBERATA" non compaiono mentre il corpo vola ancora.
 	if _pending.is_empty() and _freeze == 0 and _slowmo == 0 and wave_enemies_present() == 0:
 		_finish_wave()
+
+
+## I nemici dell'ondata il cui ritardo è passato entrano (o compaiono al loro posto, con "x").
+func _spawn_due() -> void:
+	var still: Array[Dictionary] = []
+	for s in _pending:
+		if _wave_tick >= int(s.get("delay", 0)):
+			spawn_thug(StringName(str(s.get("type", "thug_punk"))), int(s.get("side", 1)), float(s.get("y", 180)), str(active_wave.get("id", "")), s)
+		else:
+			still.append(s)
+	_pending = still
+
+
+## Fa partire subito la prossima ondata, senza aspettare la telecamera: la chiede chi ospita l'arena
+## nel tick in cui parte una scena di presentazione, così alla fine della scena i nemici ci sono già
+## (quelli con "delay" 0 compaiono in questo stesso tick).
+func start_next_wave() -> void:
+	if not active_wave.is_empty() or wave_index >= waves.size():
+		return
+	_start_wave(waves[wave_index])
+	_spawn_due()
+
+
+## Il braccio di GIG ha il segno del laser del messo.
+func player_marked() -> bool:
+	return player != null and player.marked > 0
 
 
 func _start_wave(w: Dictionary) -> void:
