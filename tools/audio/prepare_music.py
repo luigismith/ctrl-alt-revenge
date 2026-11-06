@@ -54,8 +54,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audiolib as al  # noqa: E402
 
 LAB = Path(os.environ.get("CAR_LAB", Path(os.environ.get("USERPROFILE", str(Path.home()))) / "ctrlaltrevenge-lab"))
-FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / "ffmpeg.exe"
-PML = LAB / "tools" / "pymusiclooper" / "bin" / "pymusiclooper.exe"
+EXE = ".exe" if os.name == "nt" else ""  # sul Mac gli eseguibili non hanno estensione
+FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / ("ffmpeg" + EXE)
+PML = LAB / "tools" / "pymusiclooper" / "bin" / ("pymusiclooper" + EXE)
 MUSIC_DIR = LAB / "music"
 TOOL_VERSION = 1
 

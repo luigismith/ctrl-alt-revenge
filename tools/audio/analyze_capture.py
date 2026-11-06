@@ -39,7 +39,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audiolib as al  # noqa: E402
 
 LAB = Path(os.environ.get("CAR_LAB", Path(os.environ.get("USERPROFILE", str(Path.home()))) / "ctrlaltrevenge-lab"))
-FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / "ffmpeg.exe"
+EXE = ".exe" if os.name == "nt" else ""  # sul Mac gli eseguibili non hanno estensione
+FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / ("ffmpeg" + EXE)
 ROOT = Path(__file__).resolve().parents[2]
 SR = 48000
 FPS = 60

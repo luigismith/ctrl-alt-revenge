@@ -40,7 +40,8 @@ SR = G.SR
 ROOT = Path(__file__).resolve().parents[2]
 LAB = Path(os.environ.get("CAR_LAB", Path.home() / "ctrlaltrevenge-lab"))
 SRC = LAB / "sources" / "sfx"
-FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / "ffmpeg.exe"
+EXE = ".exe" if os.name == "nt" else ""  # sul Mac gli eseguibili non hanno estensione
+FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / ("ffmpeg" + EXE)
 OUT_DEFAULT = ROOT / "tools" / "audio" / "out" / "sfx_pack"
 GAME_SFX = G.GAME_SFX
 

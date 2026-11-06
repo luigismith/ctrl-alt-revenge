@@ -9,8 +9,10 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
-LAB = os.environ.get("CAR_LAB") or os.path.join(os.environ["USERPROFILE"], "ctrlaltrevenge-lab")
-BLENDER = os.path.join(LAB, "tools", "blender-4.5.15", "blender.exe")
+LAB = os.environ.get("CAR_LAB") or os.path.join(os.path.expanduser("~"), "ctrlaltrevenge-lab")
+# Blender 4.5.15 del laboratorio: la cartella portatile su Windows, l'app sul Mac.
+BLENDER = (os.path.join(LAB, "tools", "blender-4.5.15", "Blender.app", "Contents", "MacOS", "Blender")
+           if sys.platform == "darwin" else os.path.join(LAB, "tools", "blender-4.5.15", "blender.exe"))
 OUT = os.path.join(HERE, "out")
 CHARS = os.path.join(HERE, "chars")
 BLENDER_SCRIPTS = os.path.join(REPO, "tools", "blender")

@@ -27,7 +27,7 @@ import pix  # noqa: E402
 
 ASSETS = HERE / "out" / "assets"
 CHECK = HERE / "out" / "check"
-LAB = Path(os.environ.get("USERPROFILE", "")) / "ctrlaltrevenge-lab"
+LAB = Path(os.environ.get("USERPROFILE") or Path.home()) / "ctrlaltrevenge-lab"
 SPIKE = LAB / "ricerca-2026-11-03" / "prove" / "spike-3d2pixel" / "out" / "frames"
 # Risoluzione del gioco, come View in game/src/core/view.gd (480x270 dal 5 novembre 2026).
 # I fotogrammi della prova spike sono ancora a 48 px/m: nei mockup i personaggi sembrano piccoli.

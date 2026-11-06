@@ -41,7 +41,8 @@ from pathlib import Path
 
 VOICES = ["fm0", "fm1", "fm2", "fm3", "fm4", "fm5", "dac", "psg0", "psg1", "psg2", "noise"]
 LAB = Path(os.environ.get("CAR_LAB", Path(os.environ.get("USERPROFILE", str(Path.home()))) / "ctrlaltrevenge-lab"))
-FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / "ffmpeg.exe"
+EXE = ".exe" if os.name == "nt" else ""  # sul Mac gli eseguibili non hanno estensione
+FFMPEG = LAB / "tools" / "ffmpeg" / "bin" / ("ffmpeg" + EXE)
 
 _LEN = {0x4F: 2, 0x50: 2, 0x61: 3, 0x62: 1, 0x63: 1, 0x66: 1, 0x68: 12,
         0x90: 5, 0x91: 5, 0x92: 6, 0x93: 11, 0x94: 2, 0x95: 5, 0xE0: 5}

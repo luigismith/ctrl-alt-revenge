@@ -1,4 +1,14 @@
 #!/bin/sh
 # Enable once per clone (no admin rights needed):  git config core.hooksPath tools/hooks
-if command -v python >/dev/null 2>&1; then PY=python; else PY="py -3"; fi
-exec $PY -I tools/guard_assets.py --staged
+# Serve Python 3.10 o più nuovo: python (Windows), python3 (Mac, Linux), il venv del laboratorio
+# del Mac, oppure py -3. Sul Mac il file deve essere eseguibile (chmod +x), se no git lo salta.
+for c in python python3; do
+  if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 10))' >/dev/null 2>&1; then
+    exec "$c" -I tools/guard_assets.py --staged
+  fi
+done
+LABPY="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}/venv/bin/python"
+if [ -x "$LABPY" ]; then
+  exec "$LABPY" -I tools/guard_assets.py --staged
+fi
+exec py -3 -I tools/guard_assets.py --staged

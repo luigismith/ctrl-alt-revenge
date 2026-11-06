@@ -24,6 +24,7 @@ import json
 import math
 import os
 import subprocess
+import sys
 import time
 
 import numpy as np
@@ -57,7 +58,9 @@ SCREEN_W, SCREEN_H = px(384), px(216)                        # 480 x 270
 BAND = (px(150), px(208))                                    # (188, 260)
 
 LAB = os.path.join(os.environ.get("USERPROFILE", os.path.expanduser("~")), "ctrlaltrevenge-lab")
-BLENDER = os.path.join(LAB, "tools", "blender-4.5.15", "blender.exe")
+# Blender 4.5.15 del laboratorio: la cartella portatile su Windows, l'app sul Mac.
+BLENDER = (os.path.join(LAB, "tools", "blender-4.5.15", "Blender.app", "Contents", "MacOS", "Blender")
+           if sys.platform == "darwin" else os.path.join(LAB, "tools", "blender-4.5.15", "blender.exe"))
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "tools", "env", "out")
 SRC_ENV = os.path.join(LAB, "sources", "env")

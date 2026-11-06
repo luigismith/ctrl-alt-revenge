@@ -8,7 +8,8 @@
 #
 # Variabili, tutte facoltative:
 #   GODOT    eseguibile di Godot 4.7.2 con i modelli d'esportazione installati (predefinito: quello
-#            console del laboratorio, in modalità autonoma: i modelli stanno nella sua editor_data/)
+#            console del laboratorio, in modalità autonoma: i modelli stanno nella sua editor_data/;
+#            sul Mac quello di Godot.app, con editor_data/ accanto all'app)
 #   WORK     cartella per la copia del progetto (predefinita: <laboratorio>/sito/godot-web; è
 #            diversa da sito/godot, che usa tools/site/media.py, così i due script non si
 #            cancellano la copia a vicenda)
@@ -45,6 +46,11 @@ if command -v cygpath >/dev/null 2>&1; then
 else
   native() { printf '%s' "$1"; }
   LAB="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}"
+  # sul Mac quello del laboratorio, se c'è (su GitHub, in Linux, il godot del PATH)
+  MAC_GODOT="$LAB/tools/godot-4.7.2/Godot.app/Contents/MacOS/Godot"
+  if [ -z "${GODOT:-}" ] && [ -x "$MAC_GODOT" ]; then
+    GODOT="$MAC_GODOT"
+  fi
   GODOT="${GODOT:-godot}"
 fi
 WORK="${WORK:-$LAB/sito/godot-web}"

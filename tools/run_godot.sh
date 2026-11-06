@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Esegue Godot 4.7.2 (eseguibile console) sul progetto game/ con timeout e file di log,
-# poi controlla il log. Il progetto si cambia con la variabile GODOT_PROJECT (cartella con
-# project.godot, assoluta o relativa alla radice del repository; predefinita: game/), mai con
-# un secondo --path. Fallisce se:
+# Esegue Godot 4.7.2 (su Windows l'eseguibile console, sul Mac quello dentro Godot.app) sul
+# progetto game/ con timeout e file di log, poi controlla il log. Il progetto si cambia con la
+# variabile GODOT_PROJECT (cartella con project.godot, assoluta o relativa alla radice del
+# repository; predefinita: game/), mai con un secondo --path. Fallisce se:
 #   - il codice d'uscita non è 0 (124 = timeout);
 #   - il log contiene SCRIPT ERROR, Parse Error o righe che iniziano con ERROR:
 #     (salvo quelle che corrispondono alla regex in GODOT_ERR_ALLOW);
@@ -16,16 +16,26 @@
 #   GODOT_PROJECT=tools/fxui/out/godot_check tools/run_godot.sh 60 --headless --import
 set -u
 
-LAB_WIN="${CAR_LAB:-${USERPROFILE}\\ctrlaltrevenge-lab}"
-LAB="$(cygpath -u "$LAB_WIN")"
-GODOT="$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_win64_console.exe"
+if [ "$(uname -s)" = "Darwin" ]; then
+  # Mac: il laboratorio in ~/ctrlaltrevenge-lab, con Godot.app; i percorsi restano quelli di Unix
+  LAB="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}"
+  GODOT="$LAB/tools/godot-4.7.2/Godot.app/Contents/MacOS/Godot"
+  unix_path() { printf '%s' "$1"; }
+  native_path() { printf '%s' "$1"; }
+else
+  # Git Bash su Windows: Godot vuole i percorsi di Windows
+  LAB="$(cygpath -u "${CAR_LAB:-${USERPROFILE}\\ctrlaltrevenge-lab}")"
+  GODOT="$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_win64_console.exe"
+  unix_path() { cygpath -u "$1"; }
+  native_path() { cygpath -w "$1"; }
+fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="${GODOT_PROJECT:-$ROOT/game}"
 case "$PROJECT" in
   /*|[A-Za-z]:*) ;;
   *) PROJECT="$ROOT/$PROJECT" ;;
 esac
-PROJECT="$(cygpath -u "$PROJECT")"
+PROJECT="$(unix_path "$PROJECT")"
 
 if [ ! -x "$GODOT" ]; then
   echo "Godot non trovato: $GODOT" >&2
@@ -45,8 +55,35 @@ STAMP="$(date +%Y%m%d-%H%M%S)-$$"
 LOG="$LOGDIR/godot-$STAMP.log"
 OUT="$LOGDIR/godot-$STAMP.out"
 
-timeout --kill-after=10 "$SECS" "$GODOT" --path "$(cygpath -w "$PROJECT")" \
-  --log-file "$(cygpath -w "$LOG")" "$@" >"$OUT" 2>&1
+# Il timeout di GNU c'è in Git Bash, non sul Mac: lì lo fa questa funzione, con lo stesso codice
+# d'uscita (124). Il cane da guardia scrive su /dev/null, così non tiene aperta l'uscita di chi
+# ha lanciato lo script.
+if command -v timeout >/dev/null 2>&1; then
+  run_limited() { timeout --kill-after=10 "$@"; }
+else
+  run_limited() {
+    local secs="$1" flag="$LOGDIR/.timeout-$STAMP"
+    shift
+    "$@" &
+    local pid=$!
+    ( sleep "$secs"; if kill -TERM "$pid" 2>/dev/null; then : >"$flag"; sleep 10; kill -KILL "$pid" 2>/dev/null; fi ) \
+      >/dev/null 2>&1 &
+    local watch=$!
+    wait "$pid"
+    local code=$?
+    pkill -P "$watch" >/dev/null 2>&1
+    kill "$watch" >/dev/null 2>&1
+    wait "$watch" 2>/dev/null
+    if [ -e "$flag" ]; then
+      rm -f "$flag"
+      return 124
+    fi
+    return "$code"
+  }
+fi
+
+run_limited "$SECS" "$GODOT" --path "$(native_path "$PROJECT")" \
+  --log-file "$(native_path "$LOG")" "$@" >"$OUT" 2>&1
 CODE=$?
 
 FAIL=0
