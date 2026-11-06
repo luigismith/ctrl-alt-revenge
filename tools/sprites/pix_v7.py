@@ -371,8 +371,9 @@ FACE = {
     "effort": {"eye": ["BBBB", ".CW."], "eye_o": (-2, -1), "mouth": ["MMM", "MTM"], "mouth_o": (-1, 0)},
     "pain": {"eye": ["..BB", "BkkC"], "eye_o": (-2, -1), "mouth": ["MM", "MM"], "mouth_o": (0, 0)},
 }
+# LENS: lente chiara degli occhiali da polvere, l'occhio si vede attraverso (LENS_TINT, arancione, lo copre)
 FACE_MATS = ("SKIN", "SKIN_DARK", "EYE_GLOW", "EYE_DARK", "BROW", "NOSE_SHADOW", "MOUTH", "EYE_SOCKET", "BEARD",
-             "BEARD_EDGE", "HAIR")
+             "BEARD_EDGE", "HAIR", "LENS")
 
 
 def _hex(c):

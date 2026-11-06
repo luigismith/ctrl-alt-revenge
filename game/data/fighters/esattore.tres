@@ -6,7 +6,7 @@
 script = ExtResource("1_script")
 id = &"esattore"
 display_name = "ESATTORE"
-sprite_id = &"thug_bruiser"
+sprite_id = &"esattore"
 max_hp = 110
 walk_speed = Vector2(1.0, 0.625)
 run_speed = 1.875
@@ -22,9 +22,8 @@ wait_distance = Vector2(70.0, 110.0)
 wait_lane_offset = Vector2(17.5, 30.0)
 cooldown_ticks = Vector2i(40, 70)
 approach_timeout = 220
-palette_variants = [{
-"#b1b7be": "#ffb347",
-"#8c9098": "#ff7a1f",
-"#5f6067": "#b8501a",
-"#373840": "#6a2c14"
+palette_variants = [{}, {
+"#ffab30": "#fff13a",
+"#f07818": "#f0c223",
+"#9e2c07": "#9e620f"
 }]

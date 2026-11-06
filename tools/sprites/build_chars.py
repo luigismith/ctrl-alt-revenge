@@ -3,7 +3,7 @@
 """CTRL+ALT REVENGE - pipeline dei personaggi con un comando.
 
 Uso (sempre con il Python del laboratorio e -I, dalla radice del repo):
-  python -I tools/sprites/build_chars.py all [gig gig_spento thug_punk thug_bruiser]
+  python -I tools/sprites/build_chars.py all [gig gig_spento thug_punk thug_bruiser rider esattore messo]
       render (Blender) -> pixel -> atlante + JSON -> validazione -> tavole di controllo -> ritratti -> scena
   python -I tools/sprites/build_chars.py publish [id ...]
       copia in game/assets i file già validati (nome temporaneo + rinomina, così il gioco non li legge a metà)
@@ -30,8 +30,9 @@ import charlib as C  # noqa: E402
 import pixelize as PX  # noqa: E402
 import review as RV  # noqa: E402
 
-IDS_ALL = ["gig", "gig_spento", "thug_punk", "thug_bruiser"]
-ENEMIES = ["thug_punk", "thug_bruiser"]
+IDS_ALL = ["gig", "gig_spento", "thug_punk", "thug_bruiser", "rider", "esattore", "messo"]
+# nemici che GIG può afferrare: per ognuno il suo JSON ha gli offset della vittima nelle prese
+ENEMIES = ["thug_punk", "thug_bruiser", "rider", "esattore", "messo"]
 PAIRS = ("grab_hold", "knee", "throw")
 # punti del fotogramma nel JSON (§4): nome nel JSON, nome nei dati del render
 POINTS = (("fist_l", "fist_l"), ("fist_r", "fist_r"), ("foot_l", "toe_l"), ("foot_r", "toe_r"), ("head", "head_c"))

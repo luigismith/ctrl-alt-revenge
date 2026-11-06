@@ -4,7 +4,8 @@ extends RefCounted
 
 const Harness := preload("res://tests/harness.gd")
 ## Varianti dei fogli: per i tempi degli attacchi valgono gli AttackData del personaggio base.
-const SHEET_BASE := {&"gig_spento": &"gig"}
+## Le varianti e i nemici che usano gli attacchi di un altro personaggio (il rider tira il jab del punk).
+const SHEET_BASE := {&"gig_spento": &"gig", &"rider": &"thug_punk", &"esattore": &"thug_bruiser"}
 const REPLAY_DIR := "res://tests/replays"
 
 var root: Node
@@ -50,6 +51,7 @@ func run(tree_root: Node) -> bool:
 	_test_replay_end()
 	_test_credits_glyphs()
 	_test_json_files()
+	_test_palette_variants()
 	_test_replays()
 	_test_platform()
 	_test_arm_locked()
@@ -883,6 +885,40 @@ func _test_json_files() -> void:
 		if f.ends_with(".tres"):
 			var a := load("res://data/attacks/" + f) as AttackData
 			check(a != null and a.id == StringName(f.get_basename()), "AttackData %s" % f)
+
+
+## Le varianti di colore dei nemici cambiano colori che esistono davvero nel loro sprite: con un render
+## nuovo la tavolozza può cambiare, e le varianti smetterebbero di funzionare senza avvisare.
+func _test_palette_variants() -> void:
+	for f in DirAccess.get_files_at("res://data/fighters"):
+		if not f.ends_with(".tres"):
+			continue
+		var fd := load("res://data/fighters/" + f) as FighterData
+		if fd == null or fd.palette_variants.is_empty():
+			continue
+		var s := SpriteSheet.get_sheet(fd.sprite_id)
+		if s.source != SpriteSheet.Source.REAL:
+			continue
+		var want: Array[Color] = []
+		for v: Dictionary in fd.palette_variants:
+			for k: String in v:
+				var c := Color.html(k)
+				if not want.has(c):
+					want.append(c)
+		var img := s.texture.get_image()
+		for y in img.get_height():
+			if want.is_empty():
+				break
+			for x in img.get_width():
+				var c := img.get_pixel(x, y)
+				if c.a > 0.0:
+					for i in range(want.size() - 1, -1, -1):
+						if c.r == want[i].r and c.g == want[i].g and c.b == want[i].b:
+							want.remove_at(i)
+		var missing := PackedStringArray()
+		for c in want:
+			missing.append("#" + c.to_html(false))
+		check(missing.is_empty(), "Varianti di colore presenti nello sprite: %s" % fd.id, ", ".join(missing))
 
 
 ## Le animazioni d'attacco ritemporizzate hanno esattamente i tempi dell'AttackData. Le varianti di un

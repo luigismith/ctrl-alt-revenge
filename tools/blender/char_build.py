@@ -44,7 +44,10 @@ IDS = dict(SKIN=1, HAIR=2, TOP=3, TOP_DARK=4, PANTS=5, BOOTS=6, METAL=7, EYE_GLO
            BOOT_SOLE=16, BOOT_CUFF=17, BEARD=18, METAL_SEAM=19, METAL_LIGHT=20, WRAP=21,
            HOOD=22, HOOD_DARK=23, BROW=24, EYE_SOCKET=25, NOSE_SHADOW=26, MOUTH=27, BEARD_EDGE=28,
            KNUCKLE=29, HAIR_TIE=30, PANTS_FOLD=31, SKIN_DARK=32, CREST=33, CREST_DARK=34, STUD=35,
-           WRAP_EDGE=36, LACE=37, PANTS_RIP=38, BRASS=39, SKIN_CREASE=40)
+           WRAP_EDGE=36, LACE=37, PANTS_RIP=38, BRASS=39, SKIN_CREASE=40,
+           # Esattori (char_enemies): occhiali, casco, catarifrangenti, zaino, rosso di SIDERA, plastica, camicia
+           GOGGLE=41, LENS=42, LENS_TINT=43, HELMET=44, HELMET_DARK=45, REFLECT=46, BAG=47, RED=48, PAD=49,
+           COLLAR=50, PATCH=51, SCREEN=52)
 PARTS = dict(none=0, torso=1, head=2, upperarm_l=3, lowerarm_l=4, hand_l=5, upperarm_r=6, lowerarm_r=7,
              hand_r=8, thigh_l=9, calf_l=10, foot_l=11, thigh_r=12, calf_r=13, foot_r=14)
 FINGERS = ("index", "middle", "pinky", "ring", "thumb")
@@ -1962,10 +1965,14 @@ def build(job):
     scene = bpy.context.scene
     scene.render.fps = 30
     mats = {k: make_label_mat("L_" + k, v) for k, v in IDS.items()}
-    ctx = dict(arm=arm, body=body, eyes=eyes, brows=brows, hair=hair, mats=mats, outfit=job.get("outfit_cfg", {}))
+    ctx = dict(arm=arm, body=body, eyes=eyes, brows=brows, hair=hair, mats=mats, outfit=job.get("outfit_cfg", {}),
+               proportions=job.get("proportions", {}))
     kind = job["outfit"]
     if kind == "gig":
         objs, L = build_gig(ctx)
+    elif kind in ("rider", "esattore", "messo"):
+        import char_enemies
+        objs, L = char_enemies.build(globals(), ctx, kind)
     else:
         objs, L = build_thug(ctx, kind)
     if job.get("normals", "proxy") == "proxy":
@@ -2108,9 +2115,20 @@ def render_previews(job, scene, arm, actions, objs, cam, L):
     scene.render.film_transparent = False
     old = cam.ob.data.ortho_scale
     for spec in job.get("preview", ["Punch_Jab:1"]):
-        an, fr = spec.split(":")
-        use_action(arm, find_action(actions, an))
-        scene.frame_set(int(fr))
+        if spec.startswith("tl:"):
+            # chiave di una traccia di char_anim: "tl:<mossa>:<chiave>"
+            import char_anim
+            import char_poses
+            _, ks, fr = spec.split(":")
+            an = ks
+            rig = char_poses.Rig(arm, fist_pose(arm, actions))
+            use_action(arm, None)
+            char_anim.apply_local(arm, char_anim.local_pose(rig, *rig.deltas(char_anim.KEYSETS[ks]()[fr])))
+            bpy.context.view_layer.update()
+        else:
+            an, fr = spec.split(":")
+            use_action(arm, find_action(actions, an))
+            scene.frame_set(int(fr))
         cam.ob.data.ortho_scale = job.get("preview_ortho", 2.6)
         cam.place(*cam.shift)
         scene.render.filepath = os.path.join(job["out"], f"preview_{an}_{fr}.png")

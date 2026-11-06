@@ -16,6 +16,16 @@ const PALETTES := {
 	&"thug_bruiser": {"skin": Color(0.55, 0.36, 0.24), "hair": Color(0.55, 0.36, 0.24), "shirt": Color(0.3, 0.3, 0.34),
 		"pants": Color(0.62, 0.34, 0.12), "boots": Color(0.16, 0.12, 0.1), "arm": Color(0.55, 0.36, 0.24),
 		"glow": Color(0.55, 0.36, 0.24), "scale": 1.3},
+	# gli Esattori: giacca senape del rider, pettorina arancione dell'esattore, giacca rossa del messo
+	&"rider": {"skin": Color(0.72, 0.52, 0.37), "hair": Color(0.77, 0.72, 0.62), "shirt": Color(0.72, 0.53, 0.17),
+		"pants": Color(0.22, 0.22, 0.27), "boots": Color(0.7, 0.64, 0.56), "arm": Color(0.72, 0.53, 0.17),
+		"glow": Color(0.72, 0.52, 0.37), "scale": 0.95},
+	&"esattore": {"skin": Color(0.55, 0.36, 0.24), "hair": Color(0.17, 0.14, 0.13), "shirt": Color(0.94, 0.47, 0.09),
+		"pants": Color(0.23, 0.24, 0.27), "boots": Color(0.44, 0.27, 0.16), "arm": Color(0.24, 0.25, 0.3),
+		"glow": Color(0.55, 0.36, 0.24), "scale": 1.3},
+	&"messo": {"skin": Color(0.86, 0.71, 0.61), "hair": Color(0.64, 0.64, 0.67), "shirt": Color(0.56, 0.11, 0.16),
+		"pants": Color(0.36, 0.36, 0.4), "boots": Color(0.16, 0.16, 0.19), "arm": Color(0.56, 0.11, 0.16),
+		"glow": Color(0.86, 0.71, 0.61), "scale": 1.0},
 }
 
 ## [posa, tick, tag, eventi] per animazione.
@@ -66,6 +76,9 @@ static func _make_human(sheet_id: StringName) -> SpriteSheet:
 	var pal: Dictionary = PALETTES.get(sheet_id, PALETTES[&"thug_punk"])
 	var names: PackedStringArray = SpriteSheet.REQUIRED.get(sheet_id, SpriteSheet.REQUIRED[&"thug_punk"])
 	var poses: Array[String] = []
+	# le mosse proprie dei nemici (pignora, block, read...) non hanno un disegno di debug: le alternative di
+	# SpriteSheet.FALLBACKS ripiegano su quelle comuni
+	names = PackedStringArray(Array(names).filter(func(n: String) -> bool: return HUMAN_ANIMS.has(n)))
 	for n in names:
 		for fr: Array in HUMAN_ANIMS[n][1]:
 			if not poses.has(fr[0]):

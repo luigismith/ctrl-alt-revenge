@@ -6,7 +6,8 @@ Sorgenti di un'animazione (campo "src" del lavoro):
   "guard"        guardia con respiro (come prima, GuardIdle di char_build)
   "tl:<mossa>"   traccia di pose chiave di anim_v7 (pose_at(tick)); i fotogrammi hanno "at" (tick della traccia)
   "<clip>"       clip UAL/M2M; i fotogrammi hanno "f" anche frazionario (sotto-fotogrammi di Blender)
-Opzioni per animazione: "upper": "guard" (braccia in guardia sopra la clip), "stride": s (passo allungato di s
+Opzioni per animazione: "upper": "guard" (braccia in guardia sopra la clip) oppure "tl:<mossa>:<chiave>" (braccia
+nella chiave di una traccia, es. il messo che cammina col tablet al petto), "stride": s (passo allungato di s
 con IK sui piedi), "period" (periodo della sorgente nei cicli), "loop", "spring" (molla del codino).
 Per fotogramma: "smear": ["fist_l", ...] -> punti dei sotto-istanti fra il fotogramma prima e questo ("trail").
 """
@@ -265,6 +266,13 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
     fist = ns["fist_pose"](arm, actions)
     rig = char_poses.Rig(arm, fist)
     guard_local = A7.local_pose(rig, *rig.deltas(A7.guard()))
+    upper_cache = {"guard": guard_local}
+
+    def upper_local(up):
+        if up not in upper_cache:
+            _, ks, key = up.split(":")
+            upper_cache[up] = A7.local_pose(rig, *rig.deltas(A7.KEYSETS[ks]()[key]))
+        return upper_cache[up]
     spring_on = job.get("topknot_spring", False) and "topknot" in arm.pose.bones
     dcfg = job.get("dead_arm") or None
     finals = {}
@@ -321,7 +329,7 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
                     if name_ not in acts:
                         a_ = find_action(actions, name_)
                         strip = []
-                        if an.get("upper") == "guard" and name_ == src:
+                        if an.get("upper") and name_ == src:
                             strip += list(ARM_ROT)
                         if dcfg and an.get("dead") is not False:
                             strip += dead_bones
@@ -341,9 +349,10 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
                         sik.off()
                     use_action(arm, action_for(0 if i is None else i))
                     scene.frame_set(fi, subframe=t - fi)
-                    if an.get("upper") == "guard":
+                    if an.get("upper"):
+                        ul = upper_local(an["upper"])
                         for b in ARM_ROT:
-                            q, _ = guard_local[b]
+                            q, _ = ul[b]
                             pb = arm.pose.bones[b]
                             pb.rotation_mode = "QUATERNION"
                             pb.rotation_quaternion = q

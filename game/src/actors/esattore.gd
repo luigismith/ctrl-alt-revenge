@@ -10,10 +10,11 @@ extends Thug
 ##   sbatte contro il bordo dello schermo e resta stordito, ed è il momento di picchiarlo;
 ## - per il resto picchia come il bruto dello slice, col pugno pesante con l'armatura.
 ##
-## Lo sprite è ancora quello del bruto, con la canotta ricolorata in arancione ad alta visibilità, e
-## le sue animazioni dalla pipeline 3D: la guardia ("block"), la preparazione e la corsa della spallata
-## ("charge_wind", "charge_run") e lo stordimento ("dizzy"). La pettorina vera, con le strisce
-## catarifrangenti e la scritta, arriverà con lo sprite suo.
+## Lo sprite è il suo, dalla pipeline 3D: pettorina arancione con le due strisce argento e il logo
+## rosso di SIDERA sul petto, camicia scura con le maniche arrotolate, ginocchiere, guanti senza dita
+## e occhiali da polvere chiari. La scritta ESATTORE sta sulla schiena, che la telecamera di lato non
+## mostra. Le animazioni sono quelle del bruto: la guardia ("block"), la preparazione e la corsa della
+## spallata ("charge_wind", "charge_run") e lo stordimento ("dizzy").
 
 enum Charge { NONE, WIND, RUN }
 

@@ -11,8 +11,9 @@ extends Thug
 ## braccio cyber resta sospeso per qualche secondo (Gig.suspend_arm): niente prese, niente calcio
 ## in salto, pugni più deboli. Scelta di Luigi del 5 novembre 2026.
 ##
-## Lo sprite è ancora quello del punk: quello del rider arriverà dalla pipeline 3D, con la sua
-## posa del pignoramento (per ora il fotogramma col braccio teso del jab).
+## Lo sprite viene dalla pipeline 3D: casco, occhiali da polvere, giacca senape da consegne e lo
+## zaino termico con un braccio pignorato che esce dal coperchio. Nel pignoramento tiene GIG per il
+## braccio con tutte e due le mani (animazione "pignora", due fotogrammi in ciclo).
 
 ## Velocità della corsa per arrivare e per scappare, rispetto alla camminata.
 const DASH_SPEED := 2.0
@@ -23,9 +24,9 @@ const GRAB_DX := 26.0
 ## Tick che il pignoramento impiega a riuscire: il tempo che GIG ha per divincolarsi.
 const PIGNORA_TICKS := 100
 const PIGNORA_DAMAGE := 4
-## Posa provvisoria del pignoramento: il braccio teso del jab del punk.
-const PIGNORA_POSE := &"jab"
-const PIGNORA_FRAME := 3
+## Animazione del pignoramento: due fotogrammi che si alternano ogni PIGNORA_FRAME_TICKS tick.
+const PIGNORA_POSE := &"pignora"
+const PIGNORA_FRAME_TICKS := 8
 
 ## Tick di fuga rimasti dopo un attacco.
 var retreat: int = 0
@@ -90,7 +91,7 @@ func _start_pignora(g: Gig, side: int) -> void:
 	facing = -side
 	level.director.on_attack_start(self, level.tick)
 	set_state(State.GRAB)
-	anim.show_frame(PIGNORA_POSE, PIGNORA_FRAME)
+	anim.show_frame(PIGNORA_POSE, 0)
 	grab_partner = g
 	pign_ticks = 0
 	g.become_grabbed(self)
@@ -106,7 +107,7 @@ func _think_pignora() -> void:
 		_after_pignora()
 		return
 	pign_ticks += 1
-	anim.show_frame(PIGNORA_POSE, PIGNORA_FRAME)
+	anim.show_frame(PIGNORA_POSE, (pign_ticks / PIGNORA_FRAME_TICKS) % 2)
 	px = level.clamp_x(self, g.px - facing * GRAB_DX)
 	py = g.py
 	if g.escape_presses >= Gig.ESCAPE_PRESSES:

@@ -6,7 +6,7 @@
 script = ExtResource("1_script")
 id = &"rider"
 display_name = "RIDER"
-sprite_id = &"thug_punk"
+sprite_id = &"rider"
 max_hp = 36
 walk_speed = Vector2(1.75, 1.0)
 run_speed = 3.0
@@ -22,18 +22,12 @@ wait_distance = Vector2(80.0, 125.0)
 wait_lane_offset = Vector2(17.5, 32.5)
 cooldown_ticks = Vector2i(30, 54)
 approach_timeout = 120
-palette_variants = [{
-"#e34b3e": "#4fd6c2",
-"#b4232e": "#1f9e8f",
-"#70102b": "#0d5a55",
-"#ff4583": "#4a4458",
-"#a91b62": "#2e2a38",
-"#5e0444": "#1c1824"
+palette_variants = [{}, {
+"#d9a541": "#76a960",
+"#b8882c": "#61904c",
+"#794117": "#485e2f"
 }, {
-"#e34b3e": "#ffd84a",
-"#b4232e": "#e0a21c",
-"#70102b": "#8a5a10",
-"#ff4583": "#7a5640",
-"#a91b62": "#4a3226",
-"#5e0444": "#2a1c16"
+"#d9a541": "#8e6ba1",
+"#b8882c": "#775688",
+"#794117": "#46375a"
 }]

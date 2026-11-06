@@ -30,12 +30,12 @@ from scipy import ndimage
 
 import pix_v7 as V7
 
-NID = 48
+NID = 64
 PART_BONE = {1: "spine_02", 2: "Head", 3: "upperarm_l", 4: "lowerarm_l", 5: "hand_l", 6: "upperarm_r",
              7: "lowerarm_r", 8: "hand_r", 9: "thigh_l", 10: "calf_l", 11: "foot_l", 12: "thigh_r",
              13: "calf_r", 14: "foot_r"}
 FEATURES = ("EYE_GLOW", "EYE_DARK", "BROW", "MOUTH", "EYE_SOCKET", "NOSE_SHADOW", "KNUCKLE", "BEARD_EDGE",
-            "HAIR_TIE", "STUD", "LACE", "SKIN_CREASE")
+            "HAIR_TIE", "STUD", "LACE", "SKIN_CREASE", "PATCH")
 N4 = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
 

@@ -3,7 +3,7 @@
 """Controlla gli sprite dei personaggi contro docs/specifica-slice.md (§4 formato, §5 tempi).
 
 Uso:  python -I tools/sprites/validate_sprites.py [cartella]   (predefinita: game/assets/sprites)
-La cartella contiene una sottocartella per personaggio (gig, gig_spento, thug_punk, thug_bruiser) con <id>.png e
+La cartella contiene una sottocartella per personaggio (gig, gig_spento, i nemici) con <id>.png e
 <id>.json.
 Se accanto c'è <id>.debug.json (scritto da build_chars.py) controlla anche la deriva dell'ancora.
 Esce con codice 1 se trova errori; stampa anche gli avvisi.
@@ -30,21 +30,30 @@ REQUIRED = {
                   "grabbed", "kneed", "thrown"],
     "thug_bruiser": ["idle", "walk", "punch", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
                      "grabbed", "kneed", "thrown"],
+    # gli Esattori del prologo (decisione 63 della storia): stesse mosse dei nemici dello slice, più le loro
+    "rider": ["idle", "walk", "jab", "haymaker", "pignora", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
+              "grabbed", "kneed", "thrown"],
+    "esattore": ["idle", "walk", "punch", "block", "charge_wind", "charge_run", "dizzy", "hurt_high", "hurt_low",
+                 "knock_air", "knock_down", "getup", "grabbed", "kneed", "thrown"],
+    "messo": ["idle", "walk", "read", "laser", "call", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
+              "grabbed", "kneed", "thrown"],
 }
 # cicli: i tre dello slice più quelli delle mosse platform di prova (accovacciato, appeso alla sporgenza)
-LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_slide", "wall_run", "hack", "charge_run", "dizzy"}
+LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_slide", "wall_run", "hack", "charge_run", "dizzy",
+         "pignora", "read", "call"}
 # (avvio, attivo, recupero) in tick a 60 Hz, §5; None = non controllato
 TIMING = {("gig", "jab1"): (3, 2, 9), ("gig", "jab2"): (3, 2, 9), ("gig", "hook"): (6, 3, 12),
           ("gig", "kick"): (10, 3, 20), ("gig", "air_kick"): (4, 8, None), ("gig", "knee"): (4, 3, 10),
           ("gig", "throw"): (8, 0, 14), ("gig_spento", "jab2"): (3, 2, 9), ("gig_spento", "mazza"): (14, 6, 15),
           ("thug_punk", "jab"): (18, 4, 18), ("thug_punk", "haymaker"): (33, 4, 28),
-          ("thug_bruiser", "punch"): (26, 5, 26)}
+          ("thug_bruiser", "punch"): (26, 5, 26), ("rider", "jab"): (18, 4, 18), ("rider", "haymaker"): (33, 4, 28),
+          ("esattore", "punch"): (26, 5, 26)}
 PAIRS = ("grab_hold", "knee", "throw")
 # varianti senza ritratto proprio: nell'interfaccia usano quello del personaggio base
 NO_PORTRAIT = {"gig_spento"}
 # animazioni sul posto in cui i piedi non devono muoversi affatto rispetto all'ancora
 FEET_FIXED = {"idle", "hurt_high", "hurt_low", "grabbed", "grab_hold"}
-ENEMIES = ("thug_punk", "thug_bruiser")
+ENEMIES = ("thug_punk", "thug_bruiser", "rider", "esattore", "messo")
 TAGS = {"active", "cancel", "invuln", "armor", "hold", "air"}
 SFX = {"whoosh_light", "whoosh_heavy", "hit_light", "hit_medium", "hit_heavy", "hit_kick", "knee", "grab", "throw",
        "body_fall", "body_thud", "step_a", "step_b", "jump", "land", "glint", "zap", "bin_hit", "bin_break", "pickup",

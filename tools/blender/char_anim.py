@@ -756,10 +756,76 @@ def keys_esa_dizzy():
     return k
 
 
+# ============================================================== Esattori (char_enemies): rider e messo
+def keys_rider_pignora():
+    """pignoramento del rider: afferra con le due mani il braccio di GIG davanti a sé, all'altezza del petto, e tira
+    indietro col peso del corpo, i piedi puntati. "a" e "b" sono lo strattone."""
+    legs = dict(leg_l=dict(ik=(0.12, -0.30, 0.086), pole=(0.25, -1, 0)),
+                leg_r=dict(ik=(-0.12, 0.16, 0.086), pole=(-0.1, -1, 0)))
+    k = {}
+    k["a"] = _st(hip=(0.0, 0.05, 0.88), pelvis=(-6, 0, 6), spine=(-2, 0, -6), neck=(8, 0, 0),
+                 arm_l=dict(ik=(0.05, -0.47, 1.18), pole=(0.6, 0.2, -1.0)),
+                 arm_r=dict(ik=(-0.05, -0.42, 1.12), pole=(-0.6, 0.2, -1.0)), **legs)
+    k["b"] = _st(hip=(0.0, 0.09, 0.87), pelvis=(-12, 0, 6), spine=(-8, 0, -6), neck=(14, 0, 0),
+                 arm_l=dict(ik=(0.05, -0.41, 1.16), pole=(0.6, 0.2, -1.0)),
+                 arm_r=dict(ik=(-0.05, -0.36, 1.10), pole=(-0.6, 0.2, -1.0)), **legs)
+    return k
+
+
+MESSO_LEGS = dict(leg_l=dict(ik=(0.10, -0.05, 0.086), pole=(0.2, -1, 0)),
+                  leg_r=dict(ik=(-0.10, 0.07, 0.086), pole=(-0.2, -1, 0)))
+# il tablet stretto al petto nella sinistra (l'oggetto si scrive su questa posa: vedi char_enemies.make_tablet)
+MESSO_TABLET = dict(up=V(0.32, -0.22, -0.92), lo=V(-0.66, -0.44, 0.61), hand=V(-0.40, -0.22, 0.89))
+MESSO_PEN_DOWN = dict(up=V(-0.16, 0.06, -0.98), lo=V(-0.08, -0.34, -0.94))
+
+
+def _messo(**kw):
+    d = dict(hip=(0.0, 0.0, 0.95), pelvis=(-4, 0, -6), spine=(-6, 0, -2), neck=(-10, 0, 0),
+             arm_l=dict(MESSO_TABLET), arm_r=dict(MESSO_PEN_DOWN), **MESSO_LEGS)
+    d.update(kw)
+    return _st(**d)
+
+
+def keys_messo_idle():
+    """il messo fermo (decisione 63: non picchia, sta dietro ai suoi): dritto e impettito, la pancia in fuori e il
+    mento alto, il tablet stretto al petto nella sinistra, la penna laser nella destra lungo il fianco. "base" e
+    "breath" (il respiro corto di chi non si muove)."""
+    return dict(base=_messo(), breath=_messo(hip=(0.0, 0.0, 0.953), spine=(-9, 0, -2), neck=(-12, 0, 0)))
+
+
+def keys_messo_read():
+    """legge l'atto: alza il tablet davanti al petto e china la testa a leggere; la destra con la penna resta giù.
+    "a" e "b": la testa che segue le righe."""
+    arm_l = dict(up=V(0.22, -0.62, -0.75), lo=V(-0.50, -0.62, 0.60), hand=V(-0.30, -0.45, 0.84))
+    return dict(a=_messo(neck=(14, 0, 0), spine=(-2, 0, -2), arm_l=arm_l),
+                b=_messo(neck=(9, 0, 3), spine=(-4, 0, -2), arm_l=dict(arm_l)))
+
+
+def keys_messo_laser():
+    """segna il braccio col laser: il tablet resta al petto, il braccio destro si tende in avanti all'altezza della
+    spalla e la penna prosegue l'avambraccio, appena verso il basso (il braccio di GIG). "aim" alza, "point" tende."""
+    return dict(aim=_messo(spine=(-4, 0, 8), neck=(-4, 0, -6),
+                           arm_r=dict(up=V(-0.30, -0.80, -0.52), lo=V(-0.14, -0.94, -0.30))),
+                point=_messo(spine=(-2, 0, 18), neck=(-2, 0, -14),
+                             arm_r=dict(up=V(-0.22, -0.97, 0.02), lo=V(-0.10, -0.98, -0.14),
+                                        hand=V(-0.10, -0.98, -0.14))))
+
+
+def keys_messo_call():
+    """chiama i rinforzi: alza il braccio destro con la penna accesa sopra la testa, il mento in alto (gridato); il
+    tablet resta al petto. "up_a" e "up_b": il braccio che sventola."""
+    return dict(up_a=_messo(neck=(-18, 0, 0), spine=(-8, 0, -2),
+                            arm_r=dict(up=V(-0.38, -0.14, 0.91), lo=V(-0.12, -0.22, 0.97))),
+                up_b=_messo(neck=(-16, 0, 3), spine=(-9, 0, -2),
+                            arm_r=dict(up=V(-0.42, -0.02, 0.91), lo=V(-0.30, 0.10, 0.95))))
+
+
 KEYSETS = dict(hack=keys_hack, idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
                wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash,
                esa_block=keys_esa_block, esa_charge_wind=keys_esa_charge_wind, esa_charge_run=keys_esa_charge_run,
-               esa_dizzy=keys_esa_dizzy, ledge_hang_one=keys_ledge_hang_one, mazza=keys_mazza)
+               esa_dizzy=keys_esa_dizzy, ledge_hang_one=keys_ledge_hang_one, mazza=keys_mazza,
+               rider_pignora=keys_rider_pignora, messo_idle=keys_messo_idle, messo_read=keys_messo_read,
+               messo_laser=keys_messo_laser, messo_call=keys_messo_call)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
 TRACKS = dict(
@@ -787,6 +853,11 @@ TRACKS = dict(
     mazza=[(0, "set"), (4, "grab", "smooth"), (7, "raise", "smooth"), (10, "lift", "dec"), (13, "hold", "smooth"),
            (15.5, "smash", "acc"), (18, "follow", "dec"), (20.5, "drop", "dec"), (26, "recover", "smooth"),
            (33, "set", "smooth")],
+    rider_pignora=[(0, "a"), (8, "b", "dec"), (16, "a", "smooth")],
+    messo_idle=[(0, "base"), (30, "breath", "smooth"), (60, "base", "smooth")],
+    messo_read=[(0, "a"), (24, "b", "smooth"), (48, "a", "smooth")],
+    messo_laser=[(0, "aim"), (6, "point", "dec")],
+    messo_call=[(0, "up_a"), (10, "up_b", "smooth"), (20, "up_a", "smooth")],
 )
 
 

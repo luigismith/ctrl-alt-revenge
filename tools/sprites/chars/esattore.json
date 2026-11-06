@@ -1,0 +1,238 @@
+{
+ "id": "esattore",
+ "base": "thug_bruiser",
+ "outfit": "esattore",
+ "outfit_cfg": {
+  "top": {
+   "hem_dz": 0.05,
+   "offset": 0.032,
+   "thick": 0.014,
+   "collar_dz": -0.075,
+   "armhole": 0.6,
+   "armhole_depth": 0.18,
+   "smooth_iters": 14,
+   "stripes": {
+    "bands": [
+     [
+      0.25,
+      0.026
+     ],
+     [
+      0.45,
+      0.026
+     ]
+    ]
+   },
+   "emblem": {
+    "x": -0.085,
+    "dz": -0.11,
+    "r": 0.03
+   }
+  },
+  "kneepads": {"size": [0.13, 0.05, 0.15]},
+  "rolled": {},
+  "goggles": {}
+ },
+ "palette": {
+  "max_colors": 28,
+  "ramps": {
+   "TOP": {
+    "mid": "#f07818",
+    "dark_target": 330,
+    "dh_dark": 12,
+    "vd": 0.66,
+    "vl": 1.12,
+    "light_target": 45
+   },
+   "REFLECT": {
+    "mid": "#c4c8d2",
+    "dark_target": 250,
+    "vd": 0.75,
+    "vl": 1.12
+   },
+   "RED": {
+    "mid": "#d01e2c",
+    "dark_target": 320,
+    "vd": 0.66,
+    "vl": 1.18
+   },
+   "TOP_DARK": {
+    "mid": "#3e404c",
+    "dark_target": 250,
+    "vd": 0.72,
+    "vl": 1.3
+   },
+   "TOP_LINING": {
+    "mid": "#2c2e38",
+    "vd": 0.8,
+    "vl": 1.4
+   },
+   "PANTS": {
+    "mid": "#3a3c46",
+    "dark_target": 250,
+    "dh_dark": 8,
+    "vd": 0.7,
+    "vl": 1.3
+   },
+   "PAD": {
+    "mid": "#62666f",
+    "dark_target": 250,
+    "vd": 0.7,
+    "vl": 1.25
+   },
+   "BOOTS": {
+    "mid": "#70462a",
+    "dark_target": 330,
+    "vd": 0.72,
+    "vl": 1.28
+   },
+   "WRAP": {
+    "mid": "#2c2c34",
+    "vd": 0.78,
+    "vl": 1.45
+   },
+   "GOGGLE": {
+    "mid": "#3a3a42",
+    "vd": 0.78,
+    "vl": 1.45
+   },
+   "LENS": {
+    "mid": "#a8c0cc",
+    "dark_target": 250,
+    "vd": 0.78,
+    "vl": 1.12
+   }
+  },
+  "spec": {
+   "REFLECT": [
+    "REFLECT",
+    [
+     0.3
+    ]
+   ],
+   "RED": [
+    "RED",
+    [
+     0.3
+    ]
+   ],
+   "TOP_DARK": [
+    "TOP_DARK",
+    [
+     0.3
+    ]
+   ],
+   "TOP_LINING": [
+    "TOP_LINING",
+    [
+     0.3
+    ]
+   ],
+   "PAD": [
+    "PAD",
+    [
+     0.3
+    ]
+   ],
+   "WRAP": [
+    "WRAP",
+    [
+     0.4
+    ]
+   ],
+   "WRAP_EDGE": [
+    "WRAP",
+    null,
+    1
+   ],
+   "GOGGLE": [
+    "GOGGLE",
+    [
+     0.4
+    ]
+   ],
+   "LENS": [
+    "LENS",
+    [
+     0.3
+    ]
+   ]
+  },
+  "spec_mats": {
+   "PAD": 0.8,
+   "LENS": 0.6,
+   "BOOTS": 0.86,
+   "REFLECT": 0.7
+  },
+  "big_mats": [
+   "SKIN",
+   "TOP",
+   "PANTS",
+   "BOOTS",
+   "BEARD",
+   "TOP_DARK",
+   "PANTS_FOLD"
+  ],
+  "rim_mats": [
+   "TOP",
+   "SKIN",
+   "BEARD",
+   "TOP_DARK"
+  ]
+ },
+ "beauty_cols": {
+  "TOP": "#f07818",
+  "REFLECT": "#c4c8d2",
+  "RED": "#d01e2c",
+  "TOP_DARK": "#3e404c",
+  "TOP_LINING": "#2c2e38",
+  "PANTS": "#3a3c46",
+  "PANTS_FOLD": "#2a2c34",
+  "PAD": "#62666f",
+  "BOOTS": "#70462a",
+  "BOOT_CUFF": "#4a3020",
+  "WRAP": "#2c2c34",
+  "WRAP_EDGE": "#1e1e26",
+  "GOGGLE": "#3a3a42",
+  "LENS": "#a8c0cc"
+ },
+ "pixel_cfg": {
+  "mat_lines": [
+   [
+    "PANTS",
+    "TOP"
+   ],
+   [
+    "BOOTS",
+    "PANTS"
+   ],
+   [
+    "SKIN",
+    "TOP_DARK"
+   ],
+   [
+    "TOP_DARK",
+    "TOP"
+   ],
+   [
+    "SKIN",
+    "WRAP"
+   ]
+  ],
+  "cel": {
+   "mat_thr": {
+    "TOP_DARK": [
+     -0.05,
+     0.4
+    ]
+   },
+   "mat_idx": {
+    "TOP_DARK": [
+     1,
+     2,
+     3
+    ]
+   }
+  }
+ }
+}

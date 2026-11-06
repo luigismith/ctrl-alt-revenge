@@ -23,6 +23,13 @@ const REQUIRED: Dictionary[StringName, PackedStringArray] = {
 		"getup", "grabbed", "kneed", "thrown"],
 	&"thug_bruiser": ["idle", "walk", "punch", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
 		"grabbed", "kneed", "thrown"],
+	# gli Esattori del prologo: le mosse dei nemici dello slice, più le loro
+	&"rider": ["idle", "walk", "jab", "haymaker", "pignora", "hurt_high", "hurt_low", "knock_air", "knock_down",
+		"getup", "grabbed", "kneed", "thrown"],
+	&"esattore": ["idle", "walk", "punch", "block", "charge_wind", "charge_run", "dizzy", "hurt_high", "hurt_low",
+		"knock_air", "knock_down", "getup", "grabbed", "kneed", "thrown"],
+	&"messo": ["idle", "walk", "read", "laser", "call", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
+		"grabbed", "kneed", "thrown"],
 }
 
 ## Se un'animazione manca, si prova la prima di queste che esiste.
@@ -51,6 +58,14 @@ const FALLBACKS: Dictionary[String, PackedStringArray] = {
 	"grabbed": ["hurt_high", "idle"],
 	"kneed": ["hurt_low", "grabbed", "hurt_high"],
 	"thrown": ["knock_air", "hurt_high"],
+	"pignora": ["jab", "punch"],
+	"block": ["idle"],
+	"charge_wind": ["punch", "idle"],
+	"charge_run": ["walk"],
+	"dizzy": ["hurt_low", "idle"],
+	"read": ["idle"],
+	"laser": ["idle"],
+	"call": ["idle"],
 }
 
 const KNOWN_EVENT_PREFIXES: PackedStringArray = ["sfx:", "fx:"]

@@ -1,0 +1,439 @@
+{
+ "id": "rider",
+ "base": "thug_punk",
+ "outfit": "rider",
+ "hair_meshes": [],
+ "outfit_cfg": {
+  "top": {
+   "hem_dz": 0.045,
+   "hem_band": 0.034,
+   "cuff_t": 0.8,
+   "cuff_w": 0.04,
+   "offset": 0.022,
+   "collar_dz": -0.016,
+   "stripes": {
+    "bands": [
+     [
+      0.72,
+      0.017
+     ]
+    ],
+    "band_max_y": 0.04
+   }
+  },
+  "pants_stripe_cos": 0.95,
+  "boots": {
+   "style": "v7",
+   "top_z": 0.12,
+   "size": 0.96,
+   "sole_t": 0.044,
+   "heel_t": 0.048
+  },
+  "helmet": {
+   "stickers": [
+    [
+     [
+      -0.55,
+      0.45,
+      0.7
+     ],
+     12,
+     1
+    ],
+    [
+     [
+      -0.8,
+      -0.45,
+      0.35
+     ],
+     11,
+     2
+    ],
+    [
+     [
+      0.2,
+      0.3,
+      0.93
+     ],
+     12,
+     2
+    ],
+    [
+     [
+      0.55,
+      0.6,
+      0.55
+     ],
+     12,
+     1
+    ]
+   ]
+  },
+  "goggles": {},
+  "gaiter": {},
+  "backpack": {}
+ },
+ "palette": {
+  "max_colors": 28,
+  "ramps": {
+   "SKIN": {
+    "mid": "#b8845e",
+    "dh_dark": 16,
+    "vd": 0.72
+   },
+   "HAIR": {
+    "mid": "#2e2428",
+    "vd": 0.75,
+    "vl": 1.5
+   },
+   "HELMET": {
+    "mid": "#c4b89e",
+    "dark_target": 280,
+    "dh_dark": 14,
+    "vd": 0.72,
+    "vl": 1.1
+   },
+   "HELMET_DARK": {
+    "mid": "#3a3238",
+    "vd": 0.8,
+    "vl": 1.4
+   },
+   "PATCH": {
+    "mid": "#c86472"
+   },
+   "BRASS": {
+    "mid": "#d4ac48"
+   },
+   "GOGGLE": {
+    "mid": "#2c2a32",
+    "vd": 0.8,
+    "vl": 1.5
+   },
+   "LENS_TINT": {
+    "mid": "#e8761c",
+    "dark_target": 340,
+    "vd": 0.7,
+    "vl": 1.18
+   },
+   "HOOD": {
+    "mid": "#6e2232",
+    "dark_target": 300,
+    "vd": 0.7,
+    "vl": 1.25
+   },
+   "TOP": {
+    "mid": "#b8882c",
+    "dark_target": 300,
+    "dh_dark": 14,
+    "vd": 0.66,
+    "vl": 1.14,
+    "sl": 0.92,
+    "light_target": 38,
+    "dh_light": 0
+   },
+   "TOP_LINING": {
+    "mid": "#5a5048",
+    "dark_target": 260,
+    "vd": 0.75,
+    "vl": 1.3
+   },
+   "TOP_DARK": {
+    "mid": "#3a3026"
+   },
+   "REFLECT": {
+    "mid": "#b4b8c4",
+    "dark_target": 250,
+    "vd": 0.78,
+    "vl": 1.16
+   },
+   "PANTS": {
+    "mid": "#383844",
+    "dark_target": 250,
+    "dh_dark": 8,
+    "vd": 0.7,
+    "vl": 1.35
+   },
+   "BELT": {
+    "mid": "#2a2630"
+   },
+   "BOOTS": {
+    "mid": "#b2a490",
+    "dark_target": 270,
+    "vd": 0.72,
+    "vl": 1.14
+   },
+   "SOLE": {
+    "mid": "#d8d2c6",
+    "vd": 0.78,
+    "vl": 1.08
+   },
+   "LACE": {
+    "list": [
+     "#5a0e18",
+     "#8a1a26",
+     "#b42e3c",
+     "#e05a64",
+     "#ff9aa0"
+    ]
+   },
+   "BAG": {
+    "mid": "#3c3c46",
+    "dark_target": 250,
+    "vd": 0.72,
+    "vl": 1.32
+   },
+   "RED": {
+    "mid": "#c42636",
+    "dark_target": 320,
+    "vd": 0.66,
+    "vl": 1.2
+   },
+   "METAL": {
+    "mid": "#9aa0ac",
+    "dark_target": 250,
+    "vd": 0.66,
+    "vl": 1.22
+   },
+   "METAL_DARK": {
+    "mid": "#4a4e5a",
+    "vd": 0.75,
+    "vl": 1.35
+   }
+  },
+  "spec": {
+   "HAIR": [
+    "HAIR",
+    [
+     0.3
+    ]
+   ],
+   "HELMET": [
+    "HELMET",
+    [
+     -0.05,
+     0.4,
+     0.8
+    ]
+   ],
+   "HELMET_DARK": [
+    "HELMET_DARK",
+    [
+     0.4
+    ]
+   ],
+   "PATCH": [
+    "PATCH",
+    null,
+    2
+   ],
+   "BRASS": [
+    "BRASS",
+    null,
+    2
+   ],
+   "GOGGLE": [
+    "GOGGLE",
+    [
+     0.4
+    ]
+   ],
+   "LENS_TINT": [
+    "LENS_TINT",
+    [
+     0.2,
+     0.6
+    ]
+   ],
+   "HOOD": [
+    "HOOD",
+    [
+     0.3
+    ]
+   ],
+   "TOP_LINING": [
+    "TOP_LINING",
+    [
+     0.3
+    ]
+   ],
+   "TOP_DARK": [
+    "TOP_DARK",
+    null,
+    2
+   ],
+   "REFLECT": [
+    "REFLECT",
+    [
+     0.3
+    ]
+   ],
+   "BAG": [
+    "BAG",
+    [
+     -0.05,
+     0.4,
+     0.78
+    ]
+   ],
+   "RED": [
+    "RED",
+    [
+     0.3
+    ]
+   ],
+   "METAL": [
+    "METAL",
+    [
+     -0.05,
+     0.4,
+     0.78
+    ]
+   ],
+   "METAL_DARK": [
+    "METAL_DARK",
+    [
+     0.4
+    ]
+   ]
+  },
+  "spec_mats": {
+   "HELMET": 0.8,
+   "LENS_TINT": 0.6,
+   "METAL": 0.7,
+   "BOOTS": 0.9,
+   "BELT": 0.85
+  },
+  "big_mats": [
+   "SKIN",
+   "TOP",
+   "PANTS",
+   "BOOTS",
+   "HELMET",
+   "BAG",
+   "SKIN_DARK"
+  ],
+  "rim_mats": [
+   "TOP",
+   "SKIN",
+   "HELMET",
+   "BAG",
+   "METAL"
+  ]
+ },
+ "beauty_cols": {
+  "SKIN": "#b8845e",
+  "SKIN_DARK": "#8a5c40",
+  "HAIR": "#2e2428",
+  "HELMET": "#c4b89e",
+  "HELMET_DARK": "#3a3238",
+  "PATCH": "#c86472",
+  "BRASS": "#d4ac48",
+  "GOGGLE": "#2c2a32",
+  "LENS_TINT": "#e8761c",
+  "HOOD": "#6e2232",
+  "TOP": "#b8882c",
+  "TOP_LINING": "#5a5048",
+  "TOP_DARK": "#3a3026",
+  "REFLECT": "#b4b8c4",
+  "PANTS": "#383844",
+  "BELT": "#2a2630",
+  "BOOTS": "#b2a490",
+  "BOOT_SOLE": "#d8d2c6",
+  "BOOT_CUFF": "#8a7e6c",
+  "LACE": "#b42e3c",
+  "BAG": "#3c3c46",
+  "RED": "#c42636",
+  "METAL": "#9aa0ac",
+  "METAL_DARK": "#4a4e5a",
+  "BROW": "#2e2428",
+  "EYE_DARK": "#101010",
+  "EYE_SOCKET": "#8a5c40",
+  "NOSE_SHADOW": "#9a6a4c",
+  "MOUTH": "#4a1c26",
+  "KNUCKLE": "#a07050"
+ },
+ "anims": {
+  "pignora": {
+   "src": "tl:rider_pignora",
+   "loop": true,
+   "period": 16,
+   "frames": [
+    {
+     "at": 0,
+     "t": 8
+    },
+    {
+     "at": 8,
+     "t": 8
+    }
+   ]
+  },
+  "knock_down": {
+   "ground": "feet"
+  },
+  "getup": {
+   "ground": "feet"
+  }
+ },
+ "pixel_cfg": {
+  "mat_lines": [
+   [
+    "PANTS",
+    "TOP_LINING"
+   ],
+   [
+    "PANTS",
+    "TOP"
+   ],
+   [
+    "BOOTS",
+    "PANTS"
+   ],
+   [
+    "SKIN",
+    "TOP_LINING"
+   ],
+   [
+    "SKIN",
+    "HOOD"
+   ],
+   [
+    "TOP",
+    "BAG"
+   ]
+  ],
+  "cel": {
+   "mat_thr": {
+    "HELMET": [
+     -0.05,
+     0.4
+    ],
+    "BAG": [
+     -0.05,
+     0.4
+    ],
+    "METAL": [
+     0.0,
+     0.45
+    ]
+   },
+   "mat_idx": {
+    "HELMET": [
+     1,
+     2,
+     3
+    ],
+    "BAG": [
+     1,
+     2,
+     3
+    ],
+    "METAL": [
+     1,
+     2,
+     4
+    ]
+   }
+  }
+ }
+}
