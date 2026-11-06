@@ -45,8 +45,30 @@ def camera():
     return load_json(os.path.join(HERE, "camera.json"))
 
 
+def _merge(base, over):
+    """unione ricorsiva: i dizionari si fondono, il resto (liste comprese) si sostituisce."""
+    out = dict(base)
+    for k, v in over.items():
+        out[k] = _merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
+
+
 def char_cfg(cid):
-    return load_json(os.path.join(CHARS, cid + ".json"))
+    """configurazione del personaggio. Una variante ha "base" (il personaggio di partenza) e cambia solo
+    quello che scrive; "anims_keep" dice quali animazioni della base tenere, nell'ordine della base, e
+    "anims" le aggiunge o ne cambia i campi (un'animazione della base si fonde con quella della variante)."""
+    cfg = load_json(os.path.join(CHARS, cid + ".json"))
+    if "base" not in cfg:
+        return cfg
+    base = char_cfg(cfg["base"])
+    keep = cfg.get("anims_keep")
+    anims = {n: a for n, a in base["anims"].items() if keep is None or n in keep}
+    for n, a in cfg.get("anims", {}).items():
+        anims[n] = _merge(base["anims"].get(n, {}), a)
+    over = {k: v for k, v in cfg.items() if k not in ("base", "anims_keep", "anims")}
+    out = _merge(base, over)
+    out["anims"] = anims
+    return out
 
 
 def run_blender(script, job, timeout=1800, tag="blender"):

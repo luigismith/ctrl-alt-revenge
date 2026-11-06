@@ -120,6 +120,10 @@ var arm_locked: bool = false
 ## Tick di sforzo già fatti per tirarsi su con una mano (0 = non sta salendo).
 var strain: int = 0
 var anim: FrameAnim
+## I fogli di GIG: col braccio cyber acceso e, se c'è, col braccio morto (prima del riavvio: luci spente, il
+## braccio che pende). Solo disegno: la salita (ledge_climb), l'unica clip che la fisica legge, dura uguale nei due.
+var sheet_free: SpriteSheet
+var sheet_locked: SpriteSheet
 
 ## Misure per la taratura, mostrate dalla stanza di prova: altezza massima dell'ultimo salto
 ## (in px, dai piedi alla partenza) e tick passati in aria.
@@ -133,6 +137,7 @@ func _init(m: PlatformMoves, g: SolidGrid, sheet: SpriteSheet = null) -> void:
 	moves = m
 	grid = g
 	height = moves.body_height
+	sheet_free = sheet
 	if sheet != null:
 		anim = FrameAnim.new(sheet)
 		anim.play(&"idle")
@@ -898,6 +903,7 @@ func sprite_anchor() -> Vector2i:
 func _update_anim() -> void:
 	if anim == null:
 		return
+	_pick_sheet()
 	if pose_override != &"" and anim.sheet.has_anim(pose_override):
 		anim.ensure(pose_override)
 		anim.advance()
@@ -943,6 +949,20 @@ func _update_anim() -> void:
 			_ensure_any([&"air_dash", &"jump_rise"])
 	if not (_just_boosted and anim.elapsed == 0):
 		anim.advance()
+
+
+## Col braccio bloccato il foglio del braccio morto, se c'è; si cambia tenendo l'animazione in corso.
+func _pick_sheet() -> void:
+	var want := sheet_locked if arm_locked and sheet_locked != null else sheet_free
+	if want == null or anim.sheet == want:
+		return
+	anim.sheet = want
+	if anim.name != &"" and want.has_anim(anim.name):
+		var i := anim.index
+		anim.clip = want.clip(anim.name)
+		anim.index = mini(i, anim.clip.frames.size() - 1)
+	else:
+		anim.play(&"idle")
 
 
 ## Il fotogramma di jump_arc per la velocità verticale di adesso: le soglie sono in px/tick

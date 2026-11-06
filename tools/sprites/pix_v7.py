@@ -382,7 +382,9 @@ def _hex(c):
 
 def face_stamp(sprite, ids, part, depth, fd, ID, pal, expr="neutral", eye="cyan"):
     """posa occhio, sopracciglio e bocca sui punti proiettati (sprite = fotogramma intero, coordinate del render).
-    Prima toglie i dettagli del viso venuti dal render (diventano pelle o barba), poi disegna il timbro."""
+    Prima toglie i dettagli del viso venuti dal render (diventano pelle o barba), poi disegna il timbro.
+    eye: "cyan" (l'occhio cyber acceso, col bagliore sulla pelle), "off" (spento: i colori della rampa GLOW, che
+    la variante fa grigia, e niente bagliore), "dark" (occhio normale dei nemici)."""
     h, w = ids.shape
     head = (part == 2) & (sprite[..., 3] > 0)
     feat = np.isin(ids, [ID[k] for k in ("EYE_GLOW", "EYE_DARK", "BROW", "EYE_SOCKET", "MOUTH") if k in ID]) & head
@@ -438,7 +440,7 @@ def face_stamp(sprite, ids, part, depth, fd, ID, pal, expr="neutral", eye="cyan"
         # bagliore: 1 px cyan scuro sulla pelle sotto l'occhio, se è pelle
         gy, gx = ey + 1, ex
         if 0 <= gy < h and 0 <= gx < w and allowed[gy, gx] and ids[gy, gx] in skin_ids and expr != "pain" \
-                and eye != "dark":
+                and eye not in ("dark", "off"):
             sprite[gy, gx, :3] = col["g"]
     if visible(pts["eye_l"], tol=0.05):
         x, y = int(math.floor(pts["eye_l"][0])), int(math.floor(pts["eye_l"][1]))

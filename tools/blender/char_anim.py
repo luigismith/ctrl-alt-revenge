@@ -443,6 +443,237 @@ def keys_hack():
     return k
 
 
+# ============================================================== GIG col braccio morto (prima del riavvio)
+# braccio morto appeso nella guardia (busto chino di 8°: nel riferimento del petto il "giù" del mondo è un poco
+# in avanti)
+DEAD_HANG = dict(up=V(0.12, -0.12, -0.99), lo=V(0.10, -0.25, -0.96))
+
+
+def keys_ledge_hang_one():
+    """appeso con la sola destra: la mano destra sopra la testa sullo spigolo, il busto che pende un poco verso
+    sinistra (la spalla destra su, la sinistra giù), le gambe che oscillano piano. Il braccio sinistro lo muove
+    la simulazione del braccio morto: qui c'è solo una posa di partenza lungo il fianco."""
+    k = {}
+    arm_r = dict(ik=(-0.06, -0.10, 2.16), pole=(-0.6, 0.4, 0.2))
+    k["a"] = dict(hip=(0.0, 0.0, 1.05), pelvis=(-6, 5, 0), spine=(-4, 9, 0), neck=(-14, -6, 0),
+                  leg_l=dict(up=V(0.06, -0.25, -0.97), lo=V(0.04, 0.15, -0.99), foot=V(0, -0.3, -0.95)),
+                  leg_r=dict(up=V(-0.06, 0.05, -1.0), lo=V(-0.04, 0.35, -0.94), foot=V(0, -0.2, -0.98)),
+                  arm_r=arm_r, arm_l=dict(DEAD_HANG))
+    k["b"] = dict(hip=(0.0, 0.03, 1.05), pelvis=(6, 6, 0), spine=(2, 10, 0), neck=(-10, -6, 0),
+                  leg_l=dict(up=V(0.06, 0.10, -0.99), lo=V(0.04, 0.35, -0.94), foot=V(0, -0.1, -0.99)),
+                  leg_r=dict(up=V(-0.06, 0.20, -0.98), lo=V(-0.04, 0.45, -0.89), foot=V(0, 0.0, -1.0)),
+                  arm_r=arm_r, arm_l=dict(DEAD_HANG))
+    return k
+
+
+def keys_mazza():
+    """la mazza: col braccio morto come arma. La destra afferra il polso sinistro davanti alla pancia, solleva il
+    braccio sopra la testa inarcando la schiena (carica lenta, il braccio pesa), lo abbatte in avanti con un
+    affondo e lo lascia andare: da lì il braccio torna alla simulazione e ciondola, mentre la destra torna in
+    guardia. Il colpo si legge di lato, nel piano dello schermo."""
+    k = {}
+    k["set"] = guard(arm_l=dict(DEAD_HANG))
+    k["grab"] = guard(hip=(0.0, 0.02, 0.875), pelvis=(4, 0, 6), spine=(16, 0, -16), neck=(-6, 0, 10),
+                      arm_l=dict(ik=(0.07, -0.26, 0.98), pole=(1.0, 0.4, -0.3)),
+                      arm_r=dict(ik=(0.03, -0.30, 1.03), pole=(-1.0, 0.3, -0.5)))
+    # le mani salgono insieme davanti alla faccia (le IK si interpolano in linea: restano unite)
+    k["raise"] = guard(hip=(0.0, 0.03, 0.885), pelvis=(0, 0, 8), spine=(4, 0, -10), neck=(-8, 0, 4),
+                       arm_l=dict(ik=(0.07, -0.32, 1.62), pole=(1.0, 0.2, -0.4)),
+                       arm_r=dict(ik=(0.01, -0.34, 1.57), pole=(-1.0, 0.2, -0.5)))
+    wide = dict(leg_l=dict(ik=(0.16, -0.27, 0.086), pole=(0.3, -1, 0)),
+                leg_r=dict(ik=(-0.15, 0.29, 0.086), pole=(-0.15, -1, 0)))
+    k["lift"] = guard(hip=(0.0, 0.07, 0.895), pelvis=(-6, 0, 8), spine=(-14, 0, -6), neck=(-12, 0, 0),
+                      arm_l=dict(ik=(0.07, 0.15, 2.00), pole=(1.0, -0.5, 0.3)),
+                      arm_r=dict(ik=(0.0, 0.11, 1.94), pole=(-1.0, -0.5, 0.3)), **wide)
+    k["hold"] = guard(hip=(0.0, 0.09, 0.89), pelvis=(-8, 0, 8), spine=(-19, 0, -4), neck=(-14, 0, 0),
+                      arm_l=dict(ik=(0.07, 0.22, 1.97), pole=(1.0, -0.5, 0.3)),
+                      arm_r=dict(ik=(0.0, 0.18, 1.91), pole=(-1.0, -0.5, 0.3)), **wide)
+    k["smash"] = guard(hip=(0.0, -0.07, 0.855), pelvis=(10, 0, 4), spine=(28, 0, -10), neck=(2, 0, 0),
+                       arm_l=dict(ik=(0.10, -0.74, 1.30), pole=(0.6, 0.3, -0.7)),
+                       arm_r=dict(ik=(0.05, -0.66, 1.27), pole=(-0.6, 0.3, -0.7)),
+                       leg_l=dict(ik=(0.16, -0.36, 0.11), pole=(0.3, -1, 0)),
+                       leg_r=dict(ik=(-0.15, 0.30, 0.086), pole=(-0.15, -1, 0)))
+    k["follow"] = guard(hip=(0.0, -0.08, 0.845), pelvis=(12, 0, 4), spine=(36, 0, -10), neck=(8, 0, 0),
+                        arm_l=dict(ik=(0.12, -0.62, 0.84), pole=(0.6, 0.3, -0.7)),
+                        arm_r=dict(ik=(0.07, -0.56, 0.88), pole=(-0.6, 0.3, -0.7)),
+                        leg_l=dict(ik=(0.16, -0.36, 0.11), pole=(0.3, -1, 0)),
+                        leg_r=dict(ik=(-0.15, 0.30, 0.086), pole=(-0.15, -1, 0)))
+    # la destra molla: il braccio morto cade di peso e va un poco indietro, il busto è ancora chino
+    k["drop"] = guard(hip=(0.0, -0.07, 0.85), pelvis=(10, 0, 6), spine=(30, 0, -10), neck=(4, 0, 2),
+                      arm_l=dict(up=V(0.12, -0.50, -0.86), lo=V(0.10, -0.62, -0.78)),
+                      leg_l=dict(ik=(0.16, -0.36, 0.11), pole=(0.3, -1, 0)),
+                      leg_r=dict(ik=(-0.15, 0.30, 0.086), pole=(-0.15, -1, 0)))
+    k["recover"] = guard(hip=(0.0, -0.02, 0.875), pelvis=(4, 0, 10), spine=(14, 0, -12), neck=(-4, 0, 4),
+                         arm_l=dict(DEAD_HANG))
+    return k
+
+
+class DeadArm:
+    """braccio morto: gomito e polso sono particelle (Verlet a 60 Hz, con sotto-passi) appese alla spalla.
+    Contano la gravità, il moto del corpo (anche quello del gioco, che il render sul posto non ha), l'aria e uno
+    smorzamento forte; niente muscoli. Il gomito si piega solo in avanti, fra flex_min e flex_max; braccio e
+    polso restano fuori dal busto (dal lato sinistro) e sopra il pavimento. Unità: metri e secondi."""
+
+    def __init__(self, l1, l2, cfg):
+        self.l1, self.l2 = l1, l2
+        self.g = cfg.get("g", 14.0)
+        self.damp = cfg.get("damp", 0.012)
+        self.drag = cfg.get("drag", 1.2)
+        self.sub = int(cfg.get("substeps", 4))
+        # attrito nella spalla e nel gomito (per sotto-passo): la velocità del braccio va verso quella della spalla,
+        # così un busto che ruota di scatto (il diretto) trascina il braccio invece di frustarlo. 0 = pendolo libero
+        self.follow = cfg.get("follow", 0.0)
+        self.flex_min = math.radians(cfg.get("flex_min_deg", 8.0))
+        self.flex_max = math.radians(cfg.get("flex_max_deg", 125.0))
+        self.twist = math.radians(cfg.get("twist_deg", 20.0))
+        self.out = math.sin(math.radians(cfg.get("out_deg", 6.0)))
+        self.out_max = math.sin(math.radians(cfg.get("out_max_deg", 25.0)))
+        # cono attorno al "giù" del mondo: un braccio morto non sale oltre swing_max_deg (l'avambraccio un poco di
+        # più), se no si legge come un braccio che si muove da solo. null = senza limite.
+        sm = cfg.get("swing_max_deg", 65.0)
+        self.cone = None if sm is None else math.cos(math.radians(sm))
+        self.cone_f = None if sm is None else math.cos(math.radians(min(sm + 25.0, 180.0)))
+        self.floor_r = cfg.get("floor_r", 0.04)
+        m1, m2 = cfg.get("mass", (1.0, 1.5))
+        self.wE = m2 / (m1 + m2)
+        self.A = None
+        self.E = self.Ep = self.W = self.Wp = None
+
+    def place(self, A, X, swing_deg=0.0, vel=(0.0, 0.0, 0.0)):
+        """braccio appeso fermo (o alzato in avanti di swing_deg), che si muove con il corpo a vel (m/s)."""
+        down, fwd = Vector((0.0, 0.0, -1.0)), X.cross(Vector((0.0, 0.0, 1.0))).normalized()
+        a = math.radians(swing_deg)
+        u = (down * math.cos(a) + fwd * math.sin(a) + X * self.out).normalized()
+        h = (X - u * X.dot(u)).normalized()
+        q = u.cross(h)
+        f = u * math.cos(self.flex_min * 1.5) + q * math.sin(self.flex_min * 1.5)
+        self.A = A.copy()
+        self.E = A + u * self.l1
+        self.W = self.E + f * self.l2
+        dv = Vector(vel) / (60.0 * self.sub)
+        self.Ep, self.Wp = self.E - dv, self.W - dv
+
+    def drive(self, A, E, W):
+        """braccio mosso dalla posa (tenuto dalla mano destra): le particelle seguono, con la loro velocità."""
+        if self.E is None:
+            self.Ep, self.Wp = E.copy(), W.copy()
+        else:
+            # velocità per sotto-passo, come nello step
+            self.Ep = E - (E - self.E) / self.sub
+            self.Wp = W - (W - self.W) / self.sub
+        self.A, self.E, self.W = A.copy(), E.copy(), W.copy()
+
+    def state(self, X, U):
+        """posizione e velocità (per sotto-passo) di gomito e polso nel riferimento del petto, per ripartire
+        da qui in un'altra animazione."""
+        F = X.cross(U)
+
+        def loc(v):
+            return (v.dot(X), v.dot(F), v.dot(U))
+        return dict(E=loc(self.E - self.A), W=loc(self.W - self.A), vE=loc(self.E - self.Ep), vW=loc(self.W - self.Wp))
+
+    def restore(self, st, A, X, U):
+        F = X.cross(U)
+
+        def glob(t):
+            return X * t[0] + F * t[1] + U * t[2]
+        self.A = A.copy()
+        self.E, self.W = A + glob(st["E"]), A + glob(st["W"])
+        self.Ep, self.Wp = self.E - glob(st["vE"]), self.W - glob(st["vW"])
+
+    def release(self, a, X, floor_z, k):
+        """la destra lo lascia: il braccio ha appena colpito e tiene solo una parte (k) della sua velocità. La posa
+        tenuta può stare fuori dai limiti (le mani unite davanti al corpo): si riporta dentro, e il salto della
+        correzione non diventa velocità."""
+        vE, vW = (self.E - self.Ep) * k, (self.W - self.Wp) * k
+        for _ in range(4):
+            self._constrain(a, X, floor_z)
+        self.Ep, self.Wp = self.E - vE, self.W - vW
+
+    def step(self, A, X, floor_z, wall_y=None):
+        A0 = self.A if self.A is not None else A
+        dt = 1.0 / (60.0 * self.sub)
+        gv = Vector((0.0, 0.0, -self.g))
+        va = (A - A0) / self.sub
+        for s in range(self.sub):
+            a = A0.lerp(A, (s + 1) / self.sub)
+            for nm in ("E", "W"):
+                P, Pp = getattr(self, nm), getattr(self, nm + "p")
+                v = (P - Pp) * (1.0 - self.damp)
+                v = v + (va - v) * self.follow
+                acc = gv - (v / dt) * self.drag
+                setattr(self, nm + "p", P)
+                setattr(self, nm, P + v + acc * dt * dt)
+            for _ in range(3):
+                self._constrain(a, X, floor_z, wall_y)
+        self.A = A.copy()
+
+    def _constrain(self, a, X, floor_z, wall_y=None):
+        d = self.E - a
+        self.E = a + (d.normalized() if d.length > 1e-6 else Vector((0, 0, -1))) * self.l1
+        d = self.W - self.E
+        L = max(d.length, 1e-6)
+        corr = d * ((L - self.l2) / L)
+        self.E = self.E + corr * self.wE
+        self.W = self.W - corr * (1.0 - self.wE)
+        d = self.E - a
+        u = d.normalized() if d.length > 1e-6 else Vector((0, 0, -1))
+        # fuori dal busto: il braccio non passa al lato interno della spalla, e non si apre troppo di lato
+        # (di lato non si vedrebbe: nello sprite sembrerebbe solo accorciato)
+        lat = u.dot(X)
+        if lat < self.out:
+            u = (u + X * (self.out - lat)).normalized()
+        elif lat > self.out_max:
+            u = (u - X * (lat - self.out_max)).normalized()
+        u = self._cone(u, self.cone)
+        self.E = a + u * self.l1
+        # gomito a cerniera: si piega solo in avanti
+        h = X - u * X.dot(u)
+        if h.length < 1e-6:
+            h = Vector((0.0, -1.0, 0.0))
+        h.normalize()
+        q = u.cross(h)
+        f = self.W - self.E
+        f = f.normalized() if f.length > 1e-6 else u.copy()
+        th = math.atan2(f.dot(q), f.dot(u))
+        ph = math.asin(max(-1.0, min(1.0, f.dot(h))))
+        th = min(max(th, self.flex_min), self.flex_max)
+        ph = min(max(ph, -self.twist), self.twist)
+        f = (u * math.cos(th) + q * math.sin(th)) * math.cos(ph) + h * math.sin(ph)
+        f = self._cone(f, self.cone_f)
+        W = self.E + f * self.l2
+        w = W - a
+        lat = w.dot(X)
+        if lat < self.out * w.length:
+            W = W + X * (self.out * w.length - lat)
+        self.W = W
+        for nm in ("E", "W"):
+            P = getattr(self, nm)
+            if P.z < floor_z + self.floor_r:
+                P = Vector((P.x, P.y, floor_z + self.floor_r))
+            # il muro davanti (appeso alla sporgenza): il personaggio guarda -Y, il muro sta a wall_y
+            if wall_y is not None and P.y < wall_y:
+                P = Vector((P.x, wall_y, P.z))
+            setattr(self, nm, P)
+
+    @staticmethod
+    def _cone(d, c):
+        """d dentro il cono di coseno c attorno al giù del mondo (la direzione orizzontale resta quella)."""
+        if c is None or -d.z >= c:
+            return d
+        hz = Vector((d.x, d.y, 0.0))
+        if hz.length < 1e-6:
+            hz = Vector((0.0, -1.0, 0.0))
+        hz.normalize()
+        return hz * math.sqrt(max(0.0, 1.0 - c * c)) + Vector((0.0, 0.0, -c))
+
+    def dirs(self):
+        """direzioni (mondo) di braccio e avambraccio, e il "davanti" del gomito per il polso."""
+        u = (self.E - self.A).normalized()
+        f = (self.W - self.E).normalized()
+        return u, f
+
+
 # ============================================================== l'esattore (corpo del bruto, rivolto a destra)
 def _st(**kw):
     return CP.stance(**kw)
@@ -528,7 +759,7 @@ def keys_esa_dizzy():
 KEYSETS = dict(hack=keys_hack, idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
                wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash,
                esa_block=keys_esa_block, esa_charge_wind=keys_esa_charge_wind, esa_charge_run=keys_esa_charge_run,
-               esa_dizzy=keys_esa_dizzy)
+               esa_dizzy=keys_esa_dizzy, ledge_hang_one=keys_ledge_hang_one, mazza=keys_mazza)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
 TRACKS = dict(
@@ -552,10 +783,14 @@ TRACKS = dict(
     hurt_high=[(0, "snap"), (5, "max", "dec"), (10, "rebound", "smooth"), (16, "guard", "smooth")],
     double_jump=[(0, "air"), (3, "coil", "dec"), (5, "coil", "hold"), (6.5, "thrust", "acc"), (9, "launch", "dec"),
                  (14, "open", "smooth"), (19, "tuck", "smooth"), (26, "fall", "smooth")],
+    ledge_hang_one=[(0, "a"), (24, "b", "smooth"), (48, "a", "smooth")],
+    mazza=[(0, "set"), (4, "grab", "smooth"), (7, "raise", "smooth"), (10, "lift", "dec"), (13, "hold", "smooth"),
+           (15.5, "smash", "acc"), (18, "follow", "dec"), (20.5, "drop", "dec"), (26, "recover", "smooth"),
+           (33, "set", "smooth")],
 )
 
 
-LIN_ARMS = dict(jab1=("l",), jab2=("r",))
+LIN_ARMS = dict(jab1=("l",), jab2=("r",), mazza=("l", "r"))
 
 
 def make_track(rig, name):

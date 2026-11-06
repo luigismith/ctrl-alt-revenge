@@ -419,6 +419,23 @@ func play_anim(anim_name: StringName, keep_if_same: bool = false) -> void:
 	anim.play(anim_name)
 
 
+## Cambia il foglio degli sprite tenendo l'animazione in corso (GIG col braccio morto, prima del riavvio).
+## Box e tempi vengono dal foglio: la simulazione usa quelli del foglio nuovo.
+func use_sheet(sheet_id: StringName) -> void:
+	var s := SpriteSheet.get_sheet(sheet_id)
+	if s == sheet:
+		return
+	sheet = s
+	anim.sheet = s
+	body.light_mask = LIGHT_MASK_ACTORS if s.has_normals else 1
+	if anim.name != &"" and s.has_anim(anim.name):
+		var i := anim.index
+		anim.clip = s.clip(anim.name)
+		anim.index = mini(i, anim.clip.frames.size() - 1)
+	else:
+		anim.play(&"idle")
+
+
 func is_airborne() -> bool:
 	return ph > 0.0
 

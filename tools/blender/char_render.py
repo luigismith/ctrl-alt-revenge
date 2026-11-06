@@ -117,6 +117,147 @@ class StrideIK:
         self.ns["delete_objects"](self.empties)
 
 
+# ============================================================== braccio morto (GIG prima del riavvio)
+FWD = Vector((0.0, -1.0, 0.0))     # davanti del personaggio nel render (guarda -Y)
+UP = Vector((0.0, 0.0, 1.0))
+
+
+def chest_axes(ns, arm):
+    """spalla sinistra (mondo), asse delle spalle verso sinistra (X) e alto del busto (U)."""
+    bw = ns["bone_world"]
+    S = bw(arm, "upperarm_l")[0]
+    X = (S - bw(arm, "upperarm_r")[0]).normalized()
+    up = bw(arm, "neck_01")[0] - bw(arm, "spine_01")[0]
+    U = (up - X * up.dot(X)).normalized()
+    return S, X, U
+
+
+def _vel_at(v, tau):
+    """velocità del corpo nel gioco (avanti, su) in m/s, cioè px/tick: [a, b] fissa, oppure
+    [[tick, avanti, su], ...] a tratti lineari."""
+    if not v or not isinstance(v[0], (list, tuple)):
+        return (float(v[0]), float(v[1])) if v else (0.0, 0.0)
+    if tau <= v[0][0]:
+        return float(v[0][1]), float(v[0][2])
+    for a, b in zip(v, v[1:]):
+        if a[0] <= tau <= b[0]:
+            u = (tau - a[0]) / max(b[0] - a[0], 1e-6)
+            return a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u
+    return float(v[-1][1]), float(v[-1][2])
+
+
+def dead_timeline(dd, picks, times, ticks, starts, total, loop, src_time, pick_at):
+    """passi della simulazione: [(tempo della posa, fotogramma, (avanti, su), posa tenuta)] e {passo: fotogramma}
+    dei campioni. Con "arc" (jump_arc) i fotogrammi si scelgono dalla velocità verticale, come nel gioco."""
+    pre = int(dd.get("pre", 0))
+    keyed_until = dd.get("keyed_until")
+    steps = []
+    if "arc" in dd:
+        a = dd["arc"]
+        vy, vx = a["vy0"], a.get("vx", 0.0)
+        steps += [(times[0], 0, (vx, 0.0), False)] * pre
+        first, count, last, n_last = {}, {}, len(picks) - 1, 0
+        while n_last < a.get("fall_ticks", 12):
+            fr = min(sum(1 for t in a["thr"] if vy > t), last)
+            g = a["g_apex"] if abs(vy) <= a["apex_band"] else (a["g_up"] if vy < 0 else a["g_down"])
+            # in aria il braccio cade come il corpo, con la gravità del gioco (1 px/tick² = 60 m/s²): conta l'aria
+            steps.append((times[fr], fr, (vx, -vy), False, g * 60.0))
+            first.setdefault(fr, len(steps) - 1)
+            count[fr] = count.get(fr, 0) + 1
+            if fr == last:
+                n_last += 1
+            vy = min(vy + g, a["max_fall"])
+        return steps, {first[k] + count[k] // 2: k for k in first}
+    cycles = 3 if loop else 1
+    n = total * cycles if loop else total + 1
+    v = dd.get("v")
+    steps += [(times[0], 0, _vel_at(v, 0), keyed_until is not None and times[0] < keyed_until)] * pre
+    for tau in range(n):
+        st = src_time(tau)
+        steps.append((st, pick_at(tau), _vel_at(v, tau % total if loop else tau),
+                      keyed_until is not None and st < keyed_until))
+    want = {}
+    for i in range(len(picks)):
+        want[pre + starts[i] + ticks[i] // 2 + (total * (cycles - 1) if loop else 0)] = i
+    return steps, want
+
+
+def dead_arm_dirs(ns, arm, name, dd, dcfg, steps, want, set_pose, ground_z, finals):
+    """simula il braccio morto lungo i passi; ritorna {fotogramma: (braccio, avambraccio)} in coordinate mondo."""
+    bw = ns["bone_world"]
+    S, X, U = chest_axes(ns, arm)
+    l1 = (bw(arm, "lowerarm_l")[0] - S).length
+    l2 = (bw(arm, "hand_l")[0] - bw(arm, "lowerarm_l")[0]).length
+    cfg = {**dcfg, **dd}
+    sim = A7.DeadArm(l1, l2, cfg)
+    g0 = sim.g
+    # la simulazione sente la spalla con un poco di ritardo (anchor_k per tick, 1 = subito): le pose chiave molto
+    # secche (un diretto in 4 tick) non frustano il braccio come una fune; i movimenti lenti restano uguali
+    ak = cfg.get("anchor_k", 1.0)
+    off = Vector()
+    out = {}
+    was_keyed = False
+    As = None
+    for si, step in enumerate(steps):
+        pt, pi, (vf, vu), keyed = step[:4]
+        sim.g = step[4] if len(step) > 4 else g0
+        set_pose(pt, pi)
+        bpy.context.view_layer.update()
+        S, X, U = chest_axes(ns, arm)
+        vel = FWD * vf + UP * vu
+        if si > 0:
+            off = off + vel / 60.0
+        As = (S + off) if (As is None or keyed) else As + (S + off - As) * ak
+        A = As
+        # appeso alla sporgenza il braccio non entra nel muro, che sta all'altezza della mano che tiene
+        wall_y = bw(arm, dd["wall"])[0].y + off.y + dd.get("wall_gap", 0.05) if dd.get("wall") else None
+        if keyed:
+            sim.drive(A, bw(arm, "lowerarm_l")[0] + off, bw(arm, "hand_l")[0] + off)
+            was_keyed = True
+        elif sim.E is None:
+            if dd.get("from") in finals:
+                sim.restore(finals[dd["from"]], A, X, U)
+            else:
+                iv = dd.get("init_v", (vf, vu))
+                sim.place(A, X, dd.get("swing_deg", 0.0), vel=tuple(FWD * iv[0] + UP * iv[1]))
+        else:
+            if was_keyed:
+                sim.release(A, X, ground_z, dd.get("release_v", 0.3))
+                was_keyed = False
+            sim.step(A, X, ground_z, wall_y)
+        # i fotogrammi con il braccio tenuto dalla posa restano come sono (la destra stringe il polso)
+        if si in want and not keyed:
+            out[want[si]] = sim.dirs()
+            u_, f_ = out[want[si]]
+            ns["log"](f"    braccio morto {name}/{want[si]}: braccio {math.degrees(math.acos(max(-1.0, min(1.0, -u_.z)))):.0f}°, "
+                      f"avambraccio {math.degrees(math.acos(max(-1.0, min(1.0, -f_.z)))):.0f}° dal basso, "
+                      f"avanti {-u_.y:+.2f}/{-f_.y:+.2f}")
+    finals[name] = sim.state(X, U)
+    return out
+
+
+def apply_dead_arm(ns, arm, dirs, fist, dcfg):
+    """posa il braccio sinistro sulle direzioni simulate: polso un poco piegato, dita mezze aperte."""
+    u, f = dirs
+    A7.spring_rotation(arm, "upperarm_l", u)
+    bpy.context.view_layer.update()
+    A7.spring_rotation(arm, "lowerarm_l", f)
+    bpy.context.view_layer.update()
+    _, X, _ = chest_axes(ns, arm)
+    h = X - f * X.dot(f)
+    h = h.normalized() if h.length > 1e-6 else X
+    q = f.cross(h)
+    w = math.radians(dcfg.get("wrist_deg", 18.0))
+    A7.spring_rotation(arm, "hand_l", (f * math.cos(w) + q * math.sin(w)).normalized())
+    relax = dcfg.get("relax", 0.35)
+    for bn, qf in fist.items():
+        if bn.endswith("_l") and bn in arm.pose.bones:
+            pb = arm.pose.bones[bn]
+            pb.rotation_mode = "QUATERNION"
+            pb.rotation_quaternion = Quaternion().slerp(qf, relax)
+    bpy.context.view_layer.update()
+
+
 def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, ground_z, t0):
     use_action, find_action = ns["use_action"], ns["find_action"]
     apply_frame_scale, render_gbuffer, frame_data = ns["apply_frame_scale"], ns["render_gbuffer"], ns["frame_data"]
@@ -125,6 +266,10 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
     rig = char_poses.Rig(arm, fist)
     guard_local = A7.local_pose(rig, *rig.deltas(A7.guard()))
     spring_on = job.get("topknot_spring", False) and "topknot" in arm.pose.bones
+    dcfg = job.get("dead_arm") or None
+    finals = {}
+    # ossa del braccio morto: le clip non le devono muovere (la posa la mette la simulazione)
+    dead_bones = ["upperarm_l", "lowerarm_l", "hand_l"] + [b for b in fist if b.endswith("_l")]
     idle = None
     bones_only = job.get("bones_only", False)
     for an in job["anims"]:
@@ -175,10 +320,15 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
                     name_ = picks[i].get("src") or src
                     if name_ not in acts:
                         a_ = find_action(actions, name_)
+                        strip = []
                         if an.get("upper") == "guard" and name_ == src:
+                            strip += list(ARM_ROT)
+                        if dcfg and an.get("dead") is not False:
+                            strip += dead_bones
+                        if strip:
                             a_ = a_.copy()
-                            a_.name = src + "_v7upper"
-                            strip_channels(a_, list(ARM_ROT), ("rotation_quaternion", "rotation_euler"))
+                            a_.name = name_ + "_v7" + name
+                            strip_channels(a_, strip, ("rotation_quaternion", "rotation_euler"))
                         acts[name_] = a_
                     return acts[name_]
                 times = [float(pk["f"]) for pk in picks]
@@ -256,6 +406,13 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
                     dirw = sp.step(Apos, rest_dir)
                     if tau in want:
                         spring_dirs[want[tau]] = dirw.copy()
+            # braccio morto: simulato su tutti i tick dell'animazione (con il moto del gioco, se c'è)
+            dead_dirs = {}
+            dd = an.get("dead")
+            if dcfg and dd is not False:
+                dd = dd or {}
+                steps, dwant = dead_timeline(dd, picks, times, ticks, starts, total, loop, src_time, pick_at)
+                dead_dirs = dead_arm_dirs(ns, arm, name, dd, dcfg, steps, dwant, set_pose, ground_z, finals)
             for i, pk in enumerate(picks):
                 # punti della scia: sotto-istanti dal fotogramma prima a questo
                 trail = None
@@ -275,6 +432,8 @@ def run(ns, job, scene, arm, actions, objs, cam, L, aux_mat, meta, camc, p1, gro
                     bpy.context.view_layer.update()
                     if i in spring_dirs:
                         A7.spring_rotation(arm, "topknot", spring_dirs[i])
+                if i in dead_dirs:
+                    apply_dead_arm(ns, arm, dead_dirs[i], fist, dcfg)
                 apply_frame_scale(arm, pk.get("scale"))
                 if not bones_only:
                     render_gbuffer(scene, aux_mat, os.path.join(d, f"p{i:02d}"))

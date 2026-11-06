@@ -239,6 +239,8 @@ func _ready() -> void:
 	_build_art()
 	var sheet := SpriteSheet.get_sheet(&"gig")
 	player = PlatformPlayer.new(moves, grid, sheet)
+	# prima del riavvio (prologo) GIG ha il braccio morto: luci spente e il braccio che pende
+	player.sheet_locked = SpriteSheet.get_sheet(&"gig_spento")
 	if pilot != null:
 		pilot.player = player
 		pilot.room = self
@@ -671,6 +673,10 @@ func _open_arena() -> void:
 	arena.camera.max_x = _arena_cam_x
 	arena.camera.x = _arena_cam_x
 	var g := arena.player
+	# Prima del riavvio il braccio resta bloccato anche nell'arena: il foglio spento e la sola destra.
+	if player.arm_locked:
+		g.use_sheet(&"gig_spento")
+		g.one_arm = true
 	g.facing = player.facing
 	g.play_anim(&"walk")
 	arena_phase = ArenaPhase.ENTER

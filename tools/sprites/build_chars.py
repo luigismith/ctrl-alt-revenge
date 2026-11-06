@@ -3,13 +3,14 @@
 """CTRL+ALT REVENGE - pipeline dei personaggi con un comando.
 
 Uso (sempre con il Python del laboratorio e -I, dalla radice del repo):
-  python -I tools/sprites/build_chars.py all [gig thug_punk thug_bruiser]
+  python -I tools/sprites/build_chars.py all [gig gig_spento thug_punk thug_bruiser]
       render (Blender) -> pixel -> atlante + JSON -> validazione -> tavole di controllo -> ritratti -> scena
   python -I tools/sprites/build_chars.py publish [id ...]
       copia in game/assets i file già validati (nome temporaneo + rinomina, così il gioco non li legge a metà)
 Passi singoli: retarget, render, bones, pixel, assemble, validate, review, portrait, scene, explore, preview.
-Il lavoro intermedio va in tools/sprites/out/ (ignorata da git). Configurazione: tools/sprites/chars/<id>.json,
-telecamera e luci comuni: tools/sprites/camera.json.
+Il lavoro intermedio va in tools/sprites/out/ (ignorata da git). Configurazione: tools/sprites/chars/<id>.json
+(una variante, come gig_spento, parte da "base" e cambia solo quello che scrive), telecamera e luci comuni:
+tools/sprites/camera.json.
 """
 import argparse
 import glob
@@ -29,7 +30,7 @@ import charlib as C  # noqa: E402
 import pixelize as PX  # noqa: E402
 import review as RV  # noqa: E402
 
-IDS_ALL = ["gig", "thug_punk", "thug_bruiser"]
+IDS_ALL = ["gig", "gig_spento", "thug_punk", "thug_bruiser"]
 ENEMIES = ["thug_punk", "thug_bruiser"]
 PAIRS = ("grab_hold", "knee", "throw")
 # punti del fotogramma nel JSON (§4): nome nel JSON, nome nei dati del render
@@ -89,7 +90,7 @@ def anim_jobs(cfg, only=None):
         out.append(dict(name=name, src=an["src"], picks=picks, bob_px=an.get("bob_px", 2), upper=an.get("upper"),
                         stride=an.get("stride"), period=an.get("period"), loop=an.get("loop", False),
                         spring=an.get("spring", True), twist_deg=an.get("twist_deg", 0.0),
-                        twist_phase=an.get("twist_phase", 0.0)))
+                        twist_phase=an.get("twist_phase", 0.0), dead=an.get("dead")))
     return out
 
 
@@ -103,6 +104,8 @@ def step_render(cid, only=None, bones_only=False):
     job["bones_only"] = bones_only
     job["topknot_spring"] = cfg.get("topknot_spring", False)
     job["spring_cfg"] = cfg.get("spring_cfg", {})
+    # GIG prima del riavvio: il braccio sinistro morto, simulato (char_anim.DeadArm)
+    job["dead_arm"] = cfg.get("dead_arm")
     if not only and not bones_only and os.path.isdir(out):
         shutil.rmtree(out)
     C.run_blender("char_build.py", job, timeout=3600, tag=("bones-" if bones_only else "render-") + cid)
@@ -504,7 +507,10 @@ def step_assemble(cid):
             for key, src_name in POINTS:
                 if src_name in pts:
                     rp[key] = [int(round(pts[src_name][0] - ax)), int(round(pts[src_name][1] - ay))]
-            if "fist_l" in rp and "fist_r" in rp:
+            if an.get("grip") in rp:
+                # presa con una mano sola (GIG col braccio morto appeso con la destra)
+                rp["grip"] = list(rp[an["grip"]])
+            elif "fist_l" in rp and "fist_r" in rp:
                 rp["grip"] = [(rp["fist_l"][0] + rp["fist_r"][0]) // 2, (rp["fist_l"][1] + rp["fist_r"][1]) // 2]
             if rp:
                 rec["points"] = rp

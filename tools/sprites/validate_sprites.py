@@ -3,7 +3,8 @@
 """Controlla gli sprite dei personaggi contro docs/specifica-slice.md (§4 formato, §5 tempi).
 
 Uso:  python -I tools/sprites/validate_sprites.py [cartella]   (predefinita: game/assets/sprites)
-La cartella contiene una sottocartella per personaggio (gig, thug_punk, thug_bruiser) con <id>.png e <id>.json.
+La cartella contiene una sottocartella per personaggio (gig, gig_spento, thug_punk, thug_bruiser) con <id>.png e
+<id>.json.
 Se accanto c'è <id>.debug.json (scritto da build_chars.py) controlla anche la deriva dell'ancora.
 Esce con codice 1 se trova errori; stampa anche gli avvisi.
 """
@@ -21,6 +22,10 @@ REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
 REQUIRED = {
     "gig": ["idle", "walk", "run", "jump_rise", "jump_fall", "land", "jab1", "jab2", "hook", "kick", "air_kick",
             "grab_hold", "knee", "throw", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup"],
+    # GIG prima del riavvio, col braccio morto: le mosse del prologo
+    "gig_spento": ["idle", "walk", "run", "jump_rise", "jump_fall", "jump_arc", "land", "jab2", "mazza", "hurt_high",
+                   "hurt_low", "knock_air", "knock_down", "getup", "crouch", "crouch_walk", "slide", "ledge_hang",
+                   "ledge_climb"],
     "thug_punk": ["idle", "walk", "jab", "haymaker", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
                   "grabbed", "kneed", "thrown"],
     "thug_bruiser": ["idle", "walk", "punch", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",
@@ -31,9 +36,12 @@ LOOPS = {"idle", "walk", "run", "crouch", "crouch_walk", "ledge_hang", "wall_sli
 # (avvio, attivo, recupero) in tick a 60 Hz, §5; None = non controllato
 TIMING = {("gig", "jab1"): (3, 2, 9), ("gig", "jab2"): (3, 2, 9), ("gig", "hook"): (6, 3, 12),
           ("gig", "kick"): (10, 3, 20), ("gig", "air_kick"): (4, 8, None), ("gig", "knee"): (4, 3, 10),
-          ("gig", "throw"): (8, 0, 14), ("thug_punk", "jab"): (18, 4, 18), ("thug_punk", "haymaker"): (33, 4, 28),
+          ("gig", "throw"): (8, 0, 14), ("gig_spento", "jab2"): (3, 2, 9), ("gig_spento", "mazza"): (14, 6, 15),
+          ("thug_punk", "jab"): (18, 4, 18), ("thug_punk", "haymaker"): (33, 4, 28),
           ("thug_bruiser", "punch"): (26, 5, 26)}
 PAIRS = ("grab_hold", "knee", "throw")
+# varianti senza ritratto proprio: nell'interfaccia usano quello del personaggio base
+NO_PORTRAIT = {"gig_spento"}
 # animazioni sul posto in cui i piedi non devono muoversi affatto rispetto all'ancora
 FEET_FIXED = {"idle", "hurt_high", "hurt_low", "grabbed", "grab_hold"}
 ENEMIES = ("thug_punk", "thug_bruiser")
@@ -304,6 +312,8 @@ def check_char(cid, d, R, others):
 def check_portraits(R, ids):
     pdir = os.path.join(REPO, "game", "assets", "ui", "portraits")
     for cid in ids:
+        if cid in NO_PORTRAIT:
+            continue
         p = os.path.join(pdir, cid + ".png")
         if not os.path.exists(p):
             R.warn("ritratto mancante", p)

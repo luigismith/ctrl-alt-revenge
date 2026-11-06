@@ -3,6 +3,8 @@ extends RefCounted
 ## Ogni check stampa "ok   - nome" oppure "FAIL - nome (dettagli)".
 
 const Harness := preload("res://tests/harness.gd")
+## Varianti dei fogli: per i tempi degli attacchi valgono gli AttackData del personaggio base.
+const SHEET_BASE := {&"gig_spento": &"gig"}
 const REPLAY_DIR := "res://tests/replays"
 
 var root: Node
@@ -44,6 +46,7 @@ func run(tree_root: Node) -> bool:
 	_test_armor_keeps_turn()
 	_test_enter_not_hittable()
 	_test_combo_reset_on_hurt()
+	_test_one_arm()
 	_test_replay_end()
 	_test_credits_glyphs()
 	_test_json_files()
@@ -218,6 +221,57 @@ func _test_combo_chain() -> void:
 	check(punk.hp == 48 - 4 - 4 - 7 - 12, "Combo: danni 4 + 4 + 7 + 12", "vita %d" % punk.hp)
 	check(Game.score == 10 + 10 + 20 + 50, "Combo: punti 10 + 10 + 20 + 50", str(Game.score))
 	Harness.free_level(lvl)
+
+
+## Col braccio bloccato (prima del riavvio) la sola destra: diretto → diretto → mazza se i colpi vanno a
+## segno, niente presa camminando contro il nemico, niente calcio in salto.
+func _test_one_arm() -> void:
+	var d := _duel(_taps(2, 4, 8), 37.5)
+	var lvl: Level = d["level"]
+	var g := lvl.player
+	g.one_arm = true
+	g.use_sheet(&"gig_spento")
+	check(g.sheet.id == &"gig_spento" and g.anim.sheet == g.sheet, "Braccio bloccato: GIG usa il foglio spento", str(g.sheet.id))
+	var punk: Thug = d["punk"]
+	var ids: Array = []
+	var serial := -1
+	var knocked := false
+	for i in 110:
+		lvl.step()
+		if g.attack != null and g.attack_serial != serial:
+			serial = g.attack_serial
+			ids.append(String(g.attack.id))
+		knocked = knocked or punk.state == Fighter.State.KNOCK_AIR
+	check(ids == ["gig_jab2", "gig_jab2b", "gig_mazza"], "Braccio bloccato: diretto → diretto → mazza se i colpi vanno a segno", str(ids))
+	check(punk.hp == 48 - 4 - 4 - 14 and knocked, "Braccio bloccato: danni 4 + 4 + 14, la mazza atterra", "vita %d, a terra %s" % [punk.hp, knocked])
+	check(Game.score == 10 + 10 + 50, "Braccio bloccato: punti 10 + 10 + 50", str(Game.score))
+	Harness.free_level(lvl)
+	# Camminando contro il nemico non lo afferra: la presa vuole due mani.
+	var keys := {}
+	for t in 50:
+		keys[t] = InputFrame.RIGHT
+	d = _duel(keys, 40.0)
+	lvl = d["level"]
+	g = lvl.player
+	g.one_arm = true
+	var grabbed := false
+	for i in 60:
+		lvl.step()
+		grabbed = grabbed or g.state == Fighter.State.GRAB
+	check(not grabbed, "Braccio bloccato: niente presa camminando contro il nemico")
+	Harness.free_level(lvl)
+	# In salto il tasto attacco non fa niente (e non resta nel buffer fino all'atterraggio).
+	d = _duel({2: InputFrame.JUMP, 10: InputFrame.ATTACK}, 150.0)
+	lvl = d["level"]
+	g = lvl.player
+	g.one_arm = true
+	var log := _attack_log(lvl, 70)
+	check(log.is_empty() and g.state != Fighter.State.JUMP, "Braccio bloccato: niente calcio in salto", str(log))
+	Harness.free_level(lvl)
+	# La salita della sporgenza, che la fisica del platform legge, dura uguale nei due fogli.
+	var a := SpriteSheet.get_sheet(&"gig").clip(&"ledge_climb").total_ticks()
+	var b := SpriteSheet.get_sheet(&"gig_spento").clip(&"ledge_climb").total_ticks()
+	check(a == b, "Salita della sporgenza lunga uguale col braccio libero e bloccato", "%d e %d tick" % [a, b])
 
 
 func _test_combo_miss_and_buffer() -> void:
@@ -831,11 +885,13 @@ func _test_json_files() -> void:
 			check(a != null and a.id == StringName(f.get_basename()), "AttackData %s" % f)
 
 
-## Le animazioni d'attacco ritemporizzate hanno esattamente i tempi dell'AttackData.
+## Le animazioni d'attacco ritemporizzate hanno esattamente i tempi dell'AttackData. Le varianti di un
+## personaggio usano gli attacchi del personaggio base (gig_spento: gig_jab2, gig_mazza...).
 func _check_attack_timing(s: SpriteSheet) -> void:
+	var who := String(SHEET_BASE.get(s.id, s.id)) + "_"
 	for f in DirAccess.get_files_at("res://data/attacks"):
 		var a := load("res://data/attacks/" + f) as AttackData
-		if a == null or a.anim == &"" or not String(a.id).begins_with(String(s.id) + "_"):
+		if a == null or a.anim == &"" or not String(a.id).begins_with(who):
 			continue
 		if not s.has_anim(a.anim) or a.active == 0:
 			continue

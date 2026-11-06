@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="AttackData" format=3]
+
+[ext_resource type="Script" path="res://src/combat/attack_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"gig_mazza"
+anim = &"mazza"
+startup = 14
+active = 6
+recovery = 15
+damage = 14
+hitstop_attacker = 10
+hitstop_victim = 14
+stun = 0
+weight = 2
+knockdown = true
+launch = Vector2(150.0, 200.0)
+launch_gravity = 1125.0
+push = 0.0
+juggle_cost = 2
+depth_tolerance = 12.5
+points = 50
+shake = 0.3
+sfx_whoosh = &"whoosh_heavy"
+sfx_hit = &"hit_heavy"
+fx_hit = &"hit_spark_heavy"
+hitbox = Rect2i(30, -80, 22, 38)

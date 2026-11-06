@@ -15,6 +15,10 @@ enum Source { REAL, PLACEHOLDER, DEBUG }
 const REQUIRED: Dictionary[StringName, PackedStringArray] = {
 	&"gig": ["idle", "walk", "run", "jump_rise", "jump_fall", "land", "jab1", "jab2", "hook", "kick",
 		"air_kick", "grab_hold", "knee", "throw", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup"],
+	# GIG prima del riavvio, col braccio morto: le mosse del prologo
+	&"gig_spento": ["idle", "walk", "run", "jump_rise", "jump_fall", "jump_arc", "land", "jab2", "mazza",
+		"hurt_high", "hurt_low", "knock_air", "knock_down", "getup", "crouch", "crouch_walk", "slide", "ledge_hang",
+		"ledge_climb"],
 	&"thug_punk": ["idle", "walk", "jab", "haymaker", "hurt_high", "hurt_low", "knock_air", "knock_down",
 		"getup", "grabbed", "kneed", "thrown"],
 	&"thug_bruiser": ["idle", "walk", "punch", "hurt_high", "hurt_low", "knock_air", "knock_down", "getup",

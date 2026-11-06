@@ -6,6 +6,8 @@ extends Fighter
 ## - salto (4,4 px/tick, gravità 0,26) e calcio in salto;
 ## - combo jab1 → jab2 → gancio → calcio che avanza solo se il colpo va a segno, buffer di 8 tick;
 ## - presa automatica camminando contro un nemico, due ginocchiate e proiezione;
+## - prima del riavvio (one_arm, il prologo) la sola destra: diretto, diretto e il braccio morto usato
+##   come mazza, lento ma pesante; niente prese e niente calcio in salto;
 ## - morte, vite e rientro con invulnerabilità.
 
 enum GrabAction { HOLD, KNEE, THROW }
@@ -32,13 +34,17 @@ const ARM_OFF_TICKS := 240
 const ESCAPE_INVULN := 24
 
 const CHAIN: Array[StringName] = [&"gig_jab1", &"gig_jab2", &"gig_hook", &"gig_kick"]
+## Col braccio bloccato (scelta di Luigi del 6 novembre 2026): la mazza chiude la combo se i due diretti
+## vanno a segno. Il secondo diretto ha un id suo (stessa animazione, stordimento più lungo): la mazza
+## parte lenta (14 tick) e deve trovare la vittima ancora stordita.
+const CHAIN_ONE_ARM: Array[StringName] = [&"gig_jab2", &"gig_jab2b", &"gig_mazza"]
 const ATTACK_IDS: Array[StringName] = [&"gig_jab1", &"gig_jab2", &"gig_hook", &"gig_kick", &"gig_air_kick",
-	&"gig_knee", &"gig_throw", &"gig_throw_body"]
+	&"gig_knee", &"gig_throw", &"gig_throw_body", &"gig_jab2b", &"gig_mazza"]
 
 var input: InputFrame = InputFrame.new()
 var buf_attack: int = 0
 var buf_jump: int = 0
-## Indice in CHAIN della prossima mossa, valido finché combo_timer > 0.
+## Indice in chain() della prossima mossa, valido finché combo_timer > 0.
 var combo_step: int = 0
 var combo_timer: int = 0
 var knees: int = 0
@@ -50,6 +56,8 @@ var attacks: Dictionary[StringName, AttackData] = {}
 var escape_presses: int = 0
 ## Tick rimasti di braccio sospeso: niente prese, niente calcio in salto, pugni a metà danno.
 var arm_off: int = 0
+## Braccio sinistro bloccato, prima del riavvio: lo mette chi apre l'arena insieme al foglio gig_spento.
+var one_arm: bool = false
 
 var _run_dir: int = 0
 var _last_tap_dir: int = 0
@@ -143,7 +151,7 @@ func _think_free() -> void:
 	# Dopo il cambio di stato (che azzera le velocità entrando in IDLE).
 	vx = ax * (data.run_speed if running else data.walk_speed.x)
 	vy = ay * data.walk_speed.y
-	if ax != 0 and _grab_cooldown == 0 and arm_off == 0:
+	if ax != 0 and _grab_cooldown == 0 and arm_off == 0 and not one_arm:
 		var target := level.find_grab_target(self)
 		if target != null:
 			_start_grab(target)
@@ -165,7 +173,7 @@ func _start_jump() -> void:
 
 
 func _think_air() -> void:
-	if buf_attack > 0 and not air_attacked and arm_off == 0:
+	if buf_attack > 0 and not air_attacked and arm_off == 0 and not one_arm:
 		buf_attack = 0
 		air_attacked = true
 		start_attack(attacks[&"gig_air_kick"], level.next_attack_serial())
@@ -181,7 +189,7 @@ func _start_chain_attack() -> void:
 		facing = ax
 	if combo_timer <= 0:
 		combo_step = 0
-	start_attack(attacks[CHAIN[combo_step]], level.next_attack_serial())
+	start_attack(attacks[chain()[combo_step]], level.next_attack_serial())
 	vx = 0.0
 	vy = 0.0
 
@@ -189,8 +197,9 @@ func _start_chain_attack() -> void:
 func _think_attack() -> void:
 	if attack == null or attack.air:
 		return
-	var idx := CHAIN.find(attack.id)
-	if idx < 0 or idx >= CHAIN.size() - 1:
+	var c := chain()
+	var idx := c.find(attack.id)
+	if idx < 0 or idx >= c.size() - 1:
 		return
 	# Concatenazione: solo se il colpo è andato a segno e nella finestra di cancel.
 	if connected and buf_attack > 0 and _in_cancel_window():
@@ -208,14 +217,20 @@ func _in_cancel_window() -> bool:
 
 
 func _end_attack() -> void:
-	var idx := CHAIN.find(attack.id) if attack != null else -1
-	if idx >= 0 and connected and idx < CHAIN.size() - 1:
+	var c := chain()
+	var idx := c.find(attack.id) if attack != null else -1
+	if idx >= 0 and connected and idx < c.size() - 1:
 		combo_step = idx + 1
 		combo_timer = COMBO_WINDOW
 	else:
 		combo_step = 0
 		combo_timer = 0
 	super._end_attack()
+
+
+## La combo in uso: quella a un braccio prima del riavvio.
+func chain() -> Array[StringName]:
+	return CHAIN_ONE_ARM if one_arm else CHAIN
 
 
 ## Chiamata dal CombatSystem quando l'attacco corrente colpisce qualcuno.
