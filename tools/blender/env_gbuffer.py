@@ -3,7 +3,7 @@
 """CTRL+ALT REVENGE - sfondi e oggetti di scena: costruzione di una scena da un JSON e render del G-buffer.
 
 Deriva dalla prova spike-env (env_build.py). La scena è descritta per intero da un file di lavoro JSON
-scritto da tools/env/layout.py (codice Python MIT): qui non c'è nessuna scelta artistica, solo geometria.
+scritto da tools/env/props.py (codice Python MIT): qui non c'è nessuna scelta artistica, solo geometria.
 
   blender -b --factory-startup --disable-autoexec --python-exit-code 1 --python env_gbuffer.py -- JOB.json
 

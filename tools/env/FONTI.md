@@ -1,6 +1,6 @@
 # Fonti esterne della pipeline degli sfondi
 
-Warped City è anche nel repository, con la sua scheda in `game/assets/third_party/ansimuz-warped-city/SOURCE.md`. Gli altri file stanno nel laboratorio. Crediti e licenze per il pubblico sono in `THIRD-PARTY-NOTICES.md`; qui resta la prova della verifica.
+Dal 7 novembre 2026 nessuna di queste fonti entra più nel gioco: i piani di Warped City e i modelli dei kit li usava la vecchia pipeline degli sfondi, tolta quel giorno (vedi `README.md`). Questa pagina resta come prova della verifica. I file stanno nel laboratorio. Crediti e licenze per il pubblico sono in `THIRD-PARTY-NOTICES.md`; qui resta la prova della verifica.
 
 ## Fonti verificate (3 novembre 2026)
 
@@ -20,4 +20,4 @@ Note:
 - OpenGameArt ha rifiutato l'accesso automatico alla pagina di Warped City (HTTP 403) e non è stato aggirato. Il nome e la dimensione dello zip sulla pagina sono confermati da una ricerca web. La licenza CC0 è confermata anche dalla ricerca del 3 novembre (`ricerca-2026-11-03/relazioni/asset_summary.txt`).
 - Il Cyberpunk Game Kit di Quaternius **non** è usato: il suo `License.txt` non era scaricabile (quota di Google Drive), quindi il condizionatore viene dal Downtown City MegaKit.
 - Non sono usati il carattere "Bfont" di Blender, Poly Haven, ambientCG, CraftPix, Oonquil o altro materiale non ridistribuibile. Le scritte sono un carattere pixel disegnato in `tools/env/pixfont.py`.
-- Nessuna AI generativa: tutto viene da script deterministici con semi fissi.
+- Nessuna AI generativa nella vecchia pipeline: tutto veniva da script deterministici con semi fissi. Le basi di `taranto.py` e di `tools/ambienti/` invece sono di ChatGPT (dal 6 novembre 2026), con prompt e originali nella cartella privata condivisa.
