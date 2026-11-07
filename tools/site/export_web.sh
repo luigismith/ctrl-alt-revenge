@@ -17,17 +17,29 @@
 #   CAR_MUSIC_DIR  cartella con music.json e gli OGG della demo (per esempio gli allegati della release
 #            "musica-demo"): se c'è, la musica entra nella build in res://assets_private/music/;
 #            se manca, la demo esce senza musica, come prima
+#   CAR_BATTUTE_DIR  cartella con le battute private delle scene (predefinita: docs/lore/battute, la
+#            cartella privata della storia, che git ignora). La demo ha solo quelle del prologo
+#            (decisione 68): DEMO_BATTUTE. Se il file manca, le scene mostrano un segnaposto
+#   CAR_BATTUTE_OBBLIGATORIE=1  senza le battute del prologo l'esportazione si ferma
+#   CAR_VOCI_DIR  cartella con le voci delle battute (decisione 92), una sottocartella per file di
+#            battute: <capitolo>/manifest.json e <capitolo>/<scena>/<id>.ogg, come le scrive voci.py nel
+#            laboratorio (predefinita: <laboratorio>/tts/voci). Entrano in res://assets_private/voci/,
+#            solo per DEMO_BATTUTE; i file di lavoro (quelli che iniziano con "_") restano fuori
 #
 # Passi:
 #   1. copia game/ in WORK senza .godot/, così l'importazione riparte da zero come su GitHub, e senza
 #      assets_private/, perché la musica non deve mai entrare nella build web; aggiunge
 #      THIRD-PARTY-NOTICES.md, che i crediti leggono da res:// e che il filtro del preset include;
+#      copia le battute del prologo in data/battute/, dove le cerca SceneLines (solo nella copia: nel
+#      repo pubblico non ci sono); se ci sono, mette musica e voci in assets_private/ e toglie
+#      assets_private/* dal filtro di esclusione del preset (solo nella copia);
 #   2. nella copia il preset usa la pagina tools/site/web_shell.html. Nel repo resta la pagina di
 #      Godot, così l'esportazione dall'editor funziona anche senza questo script;
 #   3. importa gli asset ed esporta in release;
 #   4. mette accanto a index.html il logo e il font della pagina di caricamento, presi dagli asset
 #      del gioco (se cambiano, basta rilanciare lo script);
-#   5. controlla i log (solo quelli dei tentativi riusciti) e che nella build non ci sia musica,
+#   5. controlla i log (solo quelli dei tentativi riusciti) e che nella build ci siano solo la musica,
+#      le battute e le voci date,
 #      stampa il peso dei file e scrive nella pagina della demo quanti MB si scaricano.
 #
 # Per provarla in locale:
@@ -82,7 +94,7 @@ check_dir "$OUT" index.wasm
 echo "Copia del progetto in $WORK"
 rm -rf "$WORK"
 mkdir -p "$WORK"
-(cd "$ROOT/game" && tar --exclude=./.godot --exclude=./assets_private -cf - .) | (cd "$WORK" && tar -xf -)
+(cd "$ROOT/game" && tar --exclude=./.godot --exclude=./assets_private --exclude=./data/battute -cf - .) | (cd "$WORK" && tar -xf -)
 cp "$ROOT/THIRD-PARTY-NOTICES.md" "$WORK/"
 # i file che iniziano con il punto Godot non li vede: il segno resta fuori dal gioco
 touch "$WORK/$MARK"
@@ -97,6 +109,43 @@ if [ -n "${CAR_MUSIC_DIR:-}" ] && [ -f "$CAR_MUSIC_DIR/music.json" ]; then
   MUSIC=1
   echo "Musica della demo da $CAR_MUSIC_DIR:"
   ls -l "$WORK/assets_private/music"
+fi
+
+# Le battute private delle scene: solo i file di DEMO_BATTUTE (il prologo), dalla cartella privata.
+DEMO_BATTUTE="prologo"
+BATTUTE_DIR="${CAR_BATTUTE_DIR:-$ROOT/docs/lore/battute}"
+BATTUTE=0
+for b in $DEMO_BATTUTE; do
+  if [ -f "$BATTUTE_DIR/$b.json" ]; then
+    mkdir -p "$WORK/data/battute"
+    cp "$BATTUTE_DIR/$b.json" "$WORK/data/battute/"
+    BATTUTE=1
+  elif [ "${CAR_BATTUTE_OBBLIGATORIE:-0}" = 1 ]; then
+    echo "Mancano le battute $BATTUTE_DIR/$b.json (CAR_BATTUTE_OBBLIGATORIE=1)." >&2
+    exit 1
+  else
+    echo "  Attenzione: mancano le battute $BATTUTE_DIR/$b.json, le scene avranno il segnaposto." >&2
+  fi
+done
+if [ "$BATTUTE" = 1 ]; then
+  echo "Battute della demo da $BATTUTE_DIR:"
+  ls -l "$WORK/data/battute"
+fi
+
+# Le voci delle battute, se ci sono: solo il manifest e gli OGG, in assets_private/voci/<capitolo>/.
+VOCI_DIR="${CAR_VOCI_DIR:-$LAB/tts/voci}"
+VOCI=0
+for b in $DEMO_BATTUTE; do
+  if [ -f "$VOCI_DIR/$b/manifest.json" ]; then
+    mkdir -p "$WORK/assets_private/voci/$b"
+    (cd "$VOCI_DIR/$b" && find . -name '_*' -prune -o -type f \( -name manifest.json -o -name '*.ogg' \) -print | tar -cf - -T -) \
+      | (cd "$WORK/assets_private/voci/$b" && tar -xf -)
+    VOCI=1
+  fi
+done
+if [ "$VOCI" = 1 ]; then
+  sed -i 's|^exclude_filter="tests/\*, assets_private/\*"$|exclude_filter="tests/*"|' "$WORK/export_presets.cfg"
+  echo "Voci della demo da $VOCI_DIR: $(find "$WORK/assets_private/voci" -name '*.ogg' | wc -l) file"
 fi
 
 # --- 2. pagina della demo -------------------------------------------------------------------
@@ -180,10 +229,54 @@ if [ "$MUSIC" = 1 ]; then
     echo "La musica della demo era data, ma nella build non c'è." >&2
     exit 1
   fi
-elif LC_ALL=C grep -a -q -E 'assets_private|\.oggvorbisstr|\.mp3str' "$OUT/index.pck"; then
+elif [ "$VOCI" = 0 ] && LC_ALL=C grep -a -q -E 'assets_private|\.oggvorbisstr|\.mp3str' "$OUT/index.pck"; then
   echo "Nella build c'è della musica (assets_private, OGG o MP3) che nessuno ha dato: non si pubblica." >&2
   exit 1
+elif LC_ALL=C grep -a -q 'assets_private/music' "$OUT/index.pck"; then
+  echo "Nella build c'è della musica che nessuno ha dato: non si pubblica." >&2
+  exit 1
 fi
+
+# Le voci: solo se date, e solo per i capitoli della demo.
+if [ "$VOCI" = 1 ]; then
+  for b in $DEMO_BATTUTE; do
+    if [ -f "$VOCI_DIR/$b/manifest.json" ] && ! LC_ALL=C grep -a -q "assets_private/voci/$b/manifest.json" "$OUT/index.pck"; then
+      echo "Le voci di $b erano date, ma nella build non ci sono." >&2
+      exit 1
+    fi
+  done
+  OTHER="$(LC_ALL=C grep -a -o -E 'assets_private/voci/[A-Za-z0-9_-]+/' "$OUT/index.pck" | sort -u || true)"
+  for o in $OTHER; do
+    c="${o#assets_private/voci/}"; c="${c%/}"
+    case " $DEMO_BATTUTE " in *" $c "*) ;; *) echo "Nella build ci sono voci che la demo non deve avere: $c" >&2; exit 1 ;; esac
+  done
+elif LC_ALL=C grep -a -q 'assets_private/voci' "$OUT/index.pck"; then
+  echo "Nella build ci sono voci che nessuno ha dato: non si pubblica." >&2
+  exit 1
+fi
+
+# Le battute: nella build solo quelle date (il prologo), nessun altro capitolo.
+if [ "$BATTUTE" = 1 ] && ! LC_ALL=C grep -a -q 'data/battute/prologo.json' "$OUT/index.pck"; then
+  echo "Le battute del prologo erano date, ma nella build non ci sono." >&2
+  exit 1
+fi
+OTHER="$(LC_ALL=C grep -a -o -E 'data/battute/[A-Za-z0-9_-]+\.json' "$OUT/index.pck" | sort -u | grep -v -x 'data/battute/prologo.json' || true)"
+if [ -n "$OTHER" ]; then
+  echo "Nella build ci sono battute che la demo non deve avere: $OTHER" >&2
+  exit 1
+fi
+
+# Il pacchetto si apre come lo legge la build: i nemici devono avere i loro attacchi (vedi
+# tools/site/controlla_pck.gd: in 4.7.2 la conversione dei .tres in binario li svuotava).
+CHECK_LOG="$LOGDIR/controlla_pck.log"
+if ! (cd "$OUT" && timeout 120 "$GODOT" --headless --main-pack "$(native "$OUT/index.pck")" \
+    -s "$(native "$ROOT/tools/site/controlla_pck.gd")") >"$CHECK_LOG" 2>&1 \
+    || ! grep -q 'CONTROLLO_PCK_OK' "$CHECK_LOG"; then
+  echo "Il controllo del pacchetto non è passato:" >&2
+  grep -E 'Pacchetto|ERROR' "$CHECK_LOG" | head -20 >&2
+  exit 1
+fi
+grep 'Pacchetto controllato' "$CHECK_LOG"
 
 echo "Peso della build (gzip -9 è una stima di quanto si scarica: GitHub Pages comprime il .wasm):"
 total=0

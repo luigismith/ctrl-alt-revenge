@@ -9,6 +9,8 @@
 
 Blocca:
   * tutto ciò che sta in assets_private/ tranne manifest.json e README.md
+  * la storia privata: docs/lore/ (repo privato) e le battute delle scene (game/data/battute/, che
+    tools/site/export_web.sh copia solo nella build web), anche in altre cartelle "battute/"
   * la cache di importazione di Godot (.godot/), che contiene copie convertite dell'audio
   * l'audio riconosciuto dall'estensione (.wav .ogg .oga .opus .mp3 .flac .aif .aiff .aifc
     .m4a .wma) e l'audio importato da Godot (.oggvorbisstr .mp3str .sample)
@@ -31,6 +33,8 @@ AUDIO_EXT = {".wav", ".ogg", ".oga", ".opus", ".mp3", ".flac", ".aif", ".aiff", 
              ".m4a", ".wma", ".oggvorbisstr", ".mp3str", ".sample"}
 PRIVATE_OK = {"assets_private/manifest.json", "assets_private/README.md"}
 MAX_BYTES = 20 * 1024 * 1024
+## La storia privata: sta nel repo privato e, per le battute, solo nella build web (decisione 68).
+PRIVATE_STORY = ("docs/lore/", "game/data/battute/")
 
 
 def git(*args: str) -> bytes:
@@ -105,6 +109,8 @@ def main() -> int:
         reason = None
         if path.startswith("assets_private/") and path not in PRIVATE_OK:
             reason = "asset privato (si possono committare solo manifest.json e README.md)"
+        elif path.startswith(PRIVATE_STORY) or (path.endswith(".json") and "/battute/" in "/" + path):
+            reason = "storia privata (battute e lore stanno nel repo privato, non in quello pubblico)"
         elif path.startswith(".godot/") or "/.godot/" in path:
             reason = "cache di importazione di Godot"
         elif Path(path).suffix.lower() in AUDIO_EXT:

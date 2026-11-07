@@ -127,6 +127,34 @@ jobs:
             echo "::warning::Release musica-demo non trovata: la demo esce senza musica."
           fi
 
+      # Anche le battute del prologo (decisione 68: la demo le ha, il repo no) e le loro voci stanno negli
+      # allegati di "musica-demo": battute-<capitolo>.json e voci-<capitolo>.zip (manifest.json e gli OGG,
+      # come li scrive voci.py nel laboratorio). Senza battute l'esportazione si ferma, perché sul sito
+      # non vadano mai i segnaposto; senza voci la demo esce muta nelle scene, come prima.
+      - name: Scarica le battute e le voci della demo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/allegati" "$RUNNER_TEMP/battute" "$RUNNER_TEMP/voci"
+          gh release download musica-demo -R "$GITHUB_REPOSITORY" -D "$RUNNER_TEMP/allegati" -p 'battute-*.json' \
+            || echo "::warning::Nella release musica-demo non ci sono le battute."
+          gh release download musica-demo -R "$GITHUB_REPOSITORY" -D "$RUNNER_TEMP/allegati" -p 'voci-*.zip' \
+            || echo "::warning::Nella release musica-demo non ci sono le voci: le scene restano mute."
+          shopt -s nullglob
+          for f in "$RUNNER_TEMP/allegati"/battute-*.json; do
+            n="$(basename "$f" .json)"; cp "$f" "$RUNNER_TEMP/battute/${n#battute-}.json"
+          done
+          for f in "$RUNNER_TEMP/allegati"/voci-*.zip; do
+            n="$(basename "$f" .zip)"; unzip -q -o "$f" -d "$RUNNER_TEMP/voci/${n#voci-}"
+          done
+          {
+            echo "CAR_BATTUTE_DIR=$RUNNER_TEMP/battute"
+            echo "CAR_BATTUTE_OBBLIGATORIE=1"
+            echo "CAR_VOCI_DIR=$RUNNER_TEMP/voci"
+          } >> "$GITHUB_ENV"
+          ls -laR "$RUNNER_TEMP/battute" "$RUNNER_TEMP/voci"
+
       # Copia game/ in una cartella temporanea, importa, esporta in release e controlla la musica
       # (c'è solo se è stata scaricata qui sopra: vedi i commenti in tools/site/export_web.sh).
       - name: Esporta la demo web
