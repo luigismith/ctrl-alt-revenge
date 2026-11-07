@@ -60,6 +60,11 @@ const PIGNORAMENTO := "pignoramento"
 const RINFORZI := "rinforzi"
 const RINFORZI_TOP := Vector3i(70, 130, -120)
 ## La fine: la scritta resta END_HOLD tick (4 s), ATTACCO o SALTO la chiudono dopo END_SKIP.
+## I murales di Totò nel prologo (docs/lore, i copioni dei murales): l'introduzione da «Nuova partita»,
+## il ricordo di Mimmo alla lapide e il passaggio al capitolo 1, prima del cartello della fine.
+const INTRO := "introduzione"
+const MIMMO := "ricordo_mimmo"
+const PASSAGGIO := "passaggio_1"
 const END_HOLD := 240
 const END_SKIP := 60
 
@@ -87,6 +92,9 @@ var vignette: String = ""
 var vignette_t: int = 0
 var _after_vignette: String = ""
 var seen_mimmo: bool = false
+## L'introduzione al primo tick (da «Nuova partita» e dai capitoli; non dalla riga di comando né nei
+## test). Solo regia: non entra nell'hash.
+var play_intro: bool = false
 ## La scena dei rinforzi è già passata. È solo disegno: non entra nell'hash, come la scena stessa.
 var seen_rinforzi: bool = false
 ## Il riavvio: 0 = non cominciato, 1-3 = tasti già premuti, 4 = fatto.
@@ -220,11 +228,19 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 			elif reboot_step == 3:
 				_finish_reboot()
 		return InputFrame.new()
+	# Da «Nuova partita»: l'introduzione, coi murales di Totò, si scioglie nel cimitero.
+	if play_intro:
+		play_intro = false
+		request_scene(INTRO, {"gig": scene_pose_player("")})
+		return InputFrame.new()
 	var on_ground := player.state == PlatformPlayer.State.GROUND
-	# La lapide di Mimmo: SU davanti apre il ricordo.
+	# La lapide di Mimmo: SU davanti apre il ricordo (il murale; la vignetta, se il copione non c'è).
 	if not seen_mimmo and on_ground and _near("M", USE_REACH) and frame.was_pressed(InputFrame.UP):
 		seen_mimmo = true
-		_open_vignette("mimmo")
+		if SceneData.load_scene(MIMMO).errors.is_empty():
+			request_scene(MIMMO, {"gig": scene_pose_player("M")})
+		else:
+			_open_vignette("mimmo")
 		return InputFrame.new()
 	# Il riavvio: SU accanto al banco attacca la tastiera, poi i tre tasti in ordine.
 	if not rebooted and on_ground and _near("X", USE_REACH):
@@ -280,6 +296,8 @@ func _stage_after_step() -> void:
 		end_t = 0
 		end_tick = tick
 		_on_event("prologue_end")
+		# Il passaggio al capitolo 1: il gioco fermo a metà salto, MP13 a spray, poi il cartello.
+		request_scene(PASSAGGIO, {"gig": scene_pose_player("")})
 
 
 ## GIG è in piedi sulla cima del muro del cimitero, accanto al cancello chiuso.
@@ -593,7 +611,8 @@ func _draw_stage_hud(h: Control) -> void:
 		UiFont.draw_text(h, Vector2(View.CX, 20), "GLI ESATTORI SFONDANO LA PORTA: ESCI DAL LUCERNARIO", C_LED_RED, 1, 1)
 	if vignette != "":
 		_draw_vignette(h)
-	if finished:
+	# Il cartello dopo il murale del passaggio (compare mentre la scena esce e l'interfaccia torna).
+	if finished and (scene == null or not scene.holds_sim()):
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, 0.6))
 		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 - 16), "FINE DEL PROLOGO", C_CYAN, 2, 1)
 		var dopo: PackedStringArray = next_title if not next_title.is_empty() else PackedStringArray(["poi il capitolo 1, I tetti dei Tamburi"])

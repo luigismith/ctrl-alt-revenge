@@ -20,8 +20,9 @@ const DIR := "res://data/scene"
 
 ## I passi della regia e i loro parametri ammessi (li controlla un test).
 const STEPS := {
-	# Le bande nere: dentro (true) o fuori. Di solito non serve: entrano ed escono da sole.
-	"bande": ["entra", "tick", "aspetta"],
+	# Le bande nere: dentro (true) o fuori. Di solito non serve: entrano ed escono da sole. "sopra": false
+	# fa entrare solo quella di sotto (le battute sotto una scritta in alto sul murale).
+	"bande": ["entra", "tick", "sopra", "aspetta"],
 	# Stacco: l'inquadratura cambia di colpo. Centro dato ("centro") o un attore ("su", con "alto" px
 	# sopra i piedi o il "punto" dello sprite, più lo "scarto" [dx, dy]), e lo zoom (2-3 per i piani
 	# stretti e i dettagli); "segui" tiene l'attore in quadro mentre si muove.
@@ -46,8 +47,18 @@ const STEPS := {
 	# "<capitolo>/<id>" (o con "capitolo"); "da"/"a" sono l'angolo del riquadro dello schermo nel murale
 	# (se mancano, lo scorrimento o la camera di murale.json) in "tick"; "rivela" (vero) lo dipinge a
 	# spray sopra il gioco in "rivela_tick", se no è uno stacco; "luci" (vero) fa pulsare le luci.
-	# "chiudi": true lo toglie con lo spray all'indietro e torna il gioco. Si aspetta la fine dello spray.
-	"murale": ["id", "capitolo", "da", "a", "tick", "rivela", "rivela_tick", "luci", "chiudi", "aspetta"],
+	# "chiudi": true lo toglie con lo spray all'indietro e torna il gioco; "sciogli": true lo scioglie nel
+	# gioco dal centro del suo "passaggio", e la telecamera del gioco è già dove dice il murale. Si aspetta
+	# la fine dello spray. "scritte" [{"id", "zona": [x, y, w, h]}] stacca dalla vignetta le scritte già
+	# dipinte, da spruzzare poi col passo "scritta".
+	"murale": ["id", "capitolo", "da", "a", "tick", "rivela", "rivela_tick", "luci", "chiudi", "sciogli",
+		"scritte", "aspetta"],
+	# Una scritta sul murale in cima (l'ultimo aperto che ce l'ha): "id" come nelle "scritte" del murale o
+	# del passo "murale", "logo" per il logo di "riusa"; in "tick" (se no qualche tick per lettera),
+	# "modo" "spray" (con le colature) o "scrivi" (netta, lettera per lettera).
+	"scritta": ["id", "tick", "modo", "aspetta"],
+	# Il nero: entra (true) sopra il gioco e sotto i murales, o esce, in "tick".
+	"nero": ["entra", "tick", "aspetta"],
 }
 
 static var _cache: Dictionary = {}
@@ -115,7 +126,19 @@ func _parse(d: Dictionary) -> void:
 		for k: String in st:
 			if k != "fai" and not allowed.has(k):
 				errors.append("passo %d (%s): parametro sconosciuto \"%s\"" % [i, fai, k])
-		if fai == "murale" and not bool((st as Dictionary).get("chiudi", false)):
+		if fai == "scritta" and str((st as Dictionary).get("id", "")) == "":
+			errors.append("passo %d (scritta): manca \"id\"" % i)
+		if fai == "scritta" and not str((st as Dictionary).get("modo", "spray")) in ["spray", "scrivi"]:
+			errors.append("passo %d (scritta): \"modo\" vuole \"spray\" o \"scrivi\"" % i)
+		if fai in ["scritta", "nero"]:
+			continue
+		if fai == "murale" and (st as Dictionary).has("scritte"):
+			for z: Variant in (st["scritte"] if st["scritte"] is Array else [null]):
+				if not (z is Dictionary and str(z.get("id", "")) != "" and z.get("zona") is Array
+						and (z["zona"] as Array).size() == 4):
+					errors.append("passo %d (murale): \"scritte\" vuole [{\"id\", \"zona\": [x, y, w, h]}]" % i)
+		if fai == "murale" and not bool((st as Dictionary).get("chiudi", false)) \
+				and not bool((st as Dictionary).get("sciogli", false)):
 			var ci := SceneMural.split_id(st)
 			if ci[0] == "" or ci[1] == "":
 				errors.append("passo %d (murale): manca \"id\" come \"<capitolo>/<id>\"" % i)

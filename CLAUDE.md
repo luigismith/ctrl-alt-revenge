@@ -33,7 +33,7 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
   - immagini animate e primi piani d'effetto.
 
   Senza strafare: non è un gioco di Kojima. Come si fanno (Luigi, 6 novembre 2026; decisione 68 della storia):
-  - **stile misto:** i murales di Totò, animati, per l'introduzione, i ricordi e i passaggi fra i capitoli; le scene nel motore, con le bande nere e i primi piani grandi, per gli Esattori, i boss e le battute brevi;
+  - **tutto a murale** (Luigi, 7 novembre 2026; decisione 94): ogni volta che il gioco si ferma per raccontare, anche nei dialoghi, nelle presentazioni dei boss e nel finale, c'è una fila di murales animati di Totò. Nel motore restano solo le battute che non fermano l'azione (fumetti, voce di Tere, guida di Totò, maxischermi) e i passaggi fra gioco e murale;
   - **i primi piani:** il nostro render 3D del volto passato a ChatGPT o a Gemini per lo stile dei murales; palpebre, bocca e luci le animano i nostri script;
   - **le battute avanzano a pressione,** come in Celeste;
   - **ogni scena ha la sua musica,** fatta con Suno (Luigi: «mi raccomando anche alle musiche per le scene»);

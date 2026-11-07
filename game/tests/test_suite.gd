@@ -67,6 +67,7 @@ func run(tree_root: Node) -> bool:
 	_test_rinforzi()
 	_test_scene_voices()
 	_test_scene_mural()
+	_test_scene_writing()
 	_test_title_menu()
 	_test_new_game_chain()
 	return failures == 0
@@ -2282,6 +2283,177 @@ func _test_scene_mural() -> void:
 		"Murale: alla fine MP06 combacia pixel per pixel con lo schermo", "%s" % mp._sprite.position)
 	mp.free()
 
+## Le scritte sui murales, lo scioglimento nel gioco e il nero: il copione, il murale da solo, il lettore
+## e i murales veri del prologo.
+func _test_scene_writing() -> void:
+	# Il copione: i passi nuovi e i loro errori.
+	var ok := SceneData.new()
+	ok._parse({"formato": 1, "spazio": "stanza", "passi": [
+		{"fai": "nero", "entra": true, "tick": 1},
+		{"fai": "murale", "id": "a/b", "scritte": [{"id": "t", "zona": [0, 0, 4, 4]}]},
+		{"fai": "bande", "entra": true, "sopra": false},
+		{"fai": "scritta", "id": "t", "tick": 10, "modo": "scrivi"},
+		{"fai": "murale", "sciogli": true, "rivela_tick": 10}]})
+	check(ok.errors.is_empty(), "Scritte: nero, scritte, bande solo sotto e sciogli sono validi nel copione", "; ".join(ok.errors))
+	var bad := SceneData.new()
+	bad._parse({"formato": 1, "passi": [{"fai": "scritta"}, {"fai": "scritta", "id": "t", "modo": "pennello"},
+		{"fai": "murale", "id": "a/b", "scritte": [{"id": "t", "zona": [1, 2]}]}]})
+	check(bad.errors.size() == 3, "Scritte: senza id, con un modo sconosciuto o una zona sbagliata, il copione è sbagliato", "; ".join(bad.errors))
+
+	# Un murale finto: fondo scuro, due lettere chiare su una riga e una sotto; una scritta in un file.
+	var base := "user://murales_scritte"
+	var dir := base + "/prova/scritta"
+	DirAccess.make_dir_recursive_absolute(dir)
+	var bg := Color8(40, 40, 60)
+	var img := Image.create(200, 120, false, Image.FORMAT_RGBA8)
+	img.fill(bg)
+	for r: Rect2i in [Rect2i(20, 30, 10, 10), Rect2i(34, 30, 10, 10), Rect2i(20, 50, 11, 6)]:
+		img.fill_rect(r, Color.WHITE)
+	img.save_png(dir + "/murale.png")
+	var sc := Image.create(200, 120, false, Image.FORMAT_RGBA8)
+	sc.fill(Color(0, 0, 0, 0))
+	sc.fill_rect(Rect2i(100, 80, 11, 6), Color.YELLOW)
+	sc.save_png(dir + "/scritta_reg.png")
+	var js := {"id": "scritta", "capitolo": "prova", "scritte": [{"nome": "reg", "file": "scritta_reg.png"}],
+		"passaggio": {"centro": [100, 60], "camera": {"x": 10, "y": 20}}}
+	var f := FileAccess.open(dir + "/murale.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(js))
+	f.close()
+	SceneMural.dir = base
+	var st := {"id": "prova/scritta", "rivela_tick": 10, "scritte": [{"id": "tit", "zona": [16, 26, 34, 34]}]}
+	var ids := SceneMural.writing_ids(st)
+	check(ids.has("reg") and ids.has("tit") and not ids.has("logo"), "Scritte: il murale sa quali scritte ha", ", ".join(ids))
+
+	var m := SceneMural.new()
+	m.setup(st)
+	root.add_child(m)
+	check(m.errors.is_empty() and m.has_writing("tit") and m.has_writing("reg") and not m.has_writing("logo"),
+		"Scritte: quelle staccate dalla zona e quelle di murale.json", "; ".join(m.errors))
+	var wt: Dictionary = m.writings.get("tit", {})
+	var wr: Dictionary = m.writings.get("reg", {})
+	check(not wt.is_empty() and Vector2(wt["pos"]) == Vector2(16, 26) and int(wt["glyphs"]) == 3 and str(wt["mode"]) == "spray",
+		"Scritte: la zona staccata ha le sue tre lettere, su due righe, a spray", "%s" % [wt.get("glyphs")])
+	var hole := m._sprite.texture.get_image().get_pixel(24, 34)
+	var over: Image = wt.get("img")
+	check(hole.is_equal_approx(bg) and over != null and over.get_pixel(24 - 16, 34 - 26).is_equal_approx(Color.WHITE),
+		"Scritte: nella vignetta il buco si riempie col fondo, la scritta sta sopra", "%s" % hole)
+	check(not wr.is_empty() and Vector2(wr["pos"]) == Vector2(100, 80) and str(wr["mode"]) == "scrivi" and int(wr["glyphs"]) == 1,
+		"Scritte: quella di murale.json sta dove è dipinta, netta")
+	var wmat: ShaderMaterial = wt["mat"]
+	check(m.writing_done("manca") and not m.write("manca") and float(wmat.get_shader_parameter(&"progress")) == 0.0,
+		"Scritte: prima del passo non si vede; una che non c'è non ferma la scena")
+	m.write("tit", 30)
+	for i in 15:
+		m.tick()
+	var mid := float(wmat.get_shader_parameter(&"progress"))
+	check(not m.writing_done("tit") and mid > 0.3 and mid < 0.8, "Scritte: a metà dei tick è dipinta a metà", "%.2f" % mid)
+	for i in 15:
+		m.tick()
+	check(m.writing_done("tit") and float(wmat.get_shader_parameter(&"progress")) > 1.0, "Scritte: alla fine è dipinta tutta")
+	m.write("tit", 10, "scrivi")
+	check(str(wt["mode"]) == "scrivi" and (wt["drips"] as Array).is_empty() and float(wmat.get_shader_parameter(&"fresh")) == 0.0
+		and not m.writing_done("tit"), "Scritte: col modo «scrivi» riparte netta, senza colature né vernice fresca")
+	check(m.handoff_camera() == Vector2(10, 20), "Sciogli: la telecamera del gioco al passaggio è quella di murale.json")
+	m.melt(20)
+	check(m.melting and m.closing and bool(m._mat.get_shader_parameter(&"melt"))
+		and m._mat.get_shader_parameter(&"melt_center") == Vector2(100, 60), "Sciogli: parte dal centro del passaggio")
+	for i in 20:
+		m.tick()
+	check(m.is_closed(), "Sciogli: in \"rivela_tick\" il murale se n'è andato")
+	m.free()
+
+	# Nel lettore: il nero sotto il murale, le bande solo sotto, la scritta, e lo scioglimento che lascia
+	# la telecamera del gioco dove dice il murale.
+	var sd := SceneData.new()
+	sd.id = "prova_scritte"
+	sd._parse({"formato": 1, "spazio": "stanza", "passi": [
+		{"fai": "nero", "entra": true, "tick": 1},
+		{"fai": "murale", "id": "prova/scritta", "rivela_tick": 10, "tick": 20, "scritte": [{"id": "tit", "zona": [16, 26, 34, 34]}]},
+		{"fai": "bande", "entra": true, "sopra": false},
+		{"fai": "scritta", "id": "tit", "tick": 10},
+		{"fai": "nero", "entra": false, "tick": 1},
+		{"fai": "murale", "sciogli": true, "rivela_tick": 10}]})
+	SceneData._cache["prova_scritte"] = sd
+	var room := _prologue_room()
+	room._scene_request = {"id": "prova_scritte", "poses": {}}
+	room._start_scene()
+	var sp := room.scene
+	var sim_tick := room.tick
+	var black_max := 0.0
+	var black_under := false
+	var top_off := false
+	var melt_cam: Variant = null
+	var frames := 0
+	while sp != null and is_instance_valid(sp) and sp.holds_sim() and frames < 400:
+		room._scene_frame()
+		frames += 1
+		black_max = maxf(black_max, sp._black_a)
+		if sp._black_a > 0.0 and not sp._murals.is_empty():
+			black_under = black_under or sp._black.get_index() < sp._murals[0].get_index()
+		top_off = top_off or (sp._step_i >= 3 and not sp._bars_top)
+		if melt_cam == null and not sp._murals.is_empty() and sp._murals[-1].melting:
+			melt_cam = sp._view_center(sp._cam_c, sp._cam_z)
+	check(black_max == 1.0 and black_under, "Nero: entra sopra il gioco e sotto i murales")
+	check(top_off, "Bande: con \"sopra\" falso entra solo quella di sotto")
+	check(melt_cam == Vector2(10, 20) + View.SIZE / 2.0, "Sciogli: sotto il murale la telecamera è già quella del gioco", "%s" % [melt_cam])
+	check(frames < 400 and sp._murals.is_empty() and room.tick == sim_tick,
+		"Sciogli: la scena aspetta lo scioglimento, con la simulazione ferma", "%d" % frames)
+	for i in ScenePlayer.OUTRO + 2:
+		if room.scene != null:
+			room._scene_frame()
+	_free_room(room)
+
+	# Saltata prima dello scioglimento: il murale si scioglie, non si chiude a spray.
+	var sd2 := SceneData.new()
+	sd2.id = "prova_scritte_2"
+	sd2._parse({"formato": 1, "spazio": "stanza", "passi": [{"fai": "murale", "id": "prova/scritta", "rivela_tick": 10},
+		{"fai": "attendi", "tick": 500}, {"fai": "murale", "sciogli": true}]})
+	SceneData._cache["prova_scritte_2"] = sd2
+	room = _prologue_room()
+	room._scene_request = {"id": "prova_scritte_2", "poses": {}}
+	room._start_scene()
+	sp = room.scene
+	for i in 40:
+		room._scene_frame()
+	var mm := sp.mural()
+	sp._skip()
+	check(mm != null and mm.melting, "Sciogli: se la scena si salta prima, il murale si scioglie lo stesso")
+	for i in ScenePlayer.OUTRO + 2:
+		if room.scene != null:
+			sp.tick()
+	check(room.scene == null, "Sciogli: saltata, la scena finisce nell'uscita")
+	_free_room(room)
+	SceneData.clear_cache()
+	SceneMural.dir = SceneMural.DIR_DEFAULT
+	for n in ["murale.png", "scritta_reg.png", "murale.json"]:
+		DirAccess.remove_absolute(dir + "/" + n)
+	DirAccess.remove_absolute(dir)
+	DirAccess.remove_absolute(base + "/prova")
+	DirAccess.remove_absolute(base)
+
+	# I murales veri: MP08 riusa MP06 e il logo, le righe di MP10, i titoli staccati di MP05 e MP13.
+	var m8 := SceneMural.new()
+	m8.setup({"id": "prologo/mp08_titolo"})
+	check(SceneMural.exists({"id": "prologo/mp08_titolo"}) and m8.errors.is_empty() and m8.size == Vector2(480, 270)
+		and m8._figures.size() == 2 and m8.has_writing("logo") and m8.handoff_camera() == Vector2(0, 230),
+		"Murales: MP08 riusa MP06 con le sue figure, ha il logo e si scioglie a cam (0, 230)", "; ".join(m8.errors))
+	m8.free()
+	var m10 := SceneMural.new()
+	m10.setup({"id": "prologo/mp10_registro"})
+	var regs := true
+	for i in range(1, 5):
+		regs = regs and m10.has_writing("registro_%d" % i)
+	check(m10.errors.is_empty() and regs, "Murales: MP10 ha le quattro righe del registro", "; ".join(m10.errors))
+	m10.free()
+	for pair: Array in [["prologo/mp05_carmine", "scritta_1", [118, 1, 230, 47]], ["prologo/mp13_tetti", "titolo_1", [135, 18, 245, 26]]]:
+		var mz := SceneMural.new()
+		mz.setup({"id": pair[0], "scritte": [{"id": pair[1], "zona": pair[2]}]})
+		var w: Dictionary = mz.writings.get(pair[1], {})
+		check(mz.errors.is_empty() and not w.is_empty() and int(w["glyphs"]) >= 6,
+			"Murales: da %s si stacca la scritta %s, lettera per lettera" % [pair[0], pair[1]], "%s" % [w.get("glyphs")])
+		mz.free()
+
+
 ## I rinforzi al muro: GIG in cima al muro del cimitero chiede la scena; la scena recita da sola, senza
 ## battute, con la simulazione ferma; i rider restano sotto il muro, GIG riparte da dov'era.
 func _test_rinforzi() -> void:
@@ -2479,10 +2651,17 @@ func _test_scene_files() -> void:
 				found = found or ResourceLoader.exists("res://assets/ui/closeups/%s.png" % n)
 			if not found:
 				bad.append("primo piano %s" % cu)
+		var writings: Array = []
 		for st: Dictionary in sd.steps:
-			if str(st.get("fai", "")) == "murale" and not bool(st.get("chiudi", false)) and not SceneMural.exists(st):
-				bad.append("murale %s" % str(st.get("id", "")))
-		check(bad.is_empty(), "Scene: attori, fogli, primi piani e murales del copione %s ci sono" % id, ", ".join(bad))
+			var fai := str(st.get("fai", ""))
+			if fai == "murale" and not bool(st.get("chiudi", false)) and not bool(st.get("sciogli", false)):
+				if not SceneMural.exists(st):
+					bad.append("murale %s" % str(st.get("id", "")))
+				else:
+					writings.append_array(SceneMural.writing_ids(st))
+			if fai == "scritta" and not writings.has(str(st.get("id", ""))):
+				bad.append("scritta %s" % str(st.get("id", "")))
+		check(bad.is_empty(), "Scene: attori, fogli, primi piani, murales e scritte del copione %s ci sono" % id, ", ".join(bad))
 		if sd.lines_file == "" or not SceneLines.available(sd.lines_file):
 			check(true, "Scene: le battute del copione %s (file privato assente: controllo saltato)" % id)
 			continue
@@ -2502,7 +2681,7 @@ func _test_scene_files() -> void:
 				leaked.append(lid)
 			if ScenePlayer._wrap(text, View.W - 2 * ScenePlayer.TEXT_X).size() > 2:
 				long.append(lid)
-			if md != "" and not md.contains("«%s»" % text):
+			if md != "" and not md.contains("«%s»" % text) and not md.contains("\"%s\"" % text):
 				differ.append(lid)
 		check(missing.is_empty(), "Scene: ogni battuta del copione %s ha il suo testo nel file privato" % id, ", ".join(missing))
 		check(leaked.is_empty(), "Scene: il copione pubblico %s non contiene il testo delle battute" % id, ", ".join(leaked))

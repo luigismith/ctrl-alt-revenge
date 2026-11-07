@@ -1,0 +1,56 @@
+{
+ "formato": 1,
+ "id": "introduzione",
+ "nota": "L'introduzione da «Nuova partita» (decisione 68, stile misto): i murales di Totò, dal nero all'ultimo quadro, che si scioglie nel prologo giocabile al cimitero, con lo schermo a cam_x 0 e cam_y 230. Il copione privato dei murales dice cosa succede in ogni quadro. Le battute stanno nel file privato; le scritte sul muro sono nelle immagini. Regia proposta da Claude il 7 novembre 2026, da rivedere in gioco.",
+ "spazio": "stanza",
+ "rif": "",
+ "battute": "prologo",
+ "musica": "",
+ "attori": {
+  "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
+  "narratore": {"fuori_campo": true, "nome": "", "colore": "#ece8dc"},
+  "toto": {"fuori_campo": true, "nome": "TOTÒ", "colore": "#ff9a5a"}
+ },
+ "passi": [
+  {"fai": "bande", "entra": false, "tick": 1, "aspetta": false},
+  {"fai": "nero", "entra": true, "tick": 1},
+  {"fai": "attendi", "tick": 240},
+
+  {"fai": "murale", "id": "prologo/mp01_nube", "rivela_tick": 120, "tick": 420},
+  {"fai": "bande", "entra": true},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_1"},
+  {"fai": "battuta", "chi": "toto", "id": "toto_1"},
+
+  {"fai": "murale", "id": "prologo/mp03_taranto", "rivela_tick": 90, "tick": 480},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_2"},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_3"},
+
+  {"fai": "bande", "entra": false, "tick": 12, "aspetta": false},
+  {"fai": "murale", "id": "prologo/mp05_carmine", "rivela": false, "da": [16, 0], "a": [16, 4], "tick": 600,
+   "scritte": [{"id": "scritta_1", "zona": [118, 1, 230, 47]}]},
+  {"fai": "attendi", "tick": 30},
+  {"fai": "scritta", "id": "scritta_1", "tick": 180},
+  {"fai": "attendi", "tick": 150},
+
+  {"fai": "murale", "id": "prologo/mp06_cimitero", "rivela_tick": 90, "tick": 360},
+  {"fai": "attendi", "tick": 60},
+  {"fai": "bande", "entra": true},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_4"},
+
+  {"fai": "bande", "entra": false, "tick": 12, "aspetta": false},
+  {"fai": "murale", "id": "prologo/mp07a_occhio", "rivela": false, "tick": 300},
+  {"fai": "attendi", "tick": 240},
+
+  {"fai": "murale", "id": "prologo/mp07b_caffe", "rivela": false},
+  {"fai": "bande", "entra": true},
+  {"fai": "battuta", "chi": "gig", "id": "gig_1", "primo_piano": ""},
+
+  {"fai": "bande", "entra": false, "tick": 12, "aspetta": false},
+  {"fai": "murale", "id": "prologo/mp08_titolo", "rivela": false},
+  {"fai": "attendi", "tick": 20},
+  {"fai": "scritta", "id": "logo", "tick": 180},
+  {"fai": "attendi", "tick": 70},
+  {"fai": "nero", "entra": false, "tick": 1},
+  {"fai": "murale", "sciogli": true, "rivela_tick": 90}
+ ]
+}

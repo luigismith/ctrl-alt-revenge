@@ -1,0 +1,31 @@
+{
+ "formato": 1,
+ "id": "ricordo_mimmo",
+ "nota": "Il ricordo alla lapide di Mimmo (prologo): SU davanti alla lapide, la camera si stringe sul bicchierino, il murale del registro si dipinge a spray sul gioco fermo, le righe del registro si scrivono nell'occhio, poi lo spray all'indietro e GIG è dov'era. Coordinate rispetto al segno M della mappa. Le battute stanno nel file privato. Regia proposta da Claude il 7 novembre 2026, da rivedere in gioco.",
+ "spazio": "stanza",
+ "rif": "M",
+ "battute": "prologo",
+ "musica": "",
+ "attori": {
+  "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
+  "narratore": {"fuori_campo": true, "nome": "", "colore": "#ece8dc"}
+ },
+ "passi": [
+  {"fai": "camera", "su": "gig", "alto": 60, "zoom": 2, "tick": 60},
+  {"fai": "attendi", "tick": 20},
+
+  {"fai": "murale", "id": "prologo/mp10_registro", "rivela_tick": 90, "tick": 480},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_1"},
+  {"fai": "scritta", "id": "registro_1", "modo": "scrivi"},
+  {"fai": "attendi", "tick": 30},
+  {"fai": "scritta", "id": "registro_2", "modo": "scrivi"},
+  {"fai": "attendi", "tick": 30},
+  {"fai": "scritta", "id": "registro_3", "modo": "scrivi"},
+  {"fai": "attendi", "tick": 30},
+  {"fai": "scritta", "id": "registro_4", "modo": "scrivi"},
+  {"fai": "attendi", "tick": 60},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_2"},
+
+  {"fai": "murale", "chiudi": true, "rivela_tick": 70}
+ ]
+}

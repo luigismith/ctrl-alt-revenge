@@ -106,10 +106,13 @@ var _follow: Dictionary = {}
 var _bars: float = 0.0
 var _bars_target: float = 1.0
 var _bars_speed: float = 1.0 / INTRO
+## Anche la banda di sopra (false: solo quella di sotto, per le battute sotto una scritta in alto).
+var _bars_top: bool = true
 var _ui_alpha: float = 1.0
 var _outro_t: int = 0
 var _outro_c: Vector2 = Vector2.ZERO
 var _outro_z: float = 1.0
+var _outro_bars: float = 1.0
 ## La battuta in corso: {"who", "name", "color", "lines", "chars", "shown", "t", "hold"}.
 var _line: Dictionary = {}
 ## La voce della battuta in corso (SceneVoices), solo con il suono: {"env", "ticks", "k"}.
@@ -134,6 +137,11 @@ var _fx: Node2D
 ## I murales aperti (SceneMural), dal più vecchio: uno nuovo si dipinge sopra quello di prima.
 var _mural_layer: CanvasLayer
 var _murals: Array[SceneMural] = []
+## Il nero (il passo «nero»): sopra il gioco e sotto i murales.
+var _black: ColorRect
+var _black_a: float = 0.0
+var _black_target: float = 0.0
+var _black_speed: float = 1.0
 ## Gli aloni del laser (solo disegno).
 var _glow: Glow
 
@@ -169,6 +177,12 @@ func _build_layers() -> void:
 	_mural_layer = CanvasLayer.new()
 	_mural_layer.layer = 14
 	add_child(_mural_layer)
+	_black = ColorRect.new()
+	_black.size = View.SIZE
+	_black.color = Color.BLACK
+	_black.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_black.visible = false
+	_mural_layer.add_child(_black)
 	# Lo sfondo sfocato sotto l'interfaccia della scena e sopra il gioco (anche sopra l'interfaccia
 	# dell'arena, che durante la scena è comunque spenta).
 	_blur_layer = CanvasLayer.new()
@@ -202,6 +216,11 @@ func _build_layers() -> void:
 
 
 func _add_puppet(actor: String, a: Dictionary, pose: Dictionary) -> void:
+	if _fx.get_parent() == null:
+		_parent.add_child(_fx)
+	# Chi parla fuori campo (il narratore delle didascalie, Totò nei suoi murales) non ha comparsa.
+	if bool(a.get("fuori_campo", false)):
+		return
 	var fd: FighterData = null
 	var tipo := str(a.get("tipo", ""))
 	if tipo != "" and ResourceLoader.exists("res://data/fighters/%s.tres" % tipo):
@@ -231,8 +250,6 @@ func _add_puppet(actor: String, a: Dictionary, pose: Dictionary) -> void:
 	_parent.add_child(p)
 	p.sync()
 	puppets[actor] = p
-	if _fx.get_parent() == null:
-		_parent.add_child(_fx)
 
 
 # ------------------------------------------------------------------ tick
@@ -261,6 +278,7 @@ func tick() -> void:
 	_tick_closeup()
 	_tick_laser()
 	_tick_murals()
+	_tick_black()
 	_apply_camera()
 	_redraw()
 
@@ -290,6 +308,8 @@ func _start_step(st: Dictionary) -> void:
 	match str(st["fai"]):
 		"bande":
 			_bars_target = 1.0 if bool(st.get("entra", true)) else 0.0
+			if _bars_target > 0.0:
+				_bars_top = bool(st.get("sopra", true))
 			_bars_speed = 1.0 / maxf(1.0, float(st.get("tick", INTRO)))
 			if wait:
 				_wait = func() -> bool: return is_equal_approx(_bars, _bars_target)
@@ -347,6 +367,13 @@ func _start_step(st: Dictionary) -> void:
 			_send_event(str(st["nome"]))
 		"murale":
 			_start_mural(st, wait)
+		"scritta":
+			_start_writing(st, wait)
+		"nero":
+			_black_target = 1.0 if bool(st.get("entra", true)) else 0.0
+			_black_speed = 1.0 / maxf(1.0, float(st.get("tick", INTRO)))
+			if wait:
+				_wait = func() -> bool: return is_equal_approx(_black_a, _black_target)
 
 
 func _send_event(e: String) -> void:
@@ -658,8 +685,15 @@ func _draw_fx() -> void:
 # ------------------------------------------------------------------ murales
 
 ## Il passo «murale»: ne apre uno (a spray sopra il gioco o sopra il murale di prima) o, con "chiudi",
-## toglie l'ultimo con lo spray all'indietro.
+## toglie l'ultimo con lo spray all'indietro, o con "sciogli" lo scioglie nel gioco.
 func _start_mural(st: Dictionary, wait: bool) -> void:
+	if bool(st.get("sciogli", false)):
+		if _murals.is_empty():
+			return
+		_melt_murals(int(st.get("rivela_tick", st.get("tick", SceneMural.MELT_TICKS))))
+		if wait:
+			_wait = func() -> bool: return _murals.is_empty()
+		return
 	if bool(st.get("chiudi", false)):
 		if _murals.is_empty():
 			return
@@ -680,6 +714,43 @@ func _start_mural(st: Dictionary, wait: bool) -> void:
 	_murals.append(m)
 	if wait:
 		_wait = func() -> bool: return not is_instance_valid(m) or m.is_revealed() or m.closing
+
+
+## Tutti i murales si sciolgono nel gioco in `n` tick; se quello in cima dice dove sta la telecamera del
+## gioco al passaggio, la scena la mette lì sotto (il gioco che si vede combacia col murale).
+func _melt_murals(n: int) -> void:
+	if _murals.is_empty():
+		return
+	var cam: Variant = _murals[-1].handoff_camera()
+	for m: SceneMural in _murals:
+		m.melt(n)
+	if cam is Vector2:
+		_move = {}
+		_follow = {}
+		_cam_z = 1.0
+		_cam_c = (cam as Vector2) + View.SIZE / 2.0 - _origin - _offset
+		_apply_camera()
+
+
+## Il passo «scritta»: la spruzza (o la scrive) sul murale più in alto che ce l'ha.
+func _start_writing(st: Dictionary, wait: bool) -> void:
+	var id := str(st["id"])
+	for i in range(_murals.size() - 1, -1, -1):
+		var m: SceneMural = _murals[i]
+		if m.has_writing(id):
+			m.write(id, int(st.get("tick", -1)), str(st.get("modo", "")))
+			if wait:
+				_wait = func() -> bool: return not is_instance_valid(m) or m.writing_done(id)
+			return
+	push_warning("scena %s: nessun murale aperto ha la scritta \"%s\"" % [data.id, id])
+
+
+func _tick_black() -> void:
+	_black_a = move_toward(_black_a, _black_target, _black_speed)
+	_black.visible = _black_a > 0.0
+	_black.color.a = _black_a
+	if _black.get_index() != 0:
+		_mural_layer.move_child(_black, 0)
 
 
 func _tick_murals() -> void:
@@ -709,6 +780,9 @@ func mural() -> SceneMural:
 func _skip() -> void:
 	for i in range(_step_i, data.steps.size()):
 		var st: Dictionary = data.steps[i]
+		# Una scena che finisce sciogliendosi nel gioco si scioglie anche saltandola.
+		if str(st["fai"]) == "murale" and bool(st.get("sciogli", false)):
+			_melt_murals(OUTRO)
 		match str(st["fai"]):
 			"evento":
 				_send_event(str(st["nome"]))
@@ -746,6 +820,7 @@ func _begin_outro() -> void:
 		m.close(OUTRO)
 	_outro_c = _view_center(_cam_c, _cam_z)
 	_outro_z = _cam_z
+	_outro_bars = _bars
 	_outro_t = 0
 	phase = Phase.OUTRO
 	host.scene_handoff(self)
@@ -758,10 +833,13 @@ func _tick_outro() -> void:
 	var game: Vector2 = host.scene_camera_center()
 	var z := exp(lerpf(log(_outro_z), 0.0, k))
 	host.scene_apply_camera(_outro_c.lerp(game, k), z)
-	_bars = 1.0 - k
+	_bars = _outro_bars * (1.0 - k)
 	host.scene_ui_alpha(k)
 	_tick_closeup()
 	_tick_murals()
+	_black_target = 0.0
+	_black_speed = maxf(_black_speed, 1.0 / OUTRO)
+	_tick_black()
 	_redraw()
 	if _outro_t >= OUTRO:
 		_finish()
@@ -813,7 +891,8 @@ func _redraw() -> void:
 func _draw_ui() -> void:
 	var h := roundf(BAR_H * _ease(_bars))
 	if h > 0.0:
-		_ui.draw_rect(Rect2(0, 0, View.W, h), C_BAR)
+		if _bars_top:
+			_ui.draw_rect(Rect2(0, 0, View.W, h), C_BAR)
 		_ui.draw_rect(Rect2(0, View.H - h, View.W, h), C_BAR)
 	for c: Dictionary in [_cu_old, _cu]:
 		if not c.is_empty():
@@ -861,10 +940,12 @@ func _draw_tex(tex: Texture2D, r: Rect2, mirror: bool, mod: Color) -> void:
 func _draw_line_text() -> void:
 	var name_s := str(_line["name"])
 	var col: Color = _line["color"]
-	var tab_w := UiFont.text_width(name_s) + 8
 	var y0 := View.H - BAR_H
-	_ui.draw_rect(Rect2(TEXT_X - 4, y0 - 11, tab_w, 11), C_BAR)
-	UiFont.draw_text(_ui, Vector2(TEXT_X, y0 - 11), name_s, col, 1, 0, Color(0, 0, 0, 0), Color(0, 0, 0, 0))
+	# Senza nome (le didascalie del narratore) niente linguetta.
+	if name_s != "":
+		var tab_w := UiFont.text_width(name_s) + 8
+		_ui.draw_rect(Rect2(TEXT_X - 4, y0 - 11, tab_w, 11), C_BAR)
+		UiFont.draw_text(_ui, Vector2(TEXT_X, y0 - 11), name_s, col, 1, 0, Color(0, 0, 0, 0), Color(0, 0, 0, 0))
 	var left := int(_line["shown"])
 	var lines: PackedStringArray = _line["lines"]
 	for i in mini(lines.size(), 2):

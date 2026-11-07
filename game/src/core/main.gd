@@ -102,7 +102,7 @@ func _show_title() -> void:
 	t.start_game.connect(func() -> void: _go(_start_level))
 	t.show_credits.connect(func() -> void: _go(_show_credits))
 	t.test_room.connect(func() -> void: _go(_start_room))
-	t.prologue.connect(func() -> void: _go(_start_prologue))
+	t.prologue.connect(func() -> void: _go(_start_prologue.bind(false, true)))
 	t.quit_game.connect(func() -> void: Game.quit_clean())
 	_set_screen(t)
 
@@ -153,13 +153,15 @@ func _start_level(after_prologue: bool = false) -> void:
 
 ## NUOVA PARTITA: il prologo e, alla fine, lo slice, con la dissolvenza lenta.
 func _start_new_game() -> void:
-	_start_prologue(true)
+	_start_prologue(true, true)
 
 
 ## Il prologo in grigio: gira sul motore della stanza di prova. `then_level`: alla fine prosegue nello slice
-## (NUOVA PARTITA) invece di chiudere con la fine della demo (CAPITOLI → PROLOGO).
-func _start_prologue(then_level: bool = false) -> void:
+## (NUOVA PARTITA) invece di chiudere con la fine della demo (CAPITOLI → PROLOGO). `intro`: comincia con
+## l'introduzione coi murales (dal menu sì, dalla riga di comando --prologue no).
+func _start_prologue(then_level: bool = false, intro: bool = false) -> void:
 	var p := Prologue.new()
+	p.play_intro = intro
 	if then_level:
 		p.next_title = AFTER_PROLOGUE
 	_start_room(p)
