@@ -251,8 +251,9 @@ Mondo largo 2400 px, cioè 5 schermate. La telecamera segue GIG su posizioni int
 Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di partenza di GIG e gli oggetti di scena sono descritti in `game/data/levels/sotto_la_linea.json`.
 
 **Atmosfera:**
-- notte, pioggia leggera, neon rossi, arancioni e un solo cyan;
-- asfalto viola bagnato, palazzi blu-viola;
+- sera di Wind Day: il vento porta la polvere rossa del minerale e non piove (7 novembre 2026);
+- una luce rosso-arancio sui piani dipinti, che lascia viola le ombre; neon rossi e arancioni, e il cyan solo per GIG;
+- asfalto scuro con le pozze orlate di fango rosso (il fondale si sta rifacendo partendo da basi di ChatGPT);
 - la ferrovia sopraelevata in primo piano in alto.
 
 **Sfondi** in `game/assets/env/sotto_la_linea/`: un PNG per piano più `layers.json`:
@@ -283,8 +284,9 @@ Fra un'ondata e l'altra compare la freccia "VAI ▶". Le ondate, il punto di par
 **Luci dinamiche** (direzione del §1: tecnologia di oggi). Il JSON del livello ha un elenco `lights`, una luce per riga: `{"kind", "x", "y", "color", "energy", "radius", "height"}` in coordinate del mondo (`height` in px, per la normal map; `lamp` ha anche `scroll`). Tipi:
 - `neon`: le insegne dello sfondo (posizioni e colori presi dai gruppi luminosi di `backdrop_emis.png`), con la stessa pulsazione lenta dei neon;
 - `lamp`: le lampade al sodio della travata `fg`, che si spostano con la sua parallasse (1,25);
-- `cable`: le scintille del cavo, accese nei fotogrammi del lampo (0 e 3 del ciclo);
-- `lightning`: il lampo del temporale sopra la vista, ogni 9 s circa, deterministico.
+- `cable`: le scintille del cavo, accese nei fotogrammi del lampo (0 e 3 del ciclo), di un arancio-bianco da scintilla (#ffd2a0), perché il cyan spetta a GIG.
+
+Il JSON ha anche `"weather": "wind_day"` e `beacons`, le luci della torre sul piano `far` che lampeggiano in sincrono. Il lampo del temporale (`lightning`) non c'è più.
 
 Le luci illuminano solo gli attori con la normal map (maschera `Fighter.LIGHT_MASK_ACTORS`), mai gli sfondi, che hanno la luce già dipinta. La luce è a 3 bande (come le ombre della pixel art): sul bordo della sagoma arriva il colore della luce, dentro schiarisce senza cambiare tinta, così l'ocra di GIG non vira. Sui colori chiari conta meno (× 1 − 0,6 × la luminanza del colore: barba, capelli e scintille non bruciano) e il contorno scuro, con le linee interne dello stesso colore, ne resta fuori come l'inchiostro. Sono solo disegno e non toccano la simulazione: replay e hash non cambiano. F5 le accende e spegne (build di debug); `--no-lights` parte spento.
 - Gli sfondi `backdrop`, `floor`, `near` e `fg` sono in cel shading a 3 toni, senza retino: luce chiave a toni, luce dei neon e riflessi sul bagnato a zone con il bordo netto, aloni ad anelli netti. Dentro la cornice delle insegne l'alone è pieno; sotto le lampade a muro c'è un cono di luce a due bande; nella fascia calpestabile i riflessi sono più scuri, per non confondersi con gli stivali.
@@ -310,7 +312,7 @@ Campi in più di `fx.json`:
 - `flip`: l'effetto è asimmetrico e va specchiato con la direzione del colpo (il codice specchia comunque tutti gli effetti secondo la direzione);
 - `ombra` ha tre varianti: 0 grande (58×12, bruto e corpi a terra), 1 media (44×10, GIG e punk), 2 piccola (30×8, oggetti). Il codice sceglie dalla larghezza dell'ombra del personaggio e passa a quella più piccola sopra i 45 px d'altezza; si disegna a 1x in (x, y), prima dello sprite.
 
-Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza 0,25), `rain_splash` (schizzo a terra), `rain_sheet` (tessera di pioggia 128×128, facoltativa, non usata) e `ko_flash` (lampo del KO finale di un'ondata). La pioggia è deterministica, con un generatore suo.
+Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza 0,25), `rain_splash` (schizzo a terra), `rain_sheet` (tessera di pioggia 128×128, facoltativa, non usata) e `ko_flash` (lampo del KO finale di un'ondata). Dal 7 novembre 2026 nello slice e nel titolo non piove: c'è il Wind Day (`game/src/fx/wind_day.gd`), con la polvere su tre piani, le raffiche ogni 4-8 s, la tinta rossa e le pozze. È solo disegno, con un generatore suo: replay e hash non lo vedono.
 
 **Interfaccia** in `game/assets/ui/`, descritta da `ui.json` (una chiave per elemento, con `image` e `size`):
 - `logo` e `subtitle`: il logo "CTRL+ALT REVENGE!" con riempimento crema e bordo rosso scuro, come la locandina, e la scritta "PICCHIA DURO A SCORRIMENTO";
@@ -379,7 +381,7 @@ game/                 progetto Godot
   src/core/           Game, Controls, flusso delle schermate, opzioni della riga di comando
   src/combat/         Fighter, FrameAnim, CombatSystem, AttackDirector, AttackData
   src/actors/         GIG, Thug (IA)
-  src/stage/          livello, telecamera, parallasse, ondate, oggetti di scena, pioggia, effetti, ombre
+  src/stage/          livello, telecamera, parallasse, ondate, oggetti di scena, effetti, ombre (il Wind Day sta in src/fx/)
   src/ui/             HUD, titolo, pausa, game over, fine demo, crediti
   src/audio/          Music, Sfx
   src/debug/          sovrapposizione hitbox, replay, pilota automatico
