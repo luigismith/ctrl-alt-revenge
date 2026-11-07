@@ -9,8 +9,10 @@ extends Node2D
 ## - murale_rivela.png: l'ordine dello spray in grigio, 0 compare subito e 255 per ultimo;
 ## - murale.json: "scorri" {"da", "a"} (l'angolo in alto a sinistra del riquadro dello schermo), oppure
 ##   "camera" {"zoom_da", "centro_da", "zoom_a", "centro_a"}; le "figure" {"file", "x", "y",
-##   "profondita"} sono strati davanti alla vignetta, con la parallasse; "riusa" {"murale", "logo"}
-##   prende immagini e figure da un altro murale (MP08 riusa MP06) e il logo da spruzzare a "logo".pos;
+##   "profondita", "nome", "blink", "talk"} sono strati davanti alla vignetta, con la parallasse (con
+##   "blink" e "talk" il volto batte le palpebre e muove la bocca quando l'attore "nome" parla);
+##   "riusa" {"murale", "logo"} prende immagini e figure da un altro murale (MP08 riusa MP06) e il logo
+##   da spruzzare a "logo".pos;
 ##   "scritte" [{"nome", "file"}] sono scritte sopra la vignetta, grandi come lei; "passaggio"
 ##   {"centro", "camera"} dice da dove si scioglie nel gioco e dove sta allora la telecamera del gioco.
 ##
@@ -128,7 +130,9 @@ var writings: Dictionary = {}
 
 var _sprite: Sprite2D
 var _mat: ShaderMaterial
-var _figures: Array = []   # [{"sprite", "pos" (nel murale), "depth"}]
+var _figures: Array = []   # [{"sprite", "pos" (nel murale), "depth", "name", "tex", "blink", "talk"}]
+## Chi parla adesso (nome → bocca aperta): lo dà il lettore, per le figure con la variante "talk".
+var mouth: Callable
 
 
 ## La cartella di un murale.
@@ -255,8 +259,17 @@ func setup(st: Dictionary) -> void:
 		s.centered = false
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		add_child(s)
+		# Il volto (MP12): palpebre chiuse ("blink") e bocca aperta ("talk"), grandi come la figura.
+		var face := {}
+		for k: String in ["blink", "talk"]:
+			face[k] = null
+			if str((f as Dictionary).get(k, "")) != "":
+				face[k] = _texture(base.path_join(str(f[k])))
+				if face[k] == null:
+					errors.append("figura mancante: %s" % str(f[k]))
 		_figures.append({"sprite": s, "pos": Vector2(float(f.get("x", 0)), float(f.get("y", 0))),
-			"depth": float(f.get("profondita", 1.0))})
+			"depth": float(f.get("profondita", 1.0)), "name": str(f.get("nome", "")), "tex": ft,
+			"blink": face["blink"], "talk": face["talk"]})
 	# Le scritte, sopra figure e vignetta: quelle staccate, quelle di murale.json (immagini grandi come la
 	# vignetta) e il logo di "riusa".
 	for l: Variant in lifted:
@@ -296,7 +309,12 @@ func _frame_from(st: Dictionary) -> void:
 	c1 = mid
 	z0 = 1.0
 	z1 = 1.0
-	if st.has("da") or st.has("a"):
+	if st.has("centro") or st.has("zoom"):
+		c0 = _vec(st.get("centro", null), mid)
+		c1 = c0
+		z0 = maxf(0.25, float(st.get("zoom", 1.0)))
+		z1 = z0
+	elif st.has("da") or st.has("a"):
 		c0 = _vec(st.get("da", st.get("a")), mid - half) + half
 		c1 = _vec(st.get("a", st.get("da")), mid - half) + half
 	elif cam.has("centro_da") or cam.has("zoom_da"):
@@ -431,6 +449,7 @@ func _apply() -> void:
 		s.scale = Vector2(z, z)
 		s.position = (half + (p - c0) * z - (c - c0) * z * depth).round()
 		s.modulate.a = fa
+		s.texture = _figure_frame(f)
 	# Le scritte: dipinte sul muro (si muovono con la vignetta), e se ne vanno con lei.
 	for w: Dictionary in writings.values():
 		var node: Node2D = w["node"]
@@ -440,6 +459,18 @@ func _apply() -> void:
 		var wk := 0.0 if not bool(w["on"]) else float(w["k"]) / float(w["n"])
 		(w["mat"] as ShaderMaterial).set_shader_parameter(&"progress", wk * (1.0 + float(w["edge"])))
 		node.queue_redraw()
+
+
+## La texture della figura adesso: la bocca si muove quando parla, le palpebre battono ogni 150-230 tick
+## per 7 tick (dal tick e dal nome, come i primi piani del lettore).
+func _figure_frame(f: Dictionary) -> Texture2D:
+	var who := str(f["name"])
+	if f["talk"] != null and mouth.is_valid() and bool(mouth.call(who)):
+		return f["talk"]
+	var period := 150 + (who.hash() & 63) + 16
+	if f["blink"] != null and (t + (who.hash() & 31)) % period < 7:
+		return f["blink"]
+	return f["tex"]
 
 
 # ------------------------------------------------------------------ scritte

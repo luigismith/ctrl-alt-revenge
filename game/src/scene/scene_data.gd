@@ -39,6 +39,9 @@ const STEPS := {
 	# Un primo piano senza parole, per "tick": uno sguardo, una reazione.
 	"primo_piano": ["chi", "primo_piano", "pieno", "tick"],
 	"suono": ["nome", "vol"],
+	# La musica: "tace" (vero) la sfuma via in "tick"; se no parte "brano" (o quello della scena, o quello
+	# che suonava prima della scena) in "tick". Senza suono non fa niente.
+	"musica": ["brano", "tace", "tick"],
 	# Il laser del messo: la linea rossa da "da" al "punto" di "a" per "tick", poi il segno.
 	"laser": ["da", "a", "punto", "tick", "segno"],
 	# Un evento per chi ospita la scena (per esempio "pioggia").
@@ -50,9 +53,10 @@ const STEPS := {
 	# "chiudi": true lo toglie con lo spray all'indietro e torna il gioco; "sciogli": true lo scioglie nel
 	# gioco dal centro del suo "passaggio", e la telecamera del gioco è già dove dice il murale. Si aspetta
 	# la fine dello spray. "scritte" [{"id", "zona": [x, y, w, h]}] stacca dalla vignetta le scritte già
-	# dipinte, da spruzzare poi col passo "scritta".
-	"murale": ["id", "capitolo", "da", "a", "tick", "rivela", "rivela_tick", "luci", "chiudi", "sciogli",
-		"scritte", "aspetta"],
+	# dipinte, da spruzzare poi col passo "scritta". "centro" [x, y] e "zoom" tengono il murale fermo su
+	# un'inquadratura (per esempio stretto sulla tastiera di MP11).
+	"murale": ["id", "capitolo", "da", "a", "centro", "zoom", "tick", "rivela", "rivela_tick", "luci", "chiudi",
+		"sciogli", "scritte", "aspetta"],
 	# Una scritta sul murale in cima (l'ultimo aperto che ce l'ha): "id" come nelle "scritte" del murale o
 	# del passo "murale", "logo" per il logo di "riusa"; in "tick" (se no qualche tick per lettera),
 	# "modo" "spray" (con le colature) o "scrivi" (netta, lettera per lettera).
@@ -142,7 +146,7 @@ func _parse(d: Dictionary) -> void:
 			var ci := SceneMural.split_id(st)
 			if ci[0] == "" or ci[1] == "":
 				errors.append("passo %d (murale): manca \"id\" come \"<capitolo>/<id>\"" % i)
-			for k in ["da", "a"]:
+			for k in ["da", "a", "centro"]:
 				if (st as Dictionary).has(k) and not ((st[k] is Array) and (st[k] as Array).size() == 2):
 					errors.append("passo %d (murale): \"%s\" vuole [x, y]" % [i, k])
 			continue

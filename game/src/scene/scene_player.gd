@@ -354,6 +354,9 @@ func _start_step(st: Dictionary) -> void:
 		"suono":
 			if sound:
 				Sfx.play(StringName(str(st["nome"])), 0.02, float(st.get("vol", 0.0)))
+		"musica":
+			if sound:
+				_music_step(st)
 		"laser":
 			var src: ScenePuppet = puppets[str(st["da"])]
 			var dst: ScenePuppet = puppets[str(st["a"])]
@@ -704,6 +707,7 @@ func _start_mural(st: Dictionary, wait: bool) -> void:
 			_wait = func() -> bool: return _murals.is_empty()
 		return
 	var m := SceneMural.new()
+	m.mouth = _mouth_open
 	m.setup(st)
 	if not m.errors.is_empty():
 		push_warning("scena %s: %s" % [data.id, "; ".join(m.errors)])
@@ -843,6 +847,22 @@ func _tick_outro() -> void:
 	_redraw()
 	if _outro_t >= OUTRO:
 		_finish()
+
+
+## Il passo «musica»: la scena prende in mano la musica, e alla fine torna quella di prima.
+func _music_step(st: Dictionary) -> void:
+	var fade := maxf(0.0, float(st.get("tick", 30)) / 60.0)
+	if _music_mode == 1:
+		Music.duck(false)
+	_music_mode = 2
+	if bool(st.get("tace", false)):
+		Music.stop(fade)
+		return
+	var track := StringName(str(st.get("brano", data.music)))
+	if track == &"" or not Music.has_track(track):
+		track = _music_prev
+	if track != &"" and Music.has_track(track):
+		Music.play(track, fade)
 
 
 func _finish() -> void:

@@ -59,12 +59,14 @@ const PIGNORAMENTO := "pignoramento"
 ## rispetto al cartello h va da dx +70 a +130, a dy -120 (sceneggiatura, «I rinforzi al muro»).
 const RINFORZI := "rinforzi"
 const RINFORZI_TOP := Vector3i(70, 130, -120)
-## La fine: la scritta resta END_HOLD tick (4 s), ATTACCO o SALTO la chiudono dopo END_SKIP.
 ## I murales di Totò nel prologo (docs/lore, i copioni dei murales): l'introduzione da «Nuova partita»,
-## il ricordo di Mimmo alla lapide e il passaggio al capitolo 1, prima del cartello della fine.
+## il ricordo di Mimmo alla lapide, il ricordo del primo braccio dopo il terzo tasto e il passaggio al
+## capitolo 1, prima del cartello della fine.
 const INTRO := "introduzione"
 const MIMMO := "ricordo_mimmo"
+const RICORDO_2064 := "ricordo_2064"
 const PASSAGGIO := "passaggio_1"
+## La fine: la scritta resta END_HOLD tick (4 s), ATTACCO o SALTO la chiudono dopo END_SKIP.
 const END_HOLD := 240
 const END_SKIP := 60
 
@@ -110,6 +112,8 @@ var weather: Weather
 ## La luce cyan del riavvio: un lampo breve sul GIG del gioco, che si spegne in REBOOT_LIGHT tick.
 ## Solo disegno: non entra nell'hash.
 const REBOOT_LIGHT := 34
+## La scarica del riavvio aspetta la fine del ricordo del 2064 (solo disegno).
+var _reboot_fx_pending: bool = false
 var _reboot_light: PointLight2D
 var _reboot_light_t: int = 0
 ## I riflessi sul pavimento bagnato dell'arena (solo disegno).
@@ -173,6 +177,7 @@ func _reset() -> void:
 	raining = cp >= CHECKPOINT_SIGNS.find("f")
 	if weather != null:
 		weather.set_rain(raining, true)
+	_reboot_fx_pending = false
 	vignette = ""
 	finished = false
 	end_t = 0
@@ -226,6 +231,8 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 				_after_vignette = ""
 				_open_vignette(next)
 			elif reboot_step == 3:
+				if SceneData.load_scene(RICORDO_2064).errors.is_empty():
+					request_scene(RICORDO_2064, {"gig": scene_pose_player("X")})
 				_finish_reboot()
 		return InputFrame.new()
 	# Da «Nuova partita»: l'introduzione, coi murales di Totò, si scioglie nel cimitero.
@@ -254,8 +261,12 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 				_on_event("reboot_key")
 				if reboot_step == 4:
 					reboot_step = 3
-					_open_vignette("riavvio")
-					_after_vignette = "naso"
+					# Col copione il naso viene prima e il ricordo del 2064 dopo; senza, le due vignette.
+					if SceneData.load_scene(RICORDO_2064).errors.is_empty():
+						_open_vignette("naso")
+					else:
+						_open_vignette("riavvio")
+						_after_vignette = "naso"
 			return InputFrame.new()
 	elif reboot_step in [1, 2]:
 		reboot_step = 0
@@ -314,7 +325,18 @@ func _finish_reboot() -> void:
 	player.arm_locked = false
 	player.boosts_left = player.boosts_max()
 	door_t = DOOR_BREAK
-	_on_event("reboot")
+	# Con il ricordo del 2064 la scarica si vede quando il murale si chiude.
+	if _scene_request.is_empty():
+		_on_event("reboot")
+	else:
+		_reboot_fx_pending = true
+
+
+func scene_end(sp: ScenePlayer) -> void:
+	super.scene_end(sp)
+	if _reboot_fx_pending:
+		_reboot_fx_pending = false
+		_on_event("reboot")
 
 
 ## GIG è entrato nell'arena del cancello: parte la scena del pignoramento (decisione 68; Luigi: «La
