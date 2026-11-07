@@ -30,21 +30,7 @@ precedence = "override"
 SPDX-FileCopyrightText = "2026 Luigi Massari"
 SPDX-License-Identifier = "LicenseRef-CAR-Assets"
 
-# 2b) Piani di "Sotto la Linea" ricolorati e ricomposti dai PNG CC0 di Warped City
-#     (la torre cyan di far.png è disegnata da noi): restano asset del gioco, con l'origine indicata.
-[[annotations]]
-path = [
-  "game/assets/env/sotto_la_linea/sky.png",
-  "game/assets/env/sotto_la_linea/far.png",
-  "game/assets/env/sotto_la_linea/far_emis.png",
-  "game/assets/env/sotto_la_linea/mid.png",
-  "game/assets/env/sotto_la_linea/mid_emis.png",
-]
-precedence = "override"
-SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]
-SPDX-License-Identifier = "LicenseRef-CAR-Assets"
-
-# 2c) Effetti sonori con uno strato di "Punch SFX" di DavidW (OpenGameArt, CC BY 4.0, modificati):
+# 2b) Effetti sonori con uno strato di "Punch SFX" di DavidW (OpenGameArt, CC BY 4.0, modificati):
 #     restano asset del gioco, con l'autore dell'originale indicato (vedi THIRD-PARTY-NOTICES.md).
 #     Gli altri effetti vengono da suoni CC0, che non chiedono annotazioni qui.
 [[annotations]]
@@ -68,20 +54,6 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # 4) Pack di terze parti e font: una tabella per pack, aggiunta insieme ai file
 #    (licenza copiata dal pack stesso, testo in LICENSES/, riga in THIRD-PARTY-NOTICES.md).
 
-# Warped City di Luis Zuno (ansimuz), OpenGameArt: solo i 4 PNG usati, così come sono nello zip.
-[[annotations]]
-path = "game/assets/third_party/ansimuz-warped-city/**"
-precedence = "override"
-SPDX-FileCopyrightText = "2019 Luis Zuno (ansimuz)"
-SPDX-License-Identifier = "CC0-1.0"
-
-# La scheda della fonte, dentro la cartella del pack, è documentazione nostra.
-[[annotations]]
-path = "game/assets/third_party/ansimuz-warped-city/SOURCE.md"
-precedence = "override"
-SPDX-FileCopyrightText = "2026 Luigi Massari"
-SPDX-License-Identifier = "MIT"
-
 # 5) Media del sito e del README, rifatti da tools/site/media.py con la grafica vera del gioco:
 #    catture, strisce degli sprite, logo, font CAR Pixel in WOFF2, icone e i loro JSON.
 #    Sono asset del gioco come gli originali. Queste tabelle vanno lasciate dopo quelle più
@@ -93,20 +65,4 @@ path = [
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Luigi Massari"
-SPDX-License-Identifier = "LicenseRef-CAR-Assets"
-
-# 5b) Le catture del gioco mostrano anche i piani di "Sotto la Linea" ricolorati da Warped City (vedi 2b).
-[[annotations]]
-path = [
-  "site/media/eroe.webm",
-  "site/media/eroe-2x.webm",
-  "site/media/eroe.mp4",
-  "site/media/eroe-poster.png",
-  "site/media/schermate/**",
-  "site/media/social.png",
-  "docs/media/demo.gif",
-  "docs/media/schermate/**",
-]
-precedence = "override"
-SPDX-FileCopyrightText = ["2026 Luigi Massari", "2019 Luis Zuno (ansimuz)"]
 SPDX-License-Identifier = "LicenseRef-CAR-Assets"

@@ -6,7 +6,7 @@
   "titolo": "CTRL+ALT REVENGE! · Taranto, 2087",
   "descrizione": "A pixel-art action platformer, in development. Taranto, 2087: the arm comes with a subscription, revenge doesn’t. Play the demo in your browser.",
   "og_locale": "en_GB",
-  "og_alt": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street, under the KEBAB sign."
+  "og_alt": "The CTRL+ALT REVENGE! logo over GIG hitting a punk with the cyber arm in a Tamburi street red with dust, under the KEBAB · PANZEROTTI sign."
  },
  "ui": {
   "salta": "Skip to content",
@@ -37,7 +37,7 @@
   "codice": "The code on GitHub",
   "tocco": "Play it on a computer: keyboard or gamepad.",
   "video": "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes down.",
-  "didascalia": "The “Sotto la Linea” slice, November 2026: a technical test. The street, the rain and the signs are placeholders; the art and the levels will change."
+  "didascalia": "The “Sotto la Linea” slice, November 2026: a technical test, in a Tamburi street on the evening of a Wind Day. The art and the levels may still change."
  },
  "storia": {
   "titolo": "A single night",
@@ -88,7 +88,7 @@
   },
   "strada": {
    "label": "The slice’s street, from the bar to the kebab shop: as you scroll, GIG walks along it towards two Esattori waiting for him.",
-   "didascalia": "A stretch of the slice’s street, with its own art and lights: scroll and GIG walks. It’s still a generic street, and we’ll rebuild it so it tells the story of the Tamburi."
+   "didascalia": "A stretch of the slice’s street, with its own art and lights: scroll and GIG walks. It’s a street in the Tamburi, under the red cloud of a Wind Day."
   },
   "notte": {
    "titolo": "The oldest night",
@@ -237,7 +237,7 @@
     {"titolo": "CC0 models", "testo": "The characters start from free 3D models and animations released under CC0, by Quaternius and Mesh2Motion."},
     {"titolo": "Blender", "testo": "Blender animates and renders them. The key moves, meaning the grab, knee strikes, throw, cyber hook and flying kick, are poses written into the scripts."},
     {"titolo": "Python", "testo": "Python scripts turn them into pixel art, with a palette for each material, stamps for facial details, a springy ponytail, procedurally built boots and a normal map for every sprite sheet."},
-    {"titolo": "Backgrounds, fonts and sounds", "testo": "The slice’s backgrounds are procedural geometry and painting, with a handful of recoloured CC0 pieces and our own pixel typeface for the shop signs; the prologue’s start from painted bases made with Gemini and ChatGPT, which our scripts turn into the game’s pixel art. Fonts, effects and interface come from scripts too. The sound effects are built from ready-made, freely licensed sounds, trimmed and layered."},
+    {"titolo": "Backgrounds, fonts and sounds", "testo": "The backgrounds start from painted bases made with ChatGPT and Gemini, written while looking at the real places of Taranto, which our scripts turn into the game’s pixel art; the slice’s floor and cable are drawn by code, and the shop signs use our own pixel typeface. Fonts, effects and interface come from scripts too. The sound effects are built from ready-made, freely licensed sounds, trimmed and layered."},
     {"titolo": "Godot", "testo": "Godot puts it all together, with dynamic lights and fixed-tick logic."}
    ],
    "chiusa": "No hand retouching: the scripts, written by AI agents for Luigi Massari, are deterministic, use fixed seeds and can all be read in the repository. AI-generated images are only ever bases: those of the prologue’s settings, from text-only prompts, and the faces in the cutscene close-ups, made from our own 3D renders. In-game characters and enemies come from the 3D pipeline."
@@ -245,10 +245,10 @@
   "colori": {
    "titolo": "Colours say whose scene it is",
    "voci": [
-    {"nome": "Blue-violet night", "testo": "the sky under the cloud, and the shadows.", "c1": "#06061a", "c2": "#0f1131", "c3": "#1a1230", "ritratto": ""},
-    {"nome": "Violet asphalt", "testo": "the street and the walls of the district.", "c1": "#110c1b", "c2": "#261c39", "c3": "#2b1f3e", "ritratto": ""},
-    {"nome": "Red and orange neon", "testo": "the signs of the Tamburi; gold is for the controls.", "c1": "#f06a1e", "c2": "#ff9440", "c3": "#ffe27a", "ritratto": ""},
-    {"nome": "Red", "testo": "belongs to SIDERA, like the Esattori’s frame.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
+    {"nome": "Red dust", "testo": "the Wind Day sky under the cloud.", "c1": "#3a1215", "c2": "#682016", "c3": "#8a463b", "ritratto": ""},
+    {"nome": "Plum and asphalt", "testo": "the street, the walls and the shadows of the district.", "c1": "#120c16", "c2": "#23162a", "c3": "#462e49", "ritratto": ""},
+    {"nome": "Amber and red signs", "testo": "the signs of the Tamburi; gold is for the controls.", "c1": "#c87832", "c2": "#eea83a", "c3": "#ffe27a", "ritratto": ""},
+    {"nome": "Red", "testo": "belongs to SIDERA: its dust in the sky, and the Esattori’s frame.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
     {"nome": "Cyan", "testo": "belongs to GIG alone: his eye and his arm.", "c1": "", "c2": "", "c3": "", "ritratto": "gig"}
    ]
   }
@@ -268,7 +268,7 @@
    {"tipo": "parallelo", "stato": "IN PARALLEL", "titolo": "Murals and soundtrack", "testo": "The style test for the murals, and the soundtrack, with a ’90s sound but not necessarily chiptune."}
   ],
   "uscita": "RELEASE DATE: NONE YET",
-  "slice": "The slice is a technical test, and its street is still generic. We’ll rebuild it so it shows Taranto on the evening of Holy Thursday 2087: the red cloud instead of a starry sky, wind and red dust instead of rain, the Linea’s conveyor belts instead of a railway, neighbourhood shop signs instead of anywhere-metropolis neon."
+  "slice": "The slice is a technical test. Since 7 November 2026 its street shows Taranto on the evening of Holy Thursday 2087, a Wind Day: the red cloud instead of a starry sky, wind and ore dust instead of rain, public housing blocks with reddened washing, the Linea’s tunnel, neighbourhood shop signs and the billboards of SIDERA and ARIA+."
  },
  "crediti": {
   "titolo": "Credits and licences",
@@ -276,13 +276,13 @@
    "titolo": "Who makes it",
    "voci": [
     {"ruolo": "Project and direction", "testo": "Luigi Massari.", "mostra": true},
-    {"ruolo": "Code, graphics and sound effects", "testo": "produced with AI agents for Luigi Massari, starting from CC0 sources and, for the prologue’s settings and the cutscene close-ups, from bases generated with Gemini and ChatGPT. It’s the same line as in the game’s credits.", "mostra": true},
+    {"ruolo": "Code, graphics and sound effects", "testo": "produced with AI agents for Luigi Massari, starting from CC0 sources and, for the settings and the cutscene close-ups, from bases generated with Gemini and ChatGPT. It’s the same line as in the game’s credits.", "mostra": true},
     {"ruolo": "Story", "testo": "co-written by Luigi Massari and Claude, an AI assistant: Claude proposes, Luigi decides.", "mostra": false},
     {"ruolo": "CAR Pixel fonts, effects and interface", "testo": "drawn by scripts for CTRL+ALT REVENGE.", "mostra": true},
     {"ruolo": "Engine", "testo": "Godot Engine.", "mostra": true}
    ]
   },
-  "ai": "The images on this site are the game’s own art, made by deterministic scripts from the CC0 sources listed below, and what the page’s own code draws, like the cloud and the dust. The scripts are written by AI agents for Luigi Massari, and you can read them all in the repository. In the game, AI-generated images are only ever bases: the painted backgrounds and prop sheets of the prologue’s settings, made with Google’s Gemini app and OpenAI’s ChatGPT from text-only prompts, and the faces in the cutscene close-ups, made with ChatGPT from our own 3D renders. The scripts turn them into pixel art, and they animate the eyelids and mouths too.",
+  "ai": "The images on this site are the game’s own art, made by deterministic scripts from the CC0 sources listed below, and what the page’s own code draws, like the cloud and the dust. The scripts are written by AI agents for Luigi Massari, and you can read them all in the repository. In the game, AI-generated images are only ever bases: the painted backgrounds and prop sheets of the prologue’s settings, made with Google’s Gemini app and OpenAI’s ChatGPT from text-only prompts; the layers of the slice’s street, painted by ChatGPT over our own renders and sketches; and the faces in the cutscene close-ups, made with ChatGPT from our own 3D renders. The scripts turn them into pixel art, and they animate the eyelids and mouths too.",
   "licenze": {
    "titolo": "Licences",
    "voci": [
@@ -300,10 +300,9 @@
     {"nome": "Quaternius · Universal Base Characters (Standard)", "cosa": "the models GIG, the punk and the brute are built from.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalbasecharacters.html"},
     {"nome": "Quaternius · Universal Animation Library (Standard)", "cosa": "their animations.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary.html"},
     {"nome": "Quaternius · Universal Animation Library 2 (Standard)", "cosa": "more animations.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary2.html"},
-    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "the wall-mounted air conditioner in the backgrounds.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
+    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "the wall-mounted air conditioner in our render that the slice’s street was repainted from.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
     {"nome": "Mesh2Motion", "cosa": "the animations of GIG’s roundhouse kick.", "licenza": "CC0 1.0", "url": "https://github.com/Mesh2Motion/mesh2motion-app"},
-    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "the bin in the alley.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
-    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "the sky and far layers of “Sotto la Linea” are a recoloured, recomposed version of it.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"},
+    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "the bin in our render that the slice’s street was repainted from.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
     {"nome": "Kenney · Impact, Interface, RPG and Sci-Fi Sounds", "cosa": "the core of the sound effects: hits, metal, cloth, interface, the cyber arm’s discharge.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/impact-sounds"},
     {"nome": "Freesound", "cosa": "swooshes, falls, landing, sparkle, the cable’s zap, the bin and food (ten single sounds, listed in THIRD-PARTY-NOTICES).", "licenza": "CC0 1.0", "url": "https://freesound.org"},
     {"nome": "rubberduck · 100 CC0 SFX #2", "cosa": "footsteps on wet asphalt.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/100-cc0-sfx-2"},

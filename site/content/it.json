@@ -6,7 +6,7 @@
   "titolo": "CTRL+ALT REVENGE! · Taranto, 2087",
   "descrizione": "Platform d’azione in pixel art, in sviluppo. Taranto, 2087: il braccio è in abbonamento, la vendetta no. Lo slice si prova nel browser.",
   "og_locale": "it_IT",
-  "og_alt": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa, davanti all’insegna KEBAB."
+  "og_alt": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il braccio cyber, in una strada dei Tamburi rossa di polvere, davanti all’insegna KEBAB · PANZEROTTI."
  },
  "ui": {
   "salta": "Vai al contenuto",
@@ -37,7 +37,7 @@
   "codice": "Il codice su GitHub",
   "tocco": "Si gioca da computer: tastiera o controller.",
   "video": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.",
-  "didascalia": "Lo slice «Sotto la Linea», novembre 2026: una prova tecnica. La strada, la pioggia e le insegne sono provvisorie; grafica e livelli cambieranno."
+  "didascalia": "Lo slice «Sotto la Linea», novembre 2026: una prova tecnica, in una strada dei Tamburi la sera di un Wind Day. Grafica e livelli possono ancora cambiare."
  },
  "storia": {
   "titolo": "Una notte sola",
@@ -88,7 +88,7 @@
   },
   "strada": {
    "label": "La strada dello slice, dal bar al kebab: scorrendo la pagina GIG ci cammina, verso due Esattori che lo aspettano.",
-   "didascalia": "Un tratto della strada dello slice, con la sua grafica e le sue luci: scorri e GIG cammina. È ancora una strada qualunque, e la rifaremo perché racconti i Tamburi."
+   "didascalia": "Un tratto della strada dello slice, con la sua grafica e le sue luci: scorri e GIG cammina. È una strada dei Tamburi, sotto la nube rossa di un Wind Day."
   },
   "notte": {
    "titolo": "La notte più antica",
@@ -237,7 +237,7 @@
     {"titolo": "Modelli CC0", "testo": "I personaggi partono da modelli e animazioni 3D gratuiti con licenza CC0, di Quaternius e Mesh2Motion."},
     {"titolo": "Blender", "testo": "Blender li anima e li renderizza. Le mosse più importanti, cioè la presa, le ginocchiate, la proiezione, il gancio cyber e il calcio volante, sono pose scritte negli script."},
     {"titolo": "Python", "testo": "Script in Python li trasformano in pixel art, con una tavolozza per ogni materiale, timbri per i dettagli del viso, il codino con la molla, stivali costruiti dal codice e una normal map per ogni atlante."},
-    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi dello slice sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne; quelli del prologo partono da basi dipinte con Gemini e ChatGPT, che i nostri script portano alla pixel art del gioco. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
+    {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi partono da basi dipinte con ChatGPT e Gemini, scritte guardando i luoghi veri di Taranto, che i nostri script portano alla pixel art del gioco; il pavimento e il cavo dello slice sono disegnati dal codice, e le scritte delle insegne sono di un carattere pixel nostro. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
     {"titolo": "Godot", "testo": "Godot mette insieme tutto, con le luci dinamiche e la logica a tick fissi."}
    ],
    "chiusa": "Niente ritocchi a mano: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository. Le immagini generate da un’intelligenza artificiale sono soltanto basi: quelle delle ambientazioni del prologo, da prompt di solo testo, e i volti dei primi piani dei filmati, fatti partendo dai nostri render 3D. Personaggi e nemici in gioco nascono dalla pipeline 3D."
@@ -245,10 +245,10 @@
   "colori": {
    "titolo": "I colori dicono di chi è la scena",
    "voci": [
-    {"nome": "Notte blu-viola", "testo": "il cielo sotto la nube e le ombre.", "c1": "#06061a", "c2": "#0f1131", "c3": "#1a1230", "ritratto": ""},
-    {"nome": "Asfalto viola", "testo": "la strada e i muri del quartiere.", "c1": "#110c1b", "c2": "#261c39", "c3": "#2b1f3e", "ritratto": ""},
-    {"nome": "Neon rossi e arancioni", "testo": "le insegne dei Tamburi; l’oro è dei comandi.", "c1": "#f06a1e", "c2": "#ff9440", "c3": "#ffe27a", "ritratto": ""},
-    {"nome": "Rosso", "testo": "è di SIDERA, come la cornice degli Esattori.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
+    {"nome": "Polvere rossa", "testo": "il cielo del Wind Day sotto la nube.", "c1": "#3a1215", "c2": "#682016", "c3": "#8a463b", "ritratto": ""},
+    {"nome": "Prugna e asfalto", "testo": "la strada, i muri e le ombre del quartiere.", "c1": "#120c16", "c2": "#23162a", "c3": "#462e49", "ritratto": ""},
+    {"nome": "Insegne d’ambra e rosse", "testo": "le insegne dei Tamburi; l’oro è dei comandi.", "c1": "#c87832", "c2": "#eea83a", "c3": "#ffe27a", "ritratto": ""},
+    {"nome": "Rosso", "testo": "è di SIDERA: la sua polvere nel cielo e la cornice degli Esattori.", "c1": "", "c2": "", "c3": "", "ritratto": "punk"},
     {"nome": "Cyan", "testo": "è solo di GIG: l’occhio e il braccio.", "c1": "", "c2": "", "c3": "", "ritratto": "gig"}
    ]
   }
@@ -268,7 +268,7 @@
    {"tipo": "parallelo", "stato": "IN PARALLELO", "titolo": "Murales e colonna sonora", "testo": "La prova di stile dei murales e la colonna sonora: suono anni ’90, ma non per forza chiptune."}
   ],
   "uscita": "DATA DI USCITA: NESSUNA, PER ORA",
-  "slice": "Lo slice è una prova tecnica, e la sua strada è ancora generica. La rifaremo perché racconti Taranto la sera del Giovedì Santo del 2087: la nube rossa al posto del cielo stellato, il vento e la polvere rossa al posto della pioggia, i nastri della Linea al posto della ferrovia, le insegne del quartiere al posto di quelle da metropoli qualunque."
+  "slice": "Lo slice è una prova tecnica. Dal 7 novembre 2026 la sua strada racconta Taranto la sera del Giovedì Santo del 2087, un Wind Day: la nube rossa al posto del cielo stellato, il vento e la polvere del minerale al posto della pioggia, le palazzine popolari col bucato arrossato, la galleria della Linea, le insegne del quartiere e i cartelloni di SIDERA e di ARIA+."
  },
  "crediti": {
   "titolo": "Crediti e licenze",
@@ -276,13 +276,13 @@
    "titolo": "Chi lo fa",
    "voci": [
     {"ruolo": "Progetto e direzione", "testo": "Luigi Massari.", "mostra": true},
-    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo e i primi piani dei filmati, da basi generate con Gemini e ChatGPT. È la stessa riga dei crediti del gioco.", "mostra": true},
+    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni e i primi piani dei filmati, da basi generate con Gemini e ChatGPT. È la stessa riga dei crediti del gioco.", "mostra": true},
     {"ruolo": "Storia", "testo": "la scrivono insieme Luigi Massari e Claude, un assistente AI: Claude propone, Luigi decide.", "mostra": false},
     {"ruolo": "Font CAR Pixel, effetti e interfaccia", "testo": "disegnati da script per CTRL+ALT REVENGE.", "mostra": true},
     {"ruolo": "Motore", "testo": "Godot Engine.", "mostra": true}
    ]
   },
-  "ai": "Le immagini di questo sito sono la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository. Nel gioco, le immagini generate da un’intelligenza artificiale sono soltanto basi: gli sfondi dipinti e i fogli di oggetti delle ambientazioni del prologo, fatti con l’app Gemini di Google e con ChatGPT di OpenAI da prompt di solo testo, e i volti dei primi piani dei filmati, fatti con ChatGPT partendo dai nostri render 3D. Gli script li portano alla pixel art, e palpebre e bocca le animano loro.",
+  "ai": "Le immagini di questo sito sono la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository. Nel gioco, le immagini generate da un’intelligenza artificiale sono soltanto basi: gli sfondi dipinti e i fogli di oggetti delle ambientazioni del prologo, fatti con l’app Gemini di Google e con ChatGPT di OpenAI da prompt di solo testo; i piani della strada dello slice, dipinti da ChatGPT sopra i nostri render e i nostri schizzi; e i volti dei primi piani dei filmati, fatti con ChatGPT partendo dai nostri render 3D. Gli script li portano alla pixel art, e palpebre e bocca le animano loro.",
   "licenze": {
    "titolo": "Licenze",
    "voci": [
@@ -300,10 +300,9 @@
     {"nome": "Quaternius · Universal Base Characters (Standard)", "cosa": "i modelli da cui nascono GIG, il punk e il bruto.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalbasecharacters.html"},
     {"nome": "Quaternius · Universal Animation Library (Standard)", "cosa": "le loro animazioni.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary.html"},
     {"nome": "Quaternius · Universal Animation Library 2 (Standard)", "cosa": "altre animazioni.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/universalanimationlibrary2.html"},
-    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "il condizionatore a muro degli sfondi.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
+    {"nome": "Quaternius · Downtown City MegaKit (Standard)", "cosa": "il condizionatore a muro del nostro render da cui è ridipinta la strada dello slice.", "licenza": "CC0 1.0", "url": "https://quaternius.com/packs/downtowncitymegakit.html"},
     {"nome": "Mesh2Motion", "cosa": "le animazioni del calcio circolare di GIG.", "licenza": "CC0 1.0", "url": "https://github.com/Mesh2Motion/mesh2motion-app"},
-    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "il cassonetto del vicolo.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
-    {"nome": "Luis Zuno (ansimuz) · Warped City", "cosa": "il cielo e i piani lontani di «Sotto la Linea» ne sono una versione ricolorata e ricomposta.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/warped-city"},
+    {"nome": "Kenney · City Kit Roads 2.2", "cosa": "il cassonetto del nostro render da cui è ridipinta la strada dello slice.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/city-kit-roads"},
     {"nome": "Kenney · Impact, Interface, RPG e Sci-Fi Sounds", "cosa": "la base degli effetti sonori: colpi, metallo, stoffa, interfaccia, la scarica del braccio cyber.", "licenza": "CC0 1.0", "url": "https://kenney.nl/assets/impact-sounds"},
     {"nome": "Freesound", "cosa": "fruscii, cadute, atterraggio, scintilla, scarica del cavo, bidone e cibo (dieci suoni singoli, elencati in THIRD-PARTY-NOTICES).", "licenza": "CC0 1.0", "url": "https://freesound.org"},
     {"nome": "rubberduck · 100 CC0 SFX #2", "cosa": "i passi sull’asfalto bagnato.", "licenza": "CC0 1.0", "url": "https://opengameart.org/content/100-cc0-sfx-2"},

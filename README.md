@@ -170,18 +170,17 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 **CTRL+ALT REVENGE!** · © 2026 Luigi Massari
 
 - **Progetto e direzione:** Luigi Massari.
-- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
+- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
 - **Musica della demo:** Luigi Massari, con Suno (piano Pro).
 - **Font CAR Pixel, effetti e interfaccia:** disegnati da script per CTRL+ALT REVENGE.
 - **Motore:** [Godot Engine](https://godotengine.org).
 
-La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le immagini generate da un’intelligenza artificiale sono soltanto basi. Quelle delle ambientazioni del prologo sono sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. I volti dei primi piani dei filmati li fa ChatGPT partendo dai nostri render 3D; `tools/sprites/closeup_ai.py` li riduce, e palpebre e bocca le animano i nostri script. Gli originali non sono nel repository.
+La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le immagini generate da un’intelligenza artificiale sono soltanto basi. Quelle delle ambientazioni del prologo sono sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. I piani della strada dello slice «Sotto la Linea» li ha dipinti ChatGPT sopra i nostri render, i nostri schizzi e le basi del prologo; il pavimento e il cavo sono disegnati dal codice, e le insegne le scrive il nostro carattere pixel. I volti dei primi piani dei filmati li fa ChatGPT partendo dai nostri render 3D; `tools/sprites/closeup_ai.py` li riduce, e palpebre e bocca le animano i nostri script. Gli originali non sono nel repository.
 
 **Sorgenti CC0** (il credito non è obbligatorio, lo diamo lo stesso):
-- [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro).
+- [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro del nostro render da cui è ridipinta la strada dello slice).
 - [Mesh2Motion](https://github.com/Mesh2Motion/mesh2motion-app): le animazioni del calcio circolare di GIG.
-- [Kenney](https://kenney.nl/assets/city-kit-roads): City Kit Roads 2.2, il cassonetto del vicolo.
-- [Luis Zuno (ansimuz)](https://opengameart.org/content/warped-city): Warped City; il cielo e i piani lontani di «Sotto la Linea» ne sono una versione ricolorata e ricomposta.
+- [Kenney](https://kenney.nl/assets/city-kit-roads): City Kit Roads 2.2, il cassonetto dello stesso render.
 
 **Strumenti, tutti gratuiti e open source:** Godot Engine 4.7.2 (MIT), Blender 4.5 LTS (GPL-3.0-or-later), FFmpeg 9.0 (GPL-3.0, solo per catture e video), Python 3.14 con NumPy, Pillow e SciPy.
 

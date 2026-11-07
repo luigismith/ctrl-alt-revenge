@@ -4,8 +4,8 @@ Demo del livello 1: Sotto la Linea
 Luigi Massari
 
 # CODICE, GRAFICA ED EFFETTI SONORI
-Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney, sfondi Warped City di Luis Zuno (ansimuz).
-Le ambientazioni del prologo partono da basi dipinte generate con l'app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, e ridisegnate in pixel art dagli script.
+Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney nel render da cui è ridipinta la strada dello slice.
+Le ambientazioni del prologo e dello slice partono da basi dipinte generate con l'app Gemini di Google e con ChatGPT di OpenAI, e ridisegnate in pixel art dagli script.
 I primi piani dei filmati partono da volti generati con ChatGPT a partire dai nostri render 3D; palpebre e bocca le animano gli script.
 
 # SUONI

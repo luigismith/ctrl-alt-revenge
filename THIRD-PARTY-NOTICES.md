@@ -7,14 +7,6 @@ Ogni voce indica la fonte, la licenza e il credito. Chi aggiunge un pack o un fo
 - **Godot Engine 4.7.2**: licenza MIT. Copyright (c) 2014-present Godot Engine contributors; (c) 2007-2014 Juan Linietsky, Ariel Manzur.
   - La schermata dei crediti del gioco mostra la licenza di Godot (`Engine.get_license_text()`), i componenti di terze parti del motore con i loro copyright (`Engine.get_copyright_info()`) e i testi completi delle loro licenze (`Engine.get_license_info()`), presi dall'eseguibile stesso.
 
-## Materiale di terze parti nel repository
-
-- **Warped City**, di Luis Zuno (ansimuz): 4 PNG dello sfondo, in `game/assets/third_party/ansimuz-warped-city/` (fonte, dimensioni e sha256 nel suo `SOURCE.md`).
-  - Licenza CC0 1.0, credito facoltativo. Testo in `LICENSES/CC0-1.0.txt`.
-  - https://opengameart.org/content/warped-city
-  - I piani `sky`, `far` e `mid` di "Sotto la Linea" ne sono una versione ricolorata e ricomposta.
-  - La musica del pack (Pascal Belisle) ha un'altra licenza e non è usata.
-
 ## Effetti sonori
 
 Gli effetti sonori in `game/assets/sfx/` li monta `tools/audio/sfx_pack.py` da suoni già pronti: taglio, intonazione, filtri, strati sovrapposti, saturazione e livelli. I file di partenza non sono in questo repository: restano nel laboratorio (`sources/sfx/`).
@@ -45,10 +37,10 @@ I file di queste sorgenti non sono in questo repository: restano nel laboratorio
 - **Mesh2Motion** (animazioni: il calcio circolare di GIG).
   - Licenza CC0 1.0.
   - https://github.com/Mesh2Motion/mesh2motion-app
-- **Quaternius Downtown City MegaKit (Standard)**: il condizionatore a muro degli sfondi.
+- **Quaternius Downtown City MegaKit (Standard)**: il condizionatore a muro del nostro render da cui è ridipinta la strada dello slice.
   - Licenza CC0 1.0, credito facoltativo.
   - https://quaternius.com/packs/downtowncitymegakit.html
-- **Kenney City Kit Roads 2.2**: il cassonetto del vicolo.
+- **Kenney City Kit Roads 2.2**: il cassonetto dello stesso render.
   - Licenza CC0 1.0; il credito "Kenney" è gradito ma non obbligatorio.
   - https://kenney.nl/assets/city-kit-roads
 - **CMU Graphics Lab Motion Capture Database**: la pipeline sa leggerne i file (`tools/blender/char_asfamc.py`), ma gli sprite attuali non ne usano. Se un giorno si useranno, il credito richiesto è: "I dati usati in questo progetto provengono da mocap.cs.cmu.edu. Il database è stato creato con il finanziamento NSF EIA-0196217."
@@ -62,11 +54,11 @@ Non sono usati Mixamo, Reallusion, CraftPix, Oonquil, Shapeforms, Sonniss, i fil
 
 ## Basi generate con l'AI (fuori dal repository)
 
-Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi e il garage, in `game/assets/env/prologo/`) partono da sfondi dipinti e fogli di oggetti generati con l'intelligenza artificiale. Gli script di `tools/ambienti/` li portano alla scala, alle palette e ai blocchi del gioco. Gli originali e i prompt non sono in questo repository.
+Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi e il garage, in `game/assets/env/prologo/`) e la strada dello slice «Sotto la Linea» (`game/assets/env/sotto_la_linea/`: tutti i piani tranne il pavimento) partono da sfondi dipinti e fogli di oggetti generati con l'intelligenza artificiale. Gli script di `tools/ambienti/` li portano alla scala, alle palette e ai blocchi del gioco. Gli originali e i prompt non sono in questo repository.
 
 - **App Gemini di Google** (gemini.google.com), dal 6 novembre 2026. Google dichiara di non rivendicare la proprietà dei contenuti generati.
 - **ChatGPT di OpenAI** (chatgpt.com), dal 6 novembre 2026. I termini di OpenAI cedono all'utente i diritti sull'output e ne ammettono l'uso commerciale.
-- Per le ambientazioni i prompt sono di solo testo: nessuna foto né immagine di altri è stata caricata. Le foto di Taranto sono servite soltanto a scriverli.
+- Per le ambientazioni del prologo i prompt sono di solo testo. Per la strada dello slice, dal 7 novembre 2026, a ChatGPT abbiamo caricato soltanto i nostri render, i nostri schizzi e le nostre basi del prologo. Nessuna foto né immagine di altri è stata caricata: le foto di Taranto e Street View sono servite soltanto a scrivere i prompt.
 - **I primi piani dei filmati** (`game/assets/ui/closeups/`) partono da volti in stile murales generati con ChatGPT, a cui abbiamo caricato soltanto i nostri render 3D dei personaggi. `tools/sprites/closeup_ai.py` li porta in pixel art, e palpebre e bocca le animano i nostri script.
 - Personaggi, nemici e oggetti animati del gioco non vengono da qui: nascono dalla pipeline da 3D a pixel.
 - Le immagini generate con l'AI potrebbero non essere proteggibili col diritto d'autore. Prima di vendere il gioco si ricontrollano i termini dei due servizi.
