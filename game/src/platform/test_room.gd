@@ -1384,6 +1384,8 @@ func _tick_sparks() -> void:
 
 func _draw_fx(n: Node2D) -> void:
 	_fx_glow.clear()
+	if arena == null:
+		_draw_panel_glow()
 	if hack_panel != "" and arena == null:
 		_draw_contact(n)
 	_draw_arm_glow()
@@ -1401,6 +1403,35 @@ func _draw_fx(n: Node2D) -> void:
 		n.draw_rect(Rect2(p, Vector2(2, 2) if big else Vector2.ONE), c)
 		if s[6] != C_DIM:
 			_fx_glow.halo(p, 3 if big else 2, Color(c, (0.55 if burst else 0.4) * a))
+
+
+## Il bagliore dei pannelli (aloni in pixel art, solo disegno). Il cyan è solo di GIG: lo schermo si
+## accende di cyan mentre il braccio lo forza, sempre di più man mano che la barra si riempie, e di
+## verde quando il cancello è aperto; in attesa brilla solo il led rosso.
+func _draw_panel_glow() -> void:
+	for id: String in panels:
+		if not grid.marks.has(id) or not gates.has(panels[id]["gate"]):
+			continue
+		var r := _panel_rect(id)
+		if r.end.x < _cam.x - 20 or r.position.x > _cam.x + View.W + 20:
+			continue
+		var sr := Rect2(r.position.x + 4, r.position.y + 15, r.size.x - 8, 14)
+		var led := Vector2(r.end.x - 8, r.position.y + 34)
+		var c := sr.get_center()
+		if hack_panel == id:
+			var k := float(hack_t) / HACK_TICKS
+			var flick := 0.5 + 0.5 * sin(tick * 0.6)
+			_fx_glow.rect(sr, Color(C_CYAN, 0.10 + 0.14 * k))
+			_fx_glow.halo(c, 24 + roundi(10.0 * k), Color(C_CYAN, 0.28 + 0.32 * k + 0.08 * flick))
+			if (tick / 3) % 2 == 0:
+				_fx_glow.halo(led, 3, Color(C_CYAN, 0.55))
+		elif gates[panels[id]["gate"]]["timer"] > 0:
+			var breath := 0.5 + 0.5 * sin(tick * 0.1)
+			_fx_glow.rect(sr, Color(C_OK, 0.12))
+			_fx_glow.halo(c, 26, Color(C_OK, 0.32 + 0.08 * breath))
+			_fx_glow.halo(led, 3, Color(C_OK, 0.5))
+		elif (tick / 45) % 3 != 2:
+			_fx_glow.halo(led, 3, Color(C_LED_RED, 0.4))
 
 
 ## Il braccio cyber acceso (fuori dall'arena, dopo il riavvio): un alone cyan che respira sul pugno.

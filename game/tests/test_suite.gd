@@ -2034,6 +2034,17 @@ func _test_prologue() -> void:
 	check(moved and room.player.px == x.x and room.player.py == x.y and room.door_t > Prologue.DOOR_BREAK - 10,
 		"Prologo: se la porta cede con GIG nel garage, si riparte dal banco", "x %d (banco %d), porta %d" % [room.player.px, x.x, room.door_t])
 	_free_room(room)
+	# F5 (debug_lights) spegne e riaccende anche le luci del tempo, il sole e il cielo; di base sono accese.
+	room = _prologue_room()
+	var lit := func() -> Array: return [room.weather._sun.enabled, room.weather._sky.enabled]
+	var start: Array = lit.call()
+	room._set_lights(false)
+	var off: Array = lit.call()
+	room._set_lights(true)
+	var on: Array = lit.call()
+	check(start == [true, true] and off == [false, false] and on == [true, true],
+		"Prologo: le luci del tempo sono accese e F5 le spegne e le riaccende", "%s %s %s" % [start, off, on])
+	_free_room(room)
 
 
 ## Le voci delle battute (SceneVoices): un manifest finto in user://. Una voce si usa solo se
