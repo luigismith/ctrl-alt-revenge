@@ -232,13 +232,9 @@ func _build_scenery() -> void:
 	backdrop.build(_back_layer, _front_layer, level_seed)
 
 	if str(data.get("weather", "")) == "wind_day":
-		var lamps: Array = []
-		for e in _lights:
-			if String(e["kind"]) == "lamp":
-				lamps.append([float(e["x"]), float(e["scroll"])])
 		wind_day = WindDay.new()
 		wind_day.setup(level_seed, data)
-		wind_day.attach(_front_layer, world, backdrop, lamps)
+		wind_day.attach(_front_layer, world, backdrop, WindDay.lamps_of(data))
 
 
 func _next_uid() -> int:

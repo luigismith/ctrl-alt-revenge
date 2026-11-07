@@ -1,6 +1,7 @@
 class_name TitleScreen
 extends Node2D
-## Titolo: lo sfondo del livello fermo sotto la pioggia (GIG è in guardia: la strada non deve scorrere), il logo,
+## Titolo: lo sfondo del livello fermo nella sera del Wind Day, con la polvere rossa portata dal vento (GIG è in
+## guardia: la strada non deve scorrere), il logo,
 ## il sottotitolo e il menu (PROLOGO, GIOCA, CREDITI, ESCI; nel browser senza ESCI). Il prologo viene
 ## prima perché la storia comincia da lì. Musica "title".
 
@@ -20,7 +21,7 @@ const GIG_FEET := Vector2(66, 198)
 var _items: PackedStringArray = PackedStringArray(["PROLOGO", "GIOCA", "CREDITI"]) if OS.has_feature("web") else ITEMS
 
 var _backdrop: Backdrop
-var _rain: Rain
+var _wind: WindDay
 var _fx: FxLayer
 var _ui: Control
 var _gig: Sprite2D
@@ -31,6 +32,8 @@ var _index: int = 0
 var _t: int = 0
 ## Punto del livello inquadrato: fisso, perché GIG è fermo e la strada sotto i piedi non deve scorrere.
 const TITLE_CAM := 220
+## Il livello dello sfondo, per le luci della torre e i lampioni del Wind Day.
+const LEVEL := Level.LEVEL_JSON
 ## Tick in cui il menu ignora i tasti: almeno quanto la dissolvenza d'entrata di Main (16 tick).
 var _locked: int = 18
 var _text := Color8(247, 232, 189)
@@ -56,9 +59,7 @@ func _ready() -> void:
 	_fx.load_defs()
 	_fx.visible = false
 	add_child(_fx)
-	# Spruzzi della pioggia, poi GIG in guardia a sinistra con la sua ombra: tutti sotto le gocce.
-	var splashes := Node2D.new()
-	add_child(splashes)
+	# GIG in guardia a sinistra con la sua ombra, sotto la polvere.
 	_shadow = Node2D.new()
 	_shadow.draw.connect(_draw_shadow)
 	add_child(_shadow)
@@ -71,11 +72,12 @@ func _ready() -> void:
 	_gig.region_enabled = true
 	_gig.position = GIG_FEET
 	add_child(_gig)
-	_rain = Rain.new()
-	_rain.z_index = 50
-	_rain.setup(3, _fx, Vector2(150, 208))
-	front.add_child(_rain)
-	_rain.set_splash_canvas(splashes, false)
+	# La sera del Wind Day come nel livello, senza le pozze: polvere, tinta rossa e luci della torre.
+	var level: Variant = JSON.parse_string(FileAccess.get_file_as_string(LEVEL))
+	var data: Dictionary = level if level is Dictionary else {}
+	_wind = WindDay.new()
+	_wind.setup(3, data)
+	_wind.attach(front, null, _backdrop, WindDay.lamps_of(data), false)
 	var ui_layer := CanvasLayer.new()
 	ui_layer.layer = 5
 	add_child(ui_layer)
@@ -101,7 +103,8 @@ func _draw_shadow() -> void:
 func _physics_process(_delta: float) -> void:
 	_t += 1
 	_backdrop.update(TITLE_CAM, _t)
-	_rain.tick(TITLE_CAM)
+	_wind.tick(TITLE_CAM)
+	_wind.sync(TITLE_CAM, [], true)
 	_gig_anim.advance()
 	var f := _gig_anim.frame()
 	_gig.region_rect = Rect2(f.rect)

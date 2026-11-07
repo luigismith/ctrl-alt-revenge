@@ -58,6 +58,6 @@
     {"kind": "lamp", "x": 2104, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
     {"kind": "lamp", "x": 2395, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
     {"kind": "lamp", "x": 2686, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
-    {"kind": "cable", "x": 1563, "y": 210, "color": "#66e8ff", "energy": 1.2, "radius": 188, "height": 15}
+    {"kind": "cable", "x": 1563, "y": 210, "color": "#ffd2a0", "energy": 1.2, "radius": 188, "height": 15}
   ]
 }

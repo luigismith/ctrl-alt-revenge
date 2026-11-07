@@ -15,7 +15,8 @@ extends Node2D
 ## Solo disegno: ha un generatore casuale suo e la simulazione, i replay e i loro hash non lo vedono.
 ##
 ## Uso, dal livello: setup(seme, dati del livello); attach(primo piano, mondo, sfondo, lampioni); a ogni tick
-## della simulazione tick(telecamera); a ogni disegno sync(telecamera, combattenti, luci accese).
+## della simulazione tick(telecamera); a ogni disegno sync(telecamera, combattenti, luci accese). Il titolo la
+## usa senza mondo e senza pozze: solo polvere, tinta e luci della torre.
 
 const W := View.W
 const H := View.H
@@ -197,9 +198,9 @@ func setup(rng_seed: int, data: Dictionary) -> void:
 
 
 
-## `front`: il primo piano (spazio dello schermo); `world`: il mondo; `bd`: lo sfondo; `lamps`: i lampioni,
-## [x, parallasse] per ognuno.
-func attach(front: Node, world: Node2D, bd: Backdrop, lamps: Array) -> void:
+## `front`: il primo piano (spazio dello schermo); `world`: il mondo (null: niente luce sugli attori né
+## pozze); `bd`: lo sfondo; `lamps`: i lampioni, [x, parallasse] per ognuno (vedi lamps_of); `pools`: le pozze.
+func attach(front: Node, world: Node2D, bd: Backdrop, lamps: Array, pools: bool = true) -> void:
 	z_index = 50
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -209,9 +210,20 @@ func attach(front: Node, world: Node2D, bd: Backdrop, lamps: Array) -> void:
 	_veil_tex = _make_veil()
 	if bd != null:
 		_grade_backdrop(bd)
-		_add_pozze(bd, world)
+		if pools and world != null:
+			_add_pozze(bd, world)
 		_add_beacons(bd)
-	_add_sky_light(world)
+	if world != null:
+		_add_sky_light(world)
+
+
+## I lampioni dalle luci del livello (tipo "lamp"): [x, parallasse] per ognuno.
+static func lamps_of(data: Dictionary) -> Array:
+	var out: Array = []
+	for v: Variant in data.get("lights", []):
+		if v is Dictionary and str(v.get("kind", "")) == "lamp":
+			out.append([float(v.get("x", 0)), float(v.get("scroll", 1.0))])
+	return out
 
 
 ## Una volta per tick della simulazione (solo disegno: non tocca lo stato del gioco).
