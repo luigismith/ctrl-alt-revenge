@@ -3,7 +3,9 @@
 """CTRL+ALT REVENGE - costumi degli Esattori (decisione 63): il rider, l'esattore di professione e il messo;
 e, con gli stessi pezzi, Totò adulto (2107): felpa scura col cappuccio su, jeans, zainetto con le bombolette;
 e Addolorata in casa (2087, 75 anni), sul corpo femminile: abito blu scuro, cardigan abbottonato con lo scollo a V,
-crocchia bassa, occhiali appesi al cordino e metro da sarta al collo, scarpe basse.
+crocchia bassa, occhiali appesi al cordino e metro da sarta al collo, scarpe basse;
+e Mimmo (2086, 49 anni): la tuta da turno grigia di SIDERA col cappuccio abbassato, il filtro sotto il mento e il
+MANODOPERA n. 2 al braccio destro, con gli anelli rossi.
 
 Stesso corpo UBC rimodellato dei nemici dello slice (build_thug di char_build.py), con i pezzi dei fogli di
 riferimento del 6 novembre 2026 (fuori dal repository):
@@ -336,14 +338,21 @@ def make_helmet(B, arm, mats, L, pts, cfg):
     return ob
 
 
-def make_gaiter(B, arm, mats, L, pts, cfg):
-    """scaldacollo abbassato sotto il mento: ciambella attorno al collo, sopra il collo alto della giacca."""
+def make_gaiter(B, arm, mats, L, pts, cfg, mat="HOOD"):
+    """scaldacollo abbassato sotto il mento: ciambella attorno al collo, sopra il collo alto della giacca
+    (per Mimmo, il filtro della tuta abbassato sotto il mento)."""
     z = L["chin"].z + cfg.get("dz", -0.022)
     a, b = L["neck_01"], L["Head"]
     r_neck = limb_radius(pts, "neck_01", a, b, max(0.0, min(1.0, (z - a.z) / max(b.z - a.z, 1e-3))), dt=0.3)
     c = Vector((0.0, (a.y + b.y) / 2 + cfg.get("dy", 0.006), z))
     bm = torus_bm(c, r_neck + cfg.get("gap", 0.020), cfg.get("r", 0.016), mat=0, sy=cfg.get("sy", 1.0))
-    return B.rigid_object("Gaiter", bm, "neck_01", arm, ["HOOD"], mats, part="head")
+    if cfg.get("filtro"):
+        # la cartuccia del filtro, tonda, sul davanti
+        fc = cfg["filtro"]
+        cc = c + Vector((0.0, -(r_neck + cfg.get("gap", 0.020) + cfg.get("r", 0.016) * 0.6), fc.get("dz", 0.004)))
+        bm = B.join_bms([bm, B.sphere_bm(cc, (fc.get("r", 0.024), fc.get("t", 0.014), fc.get("r", 0.024)), mat=1,
+                                         segs=14, rings=8)])
+    return B.rigid_object("Gaiter", bm, "neck_01", arm, [mat, "METAL_DARK"], mats, part="head")
 
 
 def make_backpack(B, arm, mats, L, pts, cfg):
@@ -673,6 +682,26 @@ def make_laser_pen(B, arm, mats, L, cfg, hand_scale):
     return B.rigid_object("LaserPen", bm, "hand_r", arm, ["PAD", "GLOW_LINE"], mats)
 
 
+# ============================================================== Vito (2064): i baffi
+def solo_baffi(beard, L, cfg):
+    """della barba restano solo i baffi: le facce sopra la bocca e sotto il naso, davanti, con le punte che
+    scendono appena ai lati della bocca."""
+    mo = L["mouth"]
+    up, down, hw = cfg.get("up", 0.024), cfg.get("down", 0.004), cfg.get("half_w", 0.046)
+    droop = cfg.get("droop", 0.014)
+    bm = bmesh.new()
+    bm.from_mesh(beard.data)
+    via = []
+    for f in bm.faces:
+        c = f.calc_center_median()
+        lo = mo.z - down - droop * max(0.0, min(1.0, (abs(c.x) - 0.018) / 0.02))
+        if not (abs(c.x) < hw and lo < c.z < mo.z + up and c.y < mo.y + 0.02):
+            via.append(f)
+    bmesh.ops.delete(bm, geom=via, context="FACES")
+    bm.to_mesh(beard.data)
+    bm.free()
+
+
 # ============================================================== Addolorata in casa (2087)
 def make_skirt(B, arm, mats, L, pts, cfg):
     """la gonna dell'abito: anelli dalla vita all'orlo sotto il ginocchio, larghi quanto il bacino e le cosce più un
@@ -965,6 +994,8 @@ def build(ns, ctx, kind):
             return "SKIN"
         if part in ("hand_l", "hand_r"):
             return None
+        if kind == "mimmo" and part == "lowerarm_r" and cfg.get("cyber") is not False:
+            return "METAL_DARK"                                # sotto la corazza del MANODOPERA
         if part in ("foot_l", "foot_r"):
             return None                                        # dentro le scarpe
         if part.startswith("upperarm"):
@@ -1065,6 +1096,37 @@ def build(ns, ctx, kind):
         objs["bun"] = B.make_topknot(arm, mats, L, cfg.get("bun", {}))
         objs["fist_l"] = B.make_fist("l", arm, mats, L, fist_bare)
         objs["fist_r"] = B.make_fist("r", arm, mats, L, fist_bare)
+    elif kind == "mimmo":
+        if cfg.get("cappuccio_su"):                            # i sonnambuli: cappuccio su
+            objs["hood"] = make_hood_up(B, arm, mats, L, pts, cfg.get("hood", {}))
+        else:
+            objs["hood"] = B.make_hood_roll(arm, mats, L, cfg.get("hood", {}))
+        if cfg.get("filtro") is not False:                     # Vito (2064) non ha il filtro
+            objs["filtro"] = make_gaiter(B, arm, mats, L, pts, cfg.get("filtro", {}), mat="PAD")
+        if "Hair_Buzzed" in hairs:
+            objs["hair"] = B.make_hair_cap(hairs["Hair_Buzzed"], mats, L, push=0.004)
+        if "Hair_Beard" in hairs:
+            objs["beard"] = B.make_beard(hairs["Hair_Beard"], mats, L, length=cfg.get("beard_len", 0.2),
+                                         thick=cfg.get("beard_thick", 0.004))
+            if cfg.get("baffi"):
+                solo_baffi(hairs["Hair_Beard"], L, cfg["baffi"])
+        if cfg.get("cyber") is False:                          # Vito: niente MANODOPERA, due mani vere
+            objs["fist_r"] = B.make_fist("r", arm, mats, L, fist_bare)
+        else:
+            for i, o in enumerate(B.make_cyber_arm(arm, mats, L, cfg.get("cyber", {"upper": False}), side="r")):
+                objs["cyber%d" % i] = o
+            objs["fist_r"] = B.make_fist("r", arm, mats, L, ["METAL_LIGHT", "METAL_SEAM", "METAL", "METAL_LIGHT",
+                                                             "METAL_SEAM", "METAL", "METAL_DARK"])
+        objs["fist_l"] = B.make_fist("l", arm, mats, L, fist_bare)
+        if cfg.get("toppa"):                                   # Vito: la toppa del nome, vuota, a sinistra sul petto
+            tc = cfg["toppa"]
+            sx_l = 1.0 if L["thigh_l"].x > 0 else -1.0
+            tx, tz = sx_l * tc.get("x", 0.075), L["clavicle_l"].z + tc.get("dz", -0.10)
+            ty = (surface_y(pts, tx, tz) or -0.11) - top_off - 0.004
+            objs["toppa"] = B.rigid_object("Toppa", B.sphere_bm(Vector((tx, ty, tz)), (tc.get("w", 0.036), 0.003,
+                                                                                    tc.get("h", 0.016)),
+                                                                mat=0, segs=8, rings=4),
+                                           "spine_03", arm, ["PATCH"], mats, part="torso")
     elif kind == "toto":
         objs["hood"] = make_hood_up(B, arm, mats, L, pts, cfg.get("hood", {}))
         objs["hoodie_front"] = make_hoodie_front(B, arm, mats, L, pts, cfg.get("hoodie", {}), top_off)

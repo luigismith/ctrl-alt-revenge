@@ -1,0 +1,208 @@
+{
+ "id": "mimmo",
+ "_nota": "Mimmo, notte fra l'1 e il 2 novembre 2086, 49 anni (docs/lore/personaggi-3d.md, riga 5; MP09): tarchiato, ex gruista e pugile, capelli corti scuri che ingrigiscono, barba corta grigia, la tuta da turno grigia di SIDERA col cappuccio abbassato e il filtro sotto il mento, il MANODOPERA n. 2 al braccio destro con gli anelli rossi accesi. Solo modello per pose e murales: non è uno sprite del gioco.",
+ "base": "toto",
+ "outfit": "mimmo",
+ "hair_meshes": [
+  "Hair_Buzzed",
+  "Hair_Beard"
+ ],
+ "outfit_cfg": {
+  "top": {
+   "hem_dz": 0.03,
+   "cuff_t": 0.9,
+   "offset": 0.02,
+   "collar_dz": -0.004,
+   "thick": 0.01
+  },
+  "boots": {
+   "style": "v7",
+   "top_z": 0.12,
+   "size": 1.0,
+   "sole_t": 0.036,
+   "heel_t": 0.04
+  },
+  "filtro": {
+   "dz": -0.03,
+   "gap": 0.012,
+   "r": 0.018,
+   "sy": 1.15,
+   "filtro": {
+    "r": 0.026,
+    "t": 0.016
+   }
+  },
+  "cyber": {
+   "upper": false,
+   "rings": [
+    0.3,
+    0.62
+   ]
+  },
+  "beard_len": 0.16,
+  "beard_thick": 0.004,
+  "brow_bushy": 1.2,
+  "brow_lift": 0.0,
+  "pants_push": 0.016
+ },
+ "beauty_cols": {
+  "SKIN": "#b88262",
+  "SKIN_DARK": "#8a5a42",
+  "SKIN_CREASE": "#9c684e",
+  "HAIR": "#4a4446",
+  "BEARD": "#8a8482",
+  "BEARD_EDGE": "#5a5452",
+  "BROW": "#3a3436",
+  "HOOD": "#7c7e86",
+  "HOOD_DARK": "#55575f",
+  "TOP": "#7c7e86",
+  "TOP_LINING": "#5c5e66",
+  "TOP_DARK": "#4a4c54",
+  "PANTS": "#7c7e86",
+  "PANTS_FOLD": "#5c5e66",
+  "BELT": "#4a4c54",
+  "BOOTS": "#2e2a2c",
+  "BOOT_SOLE": "#1c1a1c",
+  "BOOT_CUFF": "#2e2a2c",
+  "LACE": "#2e2a2c",
+  "PAD": "#3a3c44",
+  "METAL": "#4a4c56",
+  "METAL_DARK": "#2a2a32",
+  "METAL_LIGHT": "#6c707a",
+  "METAL_SEAM": "#1e1e26",
+  "GLOW_LINE": "#ff3a30",
+  "KNUCKLE": "#1e1e26",
+  "EYE_DARK": "#101010",
+  "EYE_SOCKET": "#8a5a42",
+  "NOSE_SHADOW": "#9c684e",
+  "MOUTH": "#4a1c26"
+ },
+ "reshape": {
+  "pelvis": [
+   1.0,
+   1,
+   1.0
+  ],
+  "spine_01": [
+   1.0,
+   1.0,
+   1.08
+  ],
+  "spine_02": [
+   1.0,
+   1.0,
+   1.02
+  ],
+  "spine_03": [
+   1.0,
+   1.0,
+   0.95
+  ],
+  "clavicle_l": [
+   1,
+   0.9,
+   1
+  ],
+  "clavicle_r": [
+   1,
+   0.9,
+   1
+  ],
+  "neck_01": [
+   1.05,
+   0.9,
+   1.05
+  ],
+  "upperarm_l": [
+   0.86,
+   1.0,
+   0.86
+  ],
+  "upperarm_r": [
+   0.86,
+   1.0,
+   0.86
+  ],
+  "lowerarm_l": [
+   0.86,
+   1.0,
+   0.86
+  ],
+  "lowerarm_r": [
+   0.86,
+   1.0,
+   0.86
+  ],
+  "hand_l": [
+   1,
+   1,
+   1
+  ],
+  "hand_r": [
+   1,
+   1,
+   1
+  ],
+  "thigh_l": [
+   1.02,
+   0.95,
+   1.02
+  ],
+  "thigh_r": [
+   1.02,
+   0.95,
+   1.02
+  ],
+  "calf_l": [
+   0.98,
+   0.95,
+   0.98
+  ],
+  "calf_r": [
+   0.98,
+   0.95,
+   0.98
+  ]
+ },
+ "proportions": {
+  "Head": {
+   "scale": [
+    1.16,
+    1.16,
+    1.16
+   ]
+  },
+  "hand_l": {
+   "scale": [
+    1.3,
+    1.3,
+    1.3
+   ],
+   "inherit": "NONE"
+  },
+  "hand_r": {
+   "scale": [
+    1.3,
+    1.3,
+    1.3
+   ],
+   "inherit": "NONE"
+  },
+  "foot_l": {
+   "scale": [
+    1.08,
+    1.08,
+    1.08
+   ],
+   "inherit": "NONE"
+  },
+  "foot_r": {
+   "scale": [
+    1.08,
+    1.08,
+    1.08
+   ],
+   "inherit": "NONE"
+  }
+ }
+}

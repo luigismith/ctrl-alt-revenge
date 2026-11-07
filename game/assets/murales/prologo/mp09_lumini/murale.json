@@ -1,0 +1,131 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp09_lumini",
+ "capitolo": "prologo",
+ "misura": [
+  768,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   0,
+   9
+  ],
+  "a": [
+   288,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "la fila scorre lenta verso destra (due strati, oscillazione minima, gli anelli rossi pulsano insieme); la telecamera la accompagna da sinistra e si ferma su Mimmo stringendosi; i lumini tremano nello shader",
+  "zoom_da": 1,
+  "centro_da": [
+   240,
+   144
+  ],
+  "zoom_a": 2,
+  "centro_a": [
+   520,
+   216
+  ]
+ },
+ "figure": [
+  {
+   "nome": "fila_lontana_1",
+   "file": "figura_fila_lontana_1.png",
+   "x": 40,
+   "y": 146,
+   "misura": [
+    161,
+    60
+   ],
+   "profondita": 0.6,
+   "nota": "strato lontano, sul marciapiede sotto il muro"
+  },
+  {
+   "nome": "fila_lontana_2",
+   "file": "figura_fila_lontana_2.png",
+   "x": 300,
+   "y": 143,
+   "misura": [
+    161,
+    60
+   ],
+   "profondita": 0.6
+  },
+  {
+   "nome": "fila_lontana_3",
+   "file": "figura_fila_lontana_3.png",
+   "x": 560,
+   "y": 140,
+   "misura": [
+    82,
+    60
+   ],
+   "profondita": 0.6
+  },
+  {
+   "nome": "fila_vicina_1",
+   "file": "figura_fila_vicina_1.png",
+   "x": 10,
+   "y": 190,
+   "misura": [
+    120,
+    88
+   ],
+   "profondita": 1.0,
+   "nota": "strato vicino, sulla strada"
+  },
+  {
+   "nome": "fila_vicina_2",
+   "file": "figura_fila_vicina_2.png",
+   "x": 160,
+   "y": 190,
+   "misura": [
+    120,
+    88
+   ],
+   "profondita": 1.0
+  },
+  {
+   "nome": "fila_vicina_3",
+   "file": "figura_fila_vicina_3.png",
+   "x": 318,
+   "y": 190,
+   "misura": [
+    120,
+    88
+   ],
+   "profondita": 1.0
+  },
+  {
+   "nome": "mimmo",
+   "file": "figura_mimmo.png",
+   "x": 488,
+   "y": 185,
+   "misura": [
+    61,
+    98
+   ],
+   "profondita": 1.0,
+   "nota": "Mimmo nella fila, cappuccio giù e occhi chiusi, il braccio destro cyber con gli anelli rossi dalla parte di chi guarda; la telecamera si ferma qui"
+  },
+  {
+   "nome": "fila_vicina_4",
+   "file": "figura_fila_vicina_4.png",
+   "x": 590,
+   "y": 190,
+   "misura": [
+    120,
+    88
+   ],
+   "profondita": 1.0
+  }
+ ],
+ "colori": 83,
+ "fonte": "ChatGPT (OpenAI), da testo e dai nostri render di Mimmo e del sonnambulo; ridotto in pixel art dai nostri script"
+}

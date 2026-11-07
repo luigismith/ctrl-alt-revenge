@@ -1,0 +1,11 @@
+{
+ "id": "sonnambulo",
+ "_nota": "Il sonnambulo, 2086-2087 (docs/lore/personaggi-3d.md, riga 6; MP09): operaio addormentato nella tuta da turno grigia di SIDERA, col cappuccio su e il filtro sulla bocca, il MANODOPERA al braccio destro con gli anelli rossi. Variante di Mimmo; per la folla bastano colori e corpi diversi. Solo modello per pose e murales, per ora.",
+ "base": "mimmo",
+ "hair_meshes": ["Hair_Buzzed"],
+ "outfit_cfg": {
+  "cappuccio_su": true,
+  "hood": {"front_z": 0.62, "az": [50.0, 92.0], "peak": 0.012, "off": 0.024},
+  "filtro": {"dz": 0.03, "dy": -0.012, "gap": 0.004, "r": 0.022, "sy": 1.2, "filtro": {"r": 0.03, "t": 0.02}}
+ }
+}

@@ -1,0 +1,58 @@
+{
+ "id": "vito",
+ "_nota": "Vito nel 2064, 60 anni (docs/lore/personaggi-3d.md; MP11 e MP12): gruista del porto in pensione, alto e pesante, mani enormi, viso largo e segnato, capelli grigi corti, baffi grigi folti, giacca da lavoro blu del porto con la toppa del nome vuota. Costruito sui pezzi di Mimmo, senza braccio MANODOPERA né filtro. Solo modello per pose e murales: non è uno sprite del gioco.",
+ "base": "mimmo",
+ "outfit_cfg": {
+  "cyber": false,
+  "filtro": false,
+  "beard_len": 0.5,
+  "beard_thick": 0.007,
+  "baffi": {"up": 0.026, "down": 0.002, "half_w": 0.048, "droop": 0.016},
+  "toppa": {"x": 0.078, "dz": -0.11, "w": 0.038, "h": 0.016},
+  "brow_bushy": 1.6
+ },
+ "reshape": {
+  "pelvis": [1.12, 1.04, 1.12],
+  "spine_01": [1.2, 1.06, 1.3],
+  "spine_02": [1.22, 1.06, 1.2],
+  "spine_03": [1.2, 1.05, 1.1],
+  "clavicle_l": [1.1, 1.05, 1.1],
+  "clavicle_r": [1.1, 1.05, 1.1],
+  "neck_01": [1.25, 0.9, 1.25],
+  "upperarm_l": [1.15, 1.06, 1.15],
+  "upperarm_r": [1.15, 1.06, 1.15],
+  "lowerarm_l": [1.15, 1.06, 1.15],
+  "lowerarm_r": [1.15, 1.06, 1.15],
+  "thigh_l": [1.15, 1.07, 1.15],
+  "thigh_r": [1.15, 1.07, 1.15],
+  "calf_l": [1.08, 1.07, 1.08],
+  "calf_r": [1.08, 1.07, 1.08]
+ },
+ "proportions": {
+  "Head": {"scale": [1.12, 1.12, 1.12]},
+  "hand_l": {"scale": [1.6, 1.6, 1.6], "inherit": "NONE"},
+  "hand_r": {"scale": [1.6, 1.6, 1.6], "inherit": "NONE"}
+ },
+ "beauty_cols": {
+  "SKIN": "#bf8a6a",
+  "SKIN_DARK": "#8e5c44",
+  "SKIN_CREASE": "#9e6a50",
+  "HAIR": "#a8a6a4",
+  "BEARD": "#b4b0ac",
+  "BEARD_EDGE": "#86827e",
+  "BROW": "#8a8682",
+  "TOP": "#2f4f86",
+  "TOP_LINING": "#24406e",
+  "TOP_DARK": "#1c3058",
+  "HOOD": "#2f4f86",
+  "HOOD_DARK": "#24406e",
+  "PANTS": "#3c4250",
+  "PANTS_FOLD": "#2a2f3a",
+  "BELT": "#2a2a30",
+  "BOOTS": "#3a2c24",
+  "BOOT_CUFF": "#3a2c24",
+  "LACE": "#3a2c24",
+  "PATCH": "#e4e0d6",
+  "KNUCKLE": "#a87458"
+ }
+}

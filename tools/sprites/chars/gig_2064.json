@@ -1,0 +1,30 @@
+{
+ "base": "gig",
+ "id": "gig_2064",
+ "_nota": "GIG a 27 anni, nel 2064, prima del braccio cyber (docs/lore/personaggi-3d.md, riga 7; MP11): capelli e barba corta neri, codino, occhi umani, maglietta scura, braccio sinistro mancato con la manica annodata sul moncherino. Solo modello per pose e murales: non è uno sprite del gioco.",
+ "portrait": null,
+ "closeups": [],
+ "outfit_cfg": {
+  "eye_side": null,
+  "beard_len": 0.7,
+  "monco": {"stump_t": 0.42, "sleeve_t": 0.50, "knot_t": 0.56, "knot_r": 0.032}
+ },
+ "beauty_cols": {
+  "HAIR": "#1c1a1e",
+  "HAIR_TIE": "#3a3440",
+  "BEARD": "#201c20",
+  "BEARD_EDGE": "#3a3236",
+  "BROW": "#1a1618",
+  "TOP": "#33343e",
+  "TOP_FOLD": "#22232b",
+  "TOP_SEAM": "#22232b",
+  "TOP_LINING": "#3c3d48",
+  "TOP_DARK": "#22232b",
+  "HOOD": "#33343e",
+  "HOOD_DARK": "#22232b",
+  "PANTS": "#3a4458",
+  "PANTS_FOLD": "#262d3c",
+  "EYE_GLOW": "#101010",
+  "GLOW_LINE": "#101010"
+ }
+}

@@ -1045,11 +1045,12 @@ def make_mohawk(arm, mats, L, cfg):
     return rigid_object("Mohawk", bm, "Head", arm, ["CREST", "CREST_DARK"], mats, part="head")
 
 
-def make_cyber_arm(arm, mats, L, cfg):
+def make_cyber_arm(arm, mats, L, cfg, side="l"):
     """braccio sinistro cibernetico (metallo scuro, anelli cyan): gomito, avambraccio corazzato, polso,
-    parte bassa del braccio sotto la manica arrotolata (dalla v6, rivisto)."""
+    parte bassa del braccio sotto la manica arrotolata (dalla v6, rivisto). side="r" per il braccio destro
+    (Mimmo); cfg["upper"] = False toglie la corazza sopra il gomito, quando la manica copre il braccio."""
     objs = []
-    ua_l, la_l, ha_l = L["upperarm_l"], L["lowerarm_l"], L["hand_l"]
+    ua_l, la_l, ha_l = L["upperarm_" + side], L["lowerarm_" + side], L["hand_" + side]
     d_ua = (la_l - ua_l).normalized()
     up_from = cfg.get("upper_from", 0.55)
 
@@ -1063,10 +1064,11 @@ def make_cyber_arm(arm, mats, L, cfg):
         return 0
     a = ua_l + (la_l - ua_l) * up_from
     b = la_l - d_ua * 0.030
-    objs.append(rigid_object("UpperArmor", tube_bm(a, b, [(0, 0.050), (1, 0.047)], m_upper, segs=18,
-                                                    extra_ts=(0.41, 0.49, 0.72, 0.84)),
-                             "upperarm_l", arm, ["METAL", "METAL_SEAM", "METAL_DARK", "GLOW_LINE"], mats))
-    objs.append(rigid_object("Elbow", sphere_bm(la_l, (0.048, 0.048, 0.048), mat=0), "lowerarm_l", arm,
+    if cfg.get("upper", True):
+        objs.append(rigid_object("UpperArmor", tube_bm(a, b, [(0, 0.050), (1, 0.047)], m_upper, segs=18,
+                                                        extra_ts=(0.41, 0.49, 0.72, 0.84)),
+                                 "upperarm_" + side, arm, ["METAL", "METAL_SEAM", "METAL_DARK", "GLOW_LINE"], mats))
+    objs.append(rigid_object("Elbow", sphere_bm(la_l, (0.048, 0.048, 0.048), mat=0), "lowerarm_" + side, arm,
                              ["METAL_DARK"], mats))
     d_la = (ha_l - la_l).normalized()
     rings = cfg.get("rings", (0.30, 0.62))
@@ -1091,9 +1093,10 @@ def make_cyber_arm(arm, mats, L, cfg):
     objs.append(rigid_object("Gauntlet", tube_bm(a, b, [(0, 0.056), (0.35, 0.064), (1, 0.068)], m_fore, segs=20,
                                                   extra_ts=(0.265, 0.335, 0.585, 0.655, 0.10, 0.14, 0.86, 0.90,
                                                             0.40, 0.56)),
-                             "lowerarm_l", arm, ["METAL", "METAL_SEAM", "METAL_DARK", "GLOW_LINE", "METAL_LIGHT"], mats))
+                             "lowerarm_" + side, arm, ["METAL", "METAL_SEAM", "METAL_DARK", "GLOW_LINE", "METAL_LIGHT"],
+                             mats))
     objs.append(rigid_object("Wrist", tube_bm(ha_l - d_la * 0.012, ha_l + d_la * 0.022, [(0, 0.050), (1, 0.046)],
-                                              lambda t, a: 0, segs=14), "hand_l", arm, ["METAL_DARK"], mats))
+                                              lambda t, a: 0, segs=14), "hand_" + side, arm, ["METAL_DARK"], mats))
     return objs
 
 
@@ -1173,6 +1176,9 @@ def build_gig(ctx):
     sleeve_r = cfg.get("sleeve_r_t", 0.20)       # manica destra: arrotolata appena sotto il gomito
     hem_z = cfg.get("hem_z", 0.865)
     scfg = cfg.get("shirt", {})                    # v7: camicia aperta, niente cavallo, lembi separati
+    monco = cfg.get("monco")                       # GIG prima del braccio cyber (2064): moncherino sinistro
+    if monco:
+        sleeve_l = monco.get("sleeve_t", 0.50)
 
     def open_w(z):
         """mezza larghezza dell'apertura davanti della camicia alla quota z (stretta sotto il colletto, larga
@@ -1193,9 +1199,11 @@ def build_gig(ctx):
         if part in ("foot_l", "foot_r") and cfg.get("boots", {}).get("style") == "v7":
             return None                                         # dentro gli stivali nuovi
         if part == "upperarm_l":
+            if monco:
+                return "TOP" if arm_t(c, ua_l, la_l) < monco.get("stump_t", 0.42) else None
             return "TOP" if arm_t(c, ua_l, la_l) < sleeve_l - 0.04 else "METAL_DARK"
         if part == "lowerarm_l":
-            return "METAL_DARK"
+            return None if monco else "METAL_DARK"
         if part == "upperarm_r":
             return "TOP"
         if part == "lowerarm_r":
@@ -1437,10 +1445,19 @@ def build_gig(ctx):
     topknot = make_topknot(arm, mats, L, cfg.get("topknot", {}))
     make_brows(brows, mats, L, bushy=cfg.get("brow_bushy", 1.7), lift=cfg.get("brow_lift", 0.0))
     glow = make_eyes(eyes, arm, mats, L, glow_side=cfg.get("eye_side", "right"))
-    cyber = make_cyber_arm(arm, mats, L, cfg.get("cyber", {}))
+    if monco:
+        # niente braccio cyber: la manica vuota annodata sotto il moncherino
+        cyber = []
+        ax = (la_l - ua_l)
+        kc = ua_l + ax * monco.get("knot_t", 0.58)
+        kr = monco.get("knot_r", 0.034)
+        fist_l = rigid_object("Knot", sphere_bm(kc, (kr, kr * 0.9, kr * 1.15), mat=0), "upperarm_l", arm, ["TOP"],
+                              mats, part="upperarm_l")
+    else:
+        cyber = make_cyber_arm(arm, mats, L, cfg.get("cyber", {}))
+        fist_l = make_fist("l", arm, mats, L, ["METAL_LIGHT", "KNUCKLE", "METAL", "METAL_LIGHT", "METAL_SEAM",
+                                               "METAL", "METAL_DARK"])
     hood = make_hood_roll(arm, mats, L, cfg.get("hood", {}))
-    fist_l = make_fist("l", arm, mats, L, ["METAL_LIGHT", "KNUCKLE", "METAL", "METAL_LIGHT", "METAL_SEAM", "METAL",
-                                           "METAL_DARK"])
     hcfg = cfg.get("hand_r", {})
     if hcfg.get("bare"):
         # v7: mano destra nuda (pelle, nocche e solchi delle dita); delle fasce da boxe resta solo una fascia
@@ -1970,7 +1987,7 @@ def build(job):
     kind = job["outfit"]
     if kind == "gig":
         objs, L = build_gig(ctx)
-    elif kind in ("rider", "esattore", "messo", "toto", "addolorata"):
+    elif kind in ("rider", "esattore", "messo", "toto", "addolorata", "mimmo"):
         import char_enemies
         objs, L = char_enemies.build(globals(), ctx, kind)
     else:

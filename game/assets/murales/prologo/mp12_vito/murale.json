@@ -1,0 +1,68 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp12_vito",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "ricordo del 2064, vignetta 2 (circa 5 s): primo piano di Vito che guarda il figlio fuori campo a sinistra. Spinta lentissima sul volto. La palpebra si chiude ogni tanto (figura_vito_blink) e la bocca si apre solo sulla battuta (figura_vito_talk), come i primi piani del gioco; la luce della lampada oscilla appena. Battuta di VITO, a fumetto e a pressione: «Una mano ce l'hai. L'altra fattela.» Poi la vignetta 3 nel motore: la telecamera si allarga dalla tastiera del murale a quella del 2087.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.25,
+  "centro_a": [
+   300,
+   120
+  ]
+ },
+ "figure": [
+  {
+   "nome": "vito",
+   "file": "figura_vito.png",
+   "x": 250,
+   "y": 7,
+   "misura": [
+    260,
+    284
+   ],
+   "profondita": 1.0,
+   "nota": "Vito a 60 anni, tre quarti verso sinistra, il colletto della giacca blu del porto; tagliato dal bordo in basso e a destra",
+   "blink": "figura_vito_blink.png",
+   "talk": "figura_vito_talk.png",
+   "volto": {
+    "blink": [
+     83,
+     99,
+     18,
+     3
+    ],
+    "talk": [
+     56,
+     152,
+     21,
+     5
+    ]
+   }
+  }
+ ],
+ "colori": 82,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di Vito e dal nostro sfondo del garage; ridotto in pixel art dai nostri script"
+}

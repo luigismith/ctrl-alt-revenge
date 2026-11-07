@@ -46,6 +46,9 @@ La configurazione:
                 "colori": 24, "profondita": 1.0, "visibile": true,
                 "finestra": [x0, y0, x1, y1]}],            facoltativo: la figura si vede solo dentro quel riquadro
                                                    della vignetta (un vano, una finestra); "taglia_y" taglia solo sotto
+                "volto": {"blink": [[x, y, w, h, "#colore"], ...], "talk": [...]}}],   facoltativo, per i primi
+                                                   piani che parlano: palpebre chiuse e bocca aperta, pennellate nostre
+                                                   in pixel della figura col contorno -> figura_<nome>_blink.png, _talk
     "fonte": "ChatGPT (OpenAI), da nostri render e schizzi; ridotto in pixel art dai nostri script"
   }
 Le figure (dipinte su verde #00FF00) escono come strati a parte, figura_<nome>.png, con la posizione nel json:
@@ -385,6 +388,29 @@ def figura(cp: Path, fc: dict, ink, seed: int, pal_sfondo: np.ndarray | None = N
     return out, info
 
 
+def volto(f: np.ndarray, vc: dict) -> dict:
+    """Le varianti animate di un volto dipinto: occhi chiusi ("blink") e bocca aperta ("talk"). Le disegniamo noi,
+    a mano, sui pixel della figura già ridotta: ogni variante è una lista di pennellate [x, y, w, h, "#colore"] in
+    pixel della figura (col contorno), date nell'ordine. Sui volti dei murales la ricerca automatica degli occhi dei
+    primi piani del gioco (closeup_ai.py) non funziona: l'occhio è una fessura chiara sotto l'ombra del sopracciglio.
+    -> {"blink": rgba, "talk": rgba, "info": {"blink": riquadro, "talk": riquadro}}"""
+    res, info = {}, {}
+    for k in ("blink", "talk"):
+        if not vc.get(k):
+            continue
+        comp = f.copy()
+        xs, ys = [], []
+        for x, y, w, h, col in vc[k]:
+            tocca = comp[y:y + h, x:x + w, 3] > 0                 # solo sulla figura, mai sul trasparente
+            comp[y:y + h, x:x + w, :3][tocca] = hexrgb(col)
+            xs += [x, x + w]
+            ys += [y, y + h]
+        res[k] = comp
+        info[k] = [min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)]
+    res["info"] = info
+    return res
+
+
 def scia(out: np.ndarray, sc: dict, ink, seed: int) -> tuple[np.ndarray, int, int]:
     """La scia di un getto (il braccio cyber di GIG in MP13): una linea che parte dall'ugello e si sfalda in
     trattini e poi in gocce sparse, dal colore chiaro dell'anima a quello scuro della coda. Al posto di un cono
@@ -589,6 +615,13 @@ def main() -> None:
     for fc in cfg.get("figure", []):
         pal_bg = np.unique(img[..., :3][img[..., 3] > 0], axis=0) if fc.get("tavolozza_sfondo") else None
         f, info = figura(cp, fc, ink, seed, pal_bg)
+        if fc.get("volto"):
+            vv = volto(f, fc["volto"])
+            for k in ("blink", "talk"):
+                if k in vv:
+                    Image.fromarray(vv[k]).save(out / f"figura_{fc['nome']}_{k}.png")
+                    info[k] = f"figura_{fc['nome']}_{k}.png"
+            info["volto"] = vv["info"]
         figs.append((f, info))
         if info.get("visibile", True):
             over(comp, f, info["x"], info["y"])

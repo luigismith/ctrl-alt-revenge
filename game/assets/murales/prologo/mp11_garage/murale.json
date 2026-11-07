@@ -1,0 +1,52 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp11_garage",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "ricordo del 2064, vignetta 1 (circa 7 s). Raccordo: nel motore la telecamera stringe sulla tastiera del gioco finché i tasti riempiono lo schermo, poi lo spray apre il murale stretto sulla stessa tastiera (in alto a destra sul banco) e la telecamera si allarga fino al campo medio con GIG e Vito. Animazioni: la lampada del muro oscilla appena (ombre nello shader), la mano di GIG che gira il cacciavite (due pose, da fare), una scintilla piccola dal prototipo, la polvere nella luce. Didascalia di Totò: «Il primo braccio lo fecero qui, in due.» Il nome cucito sulla giacca di Vito a questa misura non si legge: resta la toppa chiara.",
+  "zoom_da": 3,
+  "centro_da": [
+   418,
+   200
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   256,
+   144
+  ]
+ },
+ "figure": [
+  {
+   "nome": "gig_vito",
+   "file": "figura_gig_vito.png",
+   "x": 184,
+   "y": 93,
+   "misura": [
+    207,
+    122
+   ],
+   "profondita": 1.0,
+   "nota": "GIG a 27 anni (moncherino a sinistra del personaggio, cacciavite nella destra) e Vito che tiene fermo il prototipo spento sul banco; la riga in basso è il bordo del banco"
+  }
+ ],
+ "colori": 87,
+ "fonte": "ChatGPT (OpenAI), dal nostro sfondo del garage e dai nostri render 3D di GIG del 2064 e di Vito; ridotto in pixel art dai nostri script"
+}
