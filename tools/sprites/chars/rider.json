@@ -1,6 +1,9 @@
 {
  "id": "rider",
- "closeups": [{"name": "rider_dx", "faces": "right", "variants": ["talk"]}],
+ "closeups": [{"name": "rider_dx", "faces": "right", "variants": ["talk"],
+               "ai": {"base": "chatgpt/rider_dx_v3.png", "render": "rider_dx.png", "colors": 24,
+                      "canon": ["#b8845e", "#8a5c40", "#c4b89e", "#e8761c", "#3c3c46"], "mouth": [55, 56, 13, 4], "open_px": 2,
+                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche la bocca"}}],
  "base": "thug_punk",
  "outfit": "rider",
  "hair_meshes": [],

@@ -5,13 +5,14 @@
  ],
  "faces": "right",
  "mouth": [
-  59,
-  54,
-  9,
+  55,
+  56,
+  13,
   4
  ],
- "mouth_dark": "#4a1c26",
+ "mouth_dark": "#140e1e",
  "variants": [
   "talk"
- ]
+ ],
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D; ridotto in pixel art dai nostri script"
 }

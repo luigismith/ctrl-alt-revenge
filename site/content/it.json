@@ -240,7 +240,7 @@
     {"titolo": "Sfondi, font e suoni", "testo": "Gli sfondi dello slice sono geometria e disegno procedurale, con pochi pezzi CC0 ricolorati e un carattere pixel nostro per le insegne; quelli del prologo partono da basi dipinte con Gemini e ChatGPT, che i nostri script portano alla pixel art del gioco. Anche font, effetti e interfaccia escono da script. Gli effetti sonori li montiamo da suoni già pronti con licenza libera, ritoccati e sovrapposti."},
     {"titolo": "Godot", "testo": "Godot mette insieme tutto, con le luci dinamiche e la logica a tick fissi."}
    ],
-   "chiusa": "Niente ritocchi a mano: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository. Le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo, da prompt di solo testo; personaggi e nemici nascono dalla pipeline 3D."
+   "chiusa": "Niente ritocchi a mano: gli script, scritti da agenti AI per Luigi Massari, sono deterministici, hanno semi fissi e si possono rileggere tutti nel repository. Le immagini generate da un’intelligenza artificiale sono soltanto basi: quelle delle ambientazioni del prologo, da prompt di solo testo, e i volti dei primi piani dei filmati, fatti partendo dai nostri render 3D. Personaggi e nemici in gioco nascono dalla pipeline 3D."
   },
   "colori": {
    "titolo": "I colori dicono di chi è la scena",
@@ -276,13 +276,13 @@
    "titolo": "Chi lo fa",
    "voci": [
     {"ruolo": "Progetto e direzione", "testo": "Luigi Massari.", "mostra": true},
-    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo, da basi generate con Gemini e ChatGPT. È la stessa riga dei crediti del gioco.", "mostra": true},
+    {"ruolo": "Codice, grafica ed effetti sonori", "testo": "prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo e i primi piani dei filmati, da basi generate con Gemini e ChatGPT. È la stessa riga dei crediti del gioco.", "mostra": true},
     {"ruolo": "Storia", "testo": "la scrivono insieme Luigi Massari e Claude, un assistente AI: Claude propone, Luigi decide.", "mostra": false},
     {"ruolo": "Font CAR Pixel, effetti e interfaccia", "testo": "disegnati da script per CTRL+ALT REVENGE.", "mostra": true},
     {"ruolo": "Motore", "testo": "Godot Engine.", "mostra": true}
    ]
   },
-  "ai": "Le immagini di questo sito sono la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository. Nel gioco, le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo: sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, poi portati alla pixel art dagli script.",
+  "ai": "Le immagini di questo sito sono la grafica del gioco, fatta da script deterministici a partire dalle sorgenti CC0 elencate qui sotto, e quella disegnata dal codice della pagina, come la nube e la polvere. Gli script sono scritti da agenti AI per Luigi Massari, e si possono rileggere tutti nel repository. Nel gioco, le immagini generate da un’intelligenza artificiale sono soltanto basi: gli sfondi dipinti e i fogli di oggetti delle ambientazioni del prologo, fatti con l’app Gemini di Google e con ChatGPT di OpenAI da prompt di solo testo, e i volti dei primi piani dei filmati, fatti con ChatGPT partendo dai nostri render 3D. Gli script li portano alla pixel art, e palpebre e bocca le animano loro.",
   "licenze": {
    "titolo": "Licenze",
    "voci": [

@@ -1078,10 +1078,15 @@ def step_closeup(cid):
             Image.fromarray(crop_frame(bim, x0 * k, y0 * k, n * k), "RGBA").save(os.path.join(bd, name + ".png"))
             notes.append(f"render a colori {n * k}px")
         res["variants"] = [k for k in outimg if k != "base"]
-        for k, im in outimg.items():
-            fn = name + ("" if k == "base" else "_" + k) + ".png"
-            Image.fromarray(im, "RGBA").save(os.path.join(CLOSEUP_DIR, fn))
-        C.save_json(os.path.join(CLOSEUP_DIR, name + ".json"), res)
+        if sp.get("ai"):
+            # il primo piano del gioco nasce dalla base in stile murales (closeup_ai.py): qui serve solo il render
+            # a colori di riferimento per l'allineamento
+            notes.append("nel gioco la base AI: lancia closeup_ai.py")
+        else:
+            for k, im in outimg.items():
+                fn = name + ("" if k == "base" else "_" + k) + ".png"
+                Image.fromarray(im, "RGBA").save(os.path.join(CLOSEUP_DIR, fn))
+            C.save_json(os.path.join(CLOSEUP_DIR, name + ".json"), res)
         # controllo: GIG prima del riavvio non ha niente di cyan (stessa prova dello shader del gioco)
         cy = 0
         for im in outimg.values():

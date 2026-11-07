@@ -6,6 +6,7 @@ Luigi Massari
 # CODICE, GRAFICA ED EFFETTI SONORI
 Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney, sfondi Warped City di Luis Zuno (ansimuz).
 Le ambientazioni del prologo partono da basi dipinte generate con l'app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, e ridisegnate in pixel art dagli script.
+I primi piani dei filmati partono da volti generati con ChatGPT a partire dai nostri render 3D; palpebre e bocca le animano gli script.
 
 # SUONI
 Montati e ritoccati da suoni CC0 di Kenney (Impact, Interface, RPG e Sci-Fi Sounds), di Freesound e di rubberduck e AntumDeluge (OpenGameArt).

@@ -170,12 +170,12 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 **CTRL+ALT REVENGE!** · © 2026 Luigi Massari
 
 - **Progetto e direzione:** Luigi Massari.
-- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo, da basi generate con Gemini e ChatGPT.
+- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni del prologo e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
 - **Musica della demo:** Luigi Massari, con Suno (piano Pro).
 - **Font CAR Pixel, effetti e interfaccia:** disegnati da script per CTRL+ALT REVENGE.
 - **Motore:** [Godot Engine](https://godotengine.org).
 
-La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le sole immagini generate da un’intelligenza artificiale sono le basi delle ambientazioni del prologo: sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. Gli originali non sono nel repository.
+La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le immagini generate da un’intelligenza artificiale sono soltanto basi. Quelle delle ambientazioni del prologo sono sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. I volti dei primi piani dei filmati li fa ChatGPT partendo dai nostri render 3D; `tools/sprites/closeup_ai.py` li riduce, e palpebre e bocca le animano i nostri script. Gli originali non sono nel repository.
 
 **Sorgenti CC0** (il credito non è obbligatorio, lo diamo lo stesso):
 - [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro).

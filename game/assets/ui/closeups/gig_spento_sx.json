@@ -6,22 +6,23 @@
  "faces": "left",
  "eyes": [
   [
-   37,
-   53,
-   7,
+   33,
+   54,
+   11,
    4
   ]
  ],
- "lid": "#c98466",
+ "lid": "#995a44",
  "mouth": [
-  19,
-  70,
-  13,
-  6
+  21,
+  72,
+  16,
+  4
  ],
- "mouth_dark": "#4a1c26",
+ "mouth_dark": "#140e1e",
  "variants": [
   "blink",
   "talk"
- ]
+ ],
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D; ridotto in pixel art dai nostri script"
 }

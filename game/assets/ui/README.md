@@ -4,6 +4,17 @@ Tutto è generato da `tools/fxui/make_ui.py`, alla risoluzione del gioco (480×2
 
 La cartella `portraits/` non nasce da qui: i ritratti 32×32 li fa la pipeline dei personaggi.
 
+## Primi piani delle scene (`closeups/`)
+
+I primi piani 96×96 dei filmati nel motore: GIG prima del riavvio (`gig_spento_sx`), il messo (`messo_dx`) e il rider (`rider_dx`). Neanche questi nascono da `make_ui.py`:
+
+- **Il volto** in stile murales è generato con **ChatGPT di OpenAI**, ridipingendo il nostro render 3D del personaggio (decisione 68 della storia). Il JSON accanto lo dice nel campo `fonte`.
+- **La riduzione in pixel art** la fa `tools/sprites/closeup_ai.py`: allinea il volto al render, ne fa la tavolozza e la aggancia ai colori del personaggio. Le impostazioni stanno nella voce `ai` del primo piano, in `tools/sprites/chars/<personaggio>.json`.
+- **Palpebre chiuse (`_blink`) e bocca aperta (`_talk`)** le disegna lo stesso script sui pixel della base: niente di animato viene dall'AI.
+- **Gli originali e i prompt** non sono nel repository.
+
+Ogni JSON dà i riquadri di occhi (`eyes`) e bocca (`mouth`) e i loro colori (`lid`, `mouth_dark`).
+
 ## Elementi
 
 | Chiave in `ui.json` | File | Misure | Note |

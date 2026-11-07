@@ -66,8 +66,9 @@ Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi 
 
 - **App Gemini di Google** (gemini.google.com), dal 6 novembre 2026. Google dichiara di non rivendicare la proprietà dei contenuti generati.
 - **ChatGPT di OpenAI** (chatgpt.com), dal 6 novembre 2026. I termini di OpenAI cedono all'utente i diritti sull'output e ne ammettono l'uso commerciale.
-- I prompt sono di solo testo: nessuna foto né immagine di altri è stata caricata. Le foto di Taranto sono servite soltanto a scriverli.
-- Personaggi, nemici e oggetti animati non vengono da qui: nascono dalla pipeline da 3D a pixel.
+- Per le ambientazioni i prompt sono di solo testo: nessuna foto né immagine di altri è stata caricata. Le foto di Taranto sono servite soltanto a scriverli.
+- **I primi piani dei filmati** (`game/assets/ui/closeups/`) partono da volti in stile murales generati con ChatGPT, a cui abbiamo caricato soltanto i nostri render 3D dei personaggi. `tools/sprites/closeup_ai.py` li porta in pixel art, e palpebre e bocca le animano i nostri script.
+- Personaggi, nemici e oggetti animati del gioco non vengono da qui: nascono dalla pipeline da 3D a pixel.
 - Le immagini generate con l'AI potrebbero non essere proteggibili col diritto d'autore. Prima di vendere il gioco si ricontrollano i termini dei due servizi.
 
 ## Codice nostro sotto GPL

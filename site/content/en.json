@@ -240,7 +240,7 @@
     {"titolo": "Backgrounds, fonts and sounds", "testo": "The slice’s backgrounds are procedural geometry and painting, with a handful of recoloured CC0 pieces and our own pixel typeface for the shop signs; the prologue’s start from painted bases made with Gemini and ChatGPT, which our scripts turn into the game’s pixel art. Fonts, effects and interface come from scripts too. The sound effects are built from ready-made, freely licensed sounds, trimmed and layered."},
     {"titolo": "Godot", "testo": "Godot puts it all together, with dynamic lights and fixed-tick logic."}
    ],
-   "chiusa": "No hand retouching: the scripts, written by AI agents for Luigi Massari, are deterministic, use fixed seeds and can all be read in the repository. The only AI-generated images are the bases of the prologue’s settings, from text-only prompts; characters and enemies come from the 3D pipeline."
+   "chiusa": "No hand retouching: the scripts, written by AI agents for Luigi Massari, are deterministic, use fixed seeds and can all be read in the repository. AI-generated images are only ever bases: those of the prologue’s settings, from text-only prompts, and the faces in the cutscene close-ups, made from our own 3D renders. In-game characters and enemies come from the 3D pipeline."
   },
   "colori": {
    "titolo": "Colours say whose scene it is",
@@ -276,13 +276,13 @@
    "titolo": "Who makes it",
    "voci": [
     {"ruolo": "Project and direction", "testo": "Luigi Massari.", "mostra": true},
-    {"ruolo": "Code, graphics and sound effects", "testo": "produced with AI agents for Luigi Massari, starting from CC0 sources and, for the prologue’s settings, from bases generated with Gemini and ChatGPT. It’s the same line as in the game’s credits.", "mostra": true},
+    {"ruolo": "Code, graphics and sound effects", "testo": "produced with AI agents for Luigi Massari, starting from CC0 sources and, for the prologue’s settings and the cutscene close-ups, from bases generated with Gemini and ChatGPT. It’s the same line as in the game’s credits.", "mostra": true},
     {"ruolo": "Story", "testo": "co-written by Luigi Massari and Claude, an AI assistant: Claude proposes, Luigi decides.", "mostra": false},
     {"ruolo": "CAR Pixel fonts, effects and interface", "testo": "drawn by scripts for CTRL+ALT REVENGE.", "mostra": true},
     {"ruolo": "Engine", "testo": "Godot Engine.", "mostra": true}
    ]
   },
-  "ai": "The images on this site are the game’s own art, made by deterministic scripts from the CC0 sources listed below, and what the page’s own code draws, like the cloud and the dust. The scripts are written by AI agents for Luigi Massari, and you can read them all in the repository. In the game, the only AI-generated images are the bases of the prologue’s settings: painted backgrounds and prop sheets made with Google’s Gemini app and OpenAI’s ChatGPT, from text-only prompts, then turned into pixel art by the scripts.",
+  "ai": "The images on this site are the game’s own art, made by deterministic scripts from the CC0 sources listed below, and what the page’s own code draws, like the cloud and the dust. The scripts are written by AI agents for Luigi Massari, and you can read them all in the repository. In the game, AI-generated images are only ever bases: the painted backgrounds and prop sheets of the prologue’s settings, made with Google’s Gemini app and OpenAI’s ChatGPT from text-only prompts, and the faces in the cutscene close-ups, made with ChatGPT from our own 3D renders. The scripts turn them into pixel art, and they animate the eyelids and mouths too.",
   "licenze": {
    "titolo": "Licences",
    "voci": [
