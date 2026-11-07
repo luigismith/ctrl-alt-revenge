@@ -110,6 +110,9 @@ var _outro_c: Vector2 = Vector2.ZERO
 var _outro_z: float = 1.0
 ## La battuta in corso: {"who", "name", "color", "lines", "chars", "shown", "t", "hold"}.
 var _line: Dictionary = {}
+## La voce della battuta in corso (SceneVoices), solo con il suono: {"env", "ticks", "k"}.
+var _voice: Dictionary = {}
+var _voice_player: AudioStreamPlayer
 ## Il primo piano: {"who", "name", "full", "side", "tex", "blink", "talk", "mirror", "scale", "k", "out"}.
 var _cu: Dictionary = {}
 var _cu_old: Dictionary = {}
@@ -397,6 +400,7 @@ func _start_line(st: Dictionary) -> void:
 	var text := SceneLines.text(data.lines_file, data.id, str(st["id"]))
 	_line = {"who": who, "name": str(a.get("nome", who.to_upper())), "color": Color.html(str(a.get("colore", "#ece8dc"))),
 		"lines": _wrap(text, View.W - 2 * TEXT_X), "chars": text.length(), "shown": 0.0, "t": 0, "hold": 0}
+	_start_voice(str(st["id"]))
 	if st.has("anim") and puppets.has(who):
 		(puppets[who] as ScenePuppet).play(StringName(str(st["anim"])))
 	var cu := _closeup_name(who, st)
@@ -413,9 +417,48 @@ func _closeup_name(who: String, st: Dictionary) -> String:
 	return str((data.actors.get(who, {}) as Dictionary).get("primo_piano", ""))
 
 
+## La voce della battuta, se c'è e torna con il testo (SceneVoices); la precedente si ferma.
+func _start_voice(id: String) -> void:
+	_stop_voice()
+	if not sound:
+		return
+	var text := SceneLines.find(data.lines_file, data.id, id)
+	if text == "":
+		return
+	var v := SceneVoices.voice(data.lines_file, data.id, id, text)
+	if v.is_empty():
+		return
+	if _voice_player == null:
+		_voice_player = AudioStreamPlayer.new()
+		_voice_player.bus = Sfx.BUS
+		add_child(_voice_player)
+	_voice_player.stream = v["stream"]
+	_voice_player.play()
+	_voice = {"env": v["env"], "ticks": int(v["ticks"]), "k": 0}
+
+
+func _stop_voice() -> void:
+	_voice = {}
+	if _voice_player != null:
+		_voice_player.stop()
+
+
+## La bocca è aperta: con la voce la dice l'inviluppo, senza voce va mentre la battuta si scrive.
+func _mouth_open(who: String) -> bool:
+	if _line.is_empty() or str(_line["who"]) != who:
+		return false
+	if not _voice.is_empty():
+		var env: PackedByteArray = _voice["env"]
+		var k := int(_voice["k"])
+		return k < env.size() and env[k] >= SceneVoices.MOUTH_OPEN
+	return float(_line["shown"]) < int(_line["chars"]) and (t / 5) % 2 == 0
+
+
 func _tick_line() -> void:
 	if _line.is_empty():
 		return
+	if not _voice.is_empty():
+		_voice["k"] = int(_voice["k"]) + 1
 	_line["t"] = int(_line["t"]) + 1
 	var total := int(_line["chars"])
 	var typing := float(_line["shown"]) < total
@@ -428,6 +471,9 @@ func _tick_line() -> void:
 	if float(_line["shown"]) >= total:
 		_line["hold"] = int(_line["hold"]) + 1
 		var auto_done := auto and int(_line["hold"]) >= AUTO_HOLD + AUTO_PER_CHAR * total
+		# In automatico, con la voce, si aspetta anche che finisca di parlare.
+		if auto_done and not _voice.is_empty():
+			auto_done = int(_voice["k"]) >= int(_voice["ticks"]) + AUTO_HOLD / 2
 		if pressed or auto_done:
 			_end_line()
 
@@ -439,6 +485,7 @@ func _advance_pressed() -> bool:
 
 func _end_line() -> void:
 	_line = {}
+	_stop_voice()
 	_after_closeup()
 
 
@@ -549,8 +596,7 @@ func _tick_closeup() -> void:
 func _closeup_frame(c: Dictionary) -> Texture2D:
 	var tex: Texture2D = c["tex"]
 	var who := str(c["who"])
-	var talking := not _line.is_empty() and str(_line["who"]) == who and float(_line["shown"]) < int(_line["chars"])
-	if talking and c["talk"] != null and (t / 5) % 2 == 0:
+	if c["talk"] != null and _mouth_open(who):
 		return c["talk"]
 	# Le palpebre: ogni 150-230 tick, per 7 tick (dal tick e dal nome, senza caso).
 	var period := 150 + (who.hash() & 63) + 16
@@ -610,6 +656,7 @@ func _skip() -> void:
 		(_laser["dst"] as ScenePuppet).marked = true
 	_laser = {}
 	_line = {}
+	_stop_voice()
 	_hide_closeup()
 	_step_i = data.steps.size()
 	_wait = Callable()
