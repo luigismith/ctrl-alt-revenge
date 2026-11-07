@@ -61,8 +61,9 @@ func _shock(f: Fighter) -> void:
 	f.receive_hit(self, zap, HitInfo.new(Vector2(f.px, f.py - 38.0), dir, false))
 	if level.sound_enabled:
 		Sfx.play_at(&"zap", f.px)
-	level.fx.spawn(&"cyber_spark", f.px, f.py - 25.0, 1, f.depth_z(2))
-	level.fx.spawn(&"cyber_spark", f.px - 8.0, f.py - 60.0, -1, f.depth_z(2))
+	# Viola e arancio come l'arco del cavo: il cyan è solo del braccio di GIG.
+	level.fx.spawn(&"cable_spark", f.px, f.py - 25.0, 1, f.depth_z(2))
+	level.fx.spawn(&"cable_spark", f.px - 8.0, f.py - 60.0, -1, f.depth_z(2))
 	level.add_shake(0.25)
 	Game.count(&"cable_zaps")
 	if f is Gig:

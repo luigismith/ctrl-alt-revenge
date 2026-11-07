@@ -112,6 +112,10 @@ func setup(fighter_data: FighterData, lvl: Level, id: int, fighter_team: Team) -
 ## capelli e scintille non bruciano i chiari) e il contorno scuro escluso dalla luce, come l'inchiostro: resta
 ## scuro anche sotto un neon (vale anche per le linee interne, che hanno lo stesso colore). Solo disegno: la
 ## simulazione non lo vede.
+## La luce del posto (Wind Day, 7 novembre 2026: «fallo con le luci, non modificare gli sprites»): `ambient` è la
+## luce ambiente, che moltiplica i colori (rgb) quanto dice a, di più sulle ombre e meno sui chiari, così l'ocra
+## resta ocra; `light_hue` è quanto le luci colorano anche l'interno della sagoma (0: solo il bordo, come prima).
+## Il contorno e il cyan del braccio restano fuori da tutte e due. Le mette WindDay (Fighter.apply_ambient).
 const FLASH_SHADER := """shader_type canvas_item;
 uniform float flash = 0.0;
 // varianti di colore del nemico: i colori swap_from diventano swap_to
@@ -121,8 +125,15 @@ uniform vec3 swap_from[SWAP_MAX];
 uniform vec3 swap_to[SWAP_MAX];
 // braccio cyber sospeso (pignoramento del rider): i toni cyan delle luci del braccio e dell'occhio diventano grigi
 uniform float arm_off = 0.0;
+// la luce del posto: ambiente (rgb moltiplica, a quanto) e tinta delle luci sull'interno
+uniform vec4 ambient = vec4(1.0, 1.0, 1.0, 0.0);
+uniform float light_hue = 0.0;
 // colore del contorno degli sprite (palette.outline nei JSON dei personaggi, #140e1e)
 const vec3 OUTLINE = vec3(0.0784, 0.0549, 0.1176);
+const vec3 LUMA = vec3(0.299, 0.587, 0.114);
+float is_cyan(vec3 c) {
+	return step(0.4, c.b - c.r) * step(0.3, c.g - c.r);
+}
 void fragment() {
 	for (int i = 0; i < SWAP_MAX; i++) {
 		if (i < swap_n && distance(COLOR.rgb, swap_from[i]) < 0.02) {
@@ -131,8 +142,13 @@ void fragment() {
 	}
 	if (arm_off > 0.5) {
 		vec3 c = COLOR.rgb;
-		float cyan = step(0.4, c.b - c.r) * step(0.3, c.g - c.r);
-		COLOR.rgb = mix(c, vec3(dot(c, vec3(0.299, 0.587, 0.114)) * 0.7), cyan);
+		COLOR.rgb = mix(c, vec3(dot(c, LUMA) * 0.7), is_cyan(c));
+	}
+	if (ambient.a > 0.0) {
+		vec3 c = COLOR.rgb;
+		float ink = 1.0 - step(distance(c, OUTLINE), 0.02);
+		float k = ambient.a * mix(1.0, 0.65, smoothstep(0.2, 0.7, dot(c, LUMA))) * ink * (1.0 - is_cyan(c));
+		COLOR.rgb = mix(c, c * ambient.rgb, k);
 	}
 	COLOR.rgb = mix(COLOR.rgb, vec3(1.0), flash);
 }
@@ -140,14 +156,27 @@ void light() {
 	float d = max(dot(NORMAL, LIGHT_DIRECTION), 0.0);
 	d = floor(d * 3.0 + 0.35) / 3.0;
 	float rim = clamp((1.0 - NORMAL.z) * 1.6, 0.0, 1.0);
-	float lum = dot(LIGHT_COLOR.rgb, vec3(0.299, 0.587, 0.114));
-	vec3 inner = COLOR.rgb * lum * 0.45;
+	float lum = dot(LIGHT_COLOR.rgb, LUMA);
+	vec3 inner = COLOR.rgb * mix(vec3(lum), LIGHT_COLOR.rgb, light_hue * (1.0 - is_cyan(COLOR.rgb))) * 0.45;
 	vec3 edge = LIGHT_COLOR.rgb * 0.6;
-	float reserve = 1.0 - 0.6 * dot(COLOR.rgb, vec3(0.299, 0.587, 0.114));
+	float reserve = 1.0 - 0.6 * dot(COLOR.rgb, LUMA);
 	float ink = 1.0 - step(distance(COLOR.rgb, OUTLINE), 0.02);
 	LIGHT = vec4(mix(inner, edge, rim) * LIGHT_ENERGY * d * reserve * ink, LIGHT_COLOR.a);
 }
 """
+
+
+## La luce del posto su un materiale con FLASH_SHADER (vedi sopra): `tint` rgb moltiplica, a quanto; `hue` quanto
+## le luci colorano l'interno. Color(1, 1, 1, 0) e 0 la tolgono.
+static func apply_ambient(m: ShaderMaterial, tint: Color, hue: float) -> void:
+	if m == null:
+		return
+	m.set_shader_parameter(&"ambient", tint)
+	m.set_shader_parameter(&"light_hue", hue)
+
+
+func set_ambient(tint: Color, hue: float) -> void:
+	apply_ambient(_mat, tint, hue)
 
 
 static func _get_flash_shader() -> Shader:

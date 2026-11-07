@@ -25,6 +25,7 @@ var _wind: WindDay
 var _fx: FxLayer
 var _ui: Control
 var _gig: Sprite2D
+var _gig_mat: ShaderMaterial
 var _gig_anim: FrameAnim
 ## Ombra di GIG, in un nodo disegnato prima di lui (così non copre gli stivali).
 var _shadow: Node2D
@@ -71,13 +72,20 @@ func _ready() -> void:
 	_gig.centered = false
 	_gig.region_enabled = true
 	_gig.position = GIG_FEET
+	# Lo stesso materiale dei combattenti, così prende la luce del Wind Day come nel livello.
+	if sheet.has_normals:
+		_gig.light_mask = Fighter.LIGHT_MASK_ACTORS
+	_gig_mat = ShaderMaterial.new()
+	_gig_mat.shader = Fighter._get_flash_shader()
+	_gig.material = _gig_mat
 	add_child(_gig)
-	# La sera del Wind Day come nel livello, senza le pozze: polvere, tinta rossa e luci della torre.
+	# La sera del Wind Day come nel livello, senza le pozze: polvere, tinta rossa, luci della torre e la luce
+	# su GIG (qui il titolo è anche lo spazio delle luci: lo schermo).
 	var level: Variant = JSON.parse_string(FileAccess.get_file_as_string(LEVEL))
 	var data: Dictionary = level if level is Dictionary else {}
 	_wind = WindDay.new()
 	_wind.setup(3, data)
-	_wind.attach(front, null, _backdrop, WindDay.lamps_of(data), false)
+	_wind.attach(front, self, _backdrop, WindDay.lamps_of(data), false, true)
 	var ui_layer := CanvasLayer.new()
 	ui_layer.layer = 5
 	add_child(ui_layer)
@@ -105,6 +113,7 @@ func _physics_process(_delta: float) -> void:
 	_backdrop.update(TITLE_CAM, _t)
 	_wind.tick(TITLE_CAM)
 	_wind.sync(TITLE_CAM, [], true)
+	_wind.light_actor(_gig_mat)
 	_gig_anim.advance()
 	var f := _gig_anim.frame()
 	_gig.region_rect = Rect2(f.rect)

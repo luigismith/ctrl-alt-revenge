@@ -7,16 +7,20 @@ extends Node2D
 ##   secondo raddoppia i granelli, li spinge più forte e fa passare basso un velo di polvere; sotto i lampioni
 ##   i granelli prendono la luce gialla;
 ## - la luce: gli sfondi dipinti virano verso il rosso-arancio della nube accesa dalla città, più forte in
-##   alto (le insegne e le lampade dipinte restano com'erano, come accenti); gli attori con la normal map
-##   prendono la stessa luce dall'alto; le luci di segnalazione della torre di SIDERA lampeggiano lontane;
+##   alto (le insegne e le lampade dipinte restano com'erano, come accenti); gli attori prendono la stessa luce:
+##   la luce ambiente rossa sulle ombre (Fighter.apply_ambient), la nube dall'alto, che fa il bordo caldo dalla
+##   parte del cielo e tinge un po' anche l'interno, e il riverbero rosso che sale dal pavimento; il contorno e
+##   il cyan del braccio restano com'erano; le luci di segnalazione della torre di SIDERA lampeggiano lontane;
 ## - l'asfalto bagnato e le pozze col fango rosso: il fondo specchiato, con l'acqua che increspa, poco
 ##   sull'asfalto e molto nelle pozze, che hanno un velo di fango rosso; gli attori capovolti sotto i piedi,
-##   netti solo dove c'è acqua.
+##   netti solo dove c'è acqua. Il riflesso dello sfondo è spezzato in verticale, come sull'asfalto ruvido: le
+##   insegne diventano strisce di luce e le scritte non si leggono.
 ## Solo disegno: ha un generatore casuale suo e la simulazione, i replay e i loro hash non lo vedono.
 ##
 ## Uso, dal livello: setup(seme, dati del livello); attach(primo piano, mondo, sfondo, lampioni); a ogni tick
 ## della simulazione tick(telecamera); a ogni disegno sync(telecamera, combattenti, luci accese). Il titolo la
-## usa senza mondo e senza pozze: solo polvere, tinta e luci della torre.
+## usa senza pozze e con le luci nello spazio dello schermo: polvere, tinta, luci della torre e la luce su GIG
+## (light_actor sul suo materiale).
 
 const W := View.W
 const H := View.H
@@ -44,9 +48,19 @@ const C_LAMP := Color(1.0, 0.78, 0.38)
 
 ## La luce della nube sugli attori: rosso-arancio, dall'alto e un po' davanti.
 const SKY_COLOR := Color(1.0, 0.47, 0.27)
-const SKY_ENERGY := 0.4
+const SKY_ENERGY := 0.55
 const SKY_HEIGHT := 1800.0
 const FAR := 3000.0
+## Il riverbero del pavimento: rosso scuro, dal basso e radente, schiarisce i lati in giù (gambe, mento, braccia).
+const FLOOR_COLOR := Color(0.86, 0.34, 0.2)
+const FLOOR_ENERGY := 0.3
+const FLOOR_HEIGHT := 700.0
+## La luce ambiente sugli attori (Fighter.apply_ambient): i colori virano verso il rosso della nube, come gli
+## sfondi con GRADE_SHADER ma più scuri, perché la nube e il pavimento li riaccendono; con la raffica la
+## polvere li vela un po' di più. AMBIENT_HUE: quanto le luci colorano l'interno della sagoma.
+const AMBIENT := Color(0.88, 0.58, 0.5, 1.0)
+const AMBIENT_GUST := Color(0.84, 0.53, 0.44, 1.0)
+const AMBIENT_HUE := 0.6
 
 ## Le luci di segnalazione della torre: rosse, lente e in sincrono (accese 0,5 s ogni 1,5 s).
 const BEACON_COLOR := Color8(255, 48, 32)
@@ -102,7 +116,17 @@ void fragment() {
 	float d = clamp((px.y - line_y) / max(view_h - line_y, 1.0), 0.0, 1.0);
 	float wob = floor(sin(px.y * 0.85 + t * 0.21) * (0.6 + 1.6 * d) * (0.5 + m.r) + 0.5);
 	float sy = line_y - (px.y - line_y) * 1.15;
-	vec3 c = texture(screen, vec2(SCREEN_UV.x + wob * SCREEN_PIXEL_SIZE.x, (sy + 0.5) * SCREEN_PIXEL_SIZE.y)).rgb;
+	// Spezzato in verticale (5 campioni a 2 px, più lunghi lontano dal muro) e sfalsato a righe di 2 px: le
+	// insegne diventano strisce di luce, le scritte non si leggono.
+	float jit = floor(sin(floor(px.y * 0.5) * 2.3 + t * 0.05) * (1.0 + 2.0 * d) + 0.5);
+	float sx = SCREEN_UV.x + (wob + jit) * SCREEN_PIXEL_SIZE.x;
+	float st = 2.0 + 2.0 * d;
+	vec3 c = vec3(0.0);
+	for (int i = -2; i <= 2; i++) {
+		float w = 1.0 - 0.25 * abs(float(i));
+		c += w * texture(screen, vec2(sx, (sy + float(i) * st + 0.5) * SCREEN_PIXEL_SIZE.y)).rgb;
+	}
+	c /= 3.5;
 	float lum = dot(c, vec3(0.299, 0.587, 0.114));
 	float s = mix(wet * m.b, pool, m.r);
 	float b = (BAYER[int(mod(px.y, 4.0)) * 4 + int(mod(px.x, 4.0))] + 0.5) / 16.0;
@@ -170,6 +194,10 @@ var _attori: Node2D
 var _attori_mat: ShaderMaterial
 var _fighters: Array = []
 var _sky: PointLight2D
+var _floor_light: PointLight2D
+## Le luci sugli attori stanno nello spazio dello schermo (il titolo) invece che nel mondo.
+var _screen_lights: bool = false
+var _lights_on: bool = true
 var _beacons: Array[Dictionary] = []
 var _beacon_data: Array = []
 var _line_y: float = 181.0
@@ -199,14 +227,17 @@ func setup(rng_seed: int, data: Dictionary) -> void:
 
 
 ## `front`: il primo piano (spazio dello schermo); `world`: il mondo (null: niente luce sugli attori né
-## pozze); `bd`: lo sfondo; `lamps`: i lampioni, [x, parallasse] per ognuno (vedi lamps_of); `pools`: le pozze.
-func attach(front: Node, world: Node2D, bd: Backdrop, lamps: Array, pools: bool = true) -> void:
+## pozze); `bd`: lo sfondo; `lamps`: i lampioni, [x, parallasse] per ognuno (vedi lamps_of); `pools`: le pozze;
+## `screen_lights`: `world` è nello spazio dello schermo (il titolo), le luci non seguono la telecamera.
+func attach(front: Node, world: Node2D, bd: Backdrop, lamps: Array, pools: bool = true,
+		screen_lights: bool = false) -> void:
 	z_index = 50
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	front.add_child(self)
 	_glow = Glow.new(self)
 	_lamps = lamps
+	_screen_lights = screen_lights
 	_veil_tex = _make_veil()
 	if bd != null:
 		_grade_backdrop(bd)
@@ -275,9 +306,18 @@ func sync(cam_x: float, fighters: Array, lights_on: bool) -> void:
 		_fighters = fighters
 		_attori_mat.set_shader_parameter(&"t", float(_t))
 		_attori.queue_redraw()
+	_lights_on = lights_on
+	var lx := (0.0 if _screen_lights else cam_x) + W / 2.0
 	if _sky != null:
 		_sky.enabled = lights_on
-		_sky.position = Vector2(cam_x + W / 2.0, H / 2.0 - FAR)
+		_sky.position = Vector2(lx, H / 2.0 - FAR)
+		_floor_light.enabled = lights_on
+		_floor_light.position = Vector2(lx, H / 2.0 + FAR)
+	var tint := _ambient_tint()
+	var hue := AMBIENT_HUE if lights_on else 0.0
+	for f: Variant in fighters:
+		if f is Fighter:
+			(f as Fighter).set_ambient(tint, hue)
 	for b in _beacons:
 		(b["node"] as Node2D).queue_redraw()
 	queue_redraw()
@@ -350,20 +390,37 @@ func _grade_backdrop(bd: Backdrop) -> void:
 			s.material = m
 
 
+## La luce del posto su un attore (materiale con Fighter.FLASH_SHADER): ambiente e tinta, spente con F5.
+func light_actor(m: ShaderMaterial) -> void:
+	Fighter.apply_ambient(m, _ambient_tint(), AMBIENT_HUE if _lights_on else 0.0)
+
+
+func _ambient_tint() -> Color:
+	return AMBIENT.lerp(AMBIENT_GUST, _gust) if _lights_on else Color(1, 1, 1, 0)
+
+
 func _add_sky_light(world: Node2D) -> void:
+	_sky = _wide_light("LuceDellaNube", SKY_COLOR, SKY_ENERGY, SKY_HEIGHT)
+	world.add_child(_sky)
+	_floor_light = _wide_light("LuceDalPavimento", FLOOR_COLOR, FLOOR_ENERGY, FLOOR_HEIGHT)
+	world.add_child(_floor_light)
+
+
+## Una luce lontana e uniforme che copre tutta la vista: conta solo la direzione (posizione e altezza).
+static func _wide_light(n: String, col: Color, energy: float, height: float) -> PointLight2D:
 	var white := Image.create_empty(8, 8, false, Image.FORMAT_RGBA8)
 	white.fill(Color.WHITE)
 	var tex := ImageTexture.create_from_image(white)
-	_sky = PointLight2D.new()
-	_sky.name = "LuceDellaNube"
-	_sky.texture = tex
-	_sky.texture_scale = (FAR + float(W)) * 2.0 / tex.get_width()
-	_sky.height = SKY_HEIGHT
-	_sky.color = SKY_COLOR
-	_sky.energy = SKY_ENERGY
-	_sky.blend_mode = Light2D.BLEND_MODE_ADD
-	_sky.range_item_cull_mask = Fighter.LIGHT_MASK_ACTORS
-	world.add_child(_sky)
+	var l := PointLight2D.new()
+	l.name = n
+	l.texture = tex
+	l.texture_scale = (FAR + float(W)) * 2.0 / tex.get_width()
+	l.height = height
+	l.color = col
+	l.energy = energy
+	l.blend_mode = Light2D.BLEND_MODE_ADD
+	l.range_item_cull_mask = Fighter.LIGHT_MASK_ACTORS
+	return l
 
 
 ## Le luci di segnalazione: un nodo figlio del piano, che si muove con lui.

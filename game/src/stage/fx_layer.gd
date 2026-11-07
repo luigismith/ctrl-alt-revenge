@@ -6,7 +6,7 @@ extends Node2D
 ## Avanzano nei tick della simulazione: le catture con Movie Maker sono ripetibili.
 
 const FX_JSON := "res://assets/fx/fx.json"
-const REQUIRED: PackedStringArray = ["hit_spark_light", "hit_spark_heavy", "dust_land", "dust_skid", "glint", "cyber_spark", "ombra"]
+const REQUIRED: PackedStringArray = ["hit_spark_light", "hit_spark_heavy", "dust_land", "dust_skid", "glint", "cyber_spark", "cable_spark", "ombra"]
 
 
 class FxDef:
@@ -155,6 +155,8 @@ static func _procedural(n: String) -> FxDef:
 			_burst(d, 34, 5, 2, Color(1, 1, 1), Color(1, 0.45, 0.25), 4)
 		"cyber_spark":
 			_burst(d, 28, 4, 2, Color(0.85, 1, 1), Color(0.2, 0.9, 1.0), 3)
+		"cable_spark":
+			_cable_burst(d)
 		"glint":
 			_glint(d)
 		"dust_land", "dust_skid":
@@ -194,6 +196,59 @@ static func _burst(d: FxDef, size: int, count: int, ticks: int, core: Color, edg
 	d.count = count
 	d.ticks = ticks
 	d.anchor = Vector2i(c, c)
+
+
+## La scossa del cavo: il lampo bianco-lilla con l'alone viola, poi le scintille arancio che si aprono e
+## cadono. Come l'arco di cable.png (fotogrammi 0 e 3): niente cyan, che è solo del braccio di GIG.
+static func _cable_burst(d: FxDef) -> void:
+	const SIZE := 30
+	const COUNT := 5
+	var core := Color(0.96, 0.93, 1.0)
+	var violet := Color(0.66, 0.42, 1.0)
+	var orange := Color(1.0, 0.6, 0.22)
+	var ember := Color(0.85, 0.3, 0.12)
+	var img := Image.create_empty(SIZE * COUNT, SIZE, false, Image.FORMAT_RGBA8)
+	var c := SIZE / 2
+	# raggi spezzati del lampo (fotogrammi 0-1), direzioni fisse: l'effetto è uguale ogni volta
+	var rays := [Vector2(1, -0.3), Vector2(-0.8, -0.7), Vector2(0.2, 1), Vector2(-1, 0.35), Vector2(0.6, 0.8)]
+	for k in 2:
+		for r: Vector2 in rays:
+			var dir := r.normalized()
+			var side := Vector2(-dir.y, dir.x)
+			var reach := 6 + k * 5
+			for s in range(1 + k * 2, reach + 1):
+				var kink := 1.0 if (s / 3) % 2 == 1 else -1.0
+				var p := Vector2(c, c) + dir * s + side * kink * (1 if s > 3 else 0)
+				var col := core if s < 4 - k else violet
+				_put(img, k * SIZE + int(p.x), int(p.y), col, SIZE, k * SIZE)
+		var a := 1.0 - 0.4 * k
+		for y in range(c - 2, c + 3):
+			for x in range(c - 2, c + 3):
+				var m := absi(x - c) + absi(y - c)
+				if m <= 1 - k + 1:
+					_put(img, k * SIZE + x, y, Color(core, a) if m <= 1 - k else Color(violet, a), SIZE, k * SIZE)
+	# scintille arancio (fotogrammi 1-4): punti che si aprono a ventaglio e cadono, sempre più scuri
+	var sparks := [Vector2(1, -1.2), Vector2(-1.1, -0.9), Vector2(0.5, -1.5), Vector2(-0.4, -1.3), Vector2(1.4, -0.4),
+		Vector2(-1.5, -0.3)]
+	for k in range(1, COUNT):
+		var t := float(k)
+		var col := orange.lerp(ember, (t - 1.0) / (COUNT - 2))
+		for v: Vector2 in sparks:
+			var p := Vector2(c, c) + v * t * 2.6 + Vector2(0, 0.45 * t * t)
+			_put(img, k * SIZE + int(p.x), int(p.y), col, SIZE, k * SIZE)
+			if k < 3:
+				_put(img, k * SIZE + int(p.x - v.x), int(p.y - v.y), Color(col, 0.6), SIZE, k * SIZE)
+	d.texture = ImageTexture.create_from_image(img)
+	d.frame = Vector2i(SIZE, SIZE)
+	d.count = COUNT
+	d.ticks = 2
+	d.anchor = Vector2i(c, c)
+
+
+## Un pixel nel fotogramma che parte da x0 (largo size), se ci sta.
+static func _put(img: Image, x: int, y: int, col: Color, size: int, x0: int) -> void:
+	if x >= x0 and x < x0 + size and y >= 0 and y < size:
+		img.set_pixel(x, y, col)
 
 
 static func _glint(d: FxDef) -> void:

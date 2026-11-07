@@ -859,9 +859,11 @@ func _exit_tree() -> void:
 ## Luci del livello (campo "lights" del JSON): illuminano solo gli attori con la normal map (maschera
 ## Fighter.LIGHT_MASK_ACTORS), mai gli sfondi, che hanno la luce già dipinta. Sono solo disegno: non toccano la
 ## simulazione (i replay non cambiano). F5 (build di debug) o --no-lights le spengono.
-## Tipi: "neon" (insegna dello sfondo, pulsa con i neon), "lamp" (lampada sulla travata del primo piano: si
-## sposta con la sua parallasse), "cable" (scintille del cavo: si accende nei fotogrammi del lampo). La luce della
-## nube del Wind Day la tiene WindDay.
+## Tipi: "neon" (insegna dello sfondo, pulsa con i neon), "lamp" (lampada sulla travata del primo piano),
+## "flood" (faro fisso, per esempio quelli del cartellone del near), "screen" (maxischermo: luce ferma con un
+## guizzo ogni tanto), "cable" (scintille del cavo: si accende nei fotogrammi del lampo). Una luce con "scroll"
+## diverso da 1 sta su un piano con quella parallasse (x e y in pixel del piano, che parte da 0): nel mondo si
+## sposta con la telecamera. La luce della nube del Wind Day la tiene WindDay.
 var lights_on: bool = true
 var _lights: Array[Dictionary] = []
 var _lights_root: Node2D
@@ -914,13 +916,17 @@ func _update_lights() -> void:
 	for e in _lights:
 		var l: PointLight2D = e["light"]
 		var base: float = e["energy"]
+		var sc: float = e["scroll"]
+		if sc != 1.0:
+			# sul piano con parallasse sc: lo schermo lo mette a x - round(cam·sc), il mondo a cam più in là
+			l.position.x = float(e["x"]) - roundf(camera.x * sc) + camera.x
 		match String(e["kind"]):
 			"neon":
 				# stessa pulsazione lenta dei neon dello sfondo (Backdrop._levels)
 				l.energy = base * (0.9 + 0.1 * sin(tick * 0.035 + float(e["phase"])))
-			"lamp":
-				# la lampada sta sulla travata con parallasse "scroll": nel mondo si sposta con la telecamera
-				l.position.x = float(e["x"]) - (float(e["scroll"]) - 1.0) * camera.x
+			"screen":
+				# il maxischermo cambia immagine: ogni 3 s circa un guizzo di 6 tick
+				l.energy = base * (0.8 if (tick + int(float(e["phase"]) * 40.0)) % 190 < 6 else 1.0)
 			"cable":
 				l.energy = base * _cable_flash()
 
