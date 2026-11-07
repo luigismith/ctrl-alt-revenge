@@ -4,6 +4,12 @@
   "title": "1 · SOTTO LA LINEA",
   "width": 2400,
   "floor_band": [188, 260],
+  "weather": "wind_day",
+  "beacons": [
+    {"layer": "far", "x": 184, "y": 50},
+    {"layer": "far", "x": 184, "y": 33},
+    {"layer": "far", "x": 189, "y": 1, "soft": true}
+  ],
   "player_start": [70, 230],
   "env": "res://assets/env/sotto_la_linea/layers.json",
   "waves": [
@@ -52,7 +58,6 @@
     {"kind": "lamp", "x": 2104, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
     {"kind": "lamp", "x": 2395, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
     {"kind": "lamp", "x": 2686, "y": 38, "scroll": 1.25, "color": "#ffa24a", "energy": 0.5, "radius": 238, "height": 88},
-    {"kind": "cable", "x": 1563, "y": 210, "color": "#66e8ff", "energy": 1.2, "radius": 188, "height": 15},
-    {"kind": "lightning", "x": 240, "y": -75, "color": "#b8c8ff", "energy": 0.7, "radius": 625, "height": 150}
+    {"kind": "cable", "x": 1563, "y": 210, "color": "#66e8ff", "energy": 1.2, "radius": 188, "height": 15}
   ]
 }

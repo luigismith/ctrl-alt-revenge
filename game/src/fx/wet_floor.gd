@@ -117,11 +117,15 @@ func _draw() -> void:
 	draw_rect(_band, Color.WHITE)
 
 
-## Ogni combattente capovolto sotto i piedi: un quadrilatero con i colori ai vertici, pieno ai piedi e
-## trasparente all'altezza della testa (lo shader poi lo dirada a gradini).
 func _draw_attori() -> void:
-	var a0 := ATTORI_MAX * _strength
-	for f in _fighters:
+	draw_upside_down(_attori, _fighters, _origin, ATTORI_MAX * _strength, ATTORI_TINT)
+
+
+## Ogni combattente capovolto sotto i piedi, disegnato in `ci`: un quadrilatero con i colori ai vertici,
+## pieno ai piedi (alfa `a0`, colore `tint`) e trasparente all'altezza della testa (lo shader di `ci` poi lo
+## dirada a gradini). `origin`: dove sta, in `ci`, l'origine dei combattenti. Serve anche a WindDay.
+static func draw_upside_down(ci: CanvasItem, fighters: Array, origin: Vector2, a0: float, tint_base: Color) -> void:
+	for f in fighters:
 		if not is_instance_valid(f) or not f.visible:
 			continue
 		var body: Sprite2D = f.body
@@ -130,10 +134,10 @@ func _draw_attori() -> void:
 		var r := body.region_rect
 		var anchor := -body.offset
 		var face := signf(body.scale.x)
-		var ground: Vector2 = _origin + f.position
+		var ground: Vector2 = origin + f.position
 		var g := Vector2(ground.x + body.position.x, ground.y - body.position.y)
 		var tex_size := Vector2(body.texture.get_size())
-		var tint := ATTORI_TINT * body.modulate
+		var tint := tint_base * body.modulate
 		var top := -anchor.y
 		var bottom := r.size.y - anchor.y
 		var qs := [Vector2(-anchor.x, top), Vector2(r.size.x - anchor.x, top),
@@ -145,4 +149,4 @@ func _draw_attori() -> void:
 			pts.append((g + Vector2(face * q.x, -q.y)).round())
 			uvs.append((r.position + q + anchor) / tex_size)
 			cols.append(Color(tint, a0 if q.y >= 0.0 else 0.0))
-		_attori.draw_polygon(pts, cols, uvs, body.texture)
+		ci.draw_polygon(pts, cols, uvs, body.texture)

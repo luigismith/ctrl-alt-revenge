@@ -66,7 +66,8 @@ var player: Gig
 var cam_node: Camera2D
 var world: Node2D
 var fx: FxLayer
-var rain: Rain
+## La sera del Wind Day (polvere, luce, pozze): solo disegno, solo se il livello la chiede.
+var wind_day: WindDay
 var shadows: ShadowLayer
 var hud: Hud
 var overlay: LevelOverlay
@@ -230,17 +231,14 @@ func _build_scenery() -> void:
 		push_warning("Sfondo (%s): %s" % [env_path, "; ".join(backdrop.warnings)])
 	backdrop.build(_back_layer, _front_layer, level_seed)
 
-	rain = Rain.new()
-	rain.name = "Pioggia"
-	rain.z_index = 50
-	rain.setup(level_seed, fx, Vector2(band_top, band_bottom))
-	_front_layer.add_child(rain)
-	# Gli spruzzi a terra stanno nel mondo, con le ombre e sotto gli attori.
-	var splashes := Node2D.new()
-	splashes.name = "SpruzziPioggia"
-	splashes.z_index = 61
-	world.add_child(splashes)
-	rain.set_splash_canvas(splashes, true)
+	if str(data.get("weather", "")) == "wind_day":
+		var lamps: Array = []
+		for e in _lights:
+			if String(e["kind"]) == "lamp":
+				lamps.append([float(e["x"]), float(e["scroll"])])
+		wind_day = WindDay.new()
+		wind_day.setup(level_seed, data)
+		wind_day.attach(_front_layer, world, backdrop, lamps)
 
 
 func _next_uid() -> int:
@@ -433,8 +431,8 @@ func _actors_tick() -> void:
 	for p in props:
 		p.sim_tick()
 	_update_waves()
-	if rain != null:
-		rain.tick(camera.x)
+	if wind_day != null:
+		wind_day.tick(camera.x)
 	_cleanup()
 	actor_ticks += 1
 
@@ -817,6 +815,8 @@ func _sync_all() -> void:
 	_front_layer.offset = Vector2(camera.shake)
 	if backdrop != null:
 		backdrop.update(camera.x, tick)
+	if wind_day != null:
+		wind_day.sync(camera.x, fighters, lights_on)
 	_update_lights()
 	shadows.queue_redraw()
 	if debug_overlay.visible:
@@ -864,8 +864,8 @@ func _exit_tree() -> void:
 ## Fighter.LIGHT_MASK_ACTORS), mai gli sfondi, che hanno la luce già dipinta. Sono solo disegno: non toccano la
 ## simulazione (i replay non cambiano). F5 (build di debug) o --no-lights le spengono.
 ## Tipi: "neon" (insegna dello sfondo, pulsa con i neon), "lamp" (lampada sulla travata del primo piano: si
-## sposta con la sua parallasse), "cable" (scintille del cavo: si accende nei fotogrammi del lampo), "lightning"
-## (lampo del temporale, sopra la vista, raro e deterministico).
+## sposta con la sua parallasse), "cable" (scintille del cavo: si accende nei fotogrammi del lampo). La luce della
+## nube del Wind Day la tiene WindDay.
 var lights_on: bool = true
 var _lights: Array[Dictionary] = []
 var _lights_root: Node2D
@@ -927,9 +927,6 @@ func _update_lights() -> void:
 				l.position.x = float(e["x"]) - (float(e["scroll"]) - 1.0) * camera.x
 			"cable":
 				l.energy = base * _cable_flash()
-			"lightning":
-				l.position.x = camera.x + View.CX
-				l.energy = base * _lightning(tick)
 
 
 ## 1 nei fotogrammi del lampo del cavo (0 e 3 del ciclo di 6), poco nel resto.
@@ -940,19 +937,3 @@ func _cable_flash() -> float:
 			return 1.0 if k == 0 or k == 3 else 0.12
 	return 0.0
 
-
-## Lampo del temporale: ogni 9 s circa (deterministico, dal tick) due bagliori ravvicinati.
-func _lightning(t: int) -> float:
-	var period := 540
-	var k := t % period
-	var start := 120 + (t / period * 197) % 240
-	var u := k - start
-	if u < 0 or u > 14:
-		return 0.0
-	if u < 3:
-		return 1.0
-	if u < 6:
-		return 0.2
-	if u < 9:
-		return 0.75
-	return 0.75 * float(14 - u) / 5.0
