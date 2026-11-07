@@ -1,0 +1,222 @@
+{
+ "id": "addolorata",
+ "_nota": "Addolorata in casa, 2087, 75 anni (docs/lore/personaggi-3d.md, riga 2; MP04): piccola ed energica, capelli bianchi in una crocchia bassa, abito di casa blu scuro, cardigan abbottonato con lo scollo a V, occhiali appesi al cordino, metro da sarta al collo, calze velate e scarpe basse. Sul corpo femminile UBC (\"corpo\": \"f\"). Solo modello per pose e murales: non è uno sprite del gioco.",
+ "base": "thug_punk",
+ "corpo": "f",
+ "outfit": "addolorata",
+ "hair_meshes": [
+  "Hair_BuzzedFemale"
+ ],
+ "outfit_cfg": {
+  "top": {
+   "hem_dz": -0.05,
+   "hem_band": 0.03,
+   "cuff_t": 0.86,
+   "cuff_w": 0.03,
+   "offset": 0.018,
+   "collar_dz": -0.03,
+   "thick": 0.008,
+   "vneck": {
+    "z0": -0.24,
+    "w": 0.075
+   }
+  },
+  "boots": {
+   "style": "v7",
+   "top_z": 0.075,
+   "size": 0.9,
+   "sole_t": 0.02,
+   "heel_t": 0.028
+  },
+  "skirt": {
+   "top_dz": -0.02,
+   "hem_dz": -0.09,
+   "gap": 0.012,
+   "flare": 0.03
+  },
+  "sarta": {},
+  "hair_mesh": "Hair_BuzzedFemale",
+  "hair_push": 0.003,
+  "bun": {
+   "angle_deg": 112,
+   "head_r": 0.1,
+   "bun_r": [
+    0.038,
+    0.044,
+    0.034
+   ]
+  },
+  "brow_bushy": 0.8,
+  "brow_lift": 0.0
+ },
+ "beauty_cols": {
+  "SKIN": "#c8957a",
+  "SKIN_DARK": "#946450",
+  "SKIN_CREASE": "#a8745e",
+  "HAIR": "#e6e1dc",
+  "HAIR_TIE": "#bdb4ae",
+  "TOP": "#8c7c88",
+  "TOP_LINING": "#76666f",
+  "TOP_DARK": "#4a3e48",
+  "PANTS": "#2e3a5c",
+  "PANTS_FOLD": "#8a6c62",
+  "BELT": "#d8ccb8",
+  "BOOTS": "#3a2a26",
+  "BOOT_SOLE": "#241a18",
+  "BOOT_CUFF": "#3a2a26",
+  "LACE": "#3a2a26",
+  "PATCH": "#e8c440",
+  "METAL": "#b8a890",
+  "METAL_DARK": "#2a2228",
+  "LENS": "#d4dcd8",
+  "BROW": "#cfc8c2",
+  "EYE_DARK": "#141010",
+  "EYE_SOCKET": "#946450",
+  "NOSE_SHADOW": "#a8745e",
+  "MOUTH": "#6a2a30",
+  "KNUCKLE": "#b48068"
+ },
+ "anims": {},
+ "reshape": {
+  "pelvis": [
+   1.0,
+   1,
+   1.0
+  ],
+  "spine_01": [
+   1.08,
+   1.0,
+   1.06
+  ],
+  "spine_02": [
+   1.02,
+   1.0,
+   0.96
+  ],
+  "spine_03": [
+   0.95,
+   0.98,
+   0.86
+  ],
+  "clavicle_l": [
+   1,
+   0.84,
+   1
+  ],
+  "clavicle_r": [
+   1,
+   0.84,
+   1
+  ],
+  "neck_01": [
+   0.95,
+   0.9,
+   0.95
+  ],
+  "upperarm_l": [
+   0.84,
+   0.98,
+   0.84
+  ],
+  "upperarm_r": [
+   0.84,
+   0.98,
+   0.84
+  ],
+  "lowerarm_l": [
+   0.88,
+   0.98,
+   0.88
+  ],
+  "lowerarm_r": [
+   0.88,
+   0.98,
+   0.88
+  ],
+  "hand_l": [
+   1,
+   1,
+   1
+  ],
+  "hand_r": [
+   1,
+   1,
+   1
+  ],
+  "thigh_l": [
+   1,
+   0.96,
+   1
+  ],
+  "thigh_r": [
+   1,
+   0.96,
+   1
+  ],
+  "calf_l": [
+   0.95,
+   0.96,
+   0.95
+  ],
+  "calf_r": [
+   0.95,
+   0.96,
+   0.95
+  ]
+ },
+ "proportions": {
+  "Head": {
+   "scale": [
+    1.14,
+    1.14,
+    1.14
+   ]
+  },
+  "hand_l": {
+   "scale": [
+    1.15,
+    1.15,
+    1.15
+   ],
+   "inherit": "NONE"
+  },
+  "hand_r": {
+   "scale": [
+    1.15,
+    1.15,
+    1.15
+   ],
+   "inherit": "NONE"
+  },
+  "foot_l": {
+   "scale": [
+    0.95,
+    0.95,
+    0.95
+   ],
+   "inherit": "NONE"
+  },
+  "foot_r": {
+   "scale": [
+    0.95,
+    0.95,
+    0.95
+   ],
+   "inherit": "NONE"
+  },
+  "clavicle_l": {
+   "scale": [
+    1.0,
+    0.92,
+    1.0
+   ]
+  },
+  "clavicle_r": {
+   "scale": [
+    1.0,
+    0.92,
+    1.0
+   ]
+  }
+ }
+}

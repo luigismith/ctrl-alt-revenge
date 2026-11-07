@@ -43,7 +43,9 @@ La configurazione:
     "pupilla": {"centro": [x, y], "raggio": r},    facoltativo: dove il motore mette il logo ARIA+ nell'occhio
     "ritinta": [{"da": [180, 250], "a": 300, "croma": 0.6}],
     "figure": [{"nome": "toto", "base": "mp02_toto_v1.png", "altezza": 120, "x": 300, "y": 150,
-                "colori": 24, "profondita": 1.0, "visibile": true}],
+                "colori": 24, "profondita": 1.0, "visibile": true,
+                "finestra": [x0, y0, x1, y1]}],            facoltativo: la figura si vede solo dentro quel riquadro
+                                                   della vignetta (un vano, una finestra); "taglia_y" taglia solo sotto
     "fonte": "ChatGPT (OpenAI), da nostri render e schizzi; ridotto in pixel art dai nostri script"
   }
 Le figure (dipinte su verde #00FF00) escono come strati a parte, figura_<nome>.png, con la posizione nel json:
@@ -363,6 +365,13 @@ def figura(cp: Path, fc: dict, ink, seed: int, pal_sfondo: np.ndarray | None = N
         out[r:] = 0
         out[r:r + 1, :, :3] = ink
         out[r:r + 1, :, 3] = out[r - 1:r, :, 3] if r else 0
+    if fc.get("finestra"):
+        # la figura sta dentro un vano (una finestra): fuori da [x0, y0, x1, y1] della vignetta non si vede
+        fx0, fy0, fx1, fy1 = (int(v) for v in fc["finestra"])
+        ox, oy = int(fc["x"]), int(fc["y"])
+        vis = np.zeros(out.shape[:2], bool)
+        vis[max(0, fy0 - oy):max(0, fy1 - oy), max(0, fx0 - ox):max(0, fx1 - ox)] = True
+        out[~vis] = 0
     dx0 = dy0 = 0
     if fc.get("scia"):
         out, dx0, dy0 = scia(out, fc["scia"], ink, seed)

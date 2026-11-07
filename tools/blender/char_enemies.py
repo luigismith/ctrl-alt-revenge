@@ -1,6 +1,9 @@
 # SPDX-FileCopyrightText: 2026 Luigi Massari
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""CTRL+ALT REVENGE - costumi degli Esattori (decisione 63): il rider, l'esattore di professione e il messo.
+"""CTRL+ALT REVENGE - costumi degli Esattori (decisione 63): il rider, l'esattore di professione e il messo;
+e, con gli stessi pezzi, Totò adulto (2107): felpa scura col cappuccio su, jeans, zainetto con le bombolette;
+e Addolorata in casa (2087, 75 anni), sul corpo femminile: abito blu scuro, cardigan abbottonato con lo scollo a V,
+crocchia bassa, occhiali appesi al cordino e metro da sarta al collo, scarpe basse.
 
 Stesso corpo UBC rimodellato dei nemici dello slice (build_thug di char_build.py), con i pezzi dei fogli di
 riferimento del 6 novembre 2026 (fuori dal repository):
@@ -400,9 +403,16 @@ def make_backpack(B, arm, mats, L, pts, cfg):
     tb = hc - wF * 0.043 + hd * 0.004
     parts.append(B.tube_bm(tb, tb + hd * 0.040 - wF * 0.014 + uF * 0.012, [(0, 0.010), (1, 0.009)],
                            lambda t, a: 2, segs=6))
-    # cinghie: dal davanti dello zaino sopra le spalle, giù sul petto e sotto l'ascella fino al fondo dello zaino
-    sc = cfg.get("straps", {})
+    parts += strap_bms(pts, L, y0, top, H, W, cfg.get("straps", {}))
+    bm = B.join_bms(parts)
+    return B.rigid_object("Backpack", bm, "spine_03", arm, ["BAG", "RED", "METAL", "METAL_DARK"], mats, part="torso")
+
+
+def strap_bms(pts, L, y0, top, H, W, sc):
+    """cinghie dello zaino: dal davanti dello zaino sopra le spalle, giù sul petto e sotto l'ascella fino al fondo."""
+    sh_z = L["clavicle_l"].z
     lift = sc.get("lift", 0.034)
+    parts = []
     for sd, sx in SIDES:
         x0 = sx * sc.get("x", 0.085)
         ztop = surface_top(pts, x0, 0.0) or (sh_z + 0.05)
@@ -422,8 +432,131 @@ def make_backpack(B, arm, mats, L, pts, cfg):
             cc = Vector((0.0, 0.0, min(p.z, sh_z - 0.06)))
             N.append((p - cc).normalized())
         parts.append(ribbon_bm(P, N, sc.get("w", 0.040), sc.get("t", 0.010), mat=0))
+    return parts
+
+
+# ============================================================== Totò adulto (2107)
+def make_hood_up(B, arm, mats, L, pts, cfg):
+    """cappuccio della felpa tirato su: guscio largo attorno alla testa, aperto davanti sul viso (dalla fronte
+    alle guance), che scende sulla nuca e ai lati fino al collo; il bordo del viso è a costine (TOP_LINING)."""
+    ez = L["eye_l"].z
+    hc, rx, ry = head_section(pts, ez + 0.012)
+    off = cfg.get("off", 0.030)
+    cz = ez + cfg.get("cz", -0.004)
+    R = (rx + off, ry + off + cfg.get("back", 0.012), L["crown_z"] - cz + off + cfg.get("peak", 0.008))
+    center = Vector((0.0, hc.y + cfg.get("dy", 0.012), cz))
+    fz, sz = cfg.get("front_z", 0.40), cfg.get("side_z", -1.2)
+    a0, a1 = cfg.get("az", (36.0, 72.0))
+
+    def keep(co):
+        az = math.degrees(math.atan2(abs(co.x), -co.y))           # 0 davanti, 180 dietro
+        return co.z > fz + (sz - fz) * smoothstep(a0, a1, az)
+    bm = B.sphere_bm(center, R, mat=0, keep=keep, segs=48, rings=32)
+    # da uovo a cappuccio: sotto le orecchie si allarga e scende sulle spalle e sulla nuca, dietro in alto
+    # fa la punta della cucitura (dove le due metà si uniscono)
+    flare, drop, point = cfg.get("flare", 0.45), cfg.get("drop", 0.05), cfg.get("point", 0.022)
+    for v in bm.verts:
+        r = v.co - center
+        t = max(0.0, min(1.0, -r.z / R[2])) ** 1.5
+        v.co.x = center.x + r.x * (1.0 + flare * t)
+        if r.y > 0:
+            v.co.y += r.y / R[1] * (flare * 0.5 * t * R[1] + point * max(0.0, r.z / R[2]))
+        v.co.z -= drop * t
+    for f in bm.faces:
+        fc = f.calc_center_median() - center
+        if abs(fc.x) < cfg.get("seam_w", 0.007) and fc.y > 0 and fc.z > -R[2] * 0.5:
+            f.material_index = 2                                 # la cucitura al centro, dalla fronte alla nuca
+    for f in bm.faces:
+        if any(e.is_boundary for e in f.edges):
+            fc = f.calc_center_median() - center
+            if fc.y < 0 and fc.z > -R[2] * 0.55:                 # solo il bordo del viso, non il fondo dentro il collo
+                f.material_index = 1
+    ob = B.rigid_object("HoodUp", bm, "Head", arm, ["HOOD", "TOP_LINING", "HOOD_DARK", "HOOD_DARK", "HOOD_DARK"], mats,
+                        part="head")
+    sol = ob.modifiers.new("Thick", "SOLIDIFY")
+    sol.thickness = cfg.get("thick", 0.012)
+    sol.offset = -1.0
+    sol.use_even_offset = False
+    sol.use_quality_normals = True
+    sol.material_offset = 2
+    sol.material_offset_rim = 1
+    return ob
+
+
+def make_hoodie_front(B, arm, mats, L, pts, cfg, top_off):
+    """la tasca a marsupio sulla pancia e i due cordini del cappuccio che pendono sul petto."""
+    pz, sh_z = L["pelvis"].z, L["clavicle_l"].z
+    parts = []
+    pc = cfg.get("pocket", {})
+    zc = pz + pc.get("dz", 0.10)
+    ys = surface_y(pts, 0.0, zc) or -0.10
+    w, h = pc.get("w", 0.21), pc.get("h", 0.12)
+    parts.append(B.box_bm(Vector((0.0, ys - top_off - 0.004, zc)), (w, 0.010, h), bevel=0.004, mat=0, segs=1))
+    for sx in (1.0, -1.0):                                       # le aperture ai lati, scure
+        parts.append(B.box_bm(Vector((sx * (w / 2 - 0.012), ys - top_off - 0.010, zc + 0.01)),
+                              (0.016, 0.004, h * 0.7), mat=1, segs=1))
+    cc = cfg.get("cords", {})
+    z0 = L["chin"].z + cc.get("dz", -0.035)
+    for sx in (1.0, -1.0):
+        x = sx * cc.get("x", 0.032)
+        y0 = (surface_y(pts, x, z0) or -0.08) - top_off - 0.006
+        z1 = z0 - cc.get("len", 0.15)
+        y1 = (surface_y(pts, x, z1) or -0.10) - top_off - 0.006
+        parts.append(B.tube_bm(Vector((x, y0, z0)), Vector((x * 1.1, y1, z1)), [(0, 0.0045), (1, 0.0045)],
+                               lambda t, a: 2, segs=6))
+        parts.append(B.tube_bm(Vector((x * 1.1, y1, z1)), Vector((x * 1.1, y1, z1 - 0.018)),
+                               [(0, 0.006), (1, 0.006)], lambda t, a: 3, segs=6))
     bm = B.join_bms(parts)
-    return B.rigid_object("Backpack", bm, "spine_03", arm, ["BAG", "RED", "METAL", "METAL_DARK"], mats, part="torso")
+    return B.rigid_object("HoodieFront", bm, "spine_02", arm, ["TOP", "TOP_DARK", "TOP_LINING", "METAL_DARK"],
+                          mats, part="torso")
+
+
+def make_zainetto(B, arm, mats, L, pts, cfg):
+    """zainetto piccolo e morbido, macchiato di vernice (PATCH), con due bombolette che spuntano dalla patta."""
+    import random
+    rnd = random.Random(cfg.get("seed", 7))
+    sh_z = L["clavicle_l"].z
+    back_y = max(p.y for p, b in pts if b in ("spine_02", "spine_03") and abs(p.x) < 0.08)
+    W, D, H = cfg.get("size", (0.27, 0.13, 0.33))
+    top = sh_z + cfg.get("top_dz", -0.02)
+    y0 = back_y + cfg.get("gap", 0.026)
+    c = Vector((0.0, y0 + D / 2, top - H / 2))
+    box = B.box_bm(c, (W, D, H), bevel=cfg.get("bevel", 0.045), mat=0, segs=3)
+    stains = [Vector((rnd.uniform(-W / 2, W / 2), y0 + D, top - rnd.uniform(0.05, H - 0.04))) for _ in range(5)]
+    for f in box.faces:
+        fc = f.calc_center_median()
+        if any((fc - s).length < rnd.uniform(0.022, 0.034) for s in stains):
+            f.material_index = 1
+    parts = [finish(box)]
+    flap = B.box_bm(Vector((0.0, y0 + D / 2 + 0.004, top - 0.045)), (W * 0.9, D + 0.014, 0.10), bevel=0.03,
+                    mat=0, segs=2)
+    parts.append(finish(flap))
+    for i, (x, tilt, mi) in enumerate(cfg.get("cans", [(-0.06, -0.12, 4), (0.035, 0.10, 1)])):
+        a = Vector((x, y0 + D * 0.55, top - 0.07))
+        b = a + Vector((tilt * 0.4, 0.01, 0.13))
+        parts.append(B.tube_bm(a, b, [(0, 0.024), (1, 0.024)], lambda t, aa, mi=mi: mi, segs=12))
+        d = (b - a).normalized()
+        parts.append(B.tube_bm(b, b + d * 0.02, [(0, 0.016), (1, 0.010)], lambda t, aa: 2, segs=10))
+        parts.append(B.tube_bm(b + d * 0.02, b + d * 0.032, [(0, 0.006), (1, 0.006)], lambda t, aa: 3, segs=6))
+    parts += strap_bms(pts, L, y0, top, H, W, dict({"x": 0.075, "w": 0.032, "lift": 0.030}, **cfg.get("straps", {})))
+    bm = B.join_bms(parts)
+    return B.rigid_object("Zainetto", bm, "spine_03", arm, ["BAG", "PATCH", "METAL", "METAL_DARK", "RED"], mats,
+                          part="torso")
+
+
+def paint_flecks(shell, mats, cfg, L):
+    """schizzi di vernice sulle maniche e sul davanti della felpa: facce a caso col materiale PATCH."""
+    import random
+    rnd = random.Random(cfg.get("seed", 11))
+    me = shell.data
+    me.materials.append(mats["PATCH"])
+    mi = len(me.materials) - 1
+    hz = L["hand_l"].z + 0.25
+    for p in me.polygons:
+        c = p.center
+        near_hand = c.z < hz and abs(c.x) > 0.16
+        if (near_hand and rnd.random() < cfg.get("sleeves", 0.07)) or (c.y < -0.05 and rnd.random() < cfg.get("front", 0.012)):
+            p.material_index = mi
 
 
 def make_kneepads(B, arm, mats, L, pts, cfg):
@@ -538,6 +671,107 @@ def make_laser_pen(B, arm, mats, L, cfg, hand_scale):
                    lambda t, a: 1 if t > 1 - tip / ln else 0, segs=10, extra_ts=(1 - tip / ln,))
     to_rest(bm, arm, "hand_r", M, hand_scale)
     return B.rigid_object("LaserPen", bm, "hand_r", arm, ["PAD", "GLOW_LINE"], mats)
+
+
+# ============================================================== Addolorata in casa (2087)
+def make_skirt(B, arm, mats, L, pts, cfg):
+    """la gonna dell'abito: anelli dalla vita all'orlo sotto il ginocchio, larghi quanto il bacino e le cosce più un
+    margine, che si allargano appena verso il fondo. Pesata sul bacino in alto e sulle cosce in basso, così segue il
+    passo senza staccarsi dalla vita."""
+    pz = L["pelvis"].z
+    knee = (L["calf_l"].z + L["calf_r"].z) / 2
+    z0 = pz + cfg.get("top_dz", 0.04)
+    z1 = knee + cfg.get("hem_dz", -0.09)
+    gap, flare = cfg.get("gap", 0.014), cfg.get("flare", 0.05)
+    n, segs = cfg.get("rings", 14), cfg.get("segs", 32)
+    legs = ("pelvis", "thigh_l", "thigh_r", "calf_l", "calf_r")
+    prof = []
+    run = None
+    for i in range(n):
+        z = z0 + (z1 - z0) * i / (n - 1)
+        sl = [p for p, b in pts if b in legs and abs(p.z - z) < 0.025] or [p for p, b in pts if b in legs]
+        x = max(abs(p.x) for p in sl)
+        y0, y1 = min(p.y for p in sl), max(p.y for p in sl)
+        run = (x, y0, y1) if run is None else (max(run[0], x), min(run[1], y0), max(run[2], y1))
+        prof.append((z, run))
+    bm = bmesh.new()
+    rings = []
+    for i, (z, (x, y0, y1)) in enumerate(prof):
+        t = i / (n - 1)
+        rx = x + gap + flare * t * t
+        ry = (y1 - y0) / 2 + gap + flare * 0.8 * t * t
+        rings.append(ring_verts(bm, Vector((0.0, (y0 + y1) / 2, z)), Vector((0, 0, -1)), rx, ry, n=segs))
+    for i in range(n - 1):
+        bridge(bm, rings[i], rings[i + 1], 0)
+    finish(bm)
+    sx_l = 1.0 if L["thigh_l"].x > 0 else -1.0
+
+    def weights(co):
+        t = max(0.0, min(1.0, (z0 - co.z) / max(z0 - z1, 1e-3)))
+        leg = min(0.85, 1.2 * t)
+        a = max(0.0, min(1.0, 0.5 + co.x * sx_l / 0.10))   # 1 tutto sinistra, 0 tutto destra
+        return {"pelvis": 1.0 - leg, "thigh_l": leg * a, "thigh_r": leg * (1.0 - a)}
+    ob = B.skinned_object("Skirt", bm, weights, arm, ["PANTS"], mats, lambda c: "torso")
+    sol = ob.modifiers.new("Thick", "SOLIDIFY")
+    sol.thickness = cfg.get("thick", 0.008)
+    sol.offset = 1.0
+    sol.use_even_offset = False
+    return ob
+
+
+def make_sarta(B, arm, mats, L, pts, cfg, top_off):
+    """il metro da sarta giallo dietro il collo, che pende sui due lati del petto; gli occhiali da vista chiusi,
+    appesi al cordino scuro a metà petto; i bottoni del cardigan sotto la V."""
+    sh_z = L["clavicle_l"].z
+    nz = L["chin"].z + cfg.get("neck_dz", -0.040)
+    nk = L["neck_01"]
+    back = surface_y(pts, 0.0, nz, front=False, bones=("neck_01", "spine_03")) or (nk.y + 0.05)
+    parts = []
+    # metro: dietro il collo, sopra le spalle, giù dritto sul petto
+    mc = cfg.get("metro", {})
+    mx, mlen, mw = mc.get("x", 0.062), mc.get("len", 0.25), mc.get("w", 0.018)
+    for sd, sx in SIDES:
+        zs = sh_z + 0.03
+        ys = (surface_y(pts, sx * mx, zs) or -0.07) - top_off - 0.004
+        P = [Vector((0.0, back + top_off, nz + 0.005)), Vector((sx * 0.055, nk.y + 0.025, nz)),
+             Vector((sx * mx, ys, zs))]
+        for k in (1, 2, 3):
+            z = zs - mlen * k / 3
+            P.append(Vector((sx * (mx + 0.004 * k), (surface_y(pts, sx * mx, z) or -0.10) - top_off - 0.004, z)))
+        N = [Vector((0, 1, 0.4)).normalized(), Vector((sx, 0.2, 0.6)).normalized()] + [Vector((0, -1, 0))] * 4
+        parts.append(ribbon_bm(P, N, mw, 0.0025, mat=0))
+    # cordino e occhiali
+    oc = cfg.get("occhiali", {})
+    zg = sh_z + oc.get("dz", -0.13)
+    yg = (surface_y(pts, 0.0, zg) or -0.11) - top_off - oc.get("gap", 0.010)
+    for sd, sx in SIDES:
+        zs = sh_z + 0.015
+        ys = (surface_y(pts, sx * 0.050, zs) or -0.07) - top_off - 0.008
+        P = [Vector((0.0, back + top_off * 0.9, nz - 0.004)), Vector((sx * 0.050, nk.y + 0.02, nz - 0.008)),
+             Vector((sx * 0.050, ys, zs)), Vector((sx * 0.030, yg, zg + 0.012))]
+        N = [Vector((0, 1, 0.4)).normalized(), Vector((sx, 0.2, 0.6)).normalized(),
+             Vector((sx * 0.3, -1, 0.3)).normalized(), Vector((0, -1, 0))]
+        parts.append(ribbon_bm(P, N, 0.004, 0.003, mat=1))
+    lr, lw = oc.get("r", 0.019), oc.get("filo", 0.0028)
+    tilt = math.radians(oc.get("tilt_deg", 12.0))
+    for sx in (1.0, -1.0):
+        c = Vector((sx * oc.get("x", 0.024), yg, zg))
+        lens = torus_bm(c, lr, lw, segs=18, tsegs=6, mat=2)
+        bmesh.ops.rotate(lens, verts=lens.verts, cent=c, matrix=Matrix.Rotation(math.radians(90) - tilt, 3, "X"))
+        bmesh.ops.scale(lens, verts=lens.verts, vec=(1.0, 1.0, 0.8), space=Matrix.Translation(-c))
+        parts.append(lens)
+        parts.append(B.sphere_bm(c, (lr * 0.95, 0.002, lr * 0.76), mat=3, segs=14, rings=6))
+    parts.append(B.tube_bm(Vector((0.006, yg, zg + 0.004)), Vector((-0.006, yg, zg + 0.004)), [(0, lw), (1, lw)],
+                           lambda t, a: 2, segs=6))
+    # bottoni del cardigan
+    bc = cfg.get("bottoni", {})
+    for k in range(bc.get("n", 4)):
+        z = sh_z + bc.get("z0", -0.28) - k * bc.get("passo", 0.075)
+        y = (surface_y(pts, 0.0, z) or -0.10) - top_off - bc.get("fuori", 0.010)
+        parts.append(B.sphere_bm(Vector((0.0, y, z)), (0.009, 0.005, 0.009), mat=4, segs=8, rings=4))
+    bm = B.join_bms(parts)
+    return B.rigid_object("Sarta", bm, "spine_03", arm, ["PATCH", "METAL_DARK", "METAL", "LENS", "BELT"], mats,
+                          part="torso")
 
 
 # ============================================================== giacca e pettorina (guscio dal corpo)
@@ -721,11 +955,13 @@ def build(ns, ctx, kind):
                 f = B.face_features(c, n, L)
                 if f:
                     return f
-                if kind == "rider" and (c.z > ey.z + 0.022 or (c.z > ey.z - 0.04 and c.y > ey.y + 0.035)):
-                    return "HAIR"                              # sotto il casco, basette e nuca
+                if kind in ("rider", "toto") and (c.z > ey.z + 0.022 or (c.z > ey.z - 0.04 and c.y > ey.y + 0.035)):
+                    return "HAIR"                              # sotto il casco (o il cappuccio), basette e nuca
                 return "SKIN"
             if kind == "messo" and c.z < collar_z + 0.006:
                 return "COLLAR"                                # colletto della camicia
+            if kind == "addolorata" and c.z < collar_z + 0.006:
+                return "PANTS"                                 # scollo dell'abito
             return "SKIN"
         if part in ("hand_l", "hand_r"):
             return None
@@ -736,9 +972,11 @@ def build(ns, ctx, kind):
         if part.startswith("lowerarm"):
             return "SKIN" if kind == "esattore" else "TOP"
         if bone in TORSO:
-            if kind == "messo" and vn and c.y < -0.015 and c.z > sh_z + vn["z0"] - 0.01:
+            if kind in ("messo", "addolorata") and vn and c.y < -0.015 and c.z > sh_z + vn["z0"] - 0.01:
                 u = min(1.0, (c.z - (sh_z + vn["z0"])) / max(collar_z + 0.02 - (sh_z + vn["z0"]), 1e-3))
                 if abs(c.x) < 0.016 + vn["w"] * max(u, 0.0):   # solo nella V della giacca, con un margine
+                    if kind == "addolorata":
+                        return "PANTS"                         # l'abito nella V del cardigan
                     if abs(c.x) < vn.get("tie_w", 0.009) and c.z < collar_z - 0.004:
                         return "BELT"                          # cravatta
                     return "COLLAR"                            # camicia bianca nella V
@@ -753,6 +991,8 @@ def build(ns, ctx, kind):
             sx = 1.0 if bone.endswith("_l") else -1.0
             if pstripe and n.x * sx > pstripe:
                 return "REFLECT"                               # striscia della tuta
+            if kind == "addolorata" and part.startswith("calf"):
+                return "PANTS_FOLD"                            # calze velate sotto l'orlo
             if kind == "esattore" and part.startswith("thigh") and abs(c.x) > 0.10 \
                     and abs(c.z - (pz - 0.30)) < 0.06 and c.y > -0.03:
                 return "PANTS_FOLD"                            # tasconi laterali
@@ -791,7 +1031,7 @@ def build(ns, ctx, kind):
     else:
         for i, o in enumerate(boots):
             objs["boot%d" % i] = o
-    B.make_brows(brows, mats, L, bushy=cfg.get("brow_bushy", 1.5))
+    B.make_brows(brows, mats, L, bushy=cfg.get("brow_bushy", 1.5), lift=cfg.get("brow_lift", 0.0))
     B.make_eyes(eyes, arm, mats, L, glow_side=None)
     top_off = tcfg.get("offset", 0.020) + tcfg.get("thick", 0.010) * 0.2
     fist_bare = ["SKIN", "KNUCKLE", "SKIN", "SKIN", "SKIN_DARK", "SKIN", "TOP_LINING"]
@@ -816,6 +1056,31 @@ def build(ns, ctx, kind):
         objs["fist_r"] = B.make_fist("r", arm, mats, L, glove)
         objs.update(make_kneepads(B, arm, mats, L, pts, cfg.get("kneepads", {})))
         objs.update(make_rolled_sleeves(B, arm, mats, L, pts, cfg.get("rolled", {})))
+    elif kind == "addolorata":
+        objs["skirt"] = make_skirt(B, arm, mats, L, pts, cfg.get("skirt", {}))
+        objs["sarta"] = make_sarta(B, arm, mats, L, pts, cfg.get("sarta", {}), top_off)
+        hn = cfg.get("hair_mesh", "Hair_SimpleParted")
+        if hn in hairs:
+            objs["hair"] = B.make_hair_cap(hairs[hn], mats, L, push=cfg.get("hair_push", 0.003))
+        objs["bun"] = B.make_topknot(arm, mats, L, cfg.get("bun", {}))
+        objs["fist_l"] = B.make_fist("l", arm, mats, L, fist_bare)
+        objs["fist_r"] = B.make_fist("r", arm, mats, L, fist_bare)
+    elif kind == "toto":
+        objs["hood"] = make_hood_up(B, arm, mats, L, pts, cfg.get("hood", {}))
+        objs["hoodie_front"] = make_hoodie_front(B, arm, mats, L, pts, cfg.get("hoodie", {}), top_off)
+        objs["zainetto"] = make_zainetto(B, arm, mats, L, pts, cfg.get("zainetto", {}))
+        paint_flecks(objs["shirt"], mats, cfg.get("flecks", {}), L)
+        if "Hair_Buzzed" in hairs:
+            hc = cfg.get("hair", {})
+            cy, ez = hc.get("cut_y", -0.02), ey.z + hc.get("cut_above_eye", 0.03)
+            objs["hair"] = B.make_hair_cap(hairs["Hair_Buzzed"], mats, L, push=0.004,
+                                           front_cut=lambda c: c.y < cy and c.z > ez)
+        if "Hair_Beard" in hairs:
+            objs["beard"] = B.make_beard(hairs["Hair_Beard"], mats, L, length=cfg.get("beard_len", 0.35),
+                                         thick=cfg.get("beard_thick", 0.005))
+        paint = ["SKIN", "PATCH", "SKIN", "SKIN", "SKIN_DARK", "SKIN", "TOP_LINING"]   # nocche sporche di vernice
+        objs["fist_l"] = B.make_fist("l", arm, mats, L, paint)
+        objs["fist_r"] = B.make_fist("r", arm, mats, L, paint)
     else:
         objs["goggles"] = make_goggles(B, arm, mats, L, pts, cfg.get("goggles", {}), "LENS")
         if "Hair_Buzzed" in hairs:

@@ -20,6 +20,7 @@ ASSETS = os.path.join(REPO, "game", "assets")
 
 SOURCES = dict(
     body=os.path.join(LAB, "sources", "chars", "ubc-body", "Superhero_Male_FullBody.gltf"),
+    body_f=os.path.join(LAB, "sources", "chars", "ubc-body", "Superhero_Female_FullBody.gltf"),
     hair_dir=os.path.join(LAB, "sources", "chars", "ubc-hair"),
     ual1=os.path.join(LAB, "sources", "chars", "ual1-standard", "extracted", "Animation Library[Standard]",
                       "Unreal Engine", "AL_Standard.fbx"),
@@ -124,7 +125,7 @@ def run_blender_args(script, args, timeout=600, tag="blender"):
 
 def base_job(cid, cfg, mode, out):
     cam = camera()
-    job = dict(id=cid, mode=mode, out=out, body=SOURCES["body"], hair_dir=SOURCES["hair_dir"],
+    job = dict(id=cid, mode=mode, out=out, body=SOURCES["body_f" if cfg.get("corpo") == "f" else "body"], hair_dir=SOURCES["hair_dir"],
                ual1=SOURCES["ual1"], ual2=SOURCES["ual2"], camera=cam, outfit=cfg["outfit"],
                outfit_cfg=cfg.get("outfit_cfg", {}), hair_meshes=cfg.get("hair_meshes", []),
                reshape=cfg.get("reshape"), proportions=cfg.get("proportions", {}),

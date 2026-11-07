@@ -1,0 +1,52 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp02_pilone",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   0,
+   9
+  ],
+  "a": [
+   32,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "campo lungo: scorre piano da sinistra verso l'ultimo pilone grigio e Totò; la luce dell'alba sale sul cemento; lo spruzzo e la nebbiolina sono particelle nostre",
+  "zoom_da": 1,
+  "centro_da": [
+   240,
+   144
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   272,
+   144
+  ]
+ },
+ "figure": [
+  {
+   "nome": "toto",
+   "file": "figura_toto.png",
+   "x": 404,
+   "y": 202,
+   "misura": [
+    30,
+    68
+   ],
+   "profondita": 1.0,
+   "nota": "Totò a 31 anni, di spalle, spruzza sull'ultimo pilone grigio; la base ha già un filo di nebbiolina rosa, lo spruzzo vero lo fanno le particelle"
+  }
+ ],
+ "colori": 91,
+ "fonte": "ChatGPT (OpenAI), da testo e dal nostro render di Totò; ridotto in pixel art dai nostri script"
+}
