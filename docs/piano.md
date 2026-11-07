@@ -91,7 +91,12 @@ Le parti del lavoro:
 - il piano dei brani delle scene è pronto per Suno;
 - c'è la guida pubblica al mondo, [`mondo.md`](mondo.md).
 
-**Prossimo passo:** le scelte sulle voci (quanta voce, sintesi vocale, pronunce), poi i primi brani con Suno.
+**Fatto il 7 novembre 2026:**
+- la prima scena nel motore, il pignoramento, gira nel prologo, con il messo come nemico, la pioggia e il suo brano fatto con Suno;
+- i primi piani dei filmati partono da basi in stile murales fatte con ChatGPT dai nostri render 3D;
+- una prova di personaggi in 3D in tempo reale ha confermato gli sprite: il 3D a bassa risoluzione vale poco meno, quello a cubi molto meno, e nel browser pesa troppo.
+
+**In corso:** le voci sintetiche (SIDERA, le sue macchine, il messo, Tere), i brani delle altre scene e una demo più ricca per il sito, con il prologo raggiungibile dal menu. Battute e musica della demo stanno negli allegati della release, non nel repo.
 
 ### 3. Capitolo 1, «I tetti dei Tamburi»
 
