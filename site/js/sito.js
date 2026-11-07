@@ -114,7 +114,7 @@
 	const aggancia = (cssPx) => Math.round(cssPx * S.dpr) / S.dpr;
 
 	/* ------------------------------------------------------------ nube rossa (canvas) */
-	const NUBE = ['#06061a', '#0a0b24', '#0f1131', '#15183f', '#1a1230', '#2c1024', '#3e142c', '#561a36', '#722240', '#8f2c4a'].map(hex);
+	const NUBE = ['#0d060b', '#170913', '#210e1b', '#2d1325', '#221121', '#2c1024', '#3e142c', '#561a36', '#722240', '#8f2c4a'].map(hex);
 	const TW = 256, TH = 64;
 	function rumore(W, H, celle, seme) {
 		const r = mulberry32(seme);
