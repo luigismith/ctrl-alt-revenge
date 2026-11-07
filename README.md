@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="site/media/logo/logo-2x.png" width="496" height="178" alt="CTRL+ALT REVENGE!">
+  <img src="site/media/logo/logo-2x.png" width="398" height="160" alt="CTRL+ALT REVENGE!">
 </p>
 
 <p align="center">

@@ -8,7 +8,7 @@
   "tick_fine": 3841,
   "hash": "66e84c1924f2646fe34361f182b66d0dd3c51126bbdce390554cc1d90ea9fb07",
   "fotogrammi": 3850,
-  "impronta_grafica": "33d43b0de054a67998ba562eee59ce1b1e5fe3659f2b6d2eaef9d0d3d795068a"
+  "impronta_grafica": "69d96c3784390d0b715d174084ea3d00bf289765427c2e390d5fcaa2fd2bd8ae"
  },
  "controllo": {
   "zone": [
@@ -387,8 +387,8 @@
  "logo": [
   {
    "file": "logo/logo-1x.png",
-   "larghezza": 248,
-   "altezza": 89,
+   "larghezza": 199,
+   "altezza": 80,
    "scala": 1,
    "alt": {
     "it": "CTRL+ALT REVENGE!",
@@ -397,8 +397,8 @@
   },
   {
    "file": "logo/logo-2x.png",
-   "larghezza": 496,
-   "altezza": 178,
+   "larghezza": 398,
+   "altezza": 160,
    "scala": 2,
    "alt": {
     "it": "CTRL+ALT REVENGE!",
@@ -407,8 +407,8 @@
   },
   {
    "file": "logo/logo-4x.png",
-   "larghezza": 992,
-   "altezza": 356,
+   "larghezza": 796,
+   "altezza": 320,
    "scala": 4,
    "alt": {
     "it": "CTRL+ALT REVENGE!",
@@ -564,15 +564,15 @@
   },
   {
    "file": "site/media/logo/logo-1x.png",
-   "byte": 2178
+   "byte": 2805
   },
   {
    "file": "site/media/logo/logo-2x.png",
-   "byte": 2851
+   "byte": 3538
   },
   {
    "file": "site/media/logo/logo-4x.png",
-   "byte": 4410
+   "byte": 5086
   },
   {
    "file": "site/media/font/car-pixel-bold.woff2",
@@ -624,7 +624,7 @@
   },
   {
    "file": "site/media/sprite/bruto.png",
-   "byte": 29439
+   "byte": 29371
   },
   {
    "file": "site/media/sprite/bruto.json",
@@ -632,12 +632,12 @@
   },
   {
    "file": "site/media/social.png",
-   "byte": 130392
+   "byte": 131867
   },
   {
    "file": "docs/media/demo.gif",
    "byte": 1645914
   }
  ],
- "totale_byte": 9298872
+ "totale_byte": 9302269
 }

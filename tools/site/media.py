@@ -162,7 +162,7 @@ SOCIAL_FOTOGRAMMA = 657
 SOCIAL_SCALA = 3
 SOCIAL_SPOSTA = (-160, -90)
 SOCIAL_LOGO = (40, 28, 2)        # x, y, scala
-SOCIAL_HUD = [(0, 0, 156, 42), (424, 0, 480, 16)]   # l'HUD nel fotogramma: ritratto e barre, punteggio
+SOCIAL_HUD = [(0, 0, 156, 42), (424, 0, 480, 16), (100, 38, 202, 80)]   # l'HUD nel fotogramma: ritratto e barre, punteggio; il cartellone chiaro sotto il logo
 
 # Strisce degli sprite: (file, nome sul sito, atlante, [(animazione sul sito, animazione, AttackData)]).
 SPRITE = [
