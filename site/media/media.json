@@ -8,181 +8,49 @@
   "tick_fine": 3841,
   "hash": "66e84c1924f2646fe34361f182b66d0dd3c51126bbdce390554cc1d90ea9fb07",
   "fotogrammi": 3850,
-  "impronta_grafica": "55f6409a372a567d731f2c4e966b77219fe951c8413ea1280e8f4014eaa4e048"
+  "impronta_grafica": "33d43b0de054a67998ba562eee59ce1b1e5fe3659f2b6d2eaef9d0d3d795068a"
  },
  "controllo": {
   "zone": [
    {
-    "piano": "backdrop",
-    "riquadro": [
-     0,
-     122,
-     65,
-     168
-    ],
-    "cosa": "il graffito GIG",
-    "azione": "vieta"
-   },
-   {
-    "piano": "backdrop",
-    "riquadro": [
-     1242,
-     20,
-     1434,
-     75
-    ],
-    "cosa": "la FARMACIA con la croce rossa (emblema protetto)",
-    "azione": "vieta"
-   },
-   {
-    "piano": "backdrop",
-    "riquadro": [
-     1820,
-     28,
-     1936,
-     176
-    ],
-    "cosa": "l'insegna HOTEL",
-    "azione": "vieta"
-   },
-   {
     "piano": "near",
     "riquadro": [
-     588,
+     462,
      30,
-     710,
-     85
+     518,
+     95
     ],
-    "cosa": "il cartellone HOTEL",
-    "azione": "vieta"
+    "cosa": "il cartellone MANODOPERA 2.0 dei tetti (parte sopra il palazzo basso)",
+    "azione": "togli"
    },
    {
     "piano": "near",
     "riquadro": [
-     1248,
-     20,
-     1388,
-     60
-    ],
-    "cosa": "il cartellone CINEMA",
-    "azione": "vieta"
-   },
-   {
-    "piano": "near",
-    "riquadro": [
-     562,
-     172,
-     590,
-     210
-    ],
-    "cosa": "l'insegna rossa verticale dei tetti",
-    "azione": "vieta"
-   },
-   {
-    "piano": "mid",
-    "riquadro": [
-     646,
-     50,
-     682,
-     122
-    ],
-    "cosa": "le insegne HOTEL e BAR del piano medio",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     192,
+     518,
      30,
-     232,
-     72
+     656,
+     89
     ],
-    "cosa": "la luna",
-    "azione": "copri"
+    "cosa": "il cartellone MANODOPERA 2.0 dei tetti",
+    "azione": "togli"
    },
    {
-    "piano": "sky",
+    "piano": "near",
     "riquadro": [
-     59,
-     48,
-     68,
-     58
+     1225,
+     26,
+     1399,
+     78
     ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     169,
-     49,
-     178,
-     59
-    ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     315,
-     48,
-     324,
-     58
-    ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     443,
-     48,
-     452,
-     58
-    ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     242,
-     14,
-     251,
-     23
-    ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "sky",
-    "riquadro": [
-     223,
-     14,
-     232,
-     23
-    ],
-    "cosa": "una stella grande",
-    "azione": "vieta"
-   },
-   {
-    "piano": "far",
-    "riquadro": [
-     174,
-     0,
-     204,
-     155
-    ],
-    "cosa": "le luci cyan della torre lontana (il cyan è solo di GIG)",
-    "azione": "spegni"
+    "cosa": "il cartellone di Pasqua dei tetti",
+    "azione": "togli"
    }
   ],
-  "fotogrammi_controllati": 377,
-  "luci_spente_in": 374,
-  "luna_coperta_in": 376,
-  "luna_pixel_coperti_max": 212,
-  "confronto_minimo": 0.858
+  "fotogrammi_controllati": 0,
+  "luci_spente_in": 0,
+  "luna_coperta_in": 0,
+  "luna_pixel_coperti_max": 0,
+  "confronto_minimo": 1.0
  },
  "eroe": {
   "video": [
@@ -225,8 +93,8 @@
    ]
   ],
   "alt_poster": {
-   "it": "GIG colpisce il punk con il gancio del braccio cyber, sotto la pioggia, davanti all'insegna KEBAB.",
-   "en": "GIG lands a cyber-arm hook on the punk in the rain, under the KEBAB neon sign."
+   "it": "GIG colpisce il punk con il gancio del braccio cyber, nella polvere rossa del Wind Day, davanti all'insegna KEBAB.",
+   "en": "GIG lands a cyber-arm hook on the punk in the red dust of the Wind Day, under the KEBAB sign."
   },
   "descrizione": {
    "it": "Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.",
@@ -239,16 +107,12 @@
   "larghezza": 960,
   "altezza": 540,
   "fps": 20,
-  "fotogrammi": 125,
-  "durata_s": 6.25,
+  "fotogrammi": 66,
+  "durata_s": 3.3,
   "segmenti": [
    [
     657,
     741
-   ],
-   [
-    1010,
-    1187
    ],
    [
     544,
@@ -336,8 +200,8 @@
   "altezza": 640,
   "fotogramma": 657,
   "alt": {
-   "it": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa.",
-   "en": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street."
+   "it": "Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada rossa di polvere.",
+   "en": "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a street red with dust."
   }
  },
  "sprite": [
@@ -510,13 +374,13 @@
   },
   {
    "file": "livello/revenge.png",
-   "larghezza": 92,
+   "larghezza": 46,
    "altezza": 24,
    "riquadro_nel_livello": [
-    793,
-    141,
-    885,
-    165
+    848,
+    146,
+    894,
+    170
    ]
   }
  ],
@@ -588,35 +452,35 @@
  "file": [
   {
    "file": "site/media/eroe-2x.webm",
-   "byte": 1089644
+   "byte": 1210939
   },
   {
    "file": "site/media/eroe.webm",
-   "byte": 2199885
+   "byte": 2479125
   },
   {
    "file": "site/media/eroe.mp4",
-   "byte": 2515063
+   "byte": 2643834
   },
   {
    "file": "site/media/eroe-poster.png",
-   "byte": 53615
+   "byte": 194592
   },
   {
    "file": "site/media/schermate/combo.png",
-   "byte": 25201
+   "byte": 79319
   },
   {
    "file": "site/media/schermate/cavo.png",
-   "byte": 22490
+   "byte": 80910
   },
   {
    "file": "site/media/schermate/arena.png",
-   "byte": 27323
+   "byte": 104600
   },
   {
    "file": "site/media/schermate/presa.png",
-   "byte": 25947
+   "byte": 103807
   },
   {
    "file": "site/media/ui/ritratto-gig.png",
@@ -680,23 +544,23 @@
   },
   {
    "file": "site/media/livello/tetti.png",
-   "byte": 19440
+   "byte": 87997
   },
   {
    "file": "site/media/livello/tetti-luce.png",
-   "byte": 4288
+   "byte": 2494
   },
   {
    "file": "site/media/livello/strada.png",
-   "byte": 58295
+   "byte": 253329
   },
   {
    "file": "site/media/livello/strada-luce.png",
-   "byte": 6755
+   "byte": 5441
   },
   {
    "file": "site/media/livello/revenge.png",
-   "byte": 835
+   "byte": 1128
   },
   {
    "file": "site/media/logo/logo-1x.png",
@@ -768,12 +632,12 @@
   },
   {
    "file": "site/media/social.png",
-   "byte": 47676
+   "byte": 130392
   },
   {
    "file": "docs/media/demo.gif",
-   "byte": 2258597
+   "byte": 1645914
   }
  ],
- "totale_byte": 8630105
+ "totale_byte": 9298872
 }

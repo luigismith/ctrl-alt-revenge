@@ -28,11 +28,12 @@ Come lavora:
 3. controlla le zone vietate (VIETATI, qui sotto): per ogni fotogramma usato trova dove sta la
    telecamera confrontando la cattura con il piano della strada (backdrop.png), ricostruisce dove
    finisce ogni piano di layers.json e che cosa lo copre, e si ferma se in un ritaglio si vede
-   anche un pixel di una zona vietata: la FARMACIA con la croce rossa (emblema protetto), le
-   insegne HOTEL e CINEMA, il graffito GIG, la luna e le stelle grandi. Le luci cyan della torre
-   lontana invece si spengono (il cyan, nel gioco, è solo di GIG): diventano il colore scuro
-   della torre. Regge se cambiano gli sprite o la loro luce; se cambia la strada, lo script se ne
-   accorge dalle misure dei piani e le zone vanno ridisegnate;
+   anche un pixel di una zona vietata. Le zone "spegni" (luci cyan: il cyan, nel gioco, è solo di
+   GIG) diventano il colore scuro del piano; le zone "copri" prendono il colore del fondo; le zone
+   "togli" escono solo dai pezzi del livello per il sito (i cartelloni dei tetti). Regge se
+   cambiano gli sprite o la loro luce; se cambia la strada le zone vanno ridisegnate: lo script se
+   ne accorge dalle misure dei piani, ma non se la strada nuova ha le stesse misure (impronta in
+   STRADA_IMPRONTA);
 4. con Pillow e l'FFmpeg del laboratorio prepara, ingrandendo solo per multipli interi e con il
    vicino più prossimo (pixel netti):
    - site/media/eroe.webm, eroe.mp4, eroe-poster.png: loop di circa 6 s a 3x (1440x810, 60 fps),
@@ -116,8 +117,7 @@ MAX_GIF = 3 * 1024 * 1024
 # Il fotogramma k mostra lo stato dopo il tick k del livello (game/tests/README.md).
 # Intervalli [primo, ultimo escluso].
 
-# Loop dell'eroe: solo la rissa davanti al KEBAB, l'unico tratto dello slice senza FARMACIA, HOTEL,
-# CINEMA e stelle (lo verifica controlla_zone; l'orlo della luna che spunta fra i palazzi si copre).
+# Loop dell'eroe: solo la rissa davanti al KEBAB, con il graffito REVENGE e la saracinesca di ARIA VERA.
 # La telecamera sta ferma dal 513 al 1186. Comincia e finisce dentro la stessa combo (656 -> 657), così
 # il giro è continuo, e il primo fotogramma, il gancio cyber che solleva il punk, fa da poster.
 EROE = [
@@ -128,17 +128,19 @@ EROE = [
 EROE_SCALA = 3
 EROE_SCALA_PICCOLO = 2           # eroe-2x.webm, per i telefoni
 EROE_MEDIA_PICCOLO = "(max-width: 699px)"
-EROE_CRF_H264 = 17
+EROE_CRF_H264 = 21               # 17 con la pioggia; la strada del Wind Day, a 17, pesava 4,4 MB
 EROE_CRF_VP9 = 32
 
-# GIF del README: gli stessi momenti, 20 al secondo.
-GIF = list(EROE)
+# GIF del README: gli stessi momenti, 20 al secondo, senza il secondo scambio. Lì lo scossone del colpo e
+# una raffica del Wind Day cambiano la luce di tutta la strada a ogni fotogramma, e la GIF passava i 3 MB
+# (4,6 MB); il loop resta continuo: gancio e calcio, il punk a terra, il punk che arriva, jab, jab.
+GIF = [EROE[0], EROE[2]]
 GIF_PASSO = 3                    # un fotogramma ogni 3 tick: 20 al secondo
 GIF_SCALA = 2
 
 # Schermate a 1x: (nome, fotogramma, ritaglio x0, y0, x1, y1 in pixel del gioco, alt it, alt en).
 # I ritagli tengono fuori le zone vietate (lo verifica controlla_zone); nell'arena si taglia sotto
-# la luna e il cartellone CINEMA, e a sinistra l'insegna HOTEL.
+# il cartellone di Pasqua dei tetti.
 SCHERMATE = [
     ("combo", 662, (200, 32, 480, 270),   # senza l'HUD: l'insegna KEBAB e il calcio sul punk
      "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
@@ -177,49 +179,45 @@ SPRITE_NORMALI = {"gig"}
 SPRITE_SPENTO = {"gig"}
 METALLO = [(0x3a, 0x33, 0x52), (0x58, 0x50, 0x73), (0x8e, 0x86, 0xab), (0xc9, 0xc2, 0xde)]   # tools/fxui/palette.py
 
-ALT_EROE = ("GIG colpisce il punk con il gancio del braccio cyber, sotto la pioggia, davanti all'insegna KEBAB.",
-            "GIG lands a cyber-arm hook on the punk in the rain, under the KEBAB neon sign.")
+ALT_EROE = ("GIG colpisce il punk con il gancio del braccio cyber, nella polvere rossa del Wind Day, davanti "
+            "all'insegna KEBAB.",
+            "GIG lands a cyber-arm hook on the punk in the red dust of the Wind Day, under the KEBAB sign.")
 DESCR_VIDEO = ("Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine "
                "va giù.",
                "Gameplay outside the kebab shop: jab, jab, cyber hook and kick on the punk, who finally goes "
                "down.")
-ALT_SOCIAL = ("Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada piovosa.",
-              "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a rainy street.")
+ALT_SOCIAL = ("Il logo di CTRL+ALT REVENGE! sopra GIG che colpisce un punk con il gancio cyber, in una strada "
+              "rossa di polvere.",
+              "The CTRL+ALT REVENGE! logo over GIG landing a cyber hook on a punk in a street red with dust.")
 
 # ------------------------------------------------------------------ zone vietate
-# Quello che il sito non deve mostrare (elenco "vietato" del brief del sito e giudizi dei prototipi),
-# in coordinate dei piani di game/assets/env/sotto_la_linea/layers.json: (piano, x0, y0, x1, y1, cosa,
-# azione). Con "vieta" lo script si ferma se in un ritaglio usato se ne vede anche un pixel; con
-# "spegni" i pixel cyan che si vedono prendono il colore scuro del piano lì accanto (luci spente); con
-# "copri" i pixel della cosa che si vedono prendono il colore del fondo del riquadro (il cielo vuoto).
-# La luna si copre: a 480x270, nella rissa davanti al KEBAB, fra i palazzi ne spunta l'orlo in alto a
-# sinistra (una cinquantina di pixel scuri) e la telecamera lì sta ferma; nei ritagli dell'arena resta fuori.
+# Quello che il sito non deve mostrare, in coordinate dei piani di game/assets/env/sotto_la_linea/layers.json:
+# (piano, x0, y0, x1, y1, cosa, azione). Con "vieta" lo script si ferma se in un ritaglio usato se ne vede
+# anche un pixel; con "spegni" i pixel cyan che si vedono prendono il colore scuro del piano lì accanto (luci
+# spente); con "copri" i pixel della cosa che si vedono prendono il colore del fondo del riquadro; con
+# "togli" la cosa esce solo dai pezzi del livello del sito (tetti e strada), e nelle catture resta.
+# La strada del Wind Day (novembre 2026) non ha più niente da vietare: niente croce rossa (la croce della
+# FARMACIA è verde, le croci delle targhe dei necrologi sono nere), niente insegne HOTEL e CINEMA, niente
+# graffito GIG, luna, stelle o luci cyan. Restano i due cartelloni dei tetti, che nella striscia dei tetti
+# del sito, ripetuta in orizzontale, si vedrebbero tornare; si tolgono fino al tetto, gambe comprese.
 LIVELLO = GAME / "assets" / "env" / "sotto_la_linea"
 VIETATI = [
-    ("backdrop", 0, 122, 65, 168, "il graffito GIG", "vieta"),
-    ("backdrop", 1242, 20, 1434, 75, "la FARMACIA con la croce rossa (emblema protetto)", "vieta"),
-    ("backdrop", 1820, 28, 1936, 176, "l'insegna HOTEL", "vieta"),
-    ("near", 588, 30, 710, 85, "il cartellone HOTEL", "vieta"),
-    ("near", 1248, 20, 1388, 60, "il cartellone CINEMA", "vieta"),
-    ("near", 562, 172, 590, 210, "l'insegna rossa verticale dei tetti", "vieta"),
-    ("mid", 646, 50, 682, 122, "le insegne HOTEL e BAR del piano medio", "vieta"),
-    ("sky", 192, 30, 232, 72, "la luna", "copri"),
-    ("sky", 59, 48, 68, 58, "una stella grande", "vieta"),
-    ("sky", 169, 49, 178, 59, "una stella grande", "vieta"),
-    ("sky", 315, 48, 324, 58, "una stella grande", "vieta"),
-    ("sky", 443, 48, 452, 58, "una stella grande", "vieta"),
-    ("sky", 242, 14, 251, 23, "una stella grande", "vieta"),
-    ("sky", 223, 14, 232, 23, "una stella grande", "vieta"),
-    ("far", 174, 0, 204, 155, "le luci cyan della torre lontana (il cyan è solo di GIG)", "spegni"),
+    ("near", 462, 30, 518, 95, "il cartellone MANODOPERA 2.0 dei tetti (parte sopra il palazzo basso)", "togli"),
+    ("near", 518, 30, 656, 89, "il cartellone MANODOPERA 2.0 dei tetti", "togli"),
+    ("near", 1225, 26, 1399, 78, "il cartellone di Pasqua dei tetti", "togli"),
 ]
 # Misure attese dei piani: se cambiano, la strada è stata rifatta e le zone vanno ricontrollate.
 MISURE_PIANI = {"sky": (480, 270), "far": (720, 155), "mid": (960, 259), "near": (1440, 210),
                 "backdrop": (2400, 187), "floor": (2400, 108), "fg": (2880, 33)}
+# SHA-256 di backdrop.png e near.png quando le zone qui sopra sono state ridisegnate: la strada nuova del
+# Wind Day aveva le stesse misure di quella vecchia, e il controllo delle misure da solo non bastava.
+STRADA_IMPRONTA = "0a3dbd4fe5760692bc1e48f4c0c1b6fb05142ae709d8d762055d6e71a7cccbcd"
 MARGINE = 3                      # px di sicurezza attorno ai ritagli: scossoni e arrotondamenti
 
-# Tratto di strada del sito (backdrop e floor): dopo il graffito GIG, prima della FARMACIA.
+# Tratto di strada del sito (backdrop e floor): dall'insegna MALEDICONO al muro prima della FARMACIA,
+# 1175 px come la striscia del sito (site/css/sito.css, site/js/sito.js).
 STRADA_X = (65, 1240)
-REVENGE = (793, 141, 885, 165)   # il graffito REVENGE sul tavolato dei lavori, con un filo di margine
+REVENGE = (848, 146, 894, 170)   # il graffito REVENGE sul tavolato dei lavori, con un filo di margine (46x24)
 
 
 def log(msg: str) -> None:
@@ -349,6 +347,9 @@ class Livello:
         if diversi or set(self.piani) != set(MISURE_PIANI):
             sys.exit("I piani di Sotto la Linea sono cambiati (" + "; ".join(diversi or ["piani diversi"]) +
                      "): ridisegna VIETATI, STRADA_X e REVENGE in tools/site/media.py e aggiorna MISURE_PIANI.")
+        if impronta_strada() != STRADA_IMPRONTA:
+            sys.exit("backdrop.png o near.png sono cambiati: ricontrolla VIETATI, STRADA_X e REVENGE in "
+                     "tools/site/media.py, poi aggiorna STRADA_IMPRONTA (" + impronta_strada() + ").")
         bd = self.piani["backdrop"]["img"]
         self.bd_rgb = bd[..., :3].astype(np.int16)
         self.bd_a = bd[..., 3] > 250
@@ -515,6 +516,14 @@ class Livello:
 _livello: Livello | None = None
 
 
+def impronta_strada() -> str:
+    import hashlib
+    h = hashlib.sha256()
+    for nome in ("backdrop.png", "near.png"):
+        h.update((LIVELLO / nome).read_bytes())
+    return h.hexdigest()
+
+
 def livello() -> Livello:
     global _livello
     if _livello is None:
@@ -570,7 +579,7 @@ def step_controllo() -> dict:
             spenti[k] = n
         if c:
             coperti[k] = c
-    qualita = min(lv.stime[k][2] for k in lv.stime)
+    qualita = min((lv.stime[k][2] for k in lv.stime), default=1.0)   # senza zone "vieta" non si stima niente
     log(f"controllo: {len(lv.stime)} fotogrammi, nessuna zona vietata in vista (confronto minimo {qualita:.2f}); "
         f"luci della torre spente in {len(spenti)} fotogrammi; luna coperta in {len(coperti)} fotogrammi "
         f"(al massimo {max(coperti.values(), default=0)} pixel)")
@@ -840,7 +849,7 @@ def step_social(out: dict) -> None:
     giochi di una volta), il logo a 2x sopra l'HUD."""
     s = SOCIAL_SCALA
     sx, sy = SOCIAL_SPOSTA
-    notte = np.array([10, 11, 36], np.uint8)
+    notte = np.array([23, 9, 19], np.uint8)   # --notte del sito, il prugna
     card = Image.new("RGBA", (1280, 640), (*notte.tolist(), 255))
     # L'HUD (ritratto, barre, vite e punteggio) sparisce nella notte, a scacchi: sopra c'è il logo.
     f = np.asarray(frame(SOCIAL_FOTOGRAMMA)).copy()
@@ -928,7 +937,7 @@ def senza_zone(nome: str, im: Image.Image) -> Image.Image:
     """Il piano `nome` con le zone vietate trasparenti."""
     a = np.asarray(im).copy()
     for z in VIETATI:
-        if z[0] == nome and z[6] == "vieta":
+        if z[0] == nome and z[6] in ("vieta", "togli"):
             a[z[2]:z[4], z[1]:z[3], 3] = 0
     return Image.fromarray(a, "RGBA")
 
