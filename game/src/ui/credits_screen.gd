@@ -19,6 +19,9 @@ const CREDITS_TXT := "res://data/credits.txt"
 const NO_MUSIC := "In questa copia del gioco non c'è musica."
 
 var _lines: Array[Array] = []  # [testo, colore, regolare, immagine o null]
+## Per i test: i brani da elencare al posto di Music.credit_lines(), così il risultato non dipende
+## dalla musica che c'è nel laboratorio di quel PC.
+var music_lines: Variant = null
 var _scroll: float = -200.0
 var _t: int = 0
 
@@ -53,17 +56,7 @@ func _build() -> void:
 	_add_image("logo", "CTRL+ALT REVENGE!")
 	_add("")
 	if FileAccess.file_exists(CREDITS_TXT):
-		var music := false
-		for l in FileAccess.get_file_as_string(CREDITS_TXT).split("\n"):
-			if l.begins_with("# "):
-				if music:
-					_add_music()
-				music = l.substr(2).strip_edges() == "MUSICA"
-				_add(l.substr(2), YELLOW)
-			else:
-				_add(l)
-		if music:
-			_add_music()
+		_add_text(FileAccess.get_file_as_string(CREDITS_TXT))
 	_add("")
 	_add("LICENZE", YELLOW)
 	_add("")
@@ -84,10 +77,26 @@ func _build() -> void:
 	_add("Grazie per aver giocato!", YELLOW)
 
 
-## Componenti di terze parti compilati dentro Godot, con copyright e testo delle licenze,
-## come chiede la loro licenza: li fornisce l'eseguibile stesso.
+## Il testo di credits.txt: le righe "# " sono titoli, e in fondo alla sezione MUSICA vanno i brani.
+## I fine riga CRLF (un editor di Windows) valgono come LF: niente "\r" in coda ai titoli.
+func _add_text(text: String) -> void:
+	var music := false
+	for raw in text.split("\n"):
+		var l := raw.trim_suffix("\r")
+		if l.begins_with("# "):
+			if music:
+				_add_music()
+			music = l.substr(2).strip_edges() == "MUSICA"
+			_add(l.substr(2), YELLOW)
+		else:
+			_add(l)
+	if music:
+		_add_music()
+
+
+## I brani che Music ha caricato (o `music_lines`, nei test), oppure la riga NO_MUSIC.
 func _add_music() -> void:
-	var tracks := Music.credit_lines()
+	var tracks: PackedStringArray = Music.credit_lines() if music_lines == null else music_lines
 	if tracks.is_empty():
 		_add(NO_MUSIC)
 	else:
@@ -97,6 +106,8 @@ func _add_music() -> void:
 	_add("")
 
 
+## Componenti di terze parti compilati dentro Godot, con copyright e testo delle licenze,
+## come chiede la loro licenza: li fornisce l'eseguibile stesso.
 func _add_engine_components() -> void:
 	_add("Componenti di terze parti inclusi in Godot Engine", YELLOW)
 	for info: Dictionary in Engine.get_copyright_info():

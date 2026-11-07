@@ -819,20 +819,41 @@ func _test_credits_glyphs() -> void:
 	for l: Array in c._lines:
 		has_logo = has_logo or l[3] != null
 	check(has_logo, "Crediti: il titolo è il logo, non testo a scala 2")
+	c.free()
+	# La sezione MUSICA con brani finti: il risultato non dipende dalla musica del laboratorio di quel PC.
+	var fake := PackedStringArray(["\"Il messo (alla porta)\" (Suno Pro)",
+			"\"Un titolo lunghissimo che va a capo perché supera la riga dei crediti\" (Suno Pro)"])
+	check(_credits_music_ok(fake), "Crediti: la sezione MUSICA elenca i brani caricati", "%d brani finti" % fake.size())
+	check(_credits_music_ok(PackedStringArray()), "Crediti: senza musica la sezione MUSICA lo dice")
+	# credits.txt salvato da un editor di Windows (CRLF): titoli puliti e brani al loro posto.
+	var crlf := CreditsScreen.new()
+	crlf.music_lines = fake
+	crlf._add_text("# CODICE\r\nUna riga\r\n# MUSICA\r\nAltra riga\r\n")
+	var t2 := PackedStringArray()
+	for l: Array in crlf._lines:
+		t2.append(str(l[0]))
+	crlf.free()
+	check(t2.has("CODICE") and t2.has("MUSICA") and t2.has(fake[0]) and not ("\r" in "".join(t2)),
+			"Crediti: i fine riga CRLF di credits.txt non sporcano i titoli", str(t2))
+
+
+## I crediti completi con `tracks` come brani caricati: c'è la sezione MUSICA e ci sono tutti i brani
+## (un titolo lungo va a capo come ogni riga, si cercano i suoi pezzi), o la riga NO_MUSIC.
+func _credits_music_ok(tracks: PackedStringArray) -> bool:
+	var c := CreditsScreen.new()
+	c.music_lines = tracks
+	c._build()
 	var texts := PackedStringArray()
 	for l: Array in c._lines:
 		texts.append(str(l[0]))
-	var expected := Music.credit_lines()
-	var music_ok := texts.has("MUSICA")
-	if expected.is_empty():
-		music_ok = music_ok and texts.has(CreditsScreen.NO_MUSIC)
-	else:
-		# Un titolo lungo va a capo come ogni riga dei crediti: si cercano i suoi pezzi.
-		for t in expected:
-			for part in CreditsScreen.word_wrap(UiFont.safe_text(t, true), CreditsScreen.MAX_CHARS):
-				music_ok = music_ok and texts.has(part)
-	check(music_ok, "Crediti: la sezione MUSICA elenca i brani caricati", "%d brani" % expected.size())
 	c.free()
+	var ok := texts.has("MUSICA")
+	if tracks.is_empty():
+		return ok and texts.has(CreditsScreen.NO_MUSIC)
+	for t in tracks:
+		for part in CreditsScreen.word_wrap(UiFont.safe_text(t, true), CreditsScreen.MAX_CHARS):
+			ok = ok and texts.has(part)
+	return ok
 
 
 ## A replay finito nessun tasto resta tenuto.
