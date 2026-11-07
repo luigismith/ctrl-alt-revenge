@@ -20,6 +20,7 @@ import near_fg  # noqa: E402
 import props  # noqa: E402
 import render_scenes  # noqa: E402
 import street  # noqa: E402
+import taranto  # noqa: E402
 import warped  # noqa: E402
 
 
@@ -31,6 +32,7 @@ def main(install=False):
     near_fg.build_near()
     near_fg.build_fg()
     warped.build()
+    taranto.build()  # il cielo e il piano lontano di Taranto sostituiscono quelli di Warped City
     os.makedirs(props.RAW, exist_ok=True)
     props.build_bin()
     props.build_apple()
