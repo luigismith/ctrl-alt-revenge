@@ -19,8 +19,8 @@ Ogni JSON dà i riquadri di occhi (`eyes`) e bocca (`mouth`) e i loro colori (`l
 
 | Chiave in `ui.json` | File | Misure | Note |
 |---|---|---|---|
-| `logo` | `title_logo.png` | 248×89 | "CTRL+ALT REVENGE!" come sulla locandina: crema, bordo rosso scuro, estrusione, ombra |
-| `subtitle` | `title_subtitle.png` | 223×13 | "PICCHIA DURO A SCORRIMENTO" arancio, sotto il logo |
+| `logo` | `title_logo.png` | 199×80 | "CTRL+ALT REVENGE!" (`tools/fxui/logo.py`): i tasti beige CTRL e ALT, REVENGE! inclinato a spray, a fasce di fuoco, con contorno inchiostro-crema, rilievo prugna e colature |
+| `subtitle` | `title_subtitle.png` | 155×13 | "TARANTO · 2087" crema fra due trattini, sotto il logo |
 | `stage_card_1` | `stage_card_1.png` | 293×27 | "1 · SOTTO LA LINEA" |
 | `msg_zone_clear` | `msg_zone_clear.png` | 276×31 | "ZONA LIBERATA" |
 | `msg_pause` | `msg_pause.png` | 115×31 | "PAUSA" |

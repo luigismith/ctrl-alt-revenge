@@ -66,7 +66,28 @@ func run(tree_root: Node) -> bool:
 	_test_pignoramento()
 	_test_rinforzi()
 	_test_scene_voices()
+	_test_title_menu()
 	return failures == 0
+
+
+# --- Il menu del titolo ----------------------------------------------------------------------------
+
+## NUOVA PARTITA, i CAPITOLI col sottomenu e INDIETRO, le voci del PC e del browser. Il titolo non
+## entra nell'albero: _ready (piani, musica, Wind Day) non gira, si prova solo la logica delle voci.
+func _test_title_menu() -> void:
+	var t := TitleScreen.new()
+	t.web = false
+	check(t.items() == PackedStringArray(["NUOVA PARTITA", "CAPITOLI", "STANZA DI PROVA", "CREDITI", "ESCI"]), "Titolo: le voci del PC", str(t.items()))
+	check(t.choose(0) == &"new_game", "Titolo: NUOVA PARTITA dà new_game")
+	check(t.choose(2) == &"test_room" and t.choose(3) == &"show_credits" and t.choose(4) == &"quit_game", "Titolo: stanza di prova, crediti ed esci")
+	check(t.choose(1) == &"" and t.in_chapters and t._index == 0, "Titolo: CAPITOLI apre il sottomenu, sulla prima voce")
+	check(t.items() == PackedStringArray(["PROLOGO", "SOTTO LA LINEA", "INDIETRO"]), "Titolo: i capitoli e INDIETRO", str(t.items()))
+	check(t.choose(0) == &"prologue" and t.choose(1) == &"start_game", "Titolo: i capitoli danno prologue e start_game")
+	check(t.choose(2) == &"" and not t.in_chapters and t._index == 1, "Titolo: INDIETRO torna al menu, su CAPITOLI")
+	t.web = true
+	check(t.items() == PackedStringArray(["NUOVA PARTITA", "CAPITOLI", "CREDITI"]), "Titolo: nel browser niente stanza di prova né ESCI", str(t.items()))
+	check(t.choose(2) == &"show_credits", "Titolo: nel browser la terza voce è CREDITI")
+	t.free()
 
 
 # --- Impostazioni ----------------------------------------------------------------------------------

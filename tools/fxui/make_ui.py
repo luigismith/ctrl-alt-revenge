@@ -22,6 +22,7 @@ sys.path.insert(0, str(HERE))
 import bigfont  # noqa: E402
 import palette as P  # noqa: E402
 import pix  # noqa: E402
+import logo  # noqa: E402
 import title  # noqa: E402
 
 OUT = HERE / "out" / "assets" / "ui"
@@ -42,11 +43,12 @@ def hexs(c) -> str:
 # ------------------------------------------------------------------------------------
 
 def make_logo() -> np.ndarray:
-    return title.render(["CTRL+ALT", "REVENGE!"], bigfont.metrics(36, 8), title.LOGO)
+    # dal 7 novembre 2026 il logo è quello di logo.py (tasti e street art); la variante la sceglie Luigi
+    return logo.logo(logo.VARIANTI[logo.SCELTA])
 
 
 def make_subtitle() -> np.ndarray:
-    return title.render(["TARANTO · 2087"], bigfont.metrics(10, 2), SUB, gap=2)
+    return logo.sottotitolo(logo.VARIANTI[logo.SCELTA])
 
 
 def make_stage_card() -> np.ndarray:
@@ -242,9 +244,9 @@ def build() -> dict:
 
     # --- titolo e scritte grandi ---
     put("logo", "title_logo.png", make_logo(),
-        note="Logo del titolo come sulla locandina; bordo, estrusione e ombra compresi.")
+        note="Logo del titolo (tools/fxui/logo.py): tasti CTRL e ALT, REVENGE! a spray; contorno, rilievo e colature compresi.")
     put("subtitle", "title_subtitle.png", make_subtitle(),
-        note="Sottotitolo arancio, da centrare sotto il logo (2-4 px sotto).")
+        note="Sottotitolo TARANTO · 2087 fra due trattini, da centrare sotto il logo (2-4 px sotto).")
     put("stage_card_1", "stage_card_1.png", make_stage_card(),
         note="Cartello d'inizio del livello 1 ('1' oro, punto arancio), da centrare sullo schermo.")
     put("msg_zone_clear", "msg_zone_clear.png", make_msg("ZONA LIBERATA"), note="Fine del livello.")

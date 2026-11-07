@@ -1,0 +1,127 @@
+{
+ "nota": "schermata del titolo «Il tetto»: piani e posizioni (tools/ambienti/titolo.py)",
+ "schermo": [
+  480,
+  270
+ ],
+ "base": "base.png",
+ "emis": "base_emis.png",
+ "torre_emis": "torre_emis.png",
+ "gig": {
+  "png": "gig.png",
+  "normali": "gig_normali.png",
+  "cyan": "gig_cyan.png",
+  "pos": [
+   38,
+   84
+  ],
+  "piedi": [
+   78,
+   264
+  ]
+ },
+ "panni": {
+  "png": "panni.png",
+  "x": 121,
+  "y": 125,
+  "w": 90,
+  "h": 51,
+  "fotogrammi": 8,
+  "fps": 8
+ },
+ "logo": {
+  "pos": [
+   83,
+   6
+  ]
+ },
+ "sottotitolo": {
+  "cx": 182,
+  "y": 89
+ },
+ "menu": {
+  "cx": 352,
+  "y": 204,
+  "passo": 13
+ },
+ "maxischermo": [
+  350,
+  157,
+  385,
+  188
+ ],
+ "stendino": [
+  [
+   70,
+   129
+  ],
+  [
+   78,
+   131
+  ],
+  [
+   86,
+   134
+  ],
+  [
+   94,
+   135
+  ],
+  [
+   102,
+   137
+  ],
+  [
+   110,
+   138
+  ],
+  [
+   118,
+   139
+  ],
+  [
+   126,
+   140
+  ],
+  [
+   134,
+   140
+  ],
+  [
+   142,
+   140
+  ],
+  [
+   150,
+   140
+  ],
+  [
+   158,
+   139
+  ],
+  [
+   166,
+   138
+  ],
+  [
+   174,
+   137
+  ],
+  [
+   182,
+   135
+  ],
+  [
+   190,
+   133
+  ],
+  [
+   198,
+   131
+  ],
+  [
+   206,
+   128
+  ]
+ ]
+}

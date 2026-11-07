@@ -4,18 +4,18 @@
   "logo": {
     "image": "title_logo.png",
     "size": [
-      248,
-      89
+      199,
+      80
     ],
-    "note": "Logo del titolo come sulla locandina; bordo, estrusione e ombra compresi."
+    "note": "Logo del titolo (tools/fxui/logo.py): tasti CTRL e ALT, REVENGE! a spray; contorno, rilievo e colature compresi."
   },
   "subtitle": {
     "image": "title_subtitle.png",
     "size": [
-      120,
+      155,
       13
     ],
-    "note": "Sottotitolo arancio, da centrare sotto il logo (2-4 px sotto)."
+    "note": "Sottotitolo TARANTO · 2087 fra due trattini, da centrare sotto il logo (2-4 px sotto)."
   },
   "stage_card_1": {
     "image": "stage_card_1.png",
