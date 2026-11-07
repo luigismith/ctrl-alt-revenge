@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_t4_naso",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "il terzo tasto, vignetta MD-T4 (di lato, ferma, stacco su CANC): GIG piegato sul banco preme CANC col naso. SUONO: clic, poi un tuono lontano. Nessuno ride. Dopo una pausa la camera si stringe sulla tastiera finché i tasti riempiono lo schermo: è il raccordo con MP11, che si apre a spray (copione ricordo_2064). Il lettore può tenere la camera ferma per la prima metà.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.6,
+  "centro_a": [
+   313,
+   195
+  ]
+ },
+ "colori": 91,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di GIG e dal nostro murale MD-T1; ridotto in pixel art dai nostri script"
+}

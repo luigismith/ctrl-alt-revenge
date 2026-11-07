@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_t2_mano",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "il terzo tasto, vignetta MD-T2 (dettaglio, stacco su CTRL): la mano destra di GIG sulla tastiera del padre. Il giocatore preme CTRL e il mignolo scende, poi ALT e anche il pollice; le dita restano giù. Limite: nella base il pollice non preme un tasto, il gesto si legge dalle dita allargate. La camera scivola piano verso il mignolo; poi MD-T3.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.1,
+  "centro_a": [
+   210,
+   165
+  ]
+ },
+ "colori": 89,
+ "fonte": "ChatGPT (OpenAI), dal nostro murale MD-T1; ridotto in pixel art dai nostri script"
+}

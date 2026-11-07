@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_r1_muro",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "rinforzi, vignetta MD-R1 (dal basso): GIG in piedi sul muro del cimitero, accanto al cancello incatenato, il cielo che si chiude e le prime gocce. Nessuna battuta. La camera sale piano verso GIG; poi stacco su MD-R2.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.1,
+  "centro_a": [
+   270,
+   125
+  ]
+ },
+ "colori": 93,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di GIG e dai murales MP06 e MD-P2; ridotto in pixel art dai nostri script"
+}

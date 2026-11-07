@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_p2_viale",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "pignoramento, vignetta MD-P2 (campo lungo, dopo il dettaglio della catena MD-P1): passi sulla ghiaia, GIG di spalle davanti al cancello chiuso; dal viale arrivano il rider che corre avanti e il messo col tablet. Spinta lenta verso i due. Poi lo stacco sul primo piano del messo, che legge l'atto.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.12,
+  "centro_a": [
+   220,
+   150
+  ]
+ },
+ "colori": 89,
+ "fonte": "ChatGPT (OpenAI), dai nostri render 3D di GIG, del messo e del rider e dal nostro murale MP06; ridotto in pixel art dai nostri script"
+}

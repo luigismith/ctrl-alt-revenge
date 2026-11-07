@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_t3_canc",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "il terzo tasto, vignetta MD-T3 (dettaglio, stacco dopo ALT): la tastiera come una strada lunghissima, e in fondo, lontanissimo, il tasto CANC nella luce del lucernario. La camera corre piano verso il tasto. Poi il primo piano gig_spento sopra la vignetta, che sospira dal naso; il giocatore preme CANC e si passa a MD-T4.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.25,
+  "centro_a": [
+   340,
+   110
+  ]
+ },
+ "colori": 91,
+ "fonte": "ChatGPT (OpenAI), dal nostro murale MD-T2; ridotto in pixel art dai nostri script"
+}

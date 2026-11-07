@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_p1_catena",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "pignoramento, vignetta MD-P1 (dettaglio, spray sul gioco fermo): la catena nuova e il lucchetto rosso degli Esattori sul cancello laterale di San Brunone. La camera si stringe piano sul lucchetto; poi stacco su MD-P2.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.12,
+  "centro_a": [
+   256,
+   185
+  ]
+ },
+ "colori": 88,
+ "fonte": "ChatGPT (OpenAI), dal nostro murale MD-P2; ridotto in pixel art dai nostri script"
+}

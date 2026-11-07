@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_p4_laser",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "pignoramento, vignetta MD-P4 (dettaglio, stacco da MD-P3): la linea rossa della penna del messo arriva da sinistra sull'avambraccio sinistro di GIG, spento. Bip; il punto rosso resta acceso. La camera si stringe piano sul punto. Nessuna battuta; poi MD-P5 a spray.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.15,
+  "centro_a": [
+   250,
+   150
+  ]
+ },
+ "colori": 92,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D del braccio di GIG; ridotto in pixel art dai nostri script"
+}

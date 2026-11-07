@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_e3_anelli",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "copione tere, vignetta MD-E3 (stacco dopo il primo piano gig_ciano): il primo cyan del prologo sul braccio. Gli anelli si accendono dal gomito al polso (l'emissivo pulsa), la camera scivola dal gomito alla mano che si chiude. SUONO: ronzio che sale, uno scatto per anello.",
+  "zoom_da": 1.15,
+  "centro_da": [
+   330,
+   140
+  ],
+  "zoom_a": 1.25,
+  "centro_a": [
+   150,
+   160
+  ]
+ },
+ "colori": 91,
+ "fonte": "ChatGPT (OpenAI), dal nostro murale MD-T1; ridotto in pixel art dai nostri script"
+}

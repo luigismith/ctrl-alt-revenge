@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_t1_banco",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "il terzo tasto, vignetta MD-T1 (mezza figura, spray sul gioco): GIG fradicio al banco, nella luce grigia del lucernario, infila il cavo nello sportello del braccio morto; sul banco la tastiera del padre. Nessuna battuta: SUONO della pioggia sul vetro e dello spinotto. La camera si stringe piano sullo spinotto; il giocatore preme CTRL e si passa a MD-T2.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.1,
+  "centro_a": [
+   300,
+   185
+  ]
+ },
+ "colori": 90,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di GIG e dal nostro murale MP11; ridotto in pixel art dai nostri script"
+}

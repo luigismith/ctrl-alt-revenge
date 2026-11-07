@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_p3_tre",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "pignoramento, vignetta MD-P3 (mezza figura, dopo i primi piani di «Non risulta»): il messo col tablet e la penna, il rider che aspetta, GIG col braccio sinistro che pende. Scivola piano verso il braccio morto. Battute del MESSO, a pressione, col primo piano sopra: «Abbonamento scaduto…» e «Procedo alla marcatura.» Poi lo stacco sul dettaglio del laser, MD-P4.",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 1.1,
+  "centro_a": [
+   300,
+   170
+  ]
+ },
+ "colori": 92,
+ "fonte": "ChatGPT (OpenAI), dai nostri render 3D di GIG, del messo e del rider; ridotto in pixel art dai nostri script"
+}
