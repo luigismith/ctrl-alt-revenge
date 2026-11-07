@@ -47,6 +47,7 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
 - **Coerenza, prima di tutto.** Luigi: "mantenere riferimenti alla città e alle ambientazioni, deve essere tutto coerente con la storia e col passare degli anni".
   - Ogni livello, sfondo, insegna, testo, oggetto e suono deve essere coerente con Taranto e i suoi luoghi veri, con la storia e con le sue epoche (le date sono nella cronologia). Deve esserlo anche con età, date, ore, meteo e luna di ogni scena.
   - I riferimenti sono `docs/lore/cronologia.md` e `docs/lore/ricerca-taranto.md`. Prima di disegnare o scrivere qualcosa di nuovo, controllali.
+  - **Si deve capire che siamo nel futuro.** Luigi, 7 novembre 2026, guardando lo slice: «vedo delle ape car, delle fiat 500... ok che ce n'è qualcuna, ma non così tante... devono esserci elementi del futuro narrato». Taranto resta riconoscibile, ma ogni ambientazione deve mostrare il suo anno con gli elementi della storia e della cronologia: veicoli, insegne, schermi, ARIA+, droni, SIDERA. Le cose di oggi ci possono essere, ma poche e consumate. Lo slice fatto il 7 novembre resta com'è.
 
 ## Storia privata
 
