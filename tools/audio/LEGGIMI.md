@@ -50,6 +50,14 @@ Passi dello script:
 
 Se il giunto non convince, si può imporre il loop con `--loop INIZIO FINE` (in secondi).
 
+I brani radi delle scene parlate non si ripetono mai uguali, e lì nessun giunto è pulito. In quel caso `loop_sorgente.py` prepara prima una sorgente con il giunto pulito:
+
+- il loop si sceglie a battute intere;
+- l'ultima battuta sfuma a potenza costante nella musica che precede l'inizio;
+- con `--taglia` il file parte a metà del brano, per le scene sorelle che usano un'altra parte dello stesso WAV.
+
+Lo script stampa i valori `--loop … --no-refine` da dare a `prepare_music.py`. I comandi usati per il messo stanno nel piano dei brani, nella cartella `suno` del laboratorio.
+
 La musica segnaposto CC0 di oggi si ricrea con `make_placeholder_music.py`. Usa `vgm_stems.py`, che rende i VGM con libgme e ne ricava gli strati, e `vgm_info.py`, che legge loop e note dei VGM.
 
 ## Verifiche in Godot
