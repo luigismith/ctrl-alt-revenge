@@ -64,6 +64,8 @@ func run(tree_root: Node) -> bool:
 	_test_prologue()
 	_test_scene_files()
 	_test_pignoramento()
+	_test_rinforzi()
+	_test_scene_voices()
 	return failures == 0
 
 
@@ -1960,7 +1962,8 @@ func _prologue_room(input_fn: Callable = Callable()) -> Prologue:
 func _prologue_run(max_ticks: int) -> Dictionary:
 	var room := _prologue_room()
 	var out := {"end": -1, "locked_ok": true, "mimmo": -1, "arena": -1, "door": -1, "reboot": -1, "rain_before": false,
-		"rain_fight": false, "fight": -1}
+		"rain_fight": false, "fight": -1, "rinforzi": -1, "results": []}
+	room.prologue_finished.connect(func(r: Dictionary) -> void: (out["results"] as Array).append([room.tick, r]))
 	for t in max_ticks:
 		room._sim_tick()
 		room._follow_camera()
@@ -1975,6 +1978,8 @@ func _prologue_run(max_ticks: int) -> Dictionary:
 			out["rain_fight"] = room.raining
 		if room.raining and room.arena == null and out["arena"] < 0:
 			out["rain_before"] = true
+		if room.seen_rinforzi and out["rinforzi"] < 0:
+			out["rinforzi"] = t
 		if room.door_closed and out["door"] < 0:
 			out["door"] = t
 		if room.rebooted and out["reboot"] < 0:
@@ -1983,8 +1988,13 @@ func _prologue_run(max_ticks: int) -> Dictionary:
 			out["end"] = t
 			break
 	out["raining"] = room.raining
-	out["unlocked"] = not room.player.arm_locked
 	out["hash"] = room.state_hash()
+	# Dopo la fine la scritta resta END_HOLD tick, poi la partita passa alla fine della demo, una volta.
+	var end_tick := room.tick
+	for t in Prologue.END_HOLD + 30:
+		room._sim_tick()
+	out["end_tick"] = end_tick
+	out["unlocked"] = not room.player.arm_locked
 	_free_room(room)
 	return out
 
@@ -2001,10 +2011,14 @@ func _test_prologue() -> void:
 	check(a["locked_ok"], "Prologo: fino al riavvio il braccio sinistro è bloccato e la Spinta non c'è")
 	check(not a["rain_before"] and a["rain_fight"] and a["raining"], "Prologo: piove dall'arrivo degli Esattori (decisione 54)",
 		"prima %s, allo scontro %s, alla fine %s" % [a["rain_before"], a["rain_fight"], a["raining"]])
+	check(a["rinforzi"] > a["arena"] and a["rinforzi"] < a["door"],
+		"Prologo: dopo lo scontro, sul muro del cimitero, i rinforzi", "arena %d, muro %d, porta %d" % [a["arena"], a["rinforzi"], a["door"]])
 	check(a["arena"] < a["door"] and a["door"] < a["reboot"] and a["unlocked"],
 		"Prologo: nel garage la porta si chiude, poi il riavvio sblocca il braccio", "porta %d, riavvio %d" % [a["door"], a["reboot"]])
 	check(a["end"] > a["reboot"] and a["end"] - a["reboot"] < Prologue.DOOR_BREAK,
 		"Prologo: dal lucernario sul tetto prima che la porta ceda, ed è la fine", "riavvio %d, fine %d" % [a["reboot"], a["end"]])
+	var res: Array = a["results"]
+	check(res.size() == 1 and int(res[0][0]) == int(a["end_tick"]) + Prologue.END_HOLD and int(res[0][1]["ticks"]) == int(a["end_tick"]) 		and bool(res[0][1]["prologue"]), "Prologo: la scritta della fine resta 4 s, poi una volta sola la fine della demo", str(res))
 	var b := _prologue_run(9000)
 	check(a["end"] == b["end"] and a["hash"] == b["hash"], "Prologo: due giri uguali finiscono allo stesso tick e nello stesso stato", "%d / %d" % [a["end"], b["end"]])
 	# Con GIG ancora dentro quando la porta cede, si riparte dal banco.
@@ -2019,6 +2033,81 @@ func _test_prologue() -> void:
 		moved = moved or room.player.px != x.x
 	check(moved and room.player.px == x.x and room.player.py == x.y and room.door_t > Prologue.DOOR_BREAK - 10,
 		"Prologo: se la porta cede con GIG nel garage, si riparte dal banco", "x %d (banco %d), porta %d" % [room.player.px, x.x, room.door_t])
+	_free_room(room)
+
+
+## Le voci delle battute (SceneVoices): un manifest finto in user://. Una voce si usa solo se
+## testo_sha1 torna con il testo e se il file c'è; altrimenti la battuta resta muta.
+func _test_scene_voices() -> void:
+	var root := "user://test_voci"
+	DirAccess.make_dir_recursive_absolute(root + "/finto")
+	var testo := "Una battuta di prova, con gli accenti: è così."
+	var man := {"formato": 1, "battute": {
+		"scena/giusta": {"file": "scena/giusta.ogg", "durata_s": 1.0, "testo_sha1": testo.sha1_text(), "inviluppo": [0, 50, 90]},
+		"scena/vecchia": {"file": "scena/vecchia.ogg", "durata_s": 1.0, "testo_sha1": "0000", "inviluppo": [50]}}}
+	var f := FileAccess.open(root + "/finto/manifest.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(man))
+	f.close()
+	SceneVoices.root_override = ProjectSettings.globalize_path(root)
+	SceneVoices.clear_cache()
+	check(SceneVoices.dir_of("finto") != "", "Voci: il manifest si trova")
+	check(SceneVoices.voice("finto", "scena", "vecchia", testo).is_empty(), "Voci: una voce vecchia (sha1 diverso) resta muta")
+	check(SceneVoices.voice("finto", "scena", "giusta", testo).is_empty(), "Voci: senza il file OGG la battuta resta muta")
+	check(SceneVoices.voice("finto", "scena", "manca", testo).is_empty(), "Voci: una battuta senza voce resta muta")
+	check(SceneVoices.dir_of("nessuno") == "" or SceneVoices.dir_of("nessuno").ends_with("/nessuno"), "Voci: un capitolo senza voci")
+	SceneVoices.root_override = ""
+	SceneVoices.clear_cache()
+	DirAccess.remove_absolute(root + "/finto/manifest.json")
+	DirAccess.remove_absolute(root + "/finto")
+	DirAccess.remove_absolute(root)
+
+
+## I rinforzi al muro: GIG in cima al muro del cimitero chiede la scena; la scena recita da sola, senza
+## battute, con la simulazione ferma; i rider restano sotto il muro, GIG riparte da dov'era.
+func _test_rinforzi() -> void:
+	SceneData.clear_cache()
+	var sd := SceneData.load_scene(Prologue.RINFORZI)
+	check(sd.errors.is_empty() and sd.space == "stanza" and sd.rif == "h" and sd.line_ids().is_empty(),
+		"Rinforzi: il copione è valido, nel mondo platform e senza battute", "; ".join(sd.errors))
+	var room := _prologue_room()
+	var asked := false
+	for t in 6000:
+		room._sim_tick()
+		room._follow_camera()
+		if room.seen_rinforzi:
+			asked = str(room._scene_request.get("id", "")) == Prologue.RINFORZI
+			break
+	check(asked and room._on_wall_top() and room.player.facing == 1, "Rinforzi: in cima al muro la stanza chiede la scena")
+	if not asked:
+		_free_room(room)
+		return
+	var px := room.player.px
+	var py := room.player.py
+	var sim_tick := room.tick
+	room._start_scene()
+	var sp := room.scene
+	check(sp != null and sp.holds_sim(), "Rinforzi: la scena parte")
+	if sp == null:
+		_free_room(room)
+		return
+	var h := Vector2(room.grid.marks["h"][0])
+	var g0 := Vector2((sp.puppets["gig"] as ScenePuppet).px, (sp.puppets["gig"] as ScenePuppet).py)
+	check(g0.distance_to(Vector2(room.player.sprite_anchor())) < 1.0, "Rinforzi: la comparsa di GIG parte dal GIG del gioco",
+		"%s / %s" % [g0, room.player.sprite_anchor()])
+	var frames := 0
+	while sp.holds_sim() and frames < 4000:
+		room._scene_frame()
+		frames += 1
+	check(not sp.holds_sim() and frames > 300 and frames < 1200, "Rinforzi: la scena finisce da sola, in automatico", "%d fotogrammi" % frames)
+	check(room.tick == sim_tick and room.player.px == px and room.player.py == py, "Rinforzi: durante la scena la simulazione resta ferma")
+	var under := 0
+	for p in room._extras:
+		if is_instance_valid(p) and absf(p.py - h.y) < 1.0 and p.px > h.x - 80 and p.px < h.x + Prologue.RINFORZI_TOP.x:
+			under += 1
+	check(under == 3, "Rinforzi: a scena finita i tre rider restano al cancello, sotto il muro", "%d" % under)
+	for i in ScenePlayer.OUTRO + 2:
+		sp.tick()
+	check(room.scene == null and is_equal_approx(room.zoom, 1.0), "Rinforzi: le bande escono e la telecamera torna quella del gioco")
 	_free_room(room)
 
 

@@ -1,11 +1,13 @@
 class_name DemoEndScreen
 extends Control
-## Fine della demo: punteggio, tempo e ringraziamento. Un tasto porta ai crediti.
+## Fine della demo: punteggio, tempo e ringraziamento. Un tasto porta ai crediti. Dopo il prologo
+## (`prologue`) niente punteggio: il tempo e il capitolo che viene dopo.
 
 signal done
 
 var score: int = 0
 var ticks: int = 0
+var prologue: bool = false
 var _t: int = 0
 var _text := Color8(247, 232, 189)
 var _gold := Color8(255, 226, 122)
@@ -38,11 +40,18 @@ func _draw() -> void:
 		draw_rect(Rect2(0, 188 + i * 6, View.W, 3), Color8(24, 15, 44))
 	if not UiArt.draw_centered(self, "msg_demo_end", View.CX, 50):
 		UiFont.draw_text(self, Vector2(View.CX, 50), "FINE DELLA DEMO", _text, 2, 1, UiArt.color("accent_red", Color8(122, 23, 15)))
-	UiFont.draw_text(self, Vector2(View.CX, 100), "ZONA LIBERATA: SOTTO LA LINEA", UiArt.color("text_dim", Color8(207, 174, 116)), 1, 1)
-	UiFont.draw_text(self, Vector2(View.CX - 72, 127), "PUNTEGGIO", _text)
-	UiFont.draw_text(self, Vector2(View.CX + 72, 127), "%06d" % score, _gold, 1, 2)
-	UiFont.draw_text(self, Vector2(View.CX - 72, 143), "TEMPO", _text)
-	UiFont.draw_text(self, Vector2(View.CX + 72, 143), format_time(ticks), _gold, 1, 2)
+	var dim := UiArt.color("text_dim", Color8(207, 174, 116))
+	if prologue:
+		UiFont.draw_text(self, Vector2(View.CX, 100), "PROLOGO COMPLETATO", dim, 1, 1)
+		UiFont.draw_text(self, Vector2(View.CX - 72, 127), "TEMPO", _text)
+		UiFont.draw_text(self, Vector2(View.CX + 72, 127), format_time(ticks), _gold, 1, 2)
+		UiFont.draw_text(self, Vector2(View.CX, 150), "Prossimamente: capitolo 1, I tetti dei Tamburi", dim, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
+	else:
+		UiFont.draw_text(self, Vector2(View.CX, 100), "ZONA LIBERATA: SOTTO LA LINEA", dim, 1, 1)
+		UiFont.draw_text(self, Vector2(View.CX - 72, 127), "PUNTEGGIO", _text)
+		UiFont.draw_text(self, Vector2(View.CX + 72, 127), "%06d" % score, _gold, 1, 2)
+		UiFont.draw_text(self, Vector2(View.CX - 72, 143), "TEMPO", _text)
+		UiFont.draw_text(self, Vector2(View.CX + 72, 143), format_time(ticks), _gold, 1, 2)
 	UiFont.draw_text(self, Vector2(View.CX, 180), "Grazie per aver giocato!", _text, 1, 1, Color(0, 0, 0, 0), UiFont.SHADOW, true)
 	if (_t / 20) % 2 == 0 and _t > 45:
 		UiFont.draw_text(self, Vector2(View.CX, 230), "PREMI ATTACCO", _gold, 1, 1)

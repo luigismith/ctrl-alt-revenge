@@ -2,8 +2,8 @@ extends RefCounted
 ## Sequenza della galleria visiva (vedi ui_gallery.gd).
 
 const STEP := 90
-## Schermate mostrate (0-6); dopo l'ultima la galleria chiude il gioco.
-const PHASES := 7
+## Schermate mostrate (0-7); dopo l'ultima la galleria chiude il gioco.
+const PHASES := 8
 
 var _t: int = 0
 var _screen: Node
@@ -78,6 +78,15 @@ func _show(root: Node, phase: int) -> void:
 			var d := DemoEndScreen.new()
 			d.score = 2840
 			d.ticks = 4134
+			layer.add_child(d)
+			_screen = layer
+			root.add_child(layer)
+		7:
+			_clear()
+			var layer := CanvasLayer.new()
+			var d := DemoEndScreen.new()
+			d.prologue = true
+			d.ticks = 5480
 			layer.add_child(d)
 			_screen = layer
 			root.add_child(layer)

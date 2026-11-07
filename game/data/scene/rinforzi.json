@@ -1,0 +1,44 @@
+{
+ "formato": 1,
+ "id": "rinforzi",
+ "nota": "I rinforzi al muro (prologo; sceneggiatura, «I rinforzi al muro»): GIG è sul muro del cimitero, accanto al cancello; i rider chiamati dal messo arrivano di corsa dal viale, si fermano sotto il muro con la guardia alta; primo piano di GIG, muto; GIG si volta verso i Tamburi. Coordinate rispetto al cartello h, ai piedi del muro (la cima è a dy -120, fra dx +70 e +130). Senza battute. Regia proposta da Claude il 7 novembre 2026, da rivedere in gioco.",
+ "spazio": "stanza",
+ "rif": "h",
+ "battute": "",
+ "musica": "rinforzi",
+ "attori": {
+  "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "x": 100, "y": -120, "verso": 1,
+   "nome": "GIG", "colore": "#e8c07a", "primo_piano": "gig_spento"},
+  "rider_1": {"tipo": "rider", "x": -290, "y": 0, "verso": 1, "anim": "walk", "variante": 0, "resta": true},
+  "rider_2": {"tipo": "rider", "x": -340, "y": 0, "verso": 1, "anim": "walk", "variante": 1, "resta": true},
+  "rider_3": {"tipo": "rider", "x": -385, "y": 0, "verso": 1, "anim": "walk", "variante": 2, "resta": true}
+ },
+ "esito": {
+  "gig": {"verso": 1}
+ },
+ "passi": [
+  {"fai": "anim", "chi": "gig", "anim": "idle"},
+  {"fai": "attendi", "tick": 20},
+
+  {"fai": "inquadra", "centro": [-20, -70], "zoom": 1},
+  {"fai": "camera", "centro": [30, -75], "zoom": 1, "tick": 120, "aspetta": false},
+  {"fai": "cammina", "chi": "rider_3", "a": [-44, 0], "vel": 3.0, "aspetta": false},
+  {"fai": "cammina", "chi": "rider_2", "a": [-2, 0], "vel": 3.0, "aspetta": false},
+  {"fai": "attendi", "tick": 10},
+  {"fai": "verso", "chi": "gig", "verso": -1},
+  {"fai": "cammina", "chi": "rider_1", "a": [40, 0], "vel": 2.8},
+  {"fai": "attendi", "tick": 20},
+
+  {"fai": "inquadra", "centro": [20, -70], "zoom": 2},
+  {"fai": "attendi", "tick": 40},
+
+  {"fai": "primo_piano", "chi": "gig", "pieno": true, "tick": 80},
+
+  {"fai": "inquadra", "su": "gig", "alto": 60, "zoom": 2},
+  {"fai": "attendi", "tick": 16},
+  {"fai": "verso", "chi": "gig", "verso": 1},
+  {"fai": "attendi", "tick": 12},
+  {"fai": "camera", "su": "gig", "alto": 60, "scarto": [150, 10], "zoom": 1, "tick": 80},
+  {"fai": "attendi", "tick": 10}
+ ]
+}

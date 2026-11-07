@@ -12,6 +12,10 @@ extends TestRoom
 ## murales di Totò, che arrivano con la grafica. Nessuna battuta della sceneggiatura sta in questo
 ## file, che è pubblico.
 
+## Il prologo è finito e GIG è sul tetto: dopo END_HOLD tick (o ATTACCO dopo END_SKIP) la partita passa
+## alla fine della demo. `result`: {"ticks": il tick dell'arrivo, "prologue": true}.
+signal prologue_finished(result: Dictionary)
+
 const PROLOGUE_MAP := "res://data/platform/prologo.txt"
 ## La grafica: per ora il cimitero (tools/ambienti/componi_prologo.py); la fuga e il garage in grigio.
 const PROLOGUE_ART := "res://assets/env/prologo/layers.json"
@@ -51,6 +55,13 @@ const DOOR_BANG := 60
 const CHECKPOINT_SIGNS: Array[String] = ["e", "f", "i", "j"]
 ## La scena nel motore del pignoramento (decisione 68): game/data/scene/pignoramento.json.
 const PIGNORAMENTO := "pignoramento"
+## I rinforzi al muro: la scena parte quando GIG sta in piedi sulla cima del muro del cimitero, che
+## rispetto al cartello h va da dx +70 a +130, a dy -120 (sceneggiatura, «I rinforzi al muro»).
+const RINFORZI := "rinforzi"
+const RINFORZI_TOP := Vector3i(70, 130, -120)
+## La fine: la scritta resta END_HOLD tick (4 s), ATTACCO o SALTO la chiudono dopo END_SKIP.
+const END_HOLD := 240
+const END_SKIP := 60
 
 const C_VIGNETTE := Color8(18, 16, 24)
 const C_INK := Color8(240, 232, 210)
@@ -64,11 +75,17 @@ const GARAGE_INSIDE := Rect2(300 * 20, 10 * 20, 41 * 20, 13 * 20)
 var checkpoint: int = -1
 var rebooted: bool = false
 var finished: bool = false
+## Tick passati dalla fine, e il tick dell'arrivo sul tetto. Non entrano nell'hash: sono il passaggio
+## alla schermata di fine, non la simulazione.
+var end_t: int = 0
+var end_tick: int = 0
 ## Vignetta aperta ("" = nessuna) e tick da quando è aperta.
 var vignette: String = ""
 var vignette_t: int = 0
 var _after_vignette: String = ""
 var seen_mimmo: bool = false
+## La scena dei rinforzi è già passata. È solo disegno: non entra nell'hash, come la scena stessa.
+var seen_rinforzi: bool = false
 ## Il riavvio: 0 = non cominciato, 1-3 = tasti già premuti, 4 = fatto.
 var reboot_step: int = 0
 var door_closed: bool = false
@@ -136,6 +153,7 @@ func _reset() -> void:
 		weather.set_rain(raining, true)
 	vignette = ""
 	finished = false
+	end_t = 0
 	player.arm_locked = not rebooted
 	player.boosts_left = player.boosts_max()
 	_set_door(cp >= CHECKPOINT_SIGNS.find("j"))
@@ -169,6 +187,11 @@ func _set_door(closed: bool) -> void:
 
 func _stage_tick(frame: InputFrame) -> InputFrame:
 	if finished:
+		end_t += 1
+		if end_t == END_HOLD or end_t > END_SKIP and end_t < END_HOLD and (
+				frame.was_pressed(InputFrame.ATTACK) or frame.was_pressed(InputFrame.JUMP)):
+			end_t = END_HOLD + 1
+			prologue_finished.emit({"ticks": end_tick, "prologue": true})
 		return InputFrame.new()
 	if vignette != "":
 		vignette_t += 1
@@ -233,9 +256,24 @@ func _stage_after_step() -> void:
 			_on_event("door_break")
 			if _inside_garage():
 				_reset()
+	if not seen_rinforzi and on_ground and _on_wall_top():
+		seen_rinforzi = true
+		var poses := {"gig": scene_pose_player("h")}
+		player.facing = 1
+		request_scene(RINFORZI, poses)
 	if grid.marks.has("Z") and player.py <= grid.marks["Z"][0].y and player.px >= grid.marks["Z"][0].x - 40:
 		finished = true
+		end_t = 0
+		end_tick = tick
 		_on_event("prologue_end")
+
+
+## GIG è in piedi sulla cima del muro del cimitero, accanto al cancello chiuso.
+func _on_wall_top() -> bool:
+	if not grid.marks.has("h"):
+		return false
+	var h: Vector2i = grid.marks["h"][0]
+	return player.py == h.y + RINFORZI_TOP.z and player.px >= h.x + RINFORZI_TOP.x and player.px <= h.x + RINFORZI_TOP.y
 
 
 func _finish_reboot() -> void:
@@ -491,7 +529,9 @@ func _draw_stage_hud(h: Control) -> void:
 	if finished:
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, 0.6))
 		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 - 16), "FINE DEL PROLOGO", C_CYAN, 2, 1)
-		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 14), "poi il capitolo 1, I tetti dei Tamburi · START per il titolo", C_DIM, 1, 1)
+		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 14), "poi il capitolo 1, I tetti dei Tamburi", C_DIM, 1, 1)
+		if end_t > END_SKIP and (end_t / 20) % 2 == 0:
+			UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 40), "ATTACCO per continuare", C_CYAN, 1, 1)
 
 
 func _draw_reboot_prompt(h: Control) -> void:

@@ -134,7 +134,15 @@ func _start_level() -> void:
 
 ## Il prologo in grigio: gira sul motore della stanza di prova.
 func _start_prologue() -> void:
-	_start_room(Prologue.new())
+	var p := Prologue.new()
+	_start_room(p)
+	p.prologue_finished.connect(func(result: Dictionary) -> void:
+		if Game.options.quit_at_end:
+			print("Prologo finito: tick %d" % int(result.get("ticks", 0)))
+			print("DONE")
+			Game.quit_clean(0)
+			return
+		_go(func() -> void: _show_demo_end(result)))
 
 
 ## La stanza di prova in grigio: ESC o START torna al titolo.
@@ -181,6 +189,7 @@ func _show_demo_end(result: Dictionary) -> void:
 	var d := DemoEndScreen.new()
 	d.score = int(result.get("score", 0))
 	d.ticks = int(result.get("ticks", 0))
+	d.prologue = bool(result.get("prologue", false))
 	var layer := CanvasLayer.new()
 	layer.add_child(d)
 	d.done.connect(func() -> void: _go(_show_credits))

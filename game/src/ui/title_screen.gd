@@ -1,23 +1,23 @@
 class_name TitleScreen
 extends Node2D
 ## Titolo: lo sfondo del livello fermo sotto la pioggia (GIG è in guardia: la strada non deve scorrere), il logo,
-## il sottotitolo e il menu (GIOCA, CREDITI, ESCI; nel browser senza ESCI). Musica "title".
+## il sottotitolo e il menu (PROLOGO, GIOCA, CREDITI, ESCI; nel browser senza ESCI). Il prologo viene
+## prima perché la storia comincia da lì. Musica "title".
 
 signal start_game
 signal show_credits
-## Solo nelle build per PC: la stanza di prova del movimento e il prologo in grigio non vanno
-## nella demo web.
+## Solo nelle build per PC: la stanza di prova del movimento non va nella demo web.
 signal test_room
 signal prologue
 signal quit_game
 
-const ITEMS: PackedStringArray = ["GIOCA", "PROLOGO", "STANZA DI PROVA", "CREDITI", "ESCI"]
+const ITEMS: PackedStringArray = ["PROLOGO", "GIOCA", "STANZA DI PROVA", "CREDITI", "ESCI"]
 ## Punto a terra fra i piedi di GIG sullo schermo.
 const GIG_FEET := Vector2(66, 198)
 
-## Voci del menu. Nel browser ESCI non c'è: chiudere il motore lascerebbe la pagina ferma
-## sull'ultimo fotogramma, senza audio, finché non la si ricarica.
-var _items: PackedStringArray = PackedStringArray(["GIOCA", "CREDITI"]) if OS.has_feature("web") else ITEMS
+## Voci del menu. Nel browser mancano la stanza di prova, che è uno strumento, ed ESCI: chiudere il
+## motore lascerebbe la pagina ferma sull'ultimo fotogramma, senza audio, finché non la si ricarica.
+var _items: PackedStringArray = PackedStringArray(["PROLOGO", "GIOCA", "CREDITI"]) if OS.has_feature("web") else ITEMS
 
 var _backdrop: Backdrop
 var _rain: Rain
