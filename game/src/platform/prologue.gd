@@ -96,6 +96,13 @@ var raining: bool = false
 var _door_cells: Array[Vector2i] = []
 ## Il tempo (solo disegno): il cielo che si chiude, la pioggia, la luce sugli attori.
 var weather: Weather
+## La luce cyan del riavvio: un lampo breve sul GIG del gioco, che si spegne in REBOOT_LIGHT tick.
+## Solo disegno: non entra nell'hash.
+const REBOOT_LIGHT := 34
+var _reboot_light: PointLight2D
+var _reboot_light_t: int = 0
+## I riflessi sul pavimento bagnato dell'arena (solo disegno).
+var _wet: WetFloor
 
 
 func _setup_stage() -> void:
@@ -137,6 +144,10 @@ func _ready() -> void:
 	weather.setup(grid, [GARAGE_INSIDE], 1)
 	weather.attach(self, _view, _room_node)
 	weather.grade_backdrop(backdrop, [_scene_art[0]] if not _scene_art.is_empty() else [])
+	# Sopra il pavimento in profondità (z 1), sotto le ombre (60) e gli attori.
+	_wet = WetFloor.new()
+	_wet.z_index = 2
+	_view.add_child(_wet)
 	_reset()
 
 
@@ -359,11 +370,55 @@ func _event_sound(e: String) -> void:
 func _on_event(e: String) -> void:
 	super._on_event(e)
 	if e == "reboot":
-		# Il braccio riparte: una scarica cyan intorno a GIG.
-		for i in 24:
+		# Il braccio riparte: una scarica intorno a GIG, che va dal bianco al cyan al verde acqua e lascia
+		# la scia, e un lampo di luce cyan su di lui.
+		for i in 34:
 			var a := _spark_rng.randf_range(0.0, TAU)
-			var s := _spark_rng.randf_range(1.0, 3.0)
-			_spark(player.px, player.py - 60, cos(a) * s, sin(a) * s - 0.5, _spark_rng.randi_range(12, 24), C_CYAN)
+			var s := _spark_rng.randf_range(1.2, 3.6) if i < 26 else _spark_rng.randf_range(4.0, 5.5)
+			_spark(player.px, player.py - 60, cos(a) * s, sin(a) * s - 0.5, _spark_rng.randi_range(14, 30), C_CYAN, true)
+		_flash_reboot_light()
+
+
+## Il lampo cyan del riavvio: una PointLight2D sugli attori, accanto al braccio, che si spegne da sola.
+func _flash_reboot_light() -> void:
+	if _reboot_light == null:
+		var g := GradientTexture2D.new()
+		g.fill = GradientTexture2D.FILL_RADIAL
+		g.fill_from = Vector2(0.5, 0.5)
+		g.fill_to = Vector2(1.0, 0.5)
+		g.width = 128
+		g.height = 128
+		var grad := Gradient.new()
+		grad.set_color(0, Color.WHITE)
+		grad.set_color(1, Color(1, 1, 1, 0))
+		g.gradient = grad
+		_reboot_light = PointLight2D.new()
+		_reboot_light.name = "LuceDelRiavvio"
+		_reboot_light.texture = g
+		_reboot_light.texture_scale = 1.5
+		_reboot_light.height = 24.0
+		_reboot_light.color = C_CYAN
+		_reboot_light.blend_mode = Light2D.BLEND_MODE_ADD
+		_reboot_light.range_item_cull_mask = Fighter.LIGHT_MASK_ACTORS
+		_view.add_child(_reboot_light)
+	_reboot_light_t = REBOOT_LIGHT
+	_update_reboot_light()
+
+
+func _update_reboot_light() -> void:
+	if _reboot_light == null:
+		return
+	var k := float(_reboot_light_t) / REBOOT_LIGHT
+	_reboot_light.position = Vector2(player.px + 10 * player.facing, player.py - 56)
+	_reboot_light.energy = 2.2 * k * k
+	_reboot_light.enabled = lights_on and _reboot_light_t > 0
+
+
+func _set_lights(on: bool) -> void:
+	super._set_lights(on)
+	if weather != null:
+		weather.set_lights(on)
+	_update_reboot_light()
 
 
 # ------------------------------------------------------------------ pilota automatico
@@ -489,6 +544,9 @@ func _draw_keyboard(v: Node2D, at: Vector2i) -> void:
 ## "pioggia"), e la sua luce tinge gli attori e il pavimento (solo disegno).
 func _tick_extras() -> void:
 	super._tick_extras()
+	if _reboot_light_t > 0:
+		_reboot_light_t -= 1
+		_update_reboot_light()
 	if weather == null:
 		return
 	if _rain_shown() and not weather.raining:
@@ -500,6 +558,12 @@ func _tick_extras() -> void:
 	if tilt > 0.0:
 		band = Rect2(vr.position.x - 8.0, _floor_y, vr.size.x + 16.0, roundf((ARENA_BAND.y - ARENA_BAND.x) * tilt))
 	weather.tick(vr, zoom, band)
+	if arena != null and tilt > 0.0 and weather.raining:
+		var depth := roundf((View.H - ARENA_BAND.x + 8.0) * tilt)
+		_wet.update(Rect2(vr.position.x - 8.0, _floor_y, vr.size.x + 16.0, depth), weather.density() * tilt,
+				arena.fighters, arena.position, tick)
+	else:
+		_wet.update(Rect2(), 0.0, [], Vector2.ZERO, tick)
 	var tint := weather.actor_tint()
 	_body.modulate = tint
 	_floor_node.modulate = weather.ground_tint()

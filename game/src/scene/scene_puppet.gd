@@ -30,6 +30,7 @@ var _shadow: Node2D
 var _shadow_def: FxLayer.FxDef
 var _shadow_w: int = 0
 var _mark_node: Node2D
+var _mark_glow: Glow
 var _step_parity: bool = false
 var _t: int = 0
 
@@ -62,6 +63,7 @@ func setup(sheet_id: StringName, variant: Dictionary = {}, shadow_def: FxLayer.F
 	_mark_node.z_index = 1
 	_mark_node.draw.connect(_draw_mark)
 	add_child(_mark_node)
+	_mark_glow = Glow.new(_mark_node)
 	anim.play(&"idle")
 
 
@@ -175,6 +177,7 @@ func _draw_shadow() -> void:
 
 
 func _draw_mark() -> void:
+	_mark_glow.clear()
 	if not marked:
 		return
-	ArmMark.draw(_mark_node, ArmMark.offset(anim.frame(), facing), _t)
+	ArmMark.draw(_mark_node, ArmMark.offset(anim.frame(), facing), _t, _mark_glow)

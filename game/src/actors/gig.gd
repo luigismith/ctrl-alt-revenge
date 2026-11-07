@@ -65,6 +65,7 @@ var one_arm: bool = false
 ## Tick rimasti al segno del laser del messo (0 = nessun segno).
 var marked: int = 0
 var _mark_node: Node2D
+var _mark_glow: Glow
 
 var _run_dir: int = 0
 var _last_tap_dir: int = 0
@@ -490,16 +491,18 @@ func sync_visual() -> void:
 		_mark_node.z_index = 1
 		_mark_node.draw.connect(_draw_mark)
 		add_child(_mark_node)
+		_mark_glow = Glow.new(_mark_node)
 	_mark_node.position = body.position
 	_mark_node.queue_redraw()
 
 
 func _draw_mark() -> void:
+	_mark_glow.clear()
 	if marked <= 0 or not body.visible or not visible:
 		return
 	if marked < MARK_BLINK and (marked / 6) % 2 == 1:
 		return
-	ArmMark.draw(_mark_node, ArmMark.offset(anim.frame(), facing), level.tick)
+	ArmMark.draw(_mark_node, ArmMark.offset(anim.frame(), facing), level.tick, _mark_glow)
 
 
 ## Una combo interrotta da un colpo riparte da jab1.

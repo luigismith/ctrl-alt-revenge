@@ -43,13 +43,13 @@ const GUST := 0.05
 ## lunghezze degli sprite; w: larghezza; col: colore; z: ordine di disegno (assoluto). Lo strato "gioco"
 ## ha z 0 nel mondo, subito dopo la stanza dei blocchi, e passa a 61 quando c'è il pavimento dell'arena.
 const LAYERS := [
-	{"name": "lontana", "par": 0.12, "n": 130, "v": [2.8, 3.6], "len": [3, 4, 5], "w": 1,
-		"col": Color(0.74, 0.79, 0.87, 0.30), "z": -95},
-	{"name": "media", "par": 0.45, "n": 100, "v": [4.4, 5.4], "len": [5, 6, 8], "w": 1,
+	{"name": "lontana", "par": 0.12, "n": 200, "v": [2.8, 3.6], "len": [3, 4, 5], "w": 1,
+		"col": Color(0.74, 0.79, 0.87, 0.26), "z": -95},
+	{"name": "media", "par": 0.45, "n": 160, "v": [4.4, 5.4], "len": [5, 6, 8], "w": 1,
 		"col": Color(0.78, 0.83, 0.90, 0.40), "z": -85},
-	{"name": "gioco", "par": 1.0, "n": 70, "v": [6.6, 8.2], "len": [9, 11, 14], "w": 1,
+	{"name": "gioco", "par": 1.0, "n": 115, "v": [6.6, 8.2], "len": [9, 11, 14], "w": 1,
 		"col": Color(0.84, 0.88, 0.95, 0.55), "z": 0},
-	{"name": "vicina", "par": 1.6, "n": 9, "v": [13.0, 16.0], "len": [24, 30, 36], "w": 2,
+	{"name": "vicina", "par": 1.6, "n": 15, "v": [13.0, 16.0], "len": [24, 30, 36], "w": 2,
 		"col": Color(0.88, 0.92, 0.98, 0.26), "z": 1050},
 ]
 const PLAY := 2
@@ -102,13 +102,17 @@ const TINT_GROUND := Color(0.72, 0.76, 0.86)
 ## Come la pioggia cambia i piani dipinti col sole velato (il cimitero): moltiplicatore a pioggia piena,
 ## colore tolto, foschia. Da vicino le cose bagnate si scuriscono ma tengono il colore (il rosa delle
 ## cappelle resta rosa); da lontano spariscono nel grigio chiaro della pioggia. I piani che non sono qui
-## (la fuga, già dipinta con la pioggia) restano come sono.
+## (la fuga, già dipinta con la pioggia) restano come sono. `contrast` riapre i toni che il grigio della
+## pioggia schiaccia (Luigi, 7 novembre 2026: la pioggia più fitta, ma senza perdere il colore).
+## `lamp_band`: le righe del disegno dove stanno i lumini, che lì hanno l'alone (LUMINI_SHADER); fuori
+## dalla fascia lo stesso colore (i riflessi sulle colonne) resta senza.
 const GRADE := {
 	"cielo": {"sky": true},
-	"medio": {"mul": Color(0.80, 0.82, 0.88), "desat": 0.30, "haze": 0.45},
-	"vicino": {"mul": Color(0.74, 0.77, 0.85), "desat": 0.20, "haze": 0.24},
-	"davanti": {"mul": Color(0.64, 0.67, 0.77), "desat": 0.12, "haze": 0.0, "lamps": true},
-	"scena": {"mul": Color(0.78, 0.80, 0.88), "desat": 0.06, "haze": 0.0},
+	"medio": {"mul": Color(0.80, 0.82, 0.88), "desat": 0.26, "haze": 0.40, "contrast": 0.10},
+	"vicino": {"mul": Color(0.74, 0.77, 0.85), "desat": 0.16, "haze": 0.20, "contrast": 0.18},
+	"davanti": {"mul": Color(0.64, 0.67, 0.77), "desat": 0.10, "haze": 0.0, "contrast": 0.24, "lamps": true,
+		"lamp_band": [252, 276]},
+	"scena": {"mul": Color(0.78, 0.80, 0.88), "desat": 0.06, "haze": 0.0, "contrast": 0.20},
 }
 ## Il grigio della pioggia in lontananza: quello del cielo chiuso vicino all'orizzonte.
 const HAZE := Color(0.50, 0.54, 0.61)
@@ -205,17 +209,57 @@ uniform vec3 haze = vec3(0.43, 0.48, 0.56);
 uniform float haze_k = 0.0;
 uniform float lamps = 0.0;
 uniform float glow = 1.0;
+uniform float contrast = 0.0;
 void fragment() {
 	vec3 c = COLOR.rgb;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
 	vec3 g = mix(mix(c, vec3(l), desat) * mul, haze, haze_k);
+	g = clamp((g - 0.40) * (1.0 + contrast) + 0.40, 0.0, 1.0);
 	float lamp = lamps * step(0.85, c.r) * step(0.5, c.g) * step(c.b, 0.56);
 	COLOR.rgb = mix(c, g, k * (1.0 - lamp)) * mix(1.0, glow, lamp);
 }
 """
 
+## L'alone dei lumini, il bagliore finto in pixel art (senza HDR): uno sprite in additivo sopra il
+## piano, con la stessa texture, che somma i texel color fiamma vicini (solo nella fascia `band`), a
+## gradini con la retinatura di Bayer sui texel, così l'alone non scivola quando la telecamera si muove.
+const LUMINI_SHADER := """shader_type canvas_item;
+render_mode blend_add;
+uniform float k = 0.0;
+uniform vec2 band = vec2(252.0, 276.0);
+uniform vec3 tint = vec3(1.0, 0.66, 0.34);
+const float BAYER[16] = float[](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9., 15., 7., 13., 5.);
+const int R = 5;
+void fragment() {
+	vec2 tp = floor(UV / TEXTURE_PIXEL_SIZE);
+	float s = 0.0;
+	if (k > 0.0 && tp.y >= band.x - float(R) && tp.y <= band.y + float(R)) {
+		for (int dy = -R; dy <= R; dy++) {
+			float y = tp.y + float(dy);
+			if (y < band.x || y > band.y) {
+				continue;
+			}
+			for (int dx = -R; dx <= R; dx++) {
+				float d = length(vec2(float(dx), float(dy))) / (float(R) + 0.5);
+				if (d >= 1.0) {
+					continue;
+				}
+				vec4 c = texture(TEXTURE, (vec2(tp.x + float(dx), y) + 0.5) * TEXTURE_PIXEL_SIZE);
+				float lamp = c.a * step(0.85, c.r) * step(0.5, c.g) * step(c.b, 0.56);
+				s += lamp * (1.0 - d) * (1.0 - d);
+			}
+		}
+	}
+	float a = clamp(s * 0.16, 0.0, 0.8) * k;
+	float b = (BAYER[int(mod(tp.y, 4.0)) * 4 + int(mod(tp.x, 4.0))] + 0.5) / 16.0;
+	a = clamp(floor(a * 4.0 + b) / 4.0, 0.0, 1.0);
+	COLOR = vec4(tint, a);
+}
+"""
+
 static var _sky_shader: Shader
 static var _grade_shader: Shader
+static var _lumini_shader: Shader
 
 
 ## Uno strato di gocce: posizioni sullo schermo e il resto, una voce per goccia.
@@ -273,6 +317,7 @@ var _sun: PointLight2D
 var _sky: PointLight2D
 var _sky_mats: Array[ShaderMaterial] = []
 var _grade_mats: Array[ShaderMaterial] = []
+var _lumini_mats: Array[ShaderMaterial] = []
 var _lamp_glow: float = 1.0
 
 
@@ -336,6 +381,8 @@ func grade_backdrop(bd: Backdrop, scene_art: Array = []) -> void:
 			if GRADE.has(l.name):
 				for s in l.sprites:
 					s.material = _material_for(l.name)
+					if GRADE[l.name].has("lamp_band"):
+						_add_lumini(s, GRADE[l.name]["lamp_band"])
 	for s: Variant in scene_art:
 		if s is CanvasItem:
 			(s as CanvasItem).material = _material_for("scena")
@@ -707,6 +754,24 @@ static func _make_splash_atlas() -> Texture2D:
 
 # ------------------------------------------------------------------ cielo, piani e luce
 
+## L'alone dei lumini sopra lo sprite `s` del piano: un figlio con la stessa texture, in additivo.
+func _add_lumini(s: Sprite2D, band: Array) -> void:
+	if _lumini_shader == null:
+		_lumini_shader = Shader.new()
+		_lumini_shader.code = LUMINI_SHADER
+	var m := ShaderMaterial.new()
+	m.shader = _lumini_shader
+	m.set_shader_parameter(&"band", Vector2(float(band[0]), float(band[1])))
+	var h := Sprite2D.new()
+	h.name = "AloneLumini"
+	h.texture = s.texture
+	h.centered = false
+	h.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	h.material = m
+	s.add_child(h)
+	_lumini_mats.append(m)
+
+
 func _material_for(layer_name: String) -> ShaderMaterial:
 	var g: Dictionary = GRADE[layer_name]
 	var m := ShaderMaterial.new()
@@ -726,6 +791,7 @@ func _material_for(layer_name: String) -> ShaderMaterial:
 	m.set_shader_parameter(&"desat", float(g["desat"]))
 	m.set_shader_parameter(&"haze", Vector3(HAZE.r, HAZE.g, HAZE.b))
 	m.set_shader_parameter(&"haze_k", float(g["haze"]))
+	m.set_shader_parameter(&"contrast", float(g.get("contrast", 0.0)))
 	m.set_shader_parameter(&"lamps", 1.0 if g.get("lamps", false) else 0.0)
 	m.set_shader_parameter(&"glow", _lamp_glow)
 	_grade_mats.append(m)
@@ -742,6 +808,9 @@ func _update_materials() -> void:
 		m.set_shader_parameter(&"drift", _t * 0.12)
 	for m in _grade_mats:
 		m.set_shader_parameter(&"k", k)
+	# Con il sole i lumini quasi non si vedono; con la pioggia e il cielo chiuso brillano.
+	for m in _lumini_mats:
+		m.set_shader_parameter(&"k", 0.3 + 0.7 * k)
 
 
 func _build_lights() -> void:

@@ -78,6 +78,8 @@ const C_THIN := Color8(120, 120, 136)
 const C_TEXT := Color8(232, 228, 214)
 const C_DIM := Color8(160, 156, 150)
 const C_CYAN := Color8(64, 232, 255)
+## Il verde acqua dove sbiadiscono le scintille del riavvio (bianco, poi cyan, poi verde acqua).
+const C_TEAL := Color8(52, 196, 168)
 const C_BOX := Color8(255, 80, 80)
 const C_FLOOR := Color8(66, 66, 80)
 const C_FLOOR_LINE := Color8(84, 84, 100)
@@ -189,8 +191,13 @@ var hack_t: int = 0
 ## Quante volte è stato forzato ogni pannello, in questo giro.
 var hacks_done: Dictionary = {}
 var last_hacked: String = ""
-## Scintille della Spinta e degli atterraggi: [x, y, vx, vy, vita, vita iniziale, colore]. Solo disegno.
+## Scintille della Spinta e degli atterraggi: [x, y, vx, vy, vita, vita iniziale, colore, scarica].
+## Le scintille di una scarica (il riavvio) cambiano colore mentre vivono e lasciano la scia. Solo disegno.
 var _sparks: Array = []
+## Gli aloni additivi degli effetti (Glow): scintille, braccio cyan, contatto. Solo disegno.
+var _fx_glow: Glow
+## Le luci accese o spente (F5 nelle build di debug, --no-lights): il tempo, l'arena, i lampi.
+var lights_on: bool = true
 var _spark_rng := RandomNumberGenerator.new()
 
 ## La scena nel motore in corso (decisione 68), o null. La chiede il tratto con request_scene() nel
@@ -265,11 +272,19 @@ func _ready() -> void:
 	_body.centered = false
 	_body.region_enabled = true
 	_body.texture = sheet.texture
+	# Come i combattenti: lo shader con la luce a gradini, e le luci degli attori (il sole e il cielo
+	# del tempo, i lampi) solo se il foglio ha la normal map.
+	var mat := ShaderMaterial.new()
+	mat.shader = Fighter._get_flash_shader()
+	_body.material = mat
+	_body.light_mask = Fighter.LIGHT_MASK_ACTORS if sheet.has_normals else 1
 	_view.add_child(_body)
 	var fx := Node2D.new()
 	fx.z_index = 5
 	fx.draw.connect(func() -> void: _draw_fx(fx))
 	_view.add_child(fx)
+	_fx_glow = Glow.new(fx)
+	lights_on = not Game.options.no_lights
 	# I cartelli sopra tutto il mondo, anche sopra il primo piano della grafica (z 1000).
 	var signs_node := Node2D.new()
 	signs_node.z_index = 1100
@@ -405,6 +420,9 @@ func _physics_process(_delta: float) -> void:
 			_reset()
 		if Input.is_action_just_pressed(&"debug_boxes"):
 			show_boxes = not show_boxes
+		if OS.is_debug_build() and Input.is_action_just_pressed(&"debug_lights"):
+			lights_on = not lights_on
+			_set_lights(lights_on)
 	if input.mode == PlayerInput.Mode.REPLAY and input.replay_finished(tick):
 		replay_done.emit()
 		return
@@ -541,6 +559,7 @@ func _sync_visual() -> void:
 	var f := player.anim.frame()
 	if _body.texture != player.anim.sheet.texture:
 		_body.texture = player.anim.sheet.texture
+		_body.light_mask = Fighter.LIGHT_MASK_ACTORS if player.anim.sheet.has_normals else 1
 	_body.region_rect = Rect2(f.rect)
 	_body.offset = Vector2(-f.anchor)
 	_body.scale = Vector2(player.facing, 1)
@@ -736,6 +755,8 @@ func _open_arena() -> void:
 	arena.camera.min_x = _arena_cam_x
 	arena.camera.max_x = _arena_cam_x
 	arena.camera.x = _arena_cam_x
+	if not lights_on:
+		arena.set_lights(false)
 	var g := arena.player
 	# Prima del riavvio il braccio resta bloccato anche nell'arena: il foglio spento e la sola destra.
 	if player.arm_locked:
@@ -1331,8 +1352,22 @@ func _event_sound(e: String) -> void:
 	Sfx.play_at(s[0], x, 0.05, s[1])
 
 
-func _spark(x: float, y: float, sx: float, sy: float, life: int, color: Color) -> void:
-	_sparks.append([x, y, sx, sy, life, life, color])
+func _spark(x: float, y: float, sx: float, sy: float, life: int, color: Color, burst: bool = false) -> void:
+	_sparks.append([x, y, sx, sy, life, life, color, burst])
+
+
+## Le luci accese o spente: quelle dell'arena qui, il tempo e i lampi nei tratti che li hanno.
+func _set_lights(on: bool) -> void:
+	if arena != null:
+		arena.set_lights(on)
+
+
+## Il colore di una scintilla della scarica a metà vita `u` (0 appena nata, 1 alla fine): bianco, poi
+## cyan, poi verde acqua.
+static func _burst_color(u: float) -> Color:
+	if u < 0.3:
+		return C_TEXT.lerp(C_CYAN, u / 0.3)
+	return C_CYAN.lerp(C_TEAL, (u - 0.3) / 0.7)
 
 
 func _tick_sparks() -> void:
@@ -1348,11 +1383,31 @@ func _tick_sparks() -> void:
 
 
 func _draw_fx(n: Node2D) -> void:
+	_fx_glow.clear()
 	if hack_panel != "" and arena == null:
 		_draw_contact(n)
+	_draw_arm_glow()
 	for s: Array in _sparks:
 		var a := float(s[4]) / float(s[5])
-		# Le scintille cyan sbiadiscono nel bianco, come una scarica.
-		var c: Color = s[6] if a > 0.4 else C_TEXT
+		var burst: bool = s[7]
+		# Le scintille cyan sbiadiscono nel bianco, come una scarica; quelle del riavvio vanno dal bianco
+		# al cyan al verde acqua, con la scia dietro.
+		var c: Color = _burst_color(1.0 - a) if burst else (s[6] if a > 0.4 else C_TEXT)
 		c.a = a
-		n.draw_rect(Rect2(roundf(s[0]), roundf(s[1]), 1 if a < 0.5 else 2, 1 if a < 0.5 else 2), c)
+		var p := Vector2(roundf(s[0]), roundf(s[1]))
+		var big := a >= 0.5
+		if burst:
+			n.draw_line(p, (p - Vector2(s[2], s[3]) * 3.0).round(), Color(c, a * 0.45), 1.0)
+		n.draw_rect(Rect2(p, Vector2(2, 2) if big else Vector2.ONE), c)
+		if s[6] != C_DIM:
+			_fx_glow.halo(p, 3 if big else 2, Color(c, (0.55 if burst else 0.4) * a))
+
+
+## Il braccio cyber acceso (fuori dall'arena, dopo il riavvio): un alone cyan che respira sul pugno.
+func _draw_arm_glow() -> void:
+	if arena != null or not _body.visible or player.anim == null or player.anim.sheet.id != &"gig":
+		return
+	var k := 0.5 + 0.5 * sin(tick * 0.08)
+	_fx_glow.halo(_cyber_fist(), 5, Color(C_CYAN, 0.16 + 0.08 * k))
+	if hack_panel != "":
+		_fx_glow.halo(_cyber_fist(), 8, Color(C_CYAN, 0.35 + 0.15 * sin(tick * 0.6)))

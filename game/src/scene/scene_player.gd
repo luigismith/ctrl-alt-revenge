@@ -129,6 +129,8 @@ var _blur_layer: CanvasLayer
 var _blur: ColorRect
 var _blur_mat: ShaderMaterial
 var _fx: Node2D
+## Gli aloni del laser (solo disegno).
+var _glow: Glow
 
 
 ## Prepara la scena: comparse dalle pose degli attori veri (`poses`: nome → {"x", "y", "verso",
@@ -187,6 +189,7 @@ func _build_layers() -> void:
 	_fx.z_index = 2500
 	_fx.z_as_relative = false
 	_fx.draw.connect(_draw_fx)
+	_glow = Glow.new(_fx)
 
 
 func _add_puppet(actor: String, a: Dictionary, pose: Dictionary) -> void:
@@ -631,12 +634,13 @@ static func _pen_tip(p: ScenePuppet) -> Vector2:
 
 
 func _draw_fx() -> void:
+	_glow.clear()
 	if not _laser.is_empty():
 		var src: ScenePuppet = _laser["src"]
 		var dst: ScenePuppet = _laser["dst"]
-		ArmMark.draw_beam(_fx, _pen_tip(src), dst.arm_point(), t, float(_laser["k"]) / float(_laser["n"]))
+		ArmMark.draw_beam(_fx, _pen_tip(src), dst.arm_point(), t, float(_laser["k"]) / float(_laser["n"]), _glow)
 	for f: Array in _flash:
-		ArmMark.draw_flash(_fx, f[0], int(f[1]))
+		ArmMark.draw_flash(_fx, f[0], int(f[1]), _glow)
 
 
 # ------------------------------------------------------------------ uscita

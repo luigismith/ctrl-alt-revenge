@@ -46,6 +46,8 @@ var shot_t: int = 0
 var shot_hit: bool = false
 var shot_to: Vector2 = Vector2.ZERO
 var _fx_node: Node2D
+## Gli aloni del laser (solo disegno).
+var _glow: Glow
 
 
 func setup_thug(type_id: StringName, lvl: Level, id: int, rng_seed: int) -> void:
@@ -57,6 +59,7 @@ func setup_thug(type_id: StringName, lvl: Level, id: int, rng_seed: int) -> void
 	_fx_node.z_index = 2500
 	_fx_node.draw.connect(_draw_laser)
 	add_child(_fx_node)
+	_glow = Glow.new(_fx_node)
 
 
 func _think() -> void:
@@ -241,17 +244,16 @@ func sync_visual() -> void:
 
 ## Il disegno è nel nodo del messo, che sta nei suoi piedi (position = px, py arrotondati).
 func _draw_laser() -> void:
+	_glow.clear()
 	if not visible:
 		return
 	var feet := Vector2(roundf(px), roundf(py))
 	var a := pen_tip_local() + Vector2(0, -roundf(ph))
 	if act == Act.AIM:
 		var b := Vector2(_lane_end() - feet.x, a.y)
-		ArmMark.draw_beam(_fx_node, a, b, level.tick, float(act_t) / AIM_TICKS)
+		ArmMark.draw_beam(_fx_node, a, b, level.tick, float(act_t) / AIM_TICKS, _glow)
 	elif shot_t > 0:
 		var to := shot_to - feet
-		var k := float(shot_t) / SHOT_TICKS
-		_fx_node.draw_line(a.round(), to.round(), Color(ArmMark.C_MARK, 0.35 * k), 3.0)
-		_fx_node.draw_line(a.round(), to.round(), Color(ArmMark.C_CORE, k), 1.0)
+		ArmMark.draw_shot(_fx_node, a, to, float(shot_t) / SHOT_TICKS, _glow)
 		if shot_hit:
-			ArmMark.draw_flash(_fx_node, to, shot_t)
+			ArmMark.draw_flash(_fx_node, to, shot_t, _glow)
