@@ -99,9 +99,15 @@ def cem_width(name: str) -> int:
 def build_far(basi: Path) -> tuple[np.ndarray, int]:
     """Cielo, torre di SIDERA e cupole sopra gli altiforni: un'immagine sola, quasi ferma."""
     w = cem_width("cielo")
-    base = Image.open(basi / "c01_lontano_v2.jpg")
+    # v3: la torre rossa (decisione 7) e gli schermi bianchi, non più menta; la v2 resta se manca la v3
+    nome = "c01_lontano_v3_torre_rossa.png"
+    base = Image.open(basi / (nome if (basi / nome).exists() else "c01_lontano_v2.jpg")).convert("RGB")
     h = round(base.height * w / base.width)
     out, _ = px.pixelize(base, (w, h), 28)
+    # gli schermi della torre: anche nella v3 tirano al menta; li porto a un bianco caldo
+    rgb = out[..., :3].astype(int)
+    menta = (rgb[..., 1] > rgb[..., 0] + 6) & (rgb[..., 1] > 180)
+    out[menta, :3] = (250, 244, 230)
     return out, h
 
 
