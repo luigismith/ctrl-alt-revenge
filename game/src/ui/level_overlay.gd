@@ -2,14 +2,16 @@ class_name LevelOverlay
 extends Control
 ## Scritte e menu sopra il livello: cartello del livello, freccia "VAI ▶", "ZONA LIBERATA",
 ## menu di pausa e schermata CONTINUA? / GAME OVER. Usa le immagini di game/assets/ui/
-## (stage_card_1, msg_*, go_arrow) e, se mancano, testo con il font dell'interfaccia.
+## (la scheda del capitolo, msg_*, go_arrow) e, se mancano, testo con il font dell'interfaccia.
 ## Disegna e basta: la logica è nel Level.
 
 const PAUSE_ITEMS: PackedStringArray = ["RIPRENDI", "RICOMINCIA", "ESCI AL TITOLO"]
 const CARD_TICKS := 170
 const BANNER_Y := 110
 
-var card_title: String = "1 · SOTTO LA LINEA"
+var card_title: String = "2 · IL WIND DAY"
+## L'immagine della scheda in ui.json, una per capitolo; se manca, si scrive card_title.
+var card_art: String = "stage_card_2"
 var card_ticks: int = 0
 var go_ticks: int = 0
 var clear_ticks: int = -1
@@ -32,8 +34,9 @@ func _ready() -> void:
 	_red = UiArt.color("accent_red", _red)
 
 
-func show_card(title: String) -> void:
+func show_card(title: String, art: String = card_art) -> void:
 	card_title = title
+	card_art = art
 	card_ticks = CARD_TICKS
 
 
@@ -55,7 +58,7 @@ func _draw() -> void:
 		var t := CARD_TICKS - card_ticks
 		var a := clampf(minf(t / 12.0, card_ticks / 12.0), 0.0, 1.0)
 		# Comparsa a gradini (niente semitrasparenze sfumate sui pixel): 0, 1/3, 2/3, pieno.
-		_banner("stage_card_1", card_title, floorf(a * 3.0) / 3.0)
+		_banner(card_art, card_title, floorf(a * 3.0) / 3.0)
 	if go_ticks > 0:
 		_draw_go()
 	if clear_ticks >= 0:

@@ -25,6 +25,14 @@
     ],
     "note": "Cartello d'inizio del livello 1 ('1' oro, punto arancio), da centrare sullo schermo."
   },
+  "stage_card_2": {
+    "image": "stage_card_2.png",
+    "size": [
+      234,
+      27
+    ],
+    "note": "Cartello d'inizio del capitolo 2 ('2' oro, punto arancio), da centrare sullo schermo."
+  },
   "msg_zone_clear": {
     "image": "msg_zone_clear.png",
     "size": [

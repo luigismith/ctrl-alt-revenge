@@ -90,7 +90,7 @@ Argomenti utili, da scrivere dopo `--`:
 | `--autostart` | salta il titolo e parte dal livello |
 | `--stanza` | parte dalla stanza di prova in grigio (anche dal titolo: STANZA DI PROVA) |
 | `--autopilot stanza` | GIG percorre da solo la stanza di prova |
-| `--prologo` | parte dal prologo (anche dal titolo: PROLOGO, solo nelle versioni per PC) |
+| `--prologo` | parte dal prologo (anche dal titolo: NUOVA PARTITA, o CAPITOLI → PROLOGO) |
 | `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 67 s (GIG gioca da solo) |
 | `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |

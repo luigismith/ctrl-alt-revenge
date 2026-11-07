@@ -42,6 +42,12 @@ const STEPS := {
 	"laser": ["da", "a", "punto", "tick", "segno"],
 	# Un evento per chi ospita la scena (per esempio "pioggia").
 	"evento": ["nome"],
+	# Un murale di Totò (SceneMural), da res://assets/murales/<capitolo>/<id>/: "id" come
+	# "<capitolo>/<id>" (o con "capitolo"); "da"/"a" sono l'angolo del riquadro dello schermo nel murale
+	# (se mancano, lo scorrimento o la camera di murale.json) in "tick"; "rivela" (vero) lo dipinge a
+	# spray sopra il gioco in "rivela_tick", se no è uno stacco; "luci" (vero) fa pulsare le luci.
+	# "chiudi": true lo toglie con lo spray all'indietro e torna il gioco. Si aspetta la fine dello spray.
+	"murale": ["id", "capitolo", "da", "a", "tick", "rivela", "rivela_tick", "luci", "chiudi", "aspetta"],
 }
 
 static var _cache: Dictionary = {}
@@ -109,6 +115,14 @@ func _parse(d: Dictionary) -> void:
 		for k: String in st:
 			if k != "fai" and not allowed.has(k):
 				errors.append("passo %d (%s): parametro sconosciuto \"%s\"" % [i, fai, k])
+		if fai == "murale" and not bool((st as Dictionary).get("chiudi", false)):
+			var ci := SceneMural.split_id(st)
+			if ci[0] == "" or ci[1] == "":
+				errors.append("passo %d (murale): manca \"id\" come \"<capitolo>/<id>\"" % i)
+			for k in ["da", "a"]:
+				if (st as Dictionary).has(k) and not ((st[k] is Array) and (st[k] as Array).size() == 2):
+					errors.append("passo %d (murale): \"%s\" vuole [x, y]" % [i, k])
+			continue
 		for k in ["chi", "su", "da", "a"]:
 			if (st as Dictionary).has(k) and (st[k] is String) and not actors.has(str(st[k])):
 				errors.append("passo %d (%s): attore sconosciuto \"%s\"" % [i, fai, st[k]])

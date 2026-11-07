@@ -10,7 +10,8 @@ La cartella `portraits/` non nasce da qui: i ritratti 32×32 li fa la pipeline d
 |---|---|---|---|
 | `logo` | `title_logo.png` | 199×80 | "CTRL+ALT REVENGE!" (`tools/fxui/logo.py`): i tasti beige CTRL e ALT, REVENGE! inclinato a spray, a fasce di fuoco, con contorno inchiostro-crema, rilievo prugna e colature |
 | `subtitle` | `title_subtitle.png` | 155×13 | "TARANTO · 2087" crema fra due trattini, sotto il logo |
-| `stage_card_1` | `stage_card_1.png` | 293×27 | "1 · SOTTO LA LINEA" |
+| `stage_card_1` | `stage_card_1.png` | 293×27 | "1 · SOTTO LA LINEA" (non più usato nel gioco; lo usa ancora il sito) |
+| `stage_card_2` | `stage_card_2.png` | 234×27 | "2 · IL WIND DAY" |
 | `msg_zone_clear` | `msg_zone_clear.png` | 276×31 | "ZONA LIBERATA" |
 | `msg_pause` | `msg_pause.png` | 115×31 | "PAUSA" |
 | `msg_continue` | `msg_continue.png` | 197×31 | "CONTINUA?" |

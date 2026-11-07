@@ -8,14 +8,14 @@ extends Node2D
 ##   del vento (WindDay, senza pozze e con le luci nello spazio dello schermo);
 ## - GIG, con le sue normali che prendono la luce della nube, e il cyan del braccio e dell'occhio che pulsa;
 ## - il logo, che ogni tanto ha un disturbo di 2-3 fotogrammi, il sottotitolo e il menu sul parapetto.
-## Il menu: NUOVA PARTITA (il prologo e poi, di seguito, «Sotto la Linea»), CAPITOLI (i pezzi da rigiocare, uno
-## per uno, più INDIETRO), la STANZA DI PROVA (solo per PC), CREDITI ed ESCI (non nel browser). Niente
+## Il menu: NUOVA PARTITA (il prologo e poi, di seguito, lo slice: il capitolo 2, «Il Wind Day»), CAPITOLI (i pezzi
+## da rigiocare, uno per uno, più INDIETRO; il capitolo 1, «I tetti dei Tamburi», ancora non c'è), la STANZA DI PROVA (solo per PC), CREDITI ed ESCI (non nel browser). Niente
 ## salvataggi né CONTINUA, per ora. Musica "title".
 ## Solo disegno: il generatore casuale è suo e i replay non lo vedono.
 
 ## NUOVA PARTITA: il prologo, poi lo slice.
 signal new_game
-## CAPITOLI → SOTTO LA LINEA: lo slice da solo.
+## CAPITOLI → 2 · IL WIND DAY: lo slice da solo.
 signal start_game
 ## CAPITOLI → PROLOGO: il prologo da solo.
 signal prologue
@@ -35,7 +35,7 @@ const WEB_ITEMS: PackedStringArray = [NEW_GAME, CHAPTERS_ITEM, "CREDITI"]
 const ACTIONS := {NEW_GAME: &"new_game", "STANZA DI PROVA": &"test_room", "CREDITI": &"show_credits",
 	"ESCI": &"quit_game"}
 ## I capitoli da rigiocare, in ordine di storia: [voce, segnale]. Un capitolo nuovo è una riga in più.
-const CHAPTERS := [["PROLOGO", &"prologue"], ["SOTTO LA LINEA", &"start_game"]]
+const CHAPTERS := [["PROLOGO", &"prologue"], ["2 · IL WIND DAY", &"start_game"]]
 const DIR := "res://assets/ui/titolo/"
 ## Il livello dello slice, per i dati del Wind Day (le stesse raffiche).
 const LEVEL := Level.LEVEL_JSON

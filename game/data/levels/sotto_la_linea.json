@@ -1,7 +1,8 @@
 {
   "format": 1,
   "id": "sotto_la_linea",
-  "title": "1 · SOTTO LA LINEA",
+  "title": "2 · IL WIND DAY",
+  "card_art": "stage_card_2",
   "width": 2400,
   "floor_band": [188, 260],
   "weather": "wind_day",

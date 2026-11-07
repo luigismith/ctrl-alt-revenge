@@ -1,6 +1,6 @@
 class_name Level
 extends Node2D
-## Livello "Sotto la Linea" (§6): simulazione deterministica a tick, ondate con blocco della
+## Lo slice, il capitolo 2 «Il Wind Day» dell'atto I «Sotto la Linea» (§6): simulazione deterministica a tick, ondate con blocco della
 ## telecamera e muri invisibili, oggetti di scena, pioggia, effetti, HUD, pausa e CONTINUA?.
 ##
 ## Un tick di simulazione (step) fa, in quest'ordine:
@@ -143,7 +143,7 @@ func _ready() -> void:
 			r.start = {"x": start_x, "y": player.py}
 		input.recorder = r
 	if show_card and not embedded:
-		overlay.show_card(str(data.get("title", "1 · SOTTO LA LINEA")))
+		overlay.show_card(str(data.get("title", "2 · IL WIND DAY")), str(data.get("card_art", "stage_card_2")))
 	if sound_enabled and not embedded:
 		# Dopo un GAME OVER o una pausa la musica potrebbe essere ancora abbassata.
 		Music.duck(false)

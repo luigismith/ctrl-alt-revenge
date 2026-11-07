@@ -16,7 +16,9 @@ extends Node
 ##   brano della scena;
 ## - all'uscita le comparse sono nel punto degli attori veri (l'esito), che le sostituiscono; il gioco
 ##   riparte subito mentre la telecamera torna morbida all'inquadratura del gioco e le bande escono in
-##   OUTRO tick; i tasti tenuti per l'ultima battuta non diventano pressioni.
+##   OUTRO tick; i tasti tenuti per l'ultima battuta non diventano pressioni;
+## - i murales di Totò (passo «murale», SceneMural) si dipingono a spray sopra il gioco e se ne vanno con
+##   lo spray all'indietro: con "chiudi", o da soli quando la scena finisce o si salta.
 ##
 ## Chi ospita la scena (TestRoom) offre: scene_frame(space, rif) → {"origin", "offset", "parent"},
 ## scene_camera_center(), scene_bounds(), scene_apply_camera(centro, zoom), scene_ui_alpha(a),
@@ -129,6 +131,9 @@ var _blur_layer: CanvasLayer
 var _blur: ColorRect
 var _blur_mat: ShaderMaterial
 var _fx: Node2D
+## I murales aperti (SceneMural), dal più vecchio: uno nuovo si dipinge sopra quello di prima.
+var _mural_layer: CanvasLayer
+var _murals: Array[SceneMural] = []
 ## Gli aloni del laser (solo disegno).
 var _glow: Glow
 
@@ -160,6 +165,10 @@ func start(scene: SceneData, room: TestRoom, poses: Dictionary, auto_lines: bool
 
 
 func _build_layers() -> void:
+	# I murales coprono il gioco, ma stanno sotto lo sfocato dei primi piani e sotto bande e battute.
+	_mural_layer = CanvasLayer.new()
+	_mural_layer.layer = 14
+	add_child(_mural_layer)
 	# Lo sfondo sfocato sotto l'interfaccia della scena e sopra il gioco (anche sopra l'interfaccia
 	# dell'arena, che durante la scena è comunque spenta).
 	_blur_layer = CanvasLayer.new()
@@ -251,6 +260,7 @@ func tick() -> void:
 	_tick_line()
 	_tick_closeup()
 	_tick_laser()
+	_tick_murals()
 	_apply_camera()
 	_redraw()
 
@@ -335,6 +345,8 @@ func _start_step(st: Dictionary) -> void:
 			_wait = func() -> bool: return _laser.is_empty()
 		"evento":
 			_send_event(str(st["nome"]))
+		"murale":
+			_start_mural(st, wait)
 
 
 func _send_event(e: String) -> void:
@@ -643,6 +655,53 @@ func _draw_fx() -> void:
 		ArmMark.draw_flash(_fx, f[0], int(f[1]), _glow)
 
 
+# ------------------------------------------------------------------ murales
+
+## Il passo «murale»: ne apre uno (a spray sopra il gioco o sopra il murale di prima) o, con "chiudi",
+## toglie l'ultimo con lo spray all'indietro.
+func _start_mural(st: Dictionary, wait: bool) -> void:
+	if bool(st.get("chiudi", false)):
+		if _murals.is_empty():
+			return
+		var top: SceneMural = _murals[-1]
+		for m: SceneMural in _murals:
+			m.close(int(st.get("rivela_tick", st.get("tick", top.reveal_n))))
+		if wait:
+			_wait = func() -> bool: return _murals.is_empty()
+		return
+	var m := SceneMural.new()
+	m.setup(st)
+	if not m.errors.is_empty():
+		push_warning("scena %s: %s" % [data.id, "; ".join(m.errors)])
+		if m.get_child_count() == 0:
+			m.free()
+			return
+	_mural_layer.add_child(m)
+	_murals.append(m)
+	if wait:
+		_wait = func() -> bool: return not is_instance_valid(m) or m.is_revealed() or m.closing
+
+
+func _tick_murals() -> void:
+	for m: SceneMural in _murals:
+		m.tick()
+	# Quelli chiusi se ne vanno, e anche quelli coperti per intero da uno nuovo già dipinto.
+	var top_full := -1
+	for i in _murals.size():
+		if _murals[i].is_revealed():
+			top_full = i
+	for i in range(_murals.size() - 1, -1, -1):
+		var m: SceneMural = _murals[i]
+		if m.is_closed() or i < top_full:
+			_murals.remove_at(i)
+			m.queue_free()
+
+
+## Il murale in cima, se ce n'è uno (per i test e per chi ospita la scena).
+func mural() -> SceneMural:
+	return null if _murals.is_empty() else _murals[-1]
+
+
 # ------------------------------------------------------------------ uscita
 
 ## START: la scena salta alla fine. Gli eventi che mancano partono, il segno del laser c'è, le
@@ -682,6 +741,9 @@ func _begin_outro() -> void:
 		p.sync()
 	_line = {}
 	_hide_closeup()
+	# Un murale ancora aperto si chiude a spray mentre si torna al gioco.
+	for m: SceneMural in _murals:
+		m.close(OUTRO)
 	_outro_c = _view_center(_cam_c, _cam_z)
 	_outro_z = _cam_z
 	_outro_t = 0
@@ -699,6 +761,7 @@ func _tick_outro() -> void:
 	_bars = 1.0 - k
 	host.scene_ui_alpha(k)
 	_tick_closeup()
+	_tick_murals()
 	_redraw()
 	if _outro_t >= OUTRO:
 		_finish()

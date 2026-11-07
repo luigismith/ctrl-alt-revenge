@@ -66,7 +66,9 @@ func run(tree_root: Node) -> bool:
 	_test_pignoramento()
 	_test_rinforzi()
 	_test_scene_voices()
+	_test_scene_mural()
 	_test_title_menu()
+	_test_new_game_chain()
 	return failures == 0
 
 
@@ -81,13 +83,55 @@ func _test_title_menu() -> void:
 	check(t.choose(0) == &"new_game", "Titolo: NUOVA PARTITA dà new_game")
 	check(t.choose(2) == &"test_room" and t.choose(3) == &"show_credits" and t.choose(4) == &"quit_game", "Titolo: stanza di prova, crediti ed esci")
 	check(t.choose(1) == &"" and t.in_chapters and t._index == 0, "Titolo: CAPITOLI apre il sottomenu, sulla prima voce")
-	check(t.items() == PackedStringArray(["PROLOGO", "SOTTO LA LINEA", "INDIETRO"]), "Titolo: i capitoli e INDIETRO", str(t.items()))
+	check(t.items() == PackedStringArray(["PROLOGO", "2 · IL WIND DAY", "INDIETRO"]), "Titolo: i capitoli e INDIETRO", str(t.items()))
 	check(t.choose(0) == &"prologue" and t.choose(1) == &"start_game", "Titolo: i capitoli danno prologue e start_game")
 	check(t.choose(2) == &"" and not t.in_chapters and t._index == 1, "Titolo: INDIETRO torna al menu, su CAPITOLI")
 	t.web = true
 	check(t.items() == PackedStringArray(["NUOVA PARTITA", "CAPITOLI", "CREDITI"]), "Titolo: nel browser niente stanza di prova né ESCI", str(t.items()))
 	check(t.choose(2) == &"show_credits", "Titolo: nel browser la terza voce è CREDITI")
 	t.free()
+
+
+## NUOVA PARTITA in main.gd, a tick finti: titolo → prologo (con le righe di dopo) → alla fine la dissolvenza
+## lenta, con la musica che sfuma → lo slice, con la sua scheda e coi tasti, anche se il prologo l'ha
+## giocato il pilota → la dissolvenza torna corta.
+func _test_new_game_chain() -> void:
+	var saved := Game.options
+	Game.options = SessionOptions.parse(PackedStringArray(["--autopilot", "stanza"]))
+	Game.options.room = false
+	Game.options.autostart = false
+	var m: Node = load("res://scenes/main.tscn").instantiate()
+	root.add_child(m)
+	var tick := func(n: int) -> void:
+		for i in n:
+			m._physics_process(0.0)
+	check(m._screen is TitleScreen, "Nuova partita: si parte dal titolo", str(m._screen))
+	m._go(m._start_new_game)
+	tick.call(m.FADE_TICKS)
+	var p := m._screen as Prologue
+	check(p != null and p.next_title == m.AFTER_PROLOGUE and p.pilot != null,
+		"Nuova partita: dopo la dissolvenza il prologo, che sa cosa viene dopo", str(m._screen))
+	tick.call(m.FADE_TICKS)
+	check(m._fade_dir == 0, "Nuova partita: la dissolvenza d'entrata nel prologo finisce")
+	if p != null:
+		p.prologue_finished.emit({"ticks": 1, "prologue": true})
+	check(m._fade_len == m.FADE_SLOW and m._fade_dir == 1 and Music.current_track() == &"",
+		"Nuova partita: a fine prologo la dissolvenza lenta, e la musica sfuma", "%d tick, musica %s" % [m._fade_len, Music.current_track()])
+	tick.call(m.FADE_SLOW / 2)
+	var half: float = m._fade.color.a
+	tick.call(m.FADE_SLOW - m.FADE_SLOW / 2 - 1)
+	check(m._screen == p and half > 0.4 and half < 0.6, "Nuova partita: il prologo resta finché lo schermo non è nero", "a metà %.2f" % half)
+	tick.call(1)
+	var lvl := m._screen as Level
+	check(lvl != null and lvl.overlay.card_title == "2 · IL WIND DAY" and lvl.overlay.card_art == "stage_card_2" and lvl.input.mode == PlayerInput.Mode.LIVE,
+		"Nuova partita: poi lo slice, con la scheda «2 · IL WIND DAY» e coi tasti", str(m._screen))
+	tick.call(m.FADE_SLOW)
+	check(m._fade_dir == 0 and m._fade.color.a == 0.0 and m._fade_len == m.FADE_TICKS,
+		"Nuova partita: lo slice entra in 50 tick, poi le dissolvenze tornano corte", "%d, %.2f" % [m._fade_len, m._fade.color.a])
+	root.remove_child(m)
+	m.free()
+	Game.options = saved
+	Game.reset_run()
 
 
 # --- Impostazioni ----------------------------------------------------------------------------------
@@ -2094,6 +2138,150 @@ func _test_scene_voices() -> void:
 	DirAccess.remove_absolute(root)
 
 
+## Il passo «murale» (SceneMural): un murale finto in user://, dipinto a spray sopra il gioco nell'ordine
+## di murale_rivela.png, che scorre e poi se ne va con lo spray all'indietro; da solo si chiude anche
+## quando la scena si salta. Poi i dati del murale vero di MP06 (il cimitero).
+func _test_scene_mural() -> void:
+	var base := "user://murales_finti"
+	var dir := base + "/prova/finto"
+	DirAccess.make_dir_recursive_absolute(dir)
+	var img := Image.create(512, 288, false, Image.FORMAT_RGBA8)
+	img.fill(Color8(200, 60, 120))
+	img.save_png(dir + "/murale.png")
+	var rv := Image.create(512, 288, false, Image.FORMAT_L8)
+	for x in 512:
+		for y in 288:
+			rv.set_pixel(x, y, Color(x / 511.0, x / 511.0, x / 511.0))
+	rv.save_png(dir + "/murale_rivela.png")
+	var em := Image.create(512, 288, false, Image.FORMAT_RGBA8)
+	em.fill(Color(0, 0, 0, 0))
+	em.save_png(dir + "/murale_emis.png")
+	var fig := Image.create(10, 10, false, Image.FORMAT_RGBA8)
+	fig.fill(Color.WHITE)
+	fig.save_png(dir + "/figura_prova.png")
+	var js := {"id": "finto", "capitolo": "prova", "scorri": {"da": [0, 0], "a": [32, 18]},
+		"figure": [{"nome": "prova", "file": "figura_prova.png", "x": 100, "y": 50, "profondita": 2.0}]}
+	var f := FileAccess.open(dir + "/murale.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(js))
+	f.close()
+	SceneMural.dir = base
+
+	# Il copione: i parametri ammessi e quelli sbagliati.
+	var sd := SceneData.new()
+	sd.id = "prova_murale"
+	sd._parse({"formato": 1, "spazio": "stanza", "passi": [
+		{"fai": "murale", "id": "prova/finto", "tick": 100, "rivela_tick": 20},
+		{"fai": "attendi", "tick": 30},
+		{"fai": "murale", "chiudi": true, "rivela_tick": 20}]})
+	check(sd.errors.is_empty(), "Murale: il passo è valido nel copione", "; ".join(sd.errors))
+	var bad := SceneData.new()
+	bad._parse({"formato": 1, "passi": [{"fai": "murale", "da": 5}, {"fai": "murale", "id": "a/b", "colore": 1}]})
+	check(bad.errors.size() == 3, "Murale: senza id, con \"da\" non [x, y] o un parametro in più, il copione è sbagliato", "; ".join(bad.errors))
+	check(SceneMural.exists({"id": "prova/finto"}) and SceneMural.exists({"id": "finto", "capitolo": "prova"})
+		and not SceneMural.exists({"id": "prova/manca"}), "Murale: si trova con \"<capitolo>/<id>\" o con \"capitolo\"")
+
+	# Il murale da solo: inquadratura, spray, scorrimento, chiusura.
+	var m := SceneMural.new()
+	m.setup({"id": "prova/finto", "tick": 100, "rivela_tick": 20})
+	root.add_child(m)
+	check(m.errors.is_empty() and m._figures.size() == 1, "Murale: si carica, con la sua figura", "; ".join(m.errors))
+	check(m.c0 == Vector2(240, 135) and m.c1 == Vector2(272, 153) and m.amount() == 0.0,
+		"Murale: lo scorrimento di murale.json, e all'inizio non c'è ancora niente", "%s %s" % [m.c0, m.c1])
+	var mat: ShaderMaterial = m._sprite.material
+	for i in 10:
+		m.tick()
+	var half_p := float(mat.get_shader_parameter(&"progress"))
+	for i in 10:
+		m.tick()
+	check(half_p > 0.3 and half_p < 0.8 and m.is_revealed() and is_equal_approx(float(mat.get_shader_parameter(&"progress")), 1.0 + SceneMural.EDGE),
+		"Murale: lo spray lo dipinge in rivela_tick, a metà si vede metà", "%.2f" % half_p)
+	var fs: Sprite2D = m._figures[0]["sprite"]
+	check(is_equal_approx(fs.modulate.a, 1.0), "Murale: a spray finito c'è anche la figura")
+	for i in 80:
+		m.tick()
+	check(m.is_scrolled() and (m.view()[0] as Vector2) == Vector2(272, 153) and m._sprite.position == Vector2(-32, -18),
+		"Murale: in \"tick\" scorre fino al riquadro di arrivo", "%s" % m._sprite.position)
+	check(fs.position == Vector2(100 - 32 * 2, 50 - 18 * 2), "Murale: la figura davanti (profondità 2) scorre il doppio", "%s" % fs.position)
+	var g := {}
+	for i in SceneMural.PULSE_TICKS:
+		m.tick()
+		g[snappedf(float(mat.get_shader_parameter(&"glow")), 0.05)] = true
+	check(g.size() > 4, "Murale: le luci pulsano", "%d" % g.size())
+	m.close(10)
+	for i in 10:
+		m.tick()
+	check(m.is_closed() and float(mat.get_shader_parameter(&"progress")) == 0.0, "Murale: chiuso, lo spray all'indietro lo toglie tutto")
+	var cut := SceneMural.new()
+	cut.setup({"id": "prova/finto", "rivela": false, "luci": false, "da": [8, 4], "a": [8, 4]})
+	check(cut.is_revealed() and cut.c0 == Vector2(248, 139) and cut.c1 == cut.c0 and is_equal_approx(float(cut._mat.get_shader_parameter(&"glow")), 1.0),
+		"Murale: con \"rivela\" falso è uno stacco, \"da\"/\"a\" del passo vincono, senza \"luci\" non pulsa")
+	cut.free()
+	m.free()
+
+	# Nel lettore delle scene: sopra il gioco, poi via, con la simulazione ferma.
+	SceneData._cache["prova_murale"] = sd
+	var room := _prologue_room()
+	room._scene_request = {"id": "prova_murale", "poses": {}}
+	room._start_scene()
+	var sp := room.scene
+	var sim_tick := room.tick
+	room._scene_frame()
+	check(sp != null and sp.mural() != null and sp.mural().get_parent() == sp._mural_layer and sp._mural_layer.layer < 15,
+		"Murale: nel lettore sta in un suo livello, sotto lo sfocato, le bande e le battute")
+	var opened := -1
+	var frames := 1
+	while sp != null and is_instance_valid(sp) and sp.holds_sim() and frames < 1000:
+		room._scene_frame()
+		frames += 1
+		if opened < 0 and sp._step_i >= 2:
+			opened = frames
+	check(opened == 21, "Murale: la scena aspetta la fine dello spray (e va avanti al fotogramma dopo)", "%d" % opened)
+	check(frames >= 20 + 30 + 20 and frames < 80 and sp._murals.is_empty(), "Murale: con \"chiudi\" se ne va e la scena va avanti", "%d" % frames)
+	check(room.tick == sim_tick, "Murale: durante il murale la simulazione resta ferma")
+	for i in ScenePlayer.OUTRO + 2:
+		if room.scene != null:
+			room._scene_frame()
+	_free_room(room)
+
+	# Saltata a metà: il murale si chiude da solo nell'uscita.
+	var sd2 := SceneData.new()
+	sd2.id = "prova_murale_2"
+	sd2._parse({"formato": 1, "spazio": "stanza", "passi": [{"fai": "murale", "id": "prova/finto", "rivela_tick": 10},
+		{"fai": "attendi", "tick": 500}]})
+	SceneData._cache["prova_murale_2"] = sd2
+	room = _prologue_room()
+	room._scene_request = {"id": "prova_murale_2", "poses": {}}
+	room._start_scene()
+	sp = room.scene
+	for i in 40:
+		room._scene_frame()
+	var mm := sp.mural()
+	sp._skip()
+	check(mm != null and mm.closing, "Murale: se la scena si salta, il murale comincia a chiudersi")
+	for i in ScenePlayer.OUTRO:
+		sp.tick()
+	check(room.scene == null and is_instance_valid(mm) and mm.is_closed(), "Murale: a fine uscita lo spray all'indietro è finito, si vede il gioco")
+	_free_room(room)
+	SceneData.clear_cache()
+	SceneMural.dir = SceneMural.DIR_DEFAULT
+	for n in ["murale.png", "murale_rivela.png", "murale_emis.png", "figura_prova.png", "murale.json"]:
+		DirAccess.remove_absolute(dir + "/" + n)
+	DirAccess.remove_absolute(dir)
+	DirAccess.remove_absolute(base + "/prova")
+	DirAccess.remove_absolute(base)
+
+	# Il murale vero di MP06, il cimitero: parte da zoom 2 su GIG e allarga, con le due figure.
+	var mp := SceneMural.new()
+	mp.setup({"id": "prologo/mp06_cimitero"})
+	check(mp.errors.is_empty() and mp.size == Vector2(480, 270) and mp._figures.size() == 2
+		and mp.z0 == 2.0 and mp.z1 == 1.0 and mp.c0 == Vector2(240, 190) and mp.c1 == Vector2(240, 135),
+		"Murale: MP06 si carica con la camera di murale.json (zoom 2 su GIG, poi tutto)", "; ".join(mp.errors))
+	for i in mp.scroll_n:
+		mp.tick()
+	check(mp._sprite.position == Vector2.ZERO and mp._sprite.scale == Vector2.ONE,
+		"Murale: alla fine MP06 combacia pixel per pixel con lo schermo", "%s" % mp._sprite.position)
+	mp.free()
+
 ## I rinforzi al muro: GIG in cima al muro del cimitero chiede la scena; la scena recita da sola, senza
 ## battute, con la simulazione ferma; i rider restano sotto il muro, GIG riparte da dov'era.
 func _test_rinforzi() -> void:
@@ -2291,7 +2479,10 @@ func _test_scene_files() -> void:
 				found = found or ResourceLoader.exists("res://assets/ui/closeups/%s.png" % n)
 			if not found:
 				bad.append("primo piano %s" % cu)
-		check(bad.is_empty(), "Scene: attori, fogli e primi piani del copione %s ci sono" % id, ", ".join(bad))
+		for st: Dictionary in sd.steps:
+			if str(st.get("fai", "")) == "murale" and not bool(st.get("chiudi", false)) and not SceneMural.exists(st):
+				bad.append("murale %s" % str(st.get("id", "")))
+		check(bad.is_empty(), "Scene: attori, fogli, primi piani e murales del copione %s ci sono" % id, ", ".join(bad))
 		if sd.lines_file == "" or not SceneLines.available(sd.lines_file):
 			check(true, "Scene: le battute del copione %s (file privato assente: controllo saltato)" % id)
 			continue

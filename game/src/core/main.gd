@@ -1,13 +1,18 @@
 extends Node
 ## Scena principale: flusso delle schermate titolo → livello → fine demo → crediti → titolo.
-## NUOVA PARTITA: titolo → prologo → «Sotto la Linea» → fine demo; dai CAPITOLI ogni pezzo si gioca da solo.
+## NUOVA PARTITA: titolo → prologo → capitolo 2, «Il Wind Day» (lo slice) → fine demo; dai CAPITOLI ogni pezzo si gioca da solo.
 ## Argomenti utente (dopo "--"): vedi SessionOptions (--autostart, --replay, --seed, --record...).
 
 const FADE_TICKS := 16
 ## Dal prologo allo slice, in NUOVA PARTITA: una dissolvenza lenta, con la musica che sfuma insieme.
 const FADE_SLOW := 50
-## Dopo il prologo, in NUOVA PARTITA: cosa viene adesso (la scheda del livello dice «1 · SOTTO LA LINEA»).
-const AFTER_PROLOGUE := "ora il capitolo 1, Sotto la Linea"
+## Dopo il prologo, in NUOVA PARTITA: cosa viene adesso, sotto «FINE DEL PROLOGO», una riga per voce. Il
+## capitolo 1 non c'è ancora, si va dritti al 2, lo slice (la sua scheda dice «2 · IL WIND DAY»).
+## Testo approvato da car-storia il 7 novembre 2026.
+const AFTER_PROLOGUE: PackedStringArray = [
+	"Il capitolo 1, I tetti dei Tamburi, è in arrivo.",
+	"Adesso si gioca il capitolo 2: Il Wind Day.",
+]
 
 var _screen: Node
 var _fade_layer: CanvasLayer
@@ -30,7 +35,9 @@ func _ready() -> void:
 	_fade.size = View.SIZE
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade_layer.add_child(_fade)
-	if Game.options.prologue:
+	if Game.options.new_game:
+		_start_new_game()
+	elif Game.options.prologue:
 		_start_prologue()
 	elif Game.options.room:
 		_start_room()
@@ -108,14 +115,16 @@ func _show_credits() -> void:
 	_set_screen(layer)
 
 
-func _start_level() -> void:
+## `after_prologue`: arriva da NUOVA PARTITA. Un replay o il pilota della riga di comando erano del
+## prologo, non dello slice: qui si gioca coi tasti.
+func _start_level(after_prologue: bool = false) -> void:
 	Game.reset_run()
 	var o := Game.options
 	var opts := {"seed": o.level_seed, "record": o.record_path}
 	if o.start_x >= 0.0:
 		opts["start_x"] = o.start_x
 	var input: PlayerInput = null
-	if o.replay_path != "":
+	if o.replay_path != "" and not after_prologue:
 		var r := Replay.load_file(o.replay_path)
 		if r == null:
 			push_error("Replay non leggibile: %s" % o.replay_path)
@@ -129,7 +138,7 @@ func _start_level() -> void:
 				opts["start_y"] = float(r.start["y"])
 			opts["card"] = not r.start.has("x")
 	var lvl := Level.new()
-	if input == null and o.autopilot != "":
+	if input == null and o.autopilot != "" and not after_prologue:
 		var pilot := Autopilot.new(StringName(o.autopilot))
 		input = PlayerInput.from_provider(pilot.decide, pilot)
 		pilot.level = lvl
@@ -155,14 +164,14 @@ func _start_prologue(then_level: bool = false) -> void:
 		p.next_title = AFTER_PROLOGUE
 	_start_room(p)
 	p.prologue_finished.connect(func(result: Dictionary) -> void:
-		if Game.options.quit_at_end:
+		if Game.options.quit_at_end and not then_level:
 			print("Prologo finito: tick %d" % int(result.get("ticks", 0)))
 			print("DONE")
 			Game.quit_clean(0)
 			return
 		if then_level:
 			Music.stop(FADE_SLOW / 60.0)
-			_go(_start_level, FADE_SLOW)
+			_go(_start_level.bind(true), FADE_SLOW)
 		else:
 			_go(func() -> void: _show_demo_end(result)))
 

@@ -75,9 +75,9 @@ const GARAGE_INSIDE := Rect2(300 * 20, 10 * 20, 41 * 20, 13 * 20)
 var checkpoint: int = -1
 var rebooted: bool = false
 var finished: bool = false
-## Cosa viene dopo, scritto sotto «FINE DEL PROLOGO»: lo dà main.gd in NUOVA PARTITA, che prosegue
-## nello slice. Vuoto: la riga di sempre, quando il prologo si gioca da solo dai CAPITOLI.
-var next_title: String = ""
+## Cosa viene dopo, scritto sotto «FINE DEL PROLOGO», una riga per voce: lo dà main.gd in NUOVA PARTITA,
+## che prosegue nello slice. Vuoto: la riga di sempre, quando il prologo si gioca da solo dai CAPITOLI.
+var next_title: PackedStringArray = []
 ## Tick passati dalla fine, e il tick dell'arrivo sul tetto. Non entrano nell'hash: sono il passaggio
 ## alla schermata di fine, non la simulazione.
 var end_t: int = 0
@@ -596,8 +596,9 @@ func _draw_stage_hud(h: Control) -> void:
 	if finished:
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, 0.6))
 		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 - 16), "FINE DEL PROLOGO", C_CYAN, 2, 1)
-		var dopo := next_title if next_title != "" else "poi il capitolo 1, I tetti dei Tamburi"
-		UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 14), dopo, C_DIM, 1, 1)
+		var dopo: PackedStringArray = next_title if not next_title.is_empty() else PackedStringArray(["poi il capitolo 1, I tetti dei Tamburi"])
+		for i in dopo.size():
+			UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 14 + 12 * i), dopo[i], C_DIM, 1, 1)
 		if end_t > END_SKIP and (end_t / 20) % 2 == 0:
 			UiFont.draw_text(h, Vector2(View.CX, View.H / 2.0 + 40), "ATTACCO per continuare", C_CYAN, 1, 1)
 

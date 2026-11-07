@@ -51,8 +51,7 @@ def make_subtitle() -> np.ndarray:
     return logo.sottotitolo(logo.VARIANTI[logo.SCELTA])
 
 
-def make_stage_card() -> np.ndarray:
-    text = "1 · SOTTO LA LINEA"
+def make_stage_card(text: str = "1 · SOTTO LA LINEA") -> np.ndarray:
     return title.render([text], bigfont.metrics(20), MSG, fills={0: GOLD_FILL, 2: ORANGE_FILL})
 
 
@@ -249,6 +248,8 @@ def build() -> dict:
         note="Sottotitolo TARANTO · 2087 fra due trattini, da centrare sotto il logo (2-4 px sotto).")
     put("stage_card_1", "stage_card_1.png", make_stage_card(),
         note="Cartello d'inizio del livello 1 ('1' oro, punto arancio), da centrare sullo schermo.")
+    put("stage_card_2", "stage_card_2.png", make_stage_card("2 · IL WIND DAY"),
+        note="Cartello d'inizio del capitolo 2 ('2' oro, punto arancio), da centrare sullo schermo.")
     put("msg_zone_clear", "msg_zone_clear.png", make_msg("ZONA LIBERATA"), note="Fine del livello.")
     put("msg_pause", "msg_pause.png", make_msg("PAUSA"), note="Pausa (sopra al menu).")
     put("msg_continue", "msg_continue.png", make_msg("CONTINUA?"), note="Dopo l'ultima vita.")

@@ -11,7 +11,7 @@ Decisioni di Luigi del 3 novembre 2026:
 - **Approccio C, misto, a costo zero**: tutta la grafica nasce dalla pipeline 3D → pixel e dai pack CC0 ammessi, senza ritocchi umani.
 - **GIG** parte dall'aspetto della locandina di riferimento, che è generata con ChatGPT e quindi sta fuori dal repo, nella cartella privata (`ctrlaltrevenge-lab-condiviso/riferimenti-estetica/locandina-pixelart-chatgpt-2026-04-09.png`):
   - codino e barba grigi;
-  - camicia da lavoro ocra aperta e fuori dai pantaloni, con le maniche arrotolate, sopra una felpa grigia con il cappuccio;
+  - camicia da lavoro ocra aperta e fuori dai pantaloni, con le maniche arrotolate, con un cappuccio grigio abbassato sul collo, con i lacci (Luigi, 7 novembre 2026: niente felpa intera);
   - pantaloni oliva con la cintura scura, stivali marroni;
   - dal 4 novembre, su richiesta di Luigi, la mano destra è nuda, con una fascia blu sottile al polso: sulla locandina c'erano le fasce da boxe.
 
@@ -316,7 +316,7 @@ Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza
 
 **Interfaccia** in `game/assets/ui/`, descritta da `ui.json` (una chiave per elemento, con `image` e `size`):
 - `logo` e `subtitle`: il logo "CTRL+ALT REVENGE!" con riempimento crema e bordo rosso scuro, come la locandina, e la scritta "PICCHIA DURO A SCORRIMENTO";
-- scritte grandi già disegnate, da usare a 1x centrate su coordinate intere: `stage_card_1` ("1 · SOTTO LA LINEA"), `msg_zone_clear`, `msg_pause`, `msg_continue`, `msg_game_over`, `msg_demo_end`;
+- scritte grandi già disegnate, da usare a 1x centrate su coordinate intere: `stage_card_2` ("2 · IL WIND DAY"; la vecchia `stage_card_1`, "1 · SOTTO LA LINEA", la usa solo il catalogo delle immagini del sito), `msg_zone_clear`, `msg_pause`, `msg_continue`, `msg_game_over`, `msg_demo_end`;
 - `go_arrow`: striscia di 3 fotogrammi da 56×24, 8 tick ciascuno, in ciclo;
 - `big_digits`: le cifre 0-9 grandi nello stile delle scritte `msg_*`, striscia di 10 fotogrammi da 23×31 (il fotogramma k è la cifra k), per il conto alla rovescia di CONTINUA?. Tutte le scritte stanno a 1x: niente testo del font a scala 2;
 - `portrait_frame` (e `portrait_frame_enemy`): cornice 34×34 con il foro 32×32 in (1, 1); si disegna `portrait_back`, poi il ritratto in (x + 1, y + 1), poi la cornice;

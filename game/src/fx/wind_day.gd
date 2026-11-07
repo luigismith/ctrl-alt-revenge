@@ -1,6 +1,6 @@
 class_name WindDay
 extends Node2D
-## La sera del Wind Day nello slice «Sotto la Linea» (decisione 5; coerenza-slice A3, A7 e M10): la pioggia del
+## La sera del Wind Day nello slice, il capitolo 2 dell'atto I «Sotto la Linea» (decisione 5; coerenza-slice A3, A7 e M10): la pioggia del
 ## pomeriggio è finita, tira il maestrale e porta la polvere rossa del minerale. Qui c'è tutto il disegno:
 ## - la polvere: granelli da 1 px e qualche strisciata su tre piani di parallasse, da destra verso sinistra
 ##   (contro la corsa di GIG, come il vapore delle cupole), che cadono appena; ogni 4-8 s una raffica di un

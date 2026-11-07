@@ -1,6 +1,6 @@
 class_name PlaceholderEnv
 extends RefCounted
-## Sfondo segnaposto di "Sotto la Linea", disegnato da codice con un seme fisso:
+## Sfondo segnaposto dello slice (il capitolo 2, «Il Wind Day», dell'atto I «Sotto la Linea»), disegnato da codice con un seme fisso:
 ## cielo notturno, torri lontane, palazzi con i neon, marciapiede e asfalto bagnato,
 ## piloni dell'arena e la ferrovia sopraelevata in primo piano. Si usa solo finché
 ## mancano gli sfondi veri (game/assets/env/sotto_la_linea/layers.json).
