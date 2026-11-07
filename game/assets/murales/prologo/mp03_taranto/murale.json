@@ -1,0 +1,52 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp03_taranto",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   0,
+   18
+  ],
+  "a": [
+   32,
+   0
+  ]
+ },
+ "camera": {
+  "nota": "la camera entra nel murale di MP02: parte larga e arretra appena verso destra; tre piani di parallasse (cupole, Linea e tetti, insegna)",
+  "zoom_da": 1,
+  "centro_da": [
+   240,
+   153
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   272,
+   135
+  ]
+ },
+ "figure": [
+  {
+   "nome": "colomba",
+   "file": "figura_colomba.png",
+   "x": 356,
+   "y": 150,
+   "misura": [
+    40,
+    42
+   ],
+   "profondita": 1.2,
+   "nota": "attraversa il quadro verso destra davanti all'insegna; la scia di nebbiolina menta la fa il motore (particelle)"
+  }
+ ],
+ "colori": 94,
+ "fonte": "ChatGPT (OpenAI), da solo testo; ridotto in pixel art dai nostri script"
+}

@@ -60,6 +60,7 @@ Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi 
 - **ChatGPT di OpenAI** (chatgpt.com), dal 6 novembre 2026. I termini di OpenAI cedono all'utente i diritti sull'output e ne ammettono l'uso commerciale.
 - Per le ambientazioni del prologo i prompt sono di solo testo. Per la strada dello slice, dal 7 novembre 2026, a ChatGPT abbiamo caricato soltanto i nostri render, i nostri schizzi e le nostre basi del prologo. Nessuna foto né immagine di altri è stata caricata: le foto di Taranto e Street View sono servite soltanto a scrivere i prompt.
 - **I primi piani dei filmati** (`game/assets/ui/closeups/`) partono da volti in stile murales generati con ChatGPT, a cui abbiamo caricato soltanto i nostri render 3D dei personaggi. `tools/sprites/closeup_ai.py` li porta in pixel art, e palpebre e bocca le animano i nostri script.
+- **I murales dei filmati** (`game/assets/murales/`), dal 7 novembre 2026, partono da basi di ChatGPT. Per gli sfondi abbiamo usato prompt di solo testo; per le figure abbiamo caricato soltanto i nostri render 3D dei personaggi e le nostre basi. `tools/murales/` le porta in pixel art; le scritte e i tag li disegna il nostro carattere pixel.
 - Personaggi, nemici e oggetti animati del gioco non vengono da qui: nascono dalla pipeline da 3D a pixel.
 - Le immagini generate con l'AI potrebbero non essere proteggibili col diritto d'autore. Prima di vendere il gioco si ricontrollano i termini dei due servizi.
 

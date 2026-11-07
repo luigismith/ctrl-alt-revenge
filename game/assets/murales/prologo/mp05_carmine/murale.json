@@ -1,0 +1,52 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp05_carmine",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   0
+  ],
+  "a": [
+   16,
+   18
+  ]
+ },
+ "camera": {
+  "nota": "prima solo la scritta sul fondo scuro, poi si scende sulla facciata; il portale si apre (il motore copre il buio delle porte con i battenti chiusi, zone in 'porte'), poi la coppia di perdoni avanza piano verso chi guarda, con il dondolio della nazzicata fatto dallo shader",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   135
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   256,
+   153
+  ]
+ },
+ "figure": [
+  {
+   "nome": "perdoni",
+   "file": "figura_perdoni.png",
+   "x": 278,
+   "y": 164,
+   "misura": [
+    91,
+    122
+   ],
+   "profondita": 1.0,
+   "nota": "la prima posta: esce dalle porte e avanza, ingrandendosi appena; il dondolio (nazzicata) lo fa lo shader. Piccola, è anche la posta lungo il muro di MP06"
+  }
+ ],
+ "colori": 93,
+ "fonte": "ChatGPT (OpenAI), da solo testo; ridotto in pixel art dai nostri script"
+}

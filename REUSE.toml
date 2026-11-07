@@ -22,6 +22,7 @@ path = [
   "game/assets/props/**",
   "game/assets/fx/**",
   "game/assets/ui/**",
+  "game/assets/murales/**",
   "game/assets/fonts/**",
   "game/assets/sfx/**",
   "game/data/levels/**",

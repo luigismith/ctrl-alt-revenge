@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp01_nube",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "si parte dal dettaglio delle volute e si arretra fino alla vignetta intera; poi lo shader scopre il cemento del pilone",
+  "zoom_da": 2,
+  "centro_da": [
+   300,
+   120
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   256,
+   144
+  ]
+ },
+ "colori": 90,
+ "fonte": "ChatGPT (OpenAI), da solo testo; ridotto in pixel art dai nostri script"
+}

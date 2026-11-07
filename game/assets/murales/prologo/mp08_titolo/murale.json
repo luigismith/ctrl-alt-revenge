@@ -1,0 +1,21 @@
+{
+ "nota": "vignetta dei murales di Totò senza immagine nuova: riusa MP06 e il logo del titolo",
+ "id": "mp08_titolo",
+ "capitolo": "prologo",
+ "misura": [480, 270],
+ "schermo": [480, 270],
+ "riusa": {
+  "murale": "res://assets/murales/prologo/mp06_cimitero/",
+  "logo": "res://assets/ui/title_logo.png"
+ },
+ "logo": {
+  "pos": [140, 10],
+  "nota": "al centro del cielo, sopra GIG (il logo è 199x80); si spruzza lettera dopo lettera da sinistra (lo shader dello spray con murale_rivela) e poi cola"
+ },
+ "passaggio": {
+  "nota": "dissolvenza da MP06 allo sfondo del prologo nel motore, che combacia pixel per pixel a cam_x 0 e cam_y 230: i contorni grossi si sciolgono nei pixel del gioco dal centro verso i bordi; la figura di GIG (figura_gig.png, a 203,137 col contorno di 2 px) sfuma nello sprite",
+  "centro": [240, 190],
+  "camera": {"x": 0, "y": 230}
+ },
+ "fonte": "nessuna immagine nuova: MP06 e il logo del gioco"
+}

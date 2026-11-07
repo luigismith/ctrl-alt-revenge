@@ -108,6 +108,9 @@ def build_far(basi: Path) -> tuple[np.ndarray, int]:
     rgb = out[..., :3].astype(int)
     menta = (rgb[..., 1] > rgb[..., 0] + 6) & (rgb[..., 1] > 180)
     out[menta, :3] = (250, 244, 230)
+    # e sopra il bianco i contenuti del 2087: ARIA+ e SIDERA (tools/ambienti/schermi_torre.py)
+    import schermi_torre
+    schermi_torre.disegna(out, schermi_torre.trova(out))
     return out, h
 
 

@@ -1,0 +1,57 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp10_registro",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   24,
+   9
+  ],
+  "a": [
+   8,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "ricordo di Mimmo, vignetta 2 (circa 7 s): scorrimento lento verso l'occhio; le righe del registro (scritte, nell'ordine) compaiono una alla volta con il passo delle battute, l'ultima lampeggia; a ogni riga la palpebra si stringe (nostro script); alla fine l'occhio si chiude e il murale torna gioco. Nella pupilla il motore mette il logo ARIA+ menta, come in MP07a. Niente cyan: l'occhio è acceso, ma è il 2086."
+ },
+ "pupilla": {
+  "centro": [
+   203,
+   121
+  ],
+  "raggio": 7
+ },
+ "scritte": [
+  {
+   "nome": "registro_1",
+   "file": "scritta_registro_1.png",
+   "testo": "MANODOPERA N. 2 · REGISTRO 1-2/11/2086"
+  },
+  {
+   "nome": "registro_2",
+   "file": "scritta_registro_2.png",
+   "testo": "MODALITÀ TURNO: 7 ORE · CUPOLE, SETTORE RISERVATO"
+  },
+  {
+   "nome": "registro_3",
+   "file": "scritta_registro_3.png",
+   "testo": "RIENTRO A DOMICILIO: 5.50"
+  },
+  {
+   "nome": "registro_4",
+   "file": "scritta_registro_4.png",
+   "testo": "TITOLARE NON RILEVATO · ABBONAMENTO SOSPESO"
+  }
+ ],
+ "colori": 90,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di gig_spento; ridotto in pixel art dai nostri script; scritte di pixfont"
+}

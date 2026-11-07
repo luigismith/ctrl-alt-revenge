@@ -1,0 +1,45 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp07a_occhio",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "spinta lentissima verso l'occhio; nella pupilla (centro 227,165, raggio 6 px) il motore fa lampeggiare il logo ARIA+ bianco e menta; la palpebra che si chiude una volta la fa il nostro script, come per il primo piano del gioco",
+  "zoom_da": 1,
+  "centro_da": [
+   256,
+   144
+  ],
+  "zoom_a": 2,
+  "centro_a": [
+   227,
+   160
+  ]
+ },
+ "pupilla": {
+  "centro": [
+   227,
+   165
+  ],
+  "raggio": 6
+ },
+ "colori": 84,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di gig_spento; ridotto in pixel art dai nostri script"
+}

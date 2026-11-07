@@ -1,0 +1,64 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "mp13_tetti",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   18
+  ],
+  "a": [
+   16,
+   0
+  ]
+ },
+ "camera": {
+  "nota": "parte dal salto fermo (zoom 2 su GIG e la scia cyan), poi allarga e sale verso il titolo; la pioggia è di particelle, il cyan del braccio pulsa una volta",
+  "zoom_da": 2,
+  "centro_da": [
+   240,
+   130
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   256,
+   144
+  ]
+ },
+ "figure": [
+  {
+   "nome": "gig",
+   "file": "figura_gig.png",
+   "x": 196,
+   "y": 62,
+   "misura": [
+    90,
+    135
+   ],
+   "profondita": 1.0,
+   "nota": "GIG in salto sopra il lucernario aperto; il braccio sinistro (a destra nel quadro) cyber, con gli anelli; la scia cyan dell'ugello (l'unico cyan del prologo) la disegna murale.py: la base v2 è la v1 senza il getto"
+  },
+  {
+   "nome": "toto",
+   "file": "figura_toto.png",
+   "x": 402,
+   "y": 160,
+   "misura": [
+    37,
+    48
+   ],
+   "profondita": 0.6,
+   "nota": "Totò a 11 anni, accucciato sotto la tettoia del lavatoio, guarda in su; specchiato, perché guardi in su verso GIG a sinistra"
+  }
+ ],
+ "colori": 92,
+ "fonte": "ChatGPT (OpenAI), da nostri render e da testo; ridotto in pixel art dai nostri script"
+}
