@@ -41,6 +41,7 @@ window/vsync/vsync_mode=1
 
 [editor]
 
+export/convert_text_resources_to_binary=false
 movie_writer/fps=60
 movie_writer/mix_rate=48000
 
