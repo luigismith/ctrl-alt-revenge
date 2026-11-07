@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Esegue Godot 4.7.2 (su Windows l'eseguibile console, sul Mac quello dentro Godot.app) sul
-# progetto game/ con timeout e file di log, poi controlla il log. Il progetto si cambia con la
+# Esegue Godot 4.7.2 (su Windows l'eseguibile console, sul Mac quello dentro Godot.app, su Linux
+# quello per x86_64; oppure quello della variabile GODOT) sul progetto game/ con timeout e file di log, poi controlla il log. Il progetto si cambia con la
 # variabile GODOT_PROJECT (cartella con project.godot, assoluta o relativa alla radice del
 # repository; predefinita: game/), mai con un secondo --path. Fallisce se:
 #   - il codice d'uscita non è 0 (124 = timeout);
@@ -16,19 +16,30 @@
 #   GODOT_PROJECT=tools/fxui/out/godot_check tools/run_godot.sh 60 --headless --import
 set -u
 
-if [ "$(uname -s)" = "Darwin" ]; then
-  # Mac: il laboratorio in ~/ctrlaltrevenge-lab, con Godot.app; i percorsi restano quelli di Unix
-  LAB="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}"
-  GODOT="$LAB/tools/godot-4.7.2/Godot.app/Contents/MacOS/Godot"
-  unix_path() { printf '%s' "$1"; }
-  native_path() { printf '%s' "$1"; }
-else
-  # Git Bash su Windows: Godot vuole i percorsi di Windows
-  LAB="$(cygpath -u "${CAR_LAB:-${USERPROFILE}\\ctrlaltrevenge-lab}")"
-  GODOT="$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_win64_console.exe"
-  unix_path() { cygpath -u "$1"; }
-  native_path() { cygpath -w "$1"; }
-fi
+# L'eseguibile si può dare con la variabile GODOT (un percorso o un nome nel PATH): la usa la CI.
+case "$(uname -s)" in
+  Darwin)
+    # Mac: il laboratorio in ~/ctrlaltrevenge-lab, con Godot.app; i percorsi restano quelli di Unix
+    LAB="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}"
+    GODOT="${GODOT:-$LAB/tools/godot-4.7.2/Godot.app/Contents/MacOS/Godot}"
+    unix_path() { printf '%s' "$1"; }
+    native_path() { printf '%s' "$1"; }
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    # Git Bash su Windows: Godot vuole i percorsi di Windows
+    LAB="$(cygpath -u "${CAR_LAB:-${USERPROFILE}\\ctrlaltrevenge-lab}")"
+    GODOT="${GODOT:-$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_win64_console.exe}"
+    unix_path() { cygpath -u "$1"; }
+    native_path() { cygpath -w "$1"; }
+    ;;
+  *)
+    # Linux (la CI di GitHub, o WSL): l'eseguibile del laboratorio, se manca la variabile GODOT
+    LAB="${CAR_LAB:-$HOME/ctrlaltrevenge-lab}"
+    GODOT="${GODOT:-$LAB/tools/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64}"
+    unix_path() { printf '%s' "$1"; }
+    native_path() { printf '%s' "$1"; }
+    ;;
+esac
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="${GODOT_PROJECT:-$ROOT/game}"
 case "$PROJECT" in
@@ -37,7 +48,7 @@ case "$PROJECT" in
 esac
 PROJECT="$(unix_path "$PROJECT")"
 
-if [ ! -x "$GODOT" ]; then
+if ! command -v "$GODOT" >/dev/null 2>&1; then
   echo "Godot non trovato: $GODOT" >&2
   exit 3
 fi

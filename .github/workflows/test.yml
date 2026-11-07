@@ -1,0 +1,102 @@
+# I test del repo, su ogni push di sviluppo e di master: lo stesso controllo che si lancia in locale,
+# tools/verifica.sh (importazione di Godot 4.7.2, la suite dei test con i replay e i loro hash, la
+# guardia degli asset e la build del sito). Non pubblica niente.
+#
+# Lo chiama anche sito.yml (workflow_call), prima di costruire e pubblicare: su master il sito
+# parte solo se questi test passano. Da sviluppo non si pubblica mai, il sito ammette solo master.
+#
+# Le battute del prologo non sono nel repo (decisione 68): qui mancano, e i test che le leggono si
+# saltano da soli, come su un PC senza la cartella privata.
+
+name: Test
+
+on:
+  push:
+    branches: [sviluppo, master]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.7.2"
+  # Lo stesso SHA-512 di sito.yml, da SHA512-SUMS.txt della release 4.7.2-stable di
+  # godotengine/godot-builds. Se si cambia versione, si cambia in tutti e due i file.
+  GODOT_LINUX_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+
+jobs:
+  test:
+    name: Test, replay e controlli
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Un giro alla volta per ramo: sui push di fila resta solo l'ultimo. Quando lo chiama sito.yml
+    # il gruppo è un altro e non si annulla niente, perché il sito aspetta questo esito.
+    concurrency:
+      group: test-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.workflow == 'Test' }}
+    steps:
+      - name: Scarica il repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Solo l'eseguibile per Linux (circa 70 MB): ai test i modelli d'esportazione non servono.
+      - name: Ripristina Godot dalla cache
+        id: cache-godot
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/godot-test
+          key: godot-${{ env.GODOT_VERSION }}-linux-test-${{ env.GODOT_LINUX_SHA512 }}
+
+      - name: Scarica e verifica Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          bin="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          dl="$RUNNER_TEMP/godot-download"
+          mkdir -p "$dl" "$HOME/godot-test"
+          curl -fsSL --retry 3 -o "$dl/$bin.zip" "$base/$bin.zip"
+          (cd "$dl" && printf '%s  %s\n' "$GODOT_LINUX_SHA512" "$bin.zip" | sha512sum -c -)
+          unzip -q -j "$dl/$bin.zip" "$bin" -d "$HOME/godot-test"
+          chmod +x "$HOME/godot-test/$bin"
+          # Modalità autonoma (file _sc_): le impostazioni restano accanto all'eseguibile.
+          touch "$HOME/godot-test/_sc_"
+          rm -rf "$dl"
+          (cd "$HOME/godot-test" && sha512sum "$bin" > estratti.sha512)
+
+      - name: Salva Godot nella cache
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/godot-test
+          key: ${{ steps.cache-godot.outputs.cache-primary-key }}
+
+      - name: Controlla Godot
+        run: |
+          set -euo pipefail
+          (cd "$HOME/godot-test" && sha512sum -c --quiet estratti.sha512)
+          "$HOME/godot-test/Godot_v${GODOT_VERSION}-stable_linux.x86_64" --headless --version
+
+      # Il riassunto corto va anche nella pagina del giro; il codice d'uscita è quello della verifica.
+      - name: Verifica
+        run: |
+          set -uo pipefail
+          export GODOT="$HOME/godot-test/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          bash tools/verifica.sh | tee "$RUNNER_TEMP/riassunto.txt"
+          code=${PIPESTATUS[0]}
+          { echo '```'; cat "$RUNNER_TEMP/riassunto.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
+
+      # Se qualcosa fallisce, il log intero e quelli di Godot si scaricano dalla pagina del giro.
+      - name: Allega i log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: log-della-verifica
+          path: |
+            tools/out/verifica/*.log
+            tools/out/logs/
+          retention-days: 7
+          if-no-files-found: ignore
