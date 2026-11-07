@@ -16,10 +16,10 @@ i prompt stanno nella cartella privata condivisa (ambienti-ai/sotto-la-linea), n
   galleria e cupole, rimontati in modo che la torre cada nella finestra della partenza e le cupole in quella
   dell'arena. La cima della torre si scioglie nella polvere con un retino.
 
-Il piano mid (i palazzi) per ora resta quello di warped.py.
+Con --mid fa anche il piano dei palazzi (mid.png, mid_emis.png).
 
-  python -I tools/env/taranto.py [--basi CARTELLA] [--uscita CARTELLA]
-Scrive sky.png, far.png, far_emis.png (+ _x3) e taranto_info.json.
+  python -I tools/env/taranto.py [--basi CARTELLA] [--uscita CARTELLA] [--mid]
+Scrive sky.png, far.png, far_emis.png (+ _x3), con --mid anche mid.png e mid_emis.png, e taranto_info.json.
 """
 import argparse
 import json
@@ -188,6 +188,63 @@ def emissive(far, tower_cx):
     return em
 
 
+# --- Piano dei palazzi (mid) -------------------------------------------------------------------------
+MID_BASES = ("e02_medio_notte_v1.png", "e03_medio_notte_v1.png")
+MID_Y = E.px(14)                        # 18: come prima
+MID_W = int(E.SCREEN_W + (E.LEVEL_W - E.SCREEN_W) * 0.25)    # 960
+MID_H = E.SCREEN_H - MID_Y + 7          # 259
+MID_SCALE = 0.247                       # palazzine di 5 piani alte ~150 px, i tetti fra le righe 4 e 30
+MID_DY = -2                             # i tetti di e02 (riga 30 del foglio) cadono alla riga 28 (schermo 46)
+# Dai due fogli ridotti (476x202), in pixel ridotti: (foglio, x0, x1)
+MID_PIECES = {
+    "bianche": (0, 0, 228),             # e02: due palazzine bianche col vano scala in mezzo
+    "palma": (0, 228, 256),             # e02: il vicolo con la palma
+    "gialle": (0, 256, 476),            # e02: due palazzine gialle
+    "rosa": (1, 0, 80),                 # e03: la palazzina rosa, alta
+    "bottega": (1, 80, 205),            # e03: la palazzina con la bottega al piano terra
+    "vicolo": (1, 205, 250),            # e03: il vicolo coi fili della luce, case basse in fondo
+    "verde": (1, 250, 395),             # e03: la palazzina verde col pergolato e la Madonnina
+    "alta": (1, 395, 476),              # e03: la palazzina bianca alta (il tetto è fuori dal foglio)
+}
+# (pezzo, x, specchiato). Il varco x 80-330 lascia vedere la torre dalla finestra della partenza (come prima);
+# fra x 586 e 790 non c'è niente, così dalla finestra dell'arena si vedono le cupole dietro.
+MID_PLACE = [("rosa", 0, False), ("bianche", 330, False), ("palma", 558, False),
+             ("verde", 790, False), ("alta", 935, False)]
+NIGHT = np.array([0.50, 0.40, 0.58], np.float32)    # quanto resta di r, g, b nei colori non accesi
+NIGHT_ADD = np.array([10, 4, 18], np.float32)       # e la spinta verso il prugna
+
+
+def build_mid(basi):
+    """I palazzi dei Tamburi fra la strada e la fabbrica, di notte sotto la polvere rossa: dalle due notti di
+    ChatGPT (e02, e03), con le tapparelle abbassate e la luce che filtra (ordinanza del Wind Day: finestre
+    chiuse) e senza panni stesi. Una sola tavolozza per i due fogli; i colori non accesi si scuriscono verso
+    il prugna, le luci restano. Dalle finestre se ne vedono solo le cime (righe 14-73)."""
+    ims = [Image.open(os.path.join(basi, n)).convert("RGB") for n in MID_BASES]
+    W, H = ims[0].size
+    both = Image.new("RGB", (W, 2 * H))
+    both.paste(ims[0], (0, 0))
+    both.paste(ims[1].resize((W, H), Image.LANCZOS), (0, H))
+    sh, _ = px.pixelize(both, (round(W * MID_SCALE), round(2 * H * MID_SCALE)), 28, key_magenta=True)
+    h = sh.shape[0] // 2
+    sh = sh.copy()
+    dark = (sh[..., 3] > 0) & ~_lit(sh)
+    c = sh[..., :3].astype(np.float32)
+    c[dark] = c[dark] * NIGHT + NIGHT_ADD
+    sh[..., :3] = c.clip(0, 255).astype(np.uint8)
+    mid = np.zeros((MID_H, MID_W, 4), np.uint8)
+    for name, x, flip in MID_PLACE:
+        s, a, b = MID_PIECES[name]
+        p = sh[s * h:(s + 1) * h, a:b]
+        p = p[:, ::-1] if flip else p
+        # in fondo ogni colonna ripete la sua ultima riga fino al bordo del piano
+        ext = MID_H - MID_DY - p.shape[0]
+        if ext > 0:
+            p = np.concatenate([p, np.repeat(p[-1:], ext, 0)], 0)
+        _paste(mid, p, x, MID_DY)
+    mid[mid[..., 3] == 0, :3] = 0
+    return mid
+
+
 def _lit(a):
     """I pixel accesi: chiari e saturi (segnali, fari, finestre) o quasi bianchi (schermi)."""
     rgb = a[..., :3].astype(np.float32) / 255
@@ -213,7 +270,7 @@ def dim(a, k):
     return out
 
 
-def build(basi=BASI, out_dir=None):
+def build(basi=BASI, out_dir=None, mid=False):
     out_dir = out_dir or os.path.join(E.OUT, "layers")
     os.makedirs(out_dir, exist_ok=True)
     sky = build_sky(basi)
@@ -222,6 +279,14 @@ def build(basi=BASI, out_dir=None):
     E.save_rgba(os.path.join(out_dir, "far.png"), far, 3)
     E.save_rgba(os.path.join(out_dir, "far_emis.png"), dim(emissive(far, tower_cx), 0.6), 0)
     info = dict(sky=dict(y=0, w=sky.shape[1], h=sky.shape[0]), far=dict(y=FAR_Y, w=far.shape[1], h=far.shape[0]))
+    if mid:
+        m = build_mid(basi)
+        em = np.zeros_like(m)
+        lit = _lit(m)
+        em[lit] = m[lit]
+        E.save_rgba(os.path.join(out_dir, "mid.png"), m, 3)
+        E.save_rgba(os.path.join(out_dir, "mid_emis.png"), dim(em, 0.5), 0)
+        info["mid"] = dict(y=MID_Y, w=m.shape[1], h=m.shape[0])
     json.dump(info, open(os.path.join(out_dir, "taranto_info.json"), "w"), indent=1)
     print("[taranto]", info)
     return info
@@ -231,5 +296,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--basi", default=BASI)
     ap.add_argument("--uscita", default=None)
+    ap.add_argument("--mid", action="store_true", help="anche il piano dei palazzi (mid.png, mid_emis.png)")
     a = ap.parse_args()
-    build(a.basi, a.uscita)
+    build(a.basi, a.uscita, a.mid)
