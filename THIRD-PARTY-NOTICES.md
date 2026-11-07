@@ -71,6 +71,13 @@ Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi 
 
 Sono nostri, senza materiale di terze parti: i font **CAR Pixel** (regolare e grassetto), gli effetti visivi e l'interfaccia, disegnati da script in `tools/fxui/`.
 
+## Voci sintetiche (fuori dal repository)
+
+Le voci dei filmati, cioè SIDERA e le sue macchine, il messo e Tere, si preparano in locale con gli script di `tools/voci/`. I file audio non stanno in questo repository.
+
+- **Qwen3-TTS**, del team Qwen di Alibaba, sotto licenza Apache-2.0. Genera le voci (https://github.com/Qwen/Qwen3-TTS).
+- **Whisper base**, di OpenAI, sotto licenza MIT. Trascrive le prese di ogni battuta: tiene quella che dice meglio il testo e dà i tempi delle parole per la bocca dei personaggi.
+
 ## Musica segnaposto (fuori dal repository)
 
 Finché non arrivano i brani definitivi, le build locali usano musica CC0. Questi file non sono in questo repository.

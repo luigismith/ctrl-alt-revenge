@@ -1,0 +1,445 @@
+<!doctype html>
+<!-- SPDX-FileCopyrightText: 2026 Luigi Massari -->
+<!-- SPDX-License-Identifier: MIT -->
+<!-- La pagina per scegliere le voci a orecchio. Il codice sta nel repo; audio, battute e testi delle scene arrivano
+     da dati.json e tv.json, che scrivono scelta.py e scelta_tv.py nel laboratorio. Si apre con apri_scelta.cmd. -->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scelta delle voci</title>
+<style>
+:root{
+  --bg:#0d1014; --pannello:#151a20; --pannello2:#1b222a; --linea:#2a333d; --testo:#e8ecef; --tenue:#8d99a6; --fioco:#5d6874;
+  --messo:#5ee0d6; --messo-f:rgba(94,224,214,.12); --tere:#ffb15c; --tere-f:rgba(255,177,92,.12);
+  --rosso:#ff6b6b; --verde:#8be38b; --giallo:#ffd166;
+  --mono:"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",monospace;
+  --sans:"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--testo);font:15px/1.5 var(--sans);padding-bottom:110px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header{padding:40px 0 24px;border-bottom:1px solid var(--linea);margin-bottom:28px}
+.sopra{font:600 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--fioco)}
+h1{font-size:34px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
+h1 b{color:var(--tere)}
+.intro{color:var(--tenue);max-width:760px;margin:0}
+.legenda{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px;font-size:13px;color:var(--tenue)}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+h2{font:600 13px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--tenue);margin:44px 0 14px;display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--linea)}
+.voci{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.voce{background:var(--pannello);border:1px solid var(--linea);border-radius:10px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:10px}
+.voce:hover{border-color:#3b4652}
+.voce.sel{border-color:var(--tere);background:linear-gradient(var(--tere-f),var(--tere-f)),var(--pannello)}
+.voce .tit{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px}
+.voce .desc{color:var(--tenue);font-size:13.5px;margin:0}
+.voce .en{color:var(--fioco);font-size:12px;font-style:italic;margin:0}
+.voce video{width:100%;border-radius:6px;background:#000;aspect-ratio:16/9}
+.voce .manca{font-size:13px;color:var(--giallo)}
+.pallino{width:16px;height:16px;border-radius:50%;border:2px solid var(--fioco);flex:none;display:inline-block;position:relative}
+.sel .pallino,.presa.sel .pallino{border-color:currentColor}
+.sel .pallino::after,.presa.sel .pallino::after{content:"";position:absolute;inset:3px;border-radius:50%;background:currentColor}
+.voce.sel .tit{color:var(--tere)}
+.scena-nome{font:600 22px var(--sans);margin:44px 0 4px}
+.scena-sotto{color:var(--fioco);font-size:13px;margin:0 0 16px}
+.muta{display:flex;gap:12px;padding:8px 14px;color:var(--fioco);font-size:14px;border-left:2px solid var(--linea);margin:6px 0 6px 6px}
+.muta .chi{font:600 11px var(--mono);letter-spacing:.12em;padding-top:3px;min-width:46px}
+.battuta{background:var(--pannello);border:1px solid var(--linea);border-radius:12px;margin:14px 0;overflow:hidden}
+.battuta.messo{border-left:3px solid var(--messo)}
+.battuta.tere{border-left:3px solid var(--tere)}
+.testa{padding:16px 18px 12px;display:flex;gap:14px;align-items:flex-start}
+.chi-b{font:700 11px var(--mono);letter-spacing:.14em;padding:4px 8px;border-radius:4px;flex:none;margin-top:3px}
+.messo .chi-b{color:var(--messo);background:var(--messo-f)}
+.tere .chi-b{color:var(--tere);background:var(--tere-f)}
+.testo{font-size:19px;line-height:1.4;font-weight:500}
+.dove{display:block;font-size:12px;color:var(--fioco);font-weight:400;margin-top:2px}
+.fuoco{margin:0 18px 12px;padding:10px 12px;border-radius:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);font-size:13.5px;color:#f1dfb0}
+.fuoco b{color:var(--giallo)}
+.colonne{display:grid;gap:1px;background:var(--linea);border-top:1px solid var(--linea)}
+.colonne.c3{grid-template-columns:repeat(3,1fr)}
+.col{background:var(--pannello2);padding:10px 12px 12px}
+.col.altra{opacity:.62}
+.col.altra:hover{opacity:1}
+.col-tit{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fioco);margin:2px 0 8px;display:flex;justify-content:space-between;gap:8px}
+.col.scelta .col-tit{color:var(--tere)}
+.presa{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:9px 10px;border-radius:8px;border:1px solid transparent;cursor:pointer;margin:4px 0;color:var(--tenue)}
+.presa:hover{background:rgba(255,255,255,.03)}
+.presa.sel{border-color:currentColor;background:rgba(255,255,255,.035)}
+.messo .presa.sel{color:var(--messo)}
+.tere .presa.sel{color:var(--tere)}
+.presa .riga1{display:flex;align-items:center;gap:10px;min-width:0}
+.presa .nome{font:600 13px var(--mono);color:var(--testo)}
+.presa .info{font:12px var(--mono);color:var(--fioco)}
+.presa .sentito{grid-column:2;font-size:13px;color:var(--tenue)}
+.presa .sentito i{font-style:normal;color:var(--fioco)}
+.presa .sentito mark{background:rgba(255,107,107,.18);color:#ffb3b3;border-radius:3px;padding:0 2px}
+.presa .attrezzi{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.play{width:34px;height:34px;border-radius:50%;border:1px solid var(--linea);background:var(--bg);color:var(--testo);display:grid;place-items:center;cursor:pointer;flex:none;grid-row:span 3;align-self:start;padding:0}
+.play:hover{border-color:var(--tenue)}
+.play svg{width:14px;height:14px}
+.play.va{border-color:currentColor;color:inherit}
+.barra{height:3px;background:var(--linea);border-radius:2px;flex:1;min-width:40px;overflow:hidden}
+.barra i{display:block;height:100%;width:0;background:currentColor}
+.pill{font:600 11.5px var(--mono);padding:3px 8px;border-radius:20px;border:1px solid var(--linea);background:var(--bg);color:var(--tenue);cursor:pointer}
+.pill:hover{border-color:var(--tenue);color:var(--testo)}
+.badge{font:600 11px var(--mono);padding:2px 7px;border-radius:4px}
+.badge.ok{color:var(--verde);background:rgba(139,227,139,.1)}
+.badge.ko{color:var(--rosso);background:rgba(255,107,107,.1)}
+.badge.med{color:var(--giallo);background:rgba(255,209,102,.1)}
+.rifare{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:13px;color:var(--fioco);cursor:pointer;border-radius:8px;border:1px solid transparent;margin-top:4px}
+.rifare.sel{color:var(--rosso);border-color:rgba(255,107,107,.4)}
+.nota{padding:0 18px 14px;background:var(--pannello2)}
+.nota summary{cursor:pointer;color:var(--fioco);font-size:13px;padding:10px 0 4px;list-style:none}
+.nota summary::-webkit-details-marker{display:none}
+.nota summary::before{content:"＋ "}
+.nota[open] summary::before{content:"－ "}
+textarea{width:100%;min-height:58px;background:var(--bg);color:var(--testo);border:1px solid var(--linea);border-radius:8px;padding:8px 10px;font:14px/1.4 var(--sans);resize:vertical}
+textarea:focus{outline:none;border-color:var(--tenue)}
+.finale{background:var(--pannello);border:1px solid var(--linea);border-radius:12px;padding:16px 18px}
+.finale p{margin:0 0 10px;color:var(--tenue);font-size:14px}
+.piede{position:fixed;left:0;right:0;bottom:0;background:rgba(13,16,20,.92);backdrop-filter:blur(8px);border-top:1px solid var(--linea);z-index:5}
+.piede .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
+.stato{flex:1;font-size:13.5px;color:var(--tenue)}
+.stato b{color:var(--testo);font-weight:600}
+.salva{font:600 15px var(--sans);padding:12px 22px;border-radius:9px;border:0;background:var(--tere);color:#1a1206;cursor:pointer}
+.salva:hover{filter:brightness(1.08)}
+.salva:disabled{opacity:.5;cursor:default}
+.errore{color:var(--rosso)}
+/* ---------- il filtro TV */
+:root{--tv:#b8a3ff;--tv-f:rgba(184,163,255,.12)}
+.tv-intro{color:var(--tenue);max-width:820px;margin:0 0 14px;font-size:14px}
+.tv-intro b{color:var(--testo)}
+.livelli{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.livello{background:var(--pannello);border:1px solid var(--linea);border-radius:10px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.livello:hover{border-color:#3b4652}
+.livello.sel{border-color:var(--tv);background:linear-gradient(var(--tv-f),var(--tv-f)),var(--pannello)}
+.livello.sel .tit{color:var(--tv)}
+.livello.rif{cursor:default;border-style:dashed}
+.livello .tit{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px}
+.livello .desc{color:var(--tenue);font-size:13px;margin:0;flex:1}
+.livello .cons{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--tv)}
+.livello.rif .cons{color:var(--fioco)}
+.livello .scena-tutta{display:flex;flex-wrap:wrap;gap:6px}
+.tv-tab{background:var(--pannello);border:1px solid var(--linea);border-radius:12px;margin-top:14px;overflow:hidden}
+.tv-scena{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fioco);padding:12px 16px 6px;background:var(--pannello2)}
+.tv-riga{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:10px 16px;border-top:1px solid var(--linea)}
+.tv-riga .t{font-size:15px}
+.tv-riga .t .chi-b{margin:0 8px 0 0;display:inline-block;font-size:10px;padding:2px 6px}
+.tv-riga.messo .chi-b{color:var(--messo);background:var(--messo-f)}
+.tv-riga.tere .chi-b{color:var(--tere);background:var(--tere-f)}
+.tv-bott{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tvb{font:600 12px var(--mono);padding:6px 10px;border-radius:20px;border:1px solid var(--linea);background:var(--bg);color:var(--tenue);cursor:pointer;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden}
+.tvb:hover{border-color:var(--tenue);color:var(--testo)}
+.tvb.sel{border-color:var(--tv);color:var(--tv)}
+.tvb.va{color:var(--testo);border-color:var(--testo)}
+.tvb i{position:absolute;left:0;bottom:0;height:2px;width:0;background:currentColor}
+.tvb svg{width:10px;height:10px}
+.tv-nota{font-size:12.5px;color:var(--fioco);margin:10px 2px 0}
+.fatto{font-size:13.5px;color:var(--verde);background:rgba(139,227,139,.07);border:1px solid rgba(139,227,139,.25);border-radius:8px;padding:9px 12px;margin:0 0 14px}
+@media (max-width:860px){
+  .voci,.colonne.c3{grid-template-columns:1fr}
+  .livelli{grid-template-columns:1fr 1fr}
+  .tv-riga{grid-template-columns:1fr}
+  .tv-bott{justify-content:flex-start}
+  .col.altra{opacity:1}
+  h1{font-size:27px}
+  .testo{font-size:17px}
+  .testa{flex-direction:column;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="sopra">CTRL+ALT REVENGE · laboratorio · <span id="cap"></span></div>
+    <h1><span id="titolo">Le voci</span>: <b>ascolta e scegli</b></h1>
+    <p class="intro">Prima il suono della TV: le stesse battute a più intensità del filtro, per scegliere quanto devono sembrare uscite da un televisore a tubo. Sotto ci sono le voci e le prese di ogni battuta: si possono ancora cambiare. Quando hai finito, premi <b>Salva le scelte</b>: le legge Claude. Le voci restano su questo PC.</p>
+    <div class="legenda">
+      <span><span class="badge ok">Whisper ✓</span> Whisper ha capito tutte le lettere</span>
+      <span><span class="badge med">~2 lettere</span> lettere sentite male, spesso è Whisper che sbaglia</span>
+      <span><mark style="background:rgba(255,107,107,.18);color:#ffb3b3;border-radius:3px;padding:0 3px">parola</mark> dove Whisper ha sentito altro</span>
+    </div>
+  </header>
+
+  <h2>1 · Il suono della TV</h2>
+  <p class="tv-intro">Il filtro è l'ultimo passo, sopra il trattamento di ogni battuta: <b>banda stretta</b> da altoparlante piccolo, <b>un filo di saturazione</b> e di <b>compressione</b>, <b>la stanza</b> appena accennata e il <b>ronzio di riga</b> della TV, a 15.625 Hz (il PAL italiano). Il ronzio lo sentono soprattutto le orecchie giovani, e con le cuffie. Tutte le versioni hanno lo stesso volume, così il confronto è giusto. Scegli un livello cliccando la sua scheda; con i pulsanti delle battute passi da un livello all'altro sulla stessa frase.</p>
+  <div class="livelli" id="livelli"></div>
+  <div class="tv-tab" id="tv-tab"></div>
+  <p class="tv-nota" id="tv-nota"></p>
+
+  <h2>2 · La voce di Tere</h2>
+  <div class="fatto" id="fatto" hidden></div>
+  <div class="voci" id="voci"></div>
+
+  <div id="scene"></div>
+
+  <h2>Note per Claude</h2>
+  <div class="finale">
+    <p>Qualcosa che non va in generale: un tono, una pronuncia, una voce da rifare?</p>
+    <textarea id="nota-generale" placeholder="Per esempio: il messo più lento, Tere meno roca…"></textarea>
+  </div>
+</div>
+
+<div class="piede"><div class="wrap">
+  <div class="stato" id="stato">Caricamento…</div>
+  <button class="salva" id="salva" disabled>Salva le scelte</button>
+</div></div>
+
+<script>
+"use strict";
+// Descrizioni delle voci e nomi delle scene: dal blocco «pagina» di voci.json, attraverso dati.json.
+let IT = {}, NOMI_SCENA = {}, SOTTO_SCENA = {};
+const ICON_PLAY = '<svg viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>';
+const ICON_STOP = '<svg viewBox="0 0 14 14"><rect x="3" y="3" width="8" height="8" rx="1" fill="currentColor"/></svg>';
+
+let D = null, TV = null;
+const S = {voce_tere: null, messo: {}, tere: {}, note: {}, nota_generale: "", tv: null};
+let sporco = false, salvatoAlle = null;
+
+// ---------- audio
+let ctx = null; const buf = {}; let corrente = null;
+function ac(){ if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
+async function carica(f){
+  if(!buf[f]){ const r = await fetch(f); if(!r.ok) throw new Error(f); buf[f] = await ac().decodeAudioData(await r.arrayBuffer()); }
+  return buf[f];
+}
+function ferma(){
+  if(!corrente) return;
+  try{ corrente.src.stop(); }catch(e){}
+  corrente.btn.classList.remove("va"); corrente.btn.innerHTML = corrente.icona;
+  corrente.barra.style.width = "0"; cancelAnimationFrame(corrente.raf); corrente = null;
+}
+async function suona(f, btn, barra, da, a){
+  const era = corrente && corrente.btn === btn; ferma(); if(typeof fermaTv === "function") fermaTv(); if(era) return;
+  document.querySelectorAll("video").forEach(v=>v.pause());
+  const b = await carica(f); const c = ac(); if(c.state === "suspended") await c.resume();
+  const src = c.createBufferSource(); src.buffer = b; src.connect(c.destination);
+  const t0 = da||0, dur = (a!=null ? a : b.duration) - t0;
+  const icona = btn.innerHTML; btn.classList.add("va"); if(!btn.classList.contains("tvb")) btn.innerHTML = ICON_STOP;
+  const inizio = c.currentTime; src.start(0, t0, dur);
+  const me = {src, btn, barra, icona, raf:0}; corrente = me;
+  const passo = () => { if(corrente !== me) return; const p = Math.min(1, (c.currentTime - inizio)/dur);
+    barra.style.width = (100*(t0 + p*dur)/b.duration) + "%"; me.raf = requestAnimationFrame(passo); };
+  passo();
+  src.onended = () => { if(corrente === me) ferma(); };
+}
+
+// ---------- testo
+const norm = w => w.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9']/g,"").replace(/'/g,"");
+const lettere = s => (s.normalize("NFD").replace(/[̀-ͯ]/g,"").match(/[a-z0-9]/gi)||[]).length;
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function differenze(testo, sentito){
+  const A = testo.split(/\s+/).map(norm).filter(Boolean), Bw = sentito.split(/\s+/).filter(Boolean), B = Bw.map(norm);
+  const m = A.length, n = B.length, L = Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=m-1;i>=0;i--) for(let j=n-1;j>=0;j--) L[i][j] = A[i]===B[j] ? L[i+1][j+1]+1 : Math.max(L[i+1][j], L[i][j+1]);
+  const ok = new Set(); let i=0,j=0;
+  while(i<m && j<n){ if(A[i]===B[j]){ ok.add(j); i++; j++; } else if(L[i+1][j]>=L[i][j+1]) i++; else j++; }
+  return Bw.map((w,k)=> (ok.has(k) || !B[k]) ? esc(w) : "<mark>"+esc(w)+"</mark>").join(" ");
+}
+function badgeCer(p, testo){
+  if(p.cer === 0) return '<span class="badge ok">Whisper ✓</span>';
+  const n = Math.max(1, Math.round(p.cer * lettere(testo)));
+  return '<span class="badge '+(n>2?"ko":"med")+'">~'+n+(n===1?" lettera":" lettere")+'</span>';
+}
+
+// ---------- disegno
+function el(tag, cls, html){ const e = document.createElement(tag); if(cls) e.className = cls; if(html!=null) e.innerHTML = html; return e; }
+
+function disegnaVoci(){
+  const box = document.getElementById("voci"); box.innerHTML = "";
+  D.voci_tere.forEach(v => {
+    const c = el("div", "voce"+(S.voce_tere===v.nome?" sel":""));
+    c.innerHTML = '<div class="tit"><span class="pallino"></span>'+esc(v.titolo)+(v.nome===D.voce_tere_attuale?' <span class="badge med" style="color:var(--tenue);background:var(--pannello2)">proposta di Claude</span>':'')+'</div>'+
+      '<p class="desc">'+esc(IT[v.nome]||"")+'</p><p class="en">'+esc(v.descrizione)+'</p>';
+    if(v.demo){ const vid = el("video"); vid.controls = true; vid.preload = "metadata"; vid.src = v.demo; vid.addEventListener("play", ferma); vid.addEventListener("click", e=>e.stopPropagation()); c.appendChild(vid); }
+    else c.appendChild(el("div","manca", v.pronta ? "Demo non trovata." : "Prese non ancora pronte."));
+    c.addEventListener("click", () => { S.voce_tere = v.nome; segna(); disegnaVoci(); disegnaScene(); });
+    box.appendChild(c);
+  });
+}
+
+function rigaPresa(p, riga, gruppo, voce, idx){
+  const stato = riga.base === "messo" ? S.messo : (S.tere[voce] ||= {});
+  const r = el("div", "presa"+(stato[riga.key]===p.seme?" sel":""));
+  const play = el("button","play",ICON_PLAY); play.title = "Ascolta";
+  const barra = el("div","barra","<i></i>");
+  const r1 = el("div","riga1");
+  r1.appendChild(el("span","pallino"));
+  r1.appendChild(el("span","nome","Presa "+(idx+1)));
+  r1.appendChild(el("span","info","seme "+p.seme+" · "+p.durata_s.toFixed(1).replace(".",",")+" s"));
+  r1.appendChild(barra);
+  r.appendChild(play); r.appendChild(r1);
+  const sen = el("div","sentito");
+  sen.innerHTML = "<i>Whisper ha sentito:</i> «"+differenze(riga.testo, p.sentito)+"» "+badgeCer(p, riga.testo);
+  r.appendChild(sen);
+  if(p.clip || p.fruscio_ms!=null){
+    const at = el("div","attrezzi");
+    if(p.clip){ const b = el("button","pill","▶ solo "+(riga.fuoco?riga.fuoco.etichetta:"il pezzo")); b.addEventListener("click", e=>{ e.stopPropagation(); suona(p.file, play, barra.firstChild, p.clip[0], p.clip[1]); }); at.appendChild(b); }
+    if(p.fruscio_ms!=null){ const f = p.fruscio_ms; at.appendChild(el("span","badge "+(f>=15?"ok":(f<10?"ko":"med")), "fruscio "+f+" ms"+(f<10?" · g dura?":""))); }
+    r.appendChild(at);
+  }
+  play.addEventListener("click", e => { e.stopPropagation(); suona(p.file, play, barra.firstChild); });
+  r.addEventListener("click", () => { stato[riga.key] = p.seme; segna(); gruppo.querySelectorAll(".presa,.rifare").forEach(x=>x.classList.remove("sel")); r.classList.add("sel"); });
+  return r;
+}
+
+function rigaRifare(riga, gruppo, voce){
+  const stato = riga.base === "messo" ? S.messo : (S.tere[voce] ||= {});
+  const r = el("div","rifare"+(stato[riga.key]==="rifare"?" sel":""), '<span class="pallino"></span>Nessuna va bene: rifalla');
+  r.addEventListener("click", () => { stato[riga.key] = "rifare"; segna(); gruppo.querySelectorAll(".presa,.rifare").forEach(x=>x.classList.remove("sel")); r.classList.add("sel"); });
+  return r;
+}
+
+function disegnaScene(){
+  const box = document.getElementById("scene"); box.innerHTML = "";
+  let n = 2;
+  D.scene.forEach(sc => {
+    box.appendChild(el("h2", null, (n++)+" · "+esc(NOMI_SCENA[sc.scena]||sc.scena)));
+    box.appendChild(el("p","scena-sotto", esc(SOTTO_SCENA[sc.scena]||"")));
+    sc.righe.forEach(riga => {
+      if(!riga.voce){
+        const m = el("div","muta"); m.innerHTML = '<span class="chi">'+esc(riga.chi)+'</span><span>'+esc(riga.testo)+' <span style="color:#46505b">· testo a pressione, senza voce</span></span>'; box.appendChild(m); return;
+      }
+      const card = el("div","battuta "+riga.base);
+      card.innerHTML = '<div class="testa"><span class="chi-b">'+esc(riga.chi)+'</span><div class="testo">«'+esc(riga.testo)+'»'+(riga.dove?'<span class="dove">'+esc(riga.dove)+'</span>':'')+'</div></div>';
+      if(riga.fuoco) card.appendChild(el("div","fuoco","<b>Da ascoltare: "+esc(riga.fuoco.etichetta)+".</b> "+esc(riga.fuoco.nota)));
+      const voci = riga.base === "messo" ? [D.voce_messo.nome] : D.voci_tere.map(v=>v.nome).filter(v=>riga.prese[v]);
+      const cols = el("div","colonne"+(voci.length===3?" c3":""));
+      voci.forEach(v => {
+        const col = el("div","col"+(riga.base==="tere" ? (v===S.voce_tere?" scelta":" altra") : ""));
+        const tit = riga.base==="messo" ? D.voce_messo.titolo : (D.voci_tere.find(x=>x.nome===v)||{}).titolo;
+        col.appendChild(el("div","col-tit","<span>"+esc(tit||v)+"</span><span>"+(riga.base==="tere"?(v===S.voce_tere?"la voce scelta":"per confronto"):"")+"</span>"));
+        (riga.prese[v]||[]).forEach((p,i) => col.appendChild(rigaPresa(p, riga, col, v, i)));
+        col.appendChild(rigaRifare(riga, col, v));
+        cols.appendChild(col);
+      });
+      card.appendChild(cols);
+      const nota = el("details","nota"); const nt = S.note[riga.key]||"";
+      if(nt) nota.open = true;
+      nota.innerHTML = "<summary>Una nota su questa battuta</summary>";
+      const ta = el("textarea"); ta.value = nt; ta.placeholder = "Per esempio: più lenta, «Catà» più marcato…";
+      ta.addEventListener("input", () => { S.note[riga.key] = ta.value; segna(); });
+      nota.appendChild(ta); card.appendChild(nota);
+      box.appendChild(card);
+    });
+  });
+}
+
+// ---------- il filtro TV
+let tvSeq = null;
+function fermaTv(){ if(tvSeq){ tvSeq.vivo = false; if(tvSeq.src){ try{ tvSeq.src.stop(); }catch(e){} } tvSeq = null; } }
+function segnaTv(){
+  document.querySelectorAll(".livello").forEach(x => x.classList.toggle("sel", x.dataset.l === S.tv));
+  document.querySelectorAll(".tvb[data-l]").forEach(x => x.classList.toggle("sel", x.dataset.l === S.tv));
+}
+function disegnaTv(){
+  if(!TV){ document.getElementById("tv-tab").innerHTML = '<div class="tv-riga"><span class="errore">tv.json non trovato: va rifatto scelta_tv.py.</span></div>'; return; }
+  const box = document.getElementById("livelli"); box.innerHTML = "";
+  TV.livelli.forEach(L => {
+    const c = el("div", "livello"+(L.riferimento?" rif":"")+(S.tv===L.nome?" sel":""));
+    c.dataset.l = L.nome;
+    c.appendChild(el("div","tit",(L.riferimento?"":'<span class="pallino"></span>')+esc(L.titolo)));
+    if(L.proposta) c.appendChild(el("div","cons","La consigliata"));
+    if(L.riferimento) c.appendChild(el("div","cons","Solo per confronto"));
+    c.appendChild(el("p","desc",esc(L.descrizione)));
+    const sct = el("div","scena-tutta");
+    TV.scene.forEach(sc => { const b = el("button","tvb",ICON_PLAY+" "+esc(NOMI_SCENA[sc.scena]||sc.scena)+"<i></i>");
+      b.title = "Tutta la scena, una battuta dopo l'altra";
+      b.addEventListener("click", e => { e.stopPropagation(); suonaScena(sc.righe.map(r=>r.file[L.nome]), b); }); sct.appendChild(b); });
+    c.appendChild(sct);
+    if(!L.riferimento) c.addEventListener("click", () => { S.tv = L.nome; segna(); segnaTv(); });
+    box.appendChild(c);
+  });
+  const tab = document.getElementById("tv-tab"); tab.innerHTML = "";
+  TV.scene.forEach(sc => {
+    tab.appendChild(el("div","tv-scena",esc(NOMI_SCENA[sc.scena]||sc.scena)));
+    sc.righe.forEach(r => {
+      const row = el("div","tv-riga "+(r.chi==="MESSO"?"messo":"tere"));
+      row.appendChild(el("div","t",'<span class="chi-b">'+esc(r.chi)+'</span>'+esc(r.testo)));
+      const bb = el("div","tv-bott");
+      TV.livelli.forEach(L => {
+        const b = el("button","tvb"+(S.tv===L.nome?" sel":""), ICON_PLAY+" "+esc(L.proposta?"Proposta":L.titolo)+"<i></i>");
+        b.dataset.l = L.nome;
+        b.addEventListener("click", () => { fermaTv(); suona(r.file[L.nome], b, b.querySelector("i")); });
+        bb.appendChild(b);
+      });
+      row.appendChild(bb); tab.appendChild(row);
+    });
+  });
+  document.getElementById("tv-nota").textContent = "Anteprime fatte il "+TV.generato.replace(" "," alle ")+" dai file finali, con la stessa funzione che fa le voci del gioco. Campionamento "+String(TV.campionamento_hz/1000).replace(".",",")+" kHz.";
+}
+async function suonaScena(files, btn){
+  const era = tvSeq && tvSeq.btn === btn; fermaTv(); ferma(); if(era) return;
+  document.querySelectorAll("video").forEach(v=>v.pause());
+  const me = {vivo:true, btn, src:null}; tvSeq = me;
+  const barra = btn.querySelector("i");
+  btn.classList.add("va");
+  const c = ac(); if(c.state === "suspended") await c.resume();
+  for(let k=0; k<files.length && me.vivo; k++){
+    barra.style.width = (100*(k+1)/files.length)+"%";
+    const b = await carica(files[k]);
+    if(!me.vivo) break;
+    await new Promise(ok => {
+      const src = c.createBufferSource(); src.buffer = b; src.connect(c.destination); me.src = src;
+      src.onended = () => setTimeout(ok, me.vivo ? 450 : 0); src.start();
+    });
+  }
+  btn.classList.remove("va"); barra.style.width = "0"; if(tvSeq === me) tvSeq = null;
+}
+
+// ---------- stato e salvataggio
+function segna(){ sporco = true; aggiorna(); }
+function aggiorna(){
+  const st = document.getElementById("stato"), btn = document.getElementById("salva");
+  btn.disabled = !sporco;
+  const tot = D.scene.reduce((a,s)=>a+s.righe.filter(r=>r.voce).length,0);
+  const vt = (D.voci_tere.find(v=>v.nome===S.voce_tere)||{}).titolo||"?";
+  const rif = Object.values(S.messo).filter(x=>x==="rifare").length + Object.values(S.tere[S.voce_tere]||{}).filter(x=>x==="rifare").length;
+  const lt = TV ? ((TV.livelli.find(l=>l.nome===S.tv)||{}).titolo||"?") : "?";
+  st.innerHTML = "TV: <b>"+esc(lt)+"</b> · Tere: <b>"+esc(vt)+"</b> · "+tot+" battute con la voce"+(rif?" · <b>"+rif+" da rifare</b>":"")+" · "+
+    (sporco ? "<b>modifiche non salvate</b>" : (salvatoAlle ? "salvate alle "+esc(salvatoAlle) : "ancora le scelte di Claude"));
+}
+async function salva(){
+  const btn = document.getElementById("salva"); btn.disabled = true;
+  const corpo = {capitolo: D.capitolo, voce_tere: S.voce_tere, prese: {messo: S.messo, tere: S.tere}, note: Object.fromEntries(Object.entries(S.note).filter(([k,v])=>v.trim())), nota_generale: S.nota_generale, tv: S.tv};
+  try{
+    const r = await fetch("/salva", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(corpo)});
+    if(!r.ok) throw new Error(r.status);
+    const j = await r.json(); salvatoAlle = j.salvato.slice(11,16); sporco = false; aggiorna();
+  }catch(e){ document.getElementById("stato").innerHTML = '<span class="errore">Non salvato: il server è acceso? ('+esc(String(e.message||e))+')</span>'; btn.disabled = false; }
+}
+
+async function avvia(){
+  try{ D = await (await fetch("dati.json")).json(); }
+  catch(e){ document.getElementById("stato").innerHTML = '<span class="errore">dati.json non trovato: apri la pagina dal server (http://127.0.0.1:8765/).</span>'; return; }
+  document.getElementById("cap").textContent = D.capitolo + " · " + D.generato;
+  const P = D.pagina || {};
+  IT = P.descrizioni || {};
+  Object.entries(P.scene || {}).forEach(([k, v]) => { NOMI_SCENA[k] = v.nome; SOTTO_SCENA[k] = v.sotto || ""; });
+  if(P.titolo){ document.getElementById("titolo").textContent = P.titolo; document.title = P.titolo; }
+  if(P.fatto){ const f = document.getElementById("fatto"); f.textContent = P.fatto; f.hidden = false; }
+  S.voce_tere = D.voce_tere_attuale;
+  try{ const r = await fetch("tv.json"); if(r.ok){ TV = await r.json(); S.tv = TV.livello_attuale; } }catch(e){}
+  D.scene.forEach(sc => sc.righe.forEach(r => { if(!r.voce) return;
+    Object.entries(r.attuale).forEach(([v,seme]) => { if(r.base==="messo") S.messo[r.key] = seme; else (S.tere[v] ||= {})[r.key] = seme; }); }));
+  try{
+    const r = await fetch("scelte_luigi.json");
+    if(r.ok){ const j = await r.json();
+      if(j.voce_tere) S.voce_tere = j.voce_tere;
+      if(j.tv) S.tv = j.tv;
+      Object.assign(S.messo, (j.prese||{}).messo||{});
+      Object.entries((j.prese||{}).tere||{}).forEach(([v,o]) => Object.assign(S.tere[v] ||= {}, o));
+      S.note = j.note||{}; S.nota_generale = j.nota_generale||""; salvatoAlle = (j.salvato||"").slice(11,16)||null; }
+  }catch(e){}
+  const ng = document.getElementById("nota-generale"); ng.value = S.nota_generale;
+  ng.addEventListener("input", () => { S.nota_generale = ng.value; segna(); });
+  document.getElementById("salva").addEventListener("click", salva);
+  window.addEventListener("beforeunload", e => { if(sporco){ e.preventDefault(); e.returnValue = ""; } });
+  disegnaTv(); disegnaVoci(); disegnaScene(); aggiorna();
+}
+avvia();
+</script>
+</body>
+</html>
