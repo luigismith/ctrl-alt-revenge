@@ -6,6 +6,93 @@
   "x": 2760,
   "y": 200
  },
+ "emissione": {
+  "image": "a4_emis.png",
+  "x": 2760,
+  "y": 200
+ },
+ "luci": [
+  {
+   "nome": "arco",
+   "x": 2990,
+   "y": 640,
+   "colore": "#ecbca0",
+   "energia": 0.3,
+   "raggio": 110,
+   "altezza": 20,
+   "alone": {
+    "energia": 0.16,
+    "raggio": 140,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "vano",
+   "x": 3810,
+   "y": 520,
+   "colore": "#cee0f4",
+   "energia": 0.4,
+   "raggio": 120,
+   "altezza": 40,
+   "pozza": {
+    "energia": 0.22,
+    "larghezza": 140,
+    "x": 3820,
+    "y": 680
+   }
+  },
+  {
+   "nome": "crollo",
+   "x": 4180,
+   "y": 520,
+   "colore": "#c4ccda",
+   "energia": 0.36,
+   "raggio": 140,
+   "altezza": 40,
+   "pozza": {
+    "energia": 0.24,
+    "larghezza": 200,
+    "x": 4198,
+    "y": 682
+   }
+  },
+  {
+   "nome": "cancello",
+   "x": 4530,
+   "y": 640,
+   "colore": "#bcc4d2",
+   "energia": 0.26,
+   "raggio": 90,
+   "altezza": 20
+  },
+  {
+   "nome": "uscita",
+   "x": 2930,
+   "y": 516,
+   "colore": "#5ce08c",
+   "energia": 0.14,
+   "raggio": 46,
+   "altezza": 10
+  },
+  {
+   "nome": "lumini_0",
+   "x": 3057,
+   "y": 479,
+   "colore": "#ffa858",
+   "energia": 0.16,
+   "raggio": 44,
+   "altezza": 10
+  },
+  {
+   "nome": "lumini_1",
+   "x": 3633,
+   "y": 643,
+   "colore": "#ffa858",
+   "energia": 0.16,
+   "raggio": 44,
+   "altezza": 10
+  }
+ ],
  "fondo_aperto_da": 2760,
  "davanti": {
   "image": "a4_davanti.png",
@@ -17,7 +104,51 @@
   "x_from": 2760,
   "x_to": 3900,
   "fade_in": 60,
-  "fade_out": 100
+  "fade_out": 100,
+  "solo_dentro": true
+ },
+ "copertura": {
+  "image": "a4_copertura.png",
+  "x": 2876,
+  "y": 432,
+  "zona": "galleria",
+  "sfuma_s": 0.3,
+  "nota": "sopra la scena, la porticina e le cose dentro la zona; sotto le ante del cancello, GIG e gli stipiti. Piena quando GIG è fuori dalla zona, sfuma a 0 in 0,3 s quando entra, e torna quando esce."
+ },
+ "stipiti": [
+  {
+   "image": "a4_stipite_arco.png",
+   "x": 2876,
+   "y": 540,
+   "z": "sopra GIG"
+  },
+  {
+   "image": "a4_stipite_cancello.png",
+   "x": 4536,
+   "y": 520,
+   "z": "sopra GIG"
+  }
+ ],
+ "zona": {
+  "nome": "galleria",
+  "x0": 2940,
+  "x1": 4580,
+  "y0": 432,
+  "y1": 680,
+  "nota": "dentro = i piedi di GIG fra x0 e x1 e sotto y0 (la riga dei coppi, 432)"
+ },
+ "telecamera": {
+  "fuori_da_A3": {
+   "limite_destro": 2984
+  },
+  "fuori_da_A5": {
+   "limite_sinistro": 4536
+  },
+  "dentro": {
+   "limite_sinistro": 2876,
+   "limite_destro": 4624,
+   "limite_alto": 432
+  }
  },
  "stati": {
   "porta_intera": {
@@ -32,21 +163,21 @@
   },
   "cancello_chiuso": {
    "image": "a4_cancello_chiuso.png",
-   "x": 4560,
-   "y": 580
+   "x": 4548,
+   "y": 540
   },
   "cancello_aperto": {
    "image": "a4_cancello_aperto.png",
-   "x": 4560,
-   "y": 580
+   "x": 4548,
+   "y": 540
   }
  },
- "sfumatura": "Il cielo, il lontano, le cappelle e le lapidi dietro la galleria sono i piani larghi di tutto A (../a/a_larghi.json), con i tre veli: rosa, scirocco, pioggia. Qui restano la scena, le colonne davanti e i pezzi alla scala di gioco: la moto del rider in A5 dopo il cancello. Il cartellone ETERNA è nella scena di A6, oltre il muro.",
  "pezzi": {
   "moto_rider": {
    "image": "a4_moto_rider.png",
    "x": 4665,
-   "y": 610
+   "y": 592,
+   "nota": "rifatta più grande: 1,87 m di lunghezza; sostituisce quella di game/assets/env/prologo/v2/a4"
   }
  }
 }

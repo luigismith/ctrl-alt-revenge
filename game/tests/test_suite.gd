@@ -75,6 +75,7 @@ func run(tree_root: Node) -> bool:
 	_test_rider_frenzy()
 	_test_prologue()
 	_test_prologue_v2()
+	_test_prologue_interiors()
 	_test_scene_files()
 	_test_pignoramento()
 	_test_rinforzi()
@@ -3812,6 +3813,101 @@ func _test_ldtk_levels() -> void:
 
 ## Il prologo nuovo, in due livelli dello stesso file: la partenza sotto l'introduzione, le ripartenze
 ## di A e di B, la leva del cancello, il passaggio da A a B e la fine, sempre uguali da un giro all'altro.
+## Gli interni del prologo v2 (la galleria A4): le zone di LDtk, la copertura, le ante e gli stipiti,
+## lo stacco di 0,3 s, i limiti della telecamera e niente pioggia dentro. Tutto solo disegno.
+func _test_prologue_interiors() -> void:
+	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	var names: Array = room._interiors.map(func(z: Dictionary) -> String: return z["nome"])
+	var gal: Dictionary = room._interiors[names.find("galleria")] if names.has("galleria") else {}
+	var dry := false
+	for r: Rect2 in room.weather.dry:
+		dry = dry or (not gal.is_empty() and r == gal["rect"])
+	check(names.has("galleria") and names.has("deposito") and gal["rect"] == Rect2(2940, 432, 1160, 248)
+		and gal["cam"] == [2876.0, 4624.0, 432.0, 680.0] and gal["stacco"] and room._cam_zones.size() == 2 and dry,
+		"Interni: la galleria e il deposito di A4 vengono da LDtk, coi limiti della telecamera, e dentro non piove",
+		"interni %s, galleria %s, telecamere %d, asciutta %s" % [names, gal, room._cam_zones.size(), dry])
+	# La tavola: la copertura sopra la scena e le persone, le ante 64x140 sopra di lei, gli stipiti sopra
+	# GIG, la moto nuova e la luce dell'uscita.
+	var gate: Sprite2D = room._gallery_states.get("cancello_chiuso")
+	var moto := false
+	for sp: Sprite2D in room._scene_art:
+		moto = moto or (str(sp.name) == "Galleria_a4_moto_rider" and sp.position == Vector2(4665, 592))
+	var jambs := 0
+	for n in room._cover_nodes:
+		if n.z_index == 8 and jambs == 0:  # il primo è di A4; dopo viene il palo del cantiere
+			jambs += n.get_child_count()
+	var exit_light := room._gallery_lights.any(func(l: PointLight2D) -> bool: return str(l.name).contains("uscita"))
+	check(room._covers.size() == 1 and room._covers[0].position == Vector2(2876, 432) and gate != null
+		and gate.position == Vector2(4548, 540) and gate.texture.get_size() == Vector2(64, 140)
+		and gate.get_parent().z_index == 6 and room._gallery_gates.has(Rect2(4548, 540, 64, 140)) and jambs == 2
+		and moto and exit_light,
+		"Interni: in A4 la copertura, le ante 64x140, i due stipiti, la moto nuova e la luce dell'uscita",
+		"copertura %d, cancello %s, stipiti %d, moto %s, uscita %s" % [room._covers.size(),
+			gate.position if gate != null else Vector2.ZERO, jambs, moto, exit_light])
+	# Fuori, davanti all'arco: copertura piena, GIG sopra di lei, la vista non passa 2984.
+	room.player.place(2900, 680)
+	room._reset_interiors()
+	for i in 40:
+		room._follow_camera()
+	var out_ok := room._cover_k == 1.0 and room._body.z_index == 7 and room._visible_rect().end.x <= 2984.0
+	var out_s := "copertura %.2f, z %d, vista %s" % [room._cover_k, room._body.z_index, room._visible_rect()]
+	# Dentro: lo stacco annerisce, a metà la vista salta dentro i limiti e la copertura sparisce.
+	room.player.place(2960, 680)
+	room._follow_camera()
+	var dark := room._cut_alpha() > 0.0 and room._zone_shown == -1
+	for i in Prologue.CUT_TICKS / 2 - 1:
+		room._follow_camera()
+	var v := room._visible_rect()
+	var in_ok := room._zone_shown >= 0 and room._cover_k == 0.0 and room._cut_alpha() == 1.0 and v.position.x >= 2876.0 \
+		and v.position.y >= 432.0 and room._body.z_index == 0
+	for i in Prologue.CUT_TICKS:
+		room._follow_camera()
+	in_ok = in_ok and room._cut_alpha() == 0.0
+	var in_s := "vista %s, copertura %.2f, nero %.2f" % [v, room._cover_k, room._cut_alpha()]
+	# Sul tetto (dal vano della scala): stacco anche dall'alto, poi copertura piena e telecamera libera.
+	room.player.place(3820, 420)
+	for i in Prologue.CUT_TICKS + Prologue.LIMIT_BLEND:
+		room._follow_camera()
+	var roof_ok := room._zone_shown == -1 and room._cover_k == 1.0 and room._view_push == Vector2.ZERO
+	# Un passo dentro e subito fuori: lo stacco si riavvolge e non cambia niente.
+	room.player.place(2900, 680)
+	room._reset_interiors()
+	room.player.place(2960, 680)
+	for i in 3:
+		room._follow_camera()
+	room.player.place(2900, 680)
+	for i in Prologue.CUT_TICKS:
+		room._follow_camera()
+	var back_ok := room._zone_shown == -1 and room._cut_t == 0 and room._cover_k == 1.0
+	check(out_ok and dark and in_ok and roof_ok and back_ok,
+		"Interni: fuori la vista si ferma all'arco, entrando lo stacco a gradini porta dentro i limiti, dal tetto si esce, un passo indietro riavvolge",
+		"fuori %s %s; nero %s; dentro %s %s; tetto %s (spinta %s); indietro %s" % [out_ok, out_s, dark, in_ok, in_s,
+			roof_ok, room._view_push, back_ok])
+	# Un salto dal vano che sfiora il soffitto (piedi 5 px sopra il bordo) non fa uno stacco; con la vista
+	# larga, dentro la galleria lo zoom torna stretto nel nero e fuori torna largo.
+	room.wide_cam = true
+	room._px_s = 3
+	room.player.place(3820, 680)
+	room._reset_interiors()
+	var wide_in := room._wide_k
+	room.player.place(3820, 427)
+	for i in 4:
+		room._follow_camera()
+	var graze_ok := room._zone_raw >= 0 and room._cut_t == 0
+	room.player.place(3820, 420)
+	for i in Prologue.CUT_TICKS / 2:
+		room._follow_camera()
+	var wide_mid := room._wide_k
+	for i in Prologue.CUT_TICKS:
+		room._follow_camera()
+	room.wide_cam = false
+	room._px_s = 1
+	check(graze_ok and wide_in == 0.0 and wide_mid == 1.0 and room._zone_shown == -1,
+		"Interni: un salto che sfiora il soffitto non fa lampeggiare lo stacco; con la vista larga dentro è stretta, cambia nel nero",
+		"sfiora %s, zoom dentro %.2f, a metà dello stacco %.2f, zona %d" % [graze_ok, wide_in, wide_mid, room._zone_shown])
+	room.queue_free()
+
+
 func _test_prologue_v2() -> void:
 	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
 	room._follow_camera()
@@ -3846,7 +3942,7 @@ func _test_prologue_v2() -> void:
 	for l: Backdrop.Layer in a4_layers:
 		if l.z >= 1000:
 			cols = l
-	check(room.art_holes.size() == 5 and room.art_holes[3] == Rect2(2760, 200, 1960, 520) and room._art_extra.size() == 4
+	check(room.art_holes.size() == 6 and room.art_holes[3] == Rect2(2760, 200, 1960, 520) and room._art_extra.size() == 4
 		and cols != null
 		and Backdrop.alpha(cols, 2700) == 0.0 and Backdrop.alpha(cols, 3300) == 1.0 and Backdrop.alpha(cols, 3950) == 0.0,
 		"Prologo v2: la galleria A4 è montata, con le colonne davanti nel loro tratto", "buchi %s" % [room.art_holes])
@@ -3860,10 +3956,39 @@ func _test_prologue_v2() -> void:
 	var billboard := false
 	for sp: Sprite2D in room._scene_art:
 		billboard = billboard or sp.name.contains("cartellone")
-	check(room.art_holes.size() == 5 and room.art_holes[4] == Rect2(5480, 200, 1480, 600) and not billboard
+	check(room.art_holes.size() == 6 and room.art_holes[4] == Rect2(4600, 402, 880, 398)
+		and room.art_holes[5] == Rect2(5480, 200, 1480, 600) and not billboard
 		and a6_front != null and Backdrop.alpha(a6_front, 5400) == 0.0 and Backdrop.alpha(a6_front, 6200) == 1.0,
 		"Prologo v2: la tavola A6 è montata, senza il cartellone provvisorio di A4", "buchi %s, cartellone %s" % [
 			room.art_holes, billboard])
+	# A5, il piazzale del pignoramento: il chiavistello sopra la sua leva, il sigillo SIDERA che tremola
+	# quando GIG gli arriva davanti, il pavimento dipinto dell'arena; poi la soglia del cantiere, col palo
+	# davanti a GIG.
+	var latch_lever := false
+	for l in room._levers:
+		latch_lever = latch_lever or (room._lever_drawn(l["px"]) and int(l["px"].x) > 4560 and int(l["px"].x) < 4720)
+	var seal_ok := false
+	if room._gallery_states.has("sigillo_1"):
+		var sr := Prologue._sprite_rect(room._gallery_states["sigillo_1"])
+		var keep := Vector2i(room.player.px, room.player.py)
+		room.player.px = int(sr.get_center().x)
+		room.player.py = room._floor_y
+		room._seal_near = false
+		room._seal_from = -100000
+		seal_ok = room._tick_seal() == 0
+		room.player.px = keep.x
+		room.player.py = keep.y
+		room._seal_near = false
+		room._seal_from = -100000
+	var post := false
+	for n in room._cover_nodes:
+		for c in n.get_children():
+			post = post or (n.z_index == 8 and str(c.name).contains("cantiere_davanti") and c.position == Vector2(5470, 542))
+	check(latch_lever and seal_ok and room._gallery_states.has("chiavistello_tirato")
+		and room._gallery_states.has("varco_lampeggiante_acceso") and not room._arena_floor.is_empty()
+		and room._arena_floor["x"] == 4560 and room._arena_floor["y"] == 680 and post,
+		"Prologo v2: A5 e la soglia del cantiere, col chiavistello, il sigillo, il pavimento dell'arena e il palo davanti",
+		"leva %s, sigillo %s, pavimento %s, palo %s" % [latch_lever, seal_ok, room._arena_floor.get("x"), post])
 	# A1-A3, dall'ingresso alla galleria: tre tavole di fila da x 0 a 2920, senza la scena di prima (A1 ne
 	# riusa le colonne 0-25), e ognuna con le sue luci in additivo.
 	var old_scene := false
@@ -3873,7 +3998,7 @@ func _test_prologue_v2() -> void:
 	for n in room._room_node.get_children():
 		if n is Sprite2D and str(n.name) in ["Galleria_a1_emis", "Galleria_a2_emis", "Galleria_a3_emis"]:
 			a_emis += 1
-	check(room.art_holes.size() == 5 and room.art_holes.slice(0, 3) == [Rect2(0, 200, 720, 600),
+	check(room.art_holes.size() == 6 and room.art_holes.slice(0, 3) == [Rect2(0, 200, 720, 600),
 			Rect2(720, 200, 960, 600), Rect2(1680, 200, 1240, 600)] and not old_scene and a_emis == 3,
 		"Prologo v2: in A le tavole A1-A3 coprono da 0 a 2920, al posto della scena di prima",
 		"buchi %s, scena di prima %s, emissioni %d" % [room.art_holes, old_scene, a_emis])
@@ -4075,7 +4200,7 @@ func _test_prologue_v2() -> void:
 	var emis_b2: Sprite2D = room._room_node.get_node_or_null("Galleria_b2_emis")
 	check(hole_b2 == Rect2(720, 0, 1960, 880) and emis_b2 != null and not room._scene_art.has(emis_b2)
 			and (emis_b2.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD
-			and b0.size() == 9,
+			and b0.size() == 10,
 		"Prologo v2: in B le palazzine B2 sono montate, con le luci in additivo",
 		"buchi %s, stati %s" % [room.art_holes, b0])
 	# B1, la piazzetta del fioraio davanti al muro del cimitero: a (0, 0), prima di B2, con le sue luci.
@@ -4194,13 +4319,13 @@ func _test_prologue_v2() -> void:
 			scene_l += 1
 	var scene_masked := true
 	for sp in room._scene_art:
-		if sp is Sprite2D and str(sp.name).begins_with("Galleria_"):
+		if sp is Sprite2D and str(sp.name).begins_with("Galleria_") and not room._covers.has(sp):
 			scene_masked = scene_masked and (sp.light_mask & room.LIGHT_MASK_SCENE) != 0
 	var breathes: bool = room.light_rhythm("tremola", 10, 0.0) != room.light_rhythm("tremola", 30, 0.0) 		and room.light_rhythm("pulsa", 0, 0.0) != room.light_rhythm("pulsa", 40, 0.0) 		and room.light_rhythm("", 30, 0.0) == 1.0
 	room._set_lights(false)
 	var off := room._gallery_lights.all(func(l: PointLight2D) -> bool: return not l.enabled)
 	room._set_lights(true)
-	check(lit and off and actors_l == 9 and scene_l == 14 and scene_masked and breathes,
+	check(lit and off and actors_l == 18 and scene_l == 14 and scene_masked and breathes,
 		"Prologo v2: in B le luci vive illuminano gli attori, gli aloni la scena, e si spengono con F5",
 		"attori %d, scena %d, tavole %s, respiro %s, %s" % [actors_l, scene_l, scene_masked, breathes, room._gallery_lights.map(func(l: PointLight2D) -> String: return "%s %s" % [l.name, l.enabled])])
 	# GIG prende i taralli: il sacchetto sparisce. La porta si chiude dietro di lui: si vede chiusa. Il
@@ -4220,6 +4345,142 @@ func _test_prologue_v2() -> void:
 		"Prologo v2: in B3 il sacchetto sparisce coi taralli, la porta si chiude e il fumo gira", str(b2))
 	room.tick = t0
 	room.door_closed = false
+	# B4, il garage vestito: la facciata con la sua finestra e gli stipiti di fuori si vedono fuori; il
+	# muro di dentro, gli stipiti di dentro e la porta chiusa vista da dentro solo dentro; la luce
+	# fredda della porta solo dentro e con la porta aperta.
+	var names := func(arr: Array) -> Array:
+		return arr.map(func(n: Node) -> String: return str(n.name)).filter(func(n: String) -> bool: return n.contains("b4_"))
+	var add := func(sp: Sprite2D) -> bool:
+		return sp != null and sp.material is CanvasItemMaterial 			and (sp.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD
+	var glow_b4: Array = names.call(room._cover_glow)
+	var in_b4: Array = names.call(room._inside_art)
+	var add_ok := true
+	for sp: Sprite2D in room._cover_glow:
+		if str(sp.name).ends_with("copertura_emis"):
+			add_ok = add_ok and add.call(sp)
+	check(str(names.call(room._covers)) == str(["Galleria_b4_copertura"])
+			and str(glow_b4) == str(["Galleria_b4_copertura_emis", "Galleria_b4_stipiti_fuori"])
+			and str(in_b4) == str(["Galleria_b4_dentro", "Galleria_b4_stipiti_dentro", "Galleria_b4_porta_dentro"])
+			and room._door_light != null and str(room._door_light.name) == "Galleria_b4_luce_porta"
+			and add.call(room._door_light) and add_ok,
+		"Prologo v2: in B4 la facciata, il dentro, gli stipiti dei due lati e la luce della porta sono montati",
+		"copertura %s, fuori %s, dentro %s" % [names.call(room._covers), glow_b4, in_b4])
+	var vis := func() -> String:
+		var o: Array = []
+		for sp: Sprite2D in room._covers + room._cover_glow + room._inside_art + [room._door_light]:
+			if sp.visible and str(sp.name).begins_with("Galleria_b4_"):
+				o.append(str(sp.name).trim_prefix("Galleria_b4_"))
+		o.sort()
+		return ",".join(o)
+	room._cover_k = 1.0
+	room._update_gallery()
+	var v_out: String = vis.call()
+	room._cover_k = 0.0
+	room._update_gallery()
+	var v_open: String = vis.call()
+	room.door_closed = true
+	room._update_gallery()
+	var v_shut: String = vis.call()
+	room.door_closed = false
+	check(v_out == "copertura,copertura_emis,stipiti_fuori" and v_open == "dentro,luce_porta,stipiti_dentro"
+			and v_shut == "dentro,porta_dentro,stipiti_dentro",
+		"Prologo v2: in B4 fuori si vede la facciata, dentro il muro e la luce della porta, che si spegne con la porta chiusa",
+		"fuori %s; dentro aperta %s; dentro chiusa %s" % [v_out, v_open, v_shut])
+	# Il lucernario (colonne 186-189): lì piove anche nel garage, e la copertura sfuma coi piedi di GIG
+	# negli ultimi 40 px sopra il tetto, senza stacco. La base del registro (190, 28) resta libera.
+	var roof := room._roof_holes.map(func(h: Rect2) -> String: return "%d-%d" % [h.position.x, h.end.x])
+	var dry_at := func(p: Vector2) -> bool:
+		return room._dry_rects().any(func(r: Rect2) -> bool: return r.has_point(p))
+	var garage: Rect2 = Rect2()
+	for z in room._interiors:
+		if (z["rect"] as Rect2).has_point(Vector2(3760, 600)):
+			garage = z["rect"]
+	room._cut_t = 0
+	room.player.place(3760, int(garage.position.y) - 20)
+	room._tick_interiors(true)
+	var mid_k: float = room._cover_k
+	room.player.place(3760, int(garage.position.y) - 60)
+	room._tick_interiors(true)
+	var high_k: float = room._cover_k
+	# Sul bordo del tetto accanto (colonna 185) la facciata resta piena: sfuma solo sopra il buco.
+	room.player.place(3712, int(garage.position.y) - 20)
+	room._tick_interiors(true)
+	var edge_k: float = room._cover_k
+	check(roof.has("3720-3800") and not dry_at.call(Vector2(3760, 600)) and dry_at.call(Vector2(3600, 600))
+			and dry_at.call(Vector2(3900, 600)) and is_equal_approx(mid_k, 0.5) and high_k == 1.0 and edge_k == 1.0
+			and room.grid.cell(190, 28) == SolidGrid.Cell.EMPTY,
+		"Prologo v2: dal lucernario di B4 piove nel garage e la copertura sfuma coi piedi, solo sopra il buco",
+		"buchi %s, garage %s, a metà %.2f, sopra %.2f, sul bordo %.2f, cella del registro %d" % [roof, garage, mid_k,
+			high_k, edge_k, room.grid.cell(190, 28)])
+	# Le cantine sotto B2 e B3: fuori la copertura; dentro il muro riacceso, la sua emissione, la terra
+	# sopra il soffitto e sette luci che si accendono solo dentro. Il telaio della botola sta sotto le
+	# serrande. Dentro non piove, tranne sotto la grata (2660-2760); la botola chiusa non fa buco.
+	var cant_cover: Array = room._covers.map(func(n: Node) -> String: return str(n.name)).filter(
+		func(n: String) -> bool: return n.contains("cantine"))
+	var cant_in: Array = room._inside_art.map(func(n: Node) -> String: return str(n.name)).filter(
+		func(n: String) -> bool: return n.contains("cantine"))
+	cant_in.sort()
+	var above_sp: Sprite2D = room._room_node.find_child("Galleria_cantine_sopra", true, false)
+	var above_z := above_sp != null and (above_sp.get_parent() as Node2D).z_index == 6
+	var cant_em: Sprite2D = room._room_node.get_node_or_null("Galleria_cantine_emis")
+	var frame_sp: Sprite2D = room._room_node.get_node_or_null("Galleria_cantine_telaio")
+	var shut: Sprite2D = room._gallery_states.get("serranda_chiusa")
+	var frame_under := frame_sp != null and shut != null and frame_sp.get_index() < shut.get_index()
+	room._cover_k = 1.0
+	room._update_gallery()
+	var lit_out: bool = room._inside_lights.any(func(p: Array) -> bool: return (p[0] as PointLight2D).visible)
+	room._cover_k = 0.0
+	room._update_gallery()
+	var lit_in: bool = room._inside_lights.all(func(p: Array) -> bool:
+		return (p[0] as PointLight2D).visible and is_equal_approx((p[0] as PointLight2D).energy, float(p[1])))
+	room._cover_k = 1.0
+	room._update_gallery()
+	check(str(cant_cover) == str(["Galleria_cantine_copertura"])
+			and str(cant_in) == str(["Galleria_cantine_dentro", "Galleria_cantine_emis", "Galleria_cantine_sopra"])
+			and above_z
+			and add.call(cant_em) and frame_under and room._inside_lights.size() == 7 and not lit_out and lit_in
+			and roof.has("2660-2760") and not roof.any(func(h: String) -> bool: return h.begins_with("1240"))
+			and dry_at.call(Vector2(2000, 800)) and not dry_at.call(Vector2(2710, 800)),
+		"Prologo v2: le cantine sono montate, con le luci solo dentro e la pioggia solo sotto la grata",
+		"copertura %s, dentro %s, terra a z 6 %s, telaio sotto %s, luci %d fuori %s dentro %s, buchi %s" % [cant_cover,
+			cant_in, above_z, frame_under, room._inside_lights.size(), lit_out, lit_in, roof])
+	# Lo stacco alla botola: dall'alto, coi piedi che passano y 720 fra 1240 e 1280.
+	room._cut_t = 0
+	room.player.place(1260, 700)
+	room._tick_interiors(true)
+	room.player.place(1260, 740)
+	room._tick_interiors()
+	check(room._cut_t > 0, "Prologo v2: scendendo dalla botola nelle cantine c'è lo stacco", "stacco %d" % room._cut_t)
+	# Dentro le cantine la telecamera mostra anche la terra sopra il soffitto (da y 610): lì non piove,
+	# tranne sopra la grata. Fuori, sopra le cantine, c'è la strada e piove.
+	var ci := -1
+	for i in room._interiors.size():
+		if (room._interiors[i]["rect"] as Rect2).position == Vector2(1218, 720):
+			ci = i
+	room._zone_shown = ci
+	room._sync_dry()
+	var band_in: bool = room.weather._is_dry(Vector2(2000, 650)) and not room.weather._is_dry(Vector2(2710, 650))
+	room._zone_shown = -1
+	room._sync_dry()
+	var band_out: bool = room.weather._is_dry(Vector2(2000, 650))
+	check(ci >= 0 and band_in and not band_out,
+		"Prologo v2: dentro le cantine non piove sulla terra sopra il soffitto, ma sì dalla grata; fuori piove",
+		"interno %d, dentro %s, fuori asciutto %s" % [ci, band_in, band_out])
+	# Il cortile del panificio (B3): l'ombra sopra la scena di B3 e dietro GIG, il portone sopra GIG
+	# con gli stipiti, la luce della strada in additivo, e il led SIDERA che lampeggia 1 s ogni 3.
+	var shade: Sprite2D = room._room_node.get_node_or_null("Galleria_cortile_ombra")
+	var b3_scene: Sprite2D = room._room_node.get_node_or_null("Galleria_b3_scena")
+	var gate_sp: Sprite2D = room._room_node.find_child("Galleria_cortile_portone", true, false)
+	var yard_em: Sprite2D = room._room_node.get_node_or_null("Galleria_cortile_luce")
+	var led: PointLight2D = room._room_node.find_child("Luce_telecamera_sidera", true, false)
+	var shade_ok := shade != null and b3_scene != null and shade.show_behind_parent 		and shade.get_index() > b3_scene.get_index()
+	var gate_ok := gate_sp != null and (gate_sp.get_parent() as Node2D).z_index == 8
+	var blink := [Prologue.light_rhythm("lampeggia", 0, 0.0), Prologue.light_rhythm("lampeggia", 59, 0.0),
+		Prologue.light_rhythm("lampeggia", 60, 0.0), Prologue.light_rhythm("lampeggia", 179, 0.0)]
+	check(shade_ok and gate_ok and add.call(yard_em) and led != null and str(blink) == str([1.0, 1.0, 0.0, 0.0])
+			and room.find_child("Luce_strada_portone", true, false) != null,
+		"Prologo v2: il cortile ha l'ombra sopra B3, il portone sopra GIG, la luce della strada e il led che lampeggia",
+		"ombra %s, portone %s, luce %s, led %s, lampeggio %s" % [shade_ok, gate_ok, yard_em, led, blink])
 	_free_room(room)
 
 

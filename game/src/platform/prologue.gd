@@ -49,12 +49,18 @@ const A1_ART := "res://assets/env/prologo/v2/a1/a1.json"
 const A2_ART := "res://assets/env/prologo/v2/a2/a2.json"
 const A3_ART := "res://assets/env/prologo/v2/a3/a3.json"
 const GALLERY_ART := "res://assets/env/prologo/v2/a4/a4.json"
+const A5_ART := "res://assets/env/prologo/v2/a5/a5.json"
 const A6_ART := "res://assets/env/prologo/v2/a6/a6.json"
+## La soglia del cantiere ETERNA fra A5 e A6: solo pezzi, senza scena, sopra quella di A6.
+const CANTIERE_ART := "res://assets/env/prologo/v2/cantiere/cantiere.json"
 const B1_ART := "res://assets/env/prologo/v2/b1/b1.json"
 const B2_ART := "res://assets/env/prologo/v2/b2/b2.json"
 const B3_ART := "res://assets/env/prologo/v2/b3/b3.json"
 const B4_ART := "res://assets/env/prologo/v2/b4/b4.json"
-const LEVEL_ART: Array = [[A1_ART, A2_ART, A3_ART, GALLERY_ART, A6_ART], [B1_ART, B2_ART, B3_ART, B4_ART]]
+const CANTINE_B_ART := "res://assets/env/prologo/v2/cantine/cantine.json"
+const CORTILE_B_ART := "res://assets/env/prologo/v2/cortile/cortile.json"
+const LEVEL_ART: Array = [[A1_ART, A2_ART, A3_ART, GALLERY_ART, A5_ART, A6_ART, CANTIERE_ART],
+	[B1_ART, B2_ART, B3_ART, CORTILE_B_ART, CANTINE_B_ART, B4_ART]]
 ## I fondi larghi del livello (cielo, lontano, medio e vicino), disegnati allo zoom della vista: in A
 ## tutto il cimitero coi tre veli, rosa, scirocco e pioggia; in B la sera dei Tamburi, col vicino che è
 ## l'isolato dietro le palazzine della scena.
@@ -68,6 +74,14 @@ const SPARK_CYCLE := 100
 const SPARK_ON := 36
 const SPARK_STEP := 4
 const SMOKE_TICKS := 15
+## Il sigillo SIDERA sulla catena del cancello di A5: le due scritte si alternano ogni SEAL_TICKS (1,2 s);
+## quando GIG gli passa davanti ronza e tremola SEAL_FLICKERS volte, un fotogramma ogni SEAL_STEP.
+const SEAL_TICKS := 72
+const SEAL_FLICKERS := 3
+const SEAL_STEP := 4
+## Gli stati che stanno sopra una leva del livello (il quadro di cantiere di A6, il chiavistello di A5):
+## lì la leva è disegnata dalla tavola, e lo stato cambia quando la si tira.
+const LEVER_STATES := ["quadro_giu", "chiavistello_chiuso"]
 ## La telecamera tiene il pavimento a CAM_GROUND px dall'alto finché GIG non scende sotto (come la mappa
 ## di prima, alta 500 px): così l'introduzione si scioglie nel gioco senza scatti.
 const CAM_GROUND := 230
@@ -192,6 +206,12 @@ var _galleries: Array[Backdrop] = []
 var _wide_art: Backdrop
 var _gallery_states: Dictionary = {}
 var _gallery_gates: Array[Rect2] = []
+## Il pavimento dell'arena dipinto in prospettiva (chiave "pavimento_arena"): {"tex", "x", "y"}; dove
+## copre la vista prende il posto di quello disegnato. Solo disegno.
+var _arena_floor: Dictionary = {}
+## Il tremolio del sigillo: il tick in cui è cominciato, e se GIG gli era già davanti. Solo disegno.
+var _seal_from: int = -100000
+var _seal_near: bool = false
 ## Le luci vive delle tavole (chiave "luci" dei json): PointLight2D sugli attori, come nel resto del
 ## gioco; la luce sulla scena è già dipinta. Si spengono con le altre (F5, --no-lights).
 var _gallery_lights: Array[PointLight2D] = []
@@ -201,6 +221,57 @@ var _halo_tex: Dictionary = {}
 var _pool_tex: GradientTexture2D
 ## La scena delle tavole prende anche gli aloni delle luci vive (gli attori no: hanno le loro).
 const LIGHT_MASK_SCENE := 4
+
+# ------------------------------------------------------------------ interni (solo disegno)
+## Gli interni del livello (entità Interno di LDtk): {"nome", "rect", "stacco", "stacco_alto", "cam":
+## [sinistra, destra, alto, basso]}. Dentro = i piedi di GIG nel rettangolo (bordo alto escluso, fondo
+## compreso). Fuori dall'hash: cambiano solo quello che si vede.
+var _interiors: Array[Dictionary] = []
+## I limiti della telecamera di fuori (Telecamera di LDtk coi campi cam_*): {"rect", "cam"}.
+var _cam_zones: Array[Dictionary] = []
+## Lo stacco (Luigi: «soglia + luce, stacco solo dentro»): 0,3 s di nero a gradini, come la caduta; a
+## metà cambia quello che si vede.
+const CUT_TICKS := 18
+const ZONE_HOLD := 8.0
+## L'interno dove stanno i piedi (-1 fuori) e quello che si vede adesso (cambia a metà dello stacco).
+var _zone_raw: int = -1
+var _zone_shown: int = -1
+var _cut_t: int = 0
+var _prev_feet := Vector2.ZERO
+## La copertura delle tavole (la facciata che nasconde l'interno): 1 piena, 0 sparita quando GIG è dentro.
+var _cover_k: float = 1.0
+## I nodi della copertura (sopra la scena, sotto GIG) e degli stipiti (sopra GIG), figli della stanza
+## così si schiacciano con lei; le copertine, coi loro rettangoli, e i piani che si vedono solo dentro.
+var _cover_nodes: Array[Node2D] = []
+var _covers: Array[Sprite2D] = []
+var _cover_front: Array[Rect2] = []
+var _inside_layers: Array[Backdrop.Layer] = []
+## Quello che si vede solo fuori, con la copertura (la sua emissione, gli stipiti di fuori), e solo dentro
+## (il muro di dentro attorno alla porta, gli stipiti di dentro, la porta chiusa vista da dentro); la luce
+## della porta aperta (il garage di B4).
+var _cover_glow: Array[Sprite2D] = []
+var _inside_art: Array[Sprite2D] = []
+var _door_light: Sprite2D = null
+## Le luci che si vedono solo dentro (le lampadine delle cantine), con la loro energia piena.
+var _inside_lights: Array = []
+## Le aperture nel tetto degli interni (il lucernario del garage, la grata delle cantine): colonne senza
+## Pieno né cancelli sopra il bordo alto. Lì piove anche dentro. In quelle senza stacco dall'alto
+## (_roof_fades, il lucernario) la copertura sfuma coi piedi di GIG mentre passa.
+var _roof_holes: Array[Rect2] = []
+var _roof_fades: Array[Rect2] = []
+## L'interno di cui il meteo ha la fascia asciutta sopra il soffitto (-1: nessuno). Dentro le cantine
+## la telecamera mostra anche la terra sopra il soffitto, dove non deve piovere; fuori lì c'è la strada.
+var _dry_zone := -1
+const ROOF_FADE := 40.0
+## Quanto sopra il bordo alto di un buco del tetto conta la testa di GIG, da dentro.
+const ROOF_HEAD := 120.0
+## I limiti della vista: lo spostamento dal centro libero, e il passaggio morbido quando cambiano.
+const LIMIT_BLEND := 24
+var _view_push := Vector2.ZERO
+var _view_snap: bool = true
+var _limit_key: String = ""
+var _blend_t: int = 0
+var _blend_from := Vector2.ZERO
 
 
 func _setup_stage() -> void:
@@ -281,6 +352,19 @@ func _build_art() -> void:
 	_galleries.clear()
 	_gallery_states.clear()
 	_gallery_gates.clear()
+	for n in _cover_nodes:
+		n.queue_free()
+	_cover_nodes.clear()
+	_covers.clear()
+	_cover_front.clear()
+	_inside_layers.clear()
+	_cover_glow.clear()
+	_inside_art.clear()
+	_door_light = null
+	_inside_lights.clear()
+	_arena_floor = {}
+	_seal_from = -100000
+	_seal_near = false
 	art_holes.clear()
 	art_open_from = -1
 	super._build_art()
@@ -322,23 +406,26 @@ func _build_gallery(path: String) -> void:
 		return
 	var d: Dictionary = data
 	var dir := path.get_base_dir()
+	# Una tavola senza scena (la soglia del cantiere) ha solo pezzi, stati e luci.
 	var sc: Variant = d.get("scena")
-	if not (sc is Dictionary):
+	if not (sc is Dictionary) and not (d.get("pezzi") is Dictionary):
 		return
+	var has_scene := sc is Dictionary
 	# --b-grigio: in B niente scena né pezzi a stati, solo i piani; i blocchi restano grigi.
 	var grey := Game.options.grey_b and level >= 1
-	var scene_pos := Vector2(int(sc.get("x", 0)), int(sc.get("y", 0)))
+	var scene_pos := Vector2(int(sc.get("x", 0)), int(sc.get("y", 0))) if has_scene else Vector2.ZERO
 	var scene_w := 0.0
 	if grey:
-		var tex := SpriteSheet.load_texture(dir.path_join(str(sc.get("image", ""))))
+		var tex := SpriteSheet.load_texture(dir.path_join(str(sc.get("image", "")))) if has_scene else null
 		scene_w = tex.get_width() if tex != null else 0.0
 	else:
-		var scene := _gallery_sprite(dir, sc)
-		if scene == null:
-			return
-		var hole := Rect2(scene.position, scene.texture.get_size())
-		art_holes.append(hole)
-		scene_w = hole.size.x
+		if has_scene:
+			var scene := _gallery_sprite(dir, sc)
+			if scene == null:
+				return
+			var hole := Rect2(scene.position, scene.texture.get_size())
+			art_holes.append(hole)
+			scene_w = hole.size.x
 		# Le luci dipinte della tavola (maxischermo, led, lampioni): sopra la scena, in additivo e fuori
 		# dalla tinta del tempo, così restano accese anche quando la scena si scurisce.
 		var em := _gallery_sprite(dir, d.get("emissione"))
@@ -348,30 +435,85 @@ func _build_gallery(path: String) -> void:
 			m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 			m.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 			em.material = m
+		# Il muro di dentro attorno alla porta (sopra la scena accanto) e la luce della porta aperta:
+		# solo dentro.
+		var inners: Variant = d.get("dentro")
+		for spec: Variant in (inners if inners is Array else [inners]):
+			var inner := _gallery_sprite(dir, spec)
+			if inner != null:
+				_inside_art.append(inner)
+		var inner_em := _gallery_sprite(dir, d.get("emissione_dentro"))
+		if inner_em != null:
+			_scene_art.erase(inner_em)
+			inner_em.material = _additive()
+			_inside_art.append(inner_em)
+		var dl := _gallery_sprite(dir, d.get("luce_porta"))
+		if dl != null:
+			_scene_art.erase(dl)
+			dl.material = _additive()
+			_door_light = dl
 	var lights: Variant = d.get("luci", [])
 	if lights is Array and not grey:
 		for lv: Variant in lights:
 			_gallery_light(lv)
+	var inner_lights: Variant = d.get("luci_dentro", [])
+	if inner_lights is Array and not grey:
+		for lv: Variant in inner_lights:
+			var from := _gallery_lights.size()
+			_gallery_light(lv)
+			for i in range(from, _gallery_lights.size()):
+				_inside_lights.append([_gallery_lights[i], _gallery_light_base[i][0]])
 	var open_from := int(d.get("fondo_aperto_da", -1))
 	if open_from >= 0:
 		art_open_from = open_from if art_open_from < 0 else mini(art_open_from, open_from)
+	var cover: Node2D = null if grey else _build_cover(dir, d)
 	var states: Variant = d.get("stati", {})
 	if states is Dictionary and not grey:
 		for k: String in (states as Dictionary):
 			if _gallery_states.has(k):
 				push_warning("Vestizione: lo stato %s c'è già in un'altra tavola (%s)" % [k, path])
 				continue
-			var s := _gallery_sprite(dir, states[k])
+			var gate := k.begins_with("cancell") or k.begins_with("serranda")
+			# Con la copertura, le ante del cancello stanno sopra di lei (e GIG sopra le ante).
+			var s := _gallery_sprite(dir, states[k], cover if gate else null)
 			if s != null:
 				_gallery_states[k] = s
-				if k.begins_with("cancell") or k.begins_with("serranda"):
+				if k == "porta_dentro":
+					_inside_art.append(s)
+				if gate:
 					_gallery_gates.append(_sprite_rect(s))
+					if cover != null:
+						_cover_front.append(_sprite_rect(s))
 	# I pezzi fermi alla scala di gioco (la moto del rider, il cartellone ETERNA): come la scena, sempre
 	# accesi.
+	# Quelli che si chiamano "davanti..." stanno sopra GIG, con gli stipiti (_build_cover).
 	var pieces: Variant = d.get("pezzi", {})
 	if pieces is Dictionary and not grey:
 		for k: String in (pieces as Dictionary):
-			_gallery_sprite(dir, pieces[k])
+			if not k.begins_with("davanti"):
+				var pc := _gallery_sprite(dir, pieces[k])
+				# "sotto": sotto gli stati di un'altra tavola (il telaio della botola, sotto le serrande).
+				var under: Variant = (pieces[k] as Dictionary).get("sotto", [])
+				if pc != null and under is Array:
+					var at := -1
+					for st: Variant in under:
+						var o: Sprite2D = _gallery_states.get(str(st))
+						if o != null and o.get_parent() == pc.get_parent():
+							at = o.get_index() if at < 0 else mini(at, o.get_index())
+					if at >= 0:
+						pc.get_parent().move_child(pc, at)
+	# Il pavimento dell'arena dipinto e i suoi colori (per dove il dipinto non arriva).
+	var af: Variant = d.get("pavimento_arena")
+	if af is Dictionary and not grey:
+		var tex := SpriteSheet.load_texture(dir.path_join(str(af.get("image", ""))))
+		if tex != null:
+			_arena_floor = {"tex": tex, "x": float(af.get("x", 0)), "y": float(af.get("y", 0))}
+	var fc: Variant = d.get("floor_colors")
+	if fc is Dictionary and not grey:
+		for k: String in (fc as Dictionary):
+			var c: Variant = fc[k]
+			if floor_colors.has(k) and c is Array and (c as Array).size() >= 3:
+				floor_colors[k] = Color8(int(c[0]), int(c[1]), int(c[2]))
 	# I piani della grafica di prima che qui cambiano tratto o velocità (per esempio il cielo rosa che
 	# sfuma più a lungo): campi del json dei piani, per nome.
 	var fix: Variant = d.get("piani_di_prima", {})
@@ -406,6 +548,9 @@ func _build_gallery(path: String) -> void:
 			var need := View.W + ceili(scene_w * l.scroll)
 			if l.repeat_x <= 0 and l.texture.get_width() < need:
 				l.repeat_x = l.texture.get_width()
+		# Il primo piano di dentro (le colonne della galleria): si vede solo quando la copertura non c'è.
+		if bool((lv as Dictionary).get("solo_dentro", false)):
+			_inside_layers.append(l)
 		bd.layers.append(l)
 	if not bd.layers.is_empty():
 		_galleries.append(bd)
@@ -424,7 +569,8 @@ func _build_gallery(path: String) -> void:
 ## le normal map) dal json. Accende GIG e i droni. Con "alone" e "pozza" accende anche la scena, ma
 ## solo intorno alla luce dipinta: l'alone è un anello attorno alla fonte, la pozza un anello schiacciato
 ## sulla strada (alla y "y" della pozza); il centro resta quasi spento, così la luce già dipinta non
-## raddoppia. "ritmo": "tremola" (il forno) o "pulsa" (il maxischermo), solo disegno.
+## raddoppia. "ritmo": "tremola" (il forno), "pulsa" (il maxischermo) o "lampeggia" (il led SIDERA), solo
+## disegno.
 func _gallery_light(spec: Variant) -> void:
 	if not (spec is Dictionary):
 		return
@@ -492,13 +638,20 @@ static func _radial_tex(w: int, h: int, hole: float) -> GradientTexture2D:
 	return t
 
 
-## Il respiro delle luci vive al tick `t` (solo disegno): il forno tremola, il maxischermo pulsa.
+## Il led che lampeggia piano (la telecamera SIDERA del cortile): 1 s acceso ogni 3.
+const LED_TICKS := 180
+
+
+## Il respiro delle luci vive al tick `t` (solo disegno): il forno tremola, il maxischermo pulsa, il led
+## della telecamera lampeggia.
 static func light_rhythm(rhythm: String, t: int, phase: float) -> float:
 	match rhythm:
 		"tremola":
 			return 0.82 + 0.1 * sin(t * 0.31 + phase) + 0.08 * sin(t * 1.07 + phase * 2.0)
 		"pulsa":
 			return 0.8 + 0.2 * sin(t * TAU / 150.0 + phase)
+		"lampeggia":
+			return 1.0 if posmod(t, LED_TICKS) < LED_TICKS / 3 else 0.0
 	return 1.0
 
 
@@ -522,8 +675,9 @@ static func _fix_layer(l: Backdrop.Layer, f: Variant) -> void:
 	l.origin_x = int(fd.get("origin_x", l.origin_x))
 
 
-## Un pezzo della galleria nella stanza, alla sua posizione del mondo (null se manca l'immagine).
-func _gallery_sprite(dir: String, spec: Variant) -> Sprite2D:
+## Un pezzo della galleria nella stanza, alla sua posizione del mondo (null se manca l'immagine); con
+## `parent`, in quel nodo della stanza (la copertura, gli stipiti) invece che dietro alla stanza.
+func _gallery_sprite(dir: String, spec: Variant, parent: Node2D = null) -> Sprite2D:
 	if not (spec is Dictionary):
 		return null
 	var tex := SpriteSheet.load_texture(dir.path_join(str(spec.get("image", ""))))
@@ -535,11 +689,77 @@ func _gallery_sprite(dir: String, spec: Variant) -> Sprite2D:
 	s.centered = false
 	s.texture = tex
 	s.position = Vector2(int(spec.get("x", 0)), int(spec.get("y", 0)))
-	s.show_behind_parent = true
+	# "alfa": quanto si vede il pezzo (l'ombra del cortile si può alleggerire).
+	s.modulate.a = float(spec.get("alfa", 1.0))
+	s.show_behind_parent = parent == null
 	s.light_mask = 1 | LIGHT_MASK_SCENE
-	_room_node.add_child(s)
+	(parent if parent != null else _room_node).add_child(s)
 	_scene_art.append(s)
 	return s
+
+
+## La copertura della tavola (chiave "copertura": la facciata davanti all'interno, che sfuma quando GIG
+## entra) e gli stipiti (chiave "stipiti", sopra GIG). La copertura sta in un nodo della stanza sopra
+## la scena, le persone e i droni (z 6), dove vanno anche le ante dei cancelli; gli stipiti in uno sopra
+## GIG (z 8). Ritorna il nodo della copertura (null se la tavola non ce l'ha).
+func _build_cover(dir: String, d: Dictionary) -> Node2D:
+	var node: Node2D = null
+	if d.get("copertura") is Dictionary:
+		node = Node2D.new()
+		node.name = "Copertura"
+		node.z_index = 6
+		_room_node.add_child(node)
+		_cover_nodes.append(node)
+		var s := _gallery_sprite(dir, d["copertura"], node)
+		if s != null:
+			# La facciata non prende gli aloni delle luci di dentro.
+			s.light_mask = 1
+			_covers.append(s)
+			_cover_front.append(_sprite_rect(s))
+			var glow := _gallery_sprite(dir, d.get("copertura_emis"), node)
+			if glow != null:
+				_scene_art.erase(glow)
+				glow.material = _additive()
+				_cover_glow.append(glow)
+		# Quello che si vede sopra il soffitto da dentro (la terra sopra le cantine): sta con la copertura,
+		# sopra la strada, le persone e i droni, e si vede solo dentro.
+		var above_in := _gallery_sprite(dir, d.get("sopra_dentro"), node)
+		if above_in != null:
+			_inside_art.append(above_in)
+	var jambs: Array = []
+	# Gli stipiti di fuori e di dentro (il garage): si scambiano con lo stacco.
+	var jamb_sides: Dictionary = {}
+	if d.get("stipiti") is Array:
+		jambs.append_array(d["stipiti"])
+	elif d.get("stipiti") is Dictionary:
+		for side: String in ["fuori", "dentro"]:
+			if d["stipiti"].get(side) is Dictionary:
+				jambs.append(d["stipiti"][side])
+				jamb_sides[jambs.size() - 1] = side
+	# I pezzi "davanti..." (il palo e l'anta del varco del cantiere) stanno sopra GIG come gli stipiti.
+	var pieces: Variant = d.get("pezzi", {})
+	if pieces is Dictionary:
+		for k: String in (pieces as Dictionary):
+			if k.begins_with("davanti"):
+				jambs.append(pieces[k])
+	if not jambs.is_empty():
+		var front := Node2D.new()
+		front.name = "Stipiti"
+		front.z_index = 8
+		_room_node.add_child(front)
+		_cover_nodes.append(front)
+		for i in jambs.size():
+			var j := _gallery_sprite(dir, jambs[i], front)
+			if j != null and jamb_sides.has(i):
+				(_cover_glow if jamb_sides[i] == "fuori" else _inside_art).append(j)
+	return node
+
+
+static func _additive() -> CanvasItemMaterial:
+	var m := CanvasItemMaterial.new()
+	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	m.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	return m
 
 
 ## Quello che prende la tinta del tempo: la scena (e la galleria), e le colonne davanti.
@@ -574,6 +794,23 @@ func _update_gallery() -> void:
 	var c := (_view_c - View.SIZE / 2.0).round()
 	for bd in _galleries:
 		bd.update(int(c.x), tick, c.y - bd.cam_ref_y)
+	# Dentro: la copertura sparisce e compare il primo piano di dentro.
+	for l in _inside_layers:
+		if l.node != null:
+			l.node.modulate.a *= 1.0 - _cover_k
+			l.node.visible = l.node.modulate.a > 0.0
+	for s in _covers + _cover_glow:
+		s.modulate.a = _cover_k
+		s.visible = _cover_k > 0.0
+	for s in _inside_art:
+		s.modulate.a = 1.0 - _cover_k
+		s.visible = _cover_k < 1.0
+	for pair: Array in _inside_lights:
+		(pair[0] as PointLight2D).visible = _cover_k < 1.0
+		(pair[0] as PointLight2D).energy = float(pair[1]) * (1.0 - _cover_k)
+	if _door_light != null:
+		_door_light.modulate.a = 1.0 - _cover_k
+		_door_light.visible = _cover_k < 1.0 and not door_closed
 	# I fondi larghi contano la parallasse dall'angolo di quello che si vede del mondo.
 	if _wide_art != null:
 		var v := _visible_rect().position.round()
@@ -592,12 +829,9 @@ func _update_gallery() -> void:
 		for q in favors.persone:
 			if q.thanked and near.has_point(Vector2(q.px)):
 				freed = true
-	var lever_up := false
-	if _gallery_states.has("quadro_giu"):
-		var near := _sprite_rect(_gallery_states["quadro_giu"]).grow(8)
-		for l in _levers:
-			if String(l["iid"]) in pulled and near.has_point(Vector2(l["px"])):
-				lever_up = true
+	var lever_up := _lever_pulled_under("quadro_giu")
+	var latch_up := _lever_pulled_under("chiavistello_chiuso")
+	var seal := _tick_seal()
 	var bag_taken := false
 	if _gallery_states.has("sacchetto"):
 		var near := _sprite_rect(_gallery_states["sacchetto"]).grow(40)
@@ -632,9 +866,17 @@ func _update_gallery() -> void:
 				on = not lever_up
 			"quadro_su", "fari_accesi":
 				on = lever_up
-			"lampeggianti_accesi":
+			"chiavistello_chiuso":
+				on = not latch_up
+			"chiavistello_tirato":
+				on = latch_up
+			"sigillo_1":
+				on = seal == 1
+			"sigillo_2":
+				on = seal == 2
+			"lampeggianti_accesi", "varco_lampeggiante_acceso":
 				on = blink
-			"lampeggianti_spenti":
+			"lampeggianti_spenti", "varco_lampeggiante_spento":
 				on = not blink
 			"led_eterna":
 				s.modulate.a = 0.78 + 0.22 * (0.5 + 0.5 * sin(tick * TAU / BREATH_TICKS))
@@ -648,6 +890,8 @@ func _update_gallery() -> void:
 				on = not bag_taken
 			"porta_chiusa":
 				on = door_closed
+			"porta_dentro":
+				on = door_closed and _cover_k < 1.0
 		s.visible = on
 
 
@@ -661,10 +905,46 @@ func _gate_open_under(s: Sprite2D, by_hand: bool = false) -> bool:
 	return false
 
 
-## Una leva del livello dentro il quadro di cantiere disegnato.
+## Una leva del livello dentro uno stato che la disegna (il quadro di cantiere, il chiavistello).
 func _lever_drawn(at: Vector2i) -> bool:
-	return _gallery_states.has("quadro_giu") \
-		and _sprite_rect(_gallery_states["quadro_giu"]).grow(8).has_point(Vector2(at))
+	for k: String in LEVER_STATES:
+		if _gallery_states.has(k) and _sprite_rect(_gallery_states[k]).grow(8).has_point(Vector2(at)):
+			return true
+	return false
+
+
+## La leva sotto lo stato `key` è già tirata.
+func _lever_pulled_under(key: String) -> bool:
+	if not _gallery_states.has(key):
+		return false
+	var near := _sprite_rect(_gallery_states[key]).grow(8)
+	for l in _levers:
+		if String(l["iid"]) in pulled and near.has_point(Vector2(l["px"])):
+			return true
+	return false
+
+
+## Il sigillo SIDERA adesso: 1 o 2 (la scritta accesa), 0 spento (nel tremolio). Quando GIG gli arriva
+## davanti, sotto lo schermo fino al pavimento, ronza e tremola; la sua luce segue lo schermo.
+func _tick_seal() -> int:
+	if not _gallery_states.has("sigillo_1"):
+		return 0
+	var r := _sprite_rect(_gallery_states["sigillo_1"])
+	var front := Rect2(r.position.x - 6.0, r.position.y, r.size.x + 12.0, float(_floor_y) + 4.0 - r.position.y)
+	var near := player != null and front.has_point(Vector2(player.px, player.py))
+	if near and not _seal_near and tick - _seal_from > SEAL_FLICKERS * 2 * SEAL_STEP:
+		_seal_from = tick
+		if sound:
+			Sfx.play_at(&"zap", player.px, 0.1, -12.0)
+	_seal_near = near
+	var t := tick - _seal_from
+	var out := 1 + (tick / SEAL_TICKS) % 2
+	if t >= 0 and t < SEAL_FLICKERS * 2 * SEAL_STEP and (t / SEAL_STEP) % 2 == 0:
+		out = 0
+	for i in _gallery_lights.size():
+		if _gallery_lights[i].name == "Luce_sigillo":
+			_gallery_lights[i].energy = _gallery_light_base[i][0] * [0.0, 1.0, 0.7][out]
+	return out
 
 
 ## Un cancello del livello che ha un cancello disegnato sopra (lì niente grata).
@@ -707,8 +987,27 @@ func _read_level_things() -> void:
 	_gates2.clear()
 	_levers.clear()
 	pulled.clear()
+	_interiors.clear()
+	_cam_zones.clear()
 	for e: Dictionary in grid.entities:
 		match String(e["tipo"]):
+			"Interno":
+				var r := Rect2(e["pos"], e["size"])
+				var c: Dictionary = e["campi"]
+				var cam := _cam_fields(c)
+				# Senza nessun limite scritto (il ricovero) la telecamera resta libera; con almeno uno,
+				# i vuoti sono i bordi del rettangolo (legenda-ldtk §5).
+				if cam.any(func(v: float) -> bool: return is_finite(v)):
+					var edge := [r.position.x, r.end.x, r.position.y, r.end.y]
+					for i in 4:
+						if not is_finite(cam[i]):
+							cam[i] = edge[i]
+				_interiors.append({"nome": str(c.get("nome", "")), "rect": r, "stacco": c.get("stacco", true) == true,
+					"stacco_alto": c.get("stacco_alto", true) == true, "cam": cam})
+			"Telecamera":
+				var cam := _cam_fields(e["campi"])
+				if cam.any(func(v: float) -> bool: return is_finite(v)):
+					_cam_zones.append({"rect": Rect2(e["pos"], e["size"]), "cam": cam})
 			"Cancello":
 				var pos: Vector2i = e["pos"]
 				var size: Vector2i = e["size"]
@@ -723,6 +1022,15 @@ func _read_level_things() -> void:
 				var apre: Array = e["campi"]["apre"] if e["campi"].get("apre") is Array else []
 				_levers.append({"iid": e["iid"], "px": e["px"], "apre": apre})
 	_apply_gates()
+
+
+## I limiti cam_sinistra, cam_destra, cam_alto, cam_basso di una zona (INF dove sono vuoti).
+static func _cam_fields(c: Dictionary) -> Array[float]:
+	var out: Array[float] = []
+	for k: String in ["cam_sinistra", "cam_destra", "cam_alto", "cam_basso"]:
+		var v: Variant = c.get(k)
+		out.append(float(v) if v != null else INF)
+	return out
 
 
 ## I cancelli chiusi sono pieni; si aprono quando una leva che li apre è tirata, o col premio di una Persona.
@@ -743,13 +1051,93 @@ func _on_favor_opened() -> void:
 	_apply_gates()
 
 
-## Dove non piove: dentro il garage, se il livello ha la porta.
-func _dry_rects() -> Array:
-	if _door_cells.is_empty():
-		return []
-	var d := _door_cells[0]
-	return [Rect2(d.x * SolidGrid.TILE, (d.y - 8) * SolidGrid.TILE, GARAGE_SIZE.x * SolidGrid.TILE,
-		GARAGE_SIZE.y * SolidGrid.TILE)]
+## Dove non piove: negli interni del livello, e dentro il garage se il livello ha la porta; non sotto le
+## aperture del tetto (il lucernario), dove la pioggia entra.
+func _dry_rects(shown: int = -1) -> Array:
+	var out: Array = []
+	for z in _interiors:
+		out.append(z["rect"])
+	var band := Rect2()
+	if shown >= 0 and shown < _interiors.size():
+		var zr: Rect2 = _interiors[shown]["rect"]
+		var cam_top: float = _interiors[shown]["cam"][2]
+		if is_finite(cam_top) and cam_top < zr.position.y:
+			band = Rect2(zr.position.x, cam_top, zr.size.x, zr.position.y - cam_top)
+	if not _door_cells.is_empty():
+		var d := _door_cells[0]
+		out.append(Rect2(d.x * SolidGrid.TILE, (d.y - 8) * SolidGrid.TILE, GARAGE_SIZE.x * SolidGrid.TILE,
+			GARAGE_SIZE.y * SolidGrid.TILE))
+	_find_roof_holes()
+	for h in _roof_holes:
+		var cut: Array = []
+		for r: Rect2 in out:
+			if r.position.x < h.end.x and r.end.x > h.position.x and r.position.y < h.end.y and r.end.y > h.position.y:
+				if h.position.x > r.position.x:
+					cut.append(Rect2(r.position.x, r.position.y, h.position.x - r.position.x, r.size.y))
+				if h.end.x < r.end.x:
+					cut.append(Rect2(h.end.x, r.position.y, r.end.x - h.end.x, r.size.y))
+			else:
+				cut.append(r)
+		out = cut
+	if band.has_area():
+		# La fascia, tagliata in x dai buchi del suo tetto (dalla grata piove fino in fondo).
+		var parts: Array = [band]
+		for h in _roof_holes:
+			if h.position.y != band.end.y:
+				continue
+			var next: Array = []
+			for r: Rect2 in parts:
+				if r.position.x < h.end.x and r.end.x > h.position.x:
+					if h.position.x > r.position.x:
+						next.append(Rect2(r.position.x, r.position.y, h.position.x - r.position.x, r.size.y))
+					if h.end.x < r.end.x:
+						next.append(Rect2(h.end.x, r.position.y, r.end.x - h.end.x, r.size.y))
+				else:
+					next.append(r)
+			parts = next
+		out.append_array(parts)
+	return out
+
+
+## Il meteo segue l'interno inquadrato: la fascia asciutta sopra il soffitto cambia nel nero dello stacco.
+func _sync_dry() -> void:
+	if _zone_shown == _dry_zone or weather == null:
+		return
+	_dry_zone = _zone_shown
+	weather.dry.clear()
+	for r: Variant in _dry_rects(_dry_zone):
+		weather.dry.append(r as Rect2)
+
+
+## Le aperture nel tetto degli interni con lo stacco (il lucernario del garage, la grata delle cantine):
+## le colonne senza Pieno né cancelli nella riga sopra il bordo alto; dove si entra dall'alto, solo
+## quelle con una grata (celle sottili). Ognuna è alta quanto l'interno.
+func _find_roof_holes() -> void:
+	_roof_holes.clear()
+	_roof_fades.clear()
+	for z in _interiors:
+		if not z["stacco"]:
+			continue
+		var r: Rect2 = z["rect"]
+		# La cella subito sopra il bordo alto, anche quando il bordo cade a metà cella (la galleria di A4).
+		var row := (int(r.position.y) - 1) / SolidGrid.TILE
+		# Dove si entra dall'alto con lo stacco, le aperture libere sono entrate: piove solo dalle grate.
+		var grate_only: bool = z["stacco_alto"]
+		var from := -1
+		var c0 := int(r.position.x) / SolidGrid.TILE
+		var c1 := ceili(r.end.x / SolidGrid.TILE)
+		for c in range(c0, c1 + 1):
+			var open := c < c1 and grid.cell(c, row) != SolidGrid.Cell.SOLID and not _gate_cells.has(Vector2i(c, row))
+			if open and grate_only:
+				open = grid.cell(c, row) == SolidGrid.Cell.THIN or grid.cell(c, row - 1) == SolidGrid.Cell.THIN
+			if open and from < 0:
+				from = c
+			elif not open and from >= 0:
+				var h := Rect2(from * SolidGrid.TILE, r.position.y, (c - from) * SolidGrid.TILE, r.size.y)
+				_roof_holes.append(h)
+				if z["stacco"] and not z["stacco_alto"]:
+					_roof_fades.append(h)
+				from = -1
 
 
 ## Il passaggio al livello `i` dello stesso file: la mappa, la grafica, la porta, i cancelli e il tempo
@@ -764,6 +1152,7 @@ func _enter_level(i: int) -> void:
 	weather.dry.clear()
 	for r: Variant in _dry_rects():
 		weather.dry.append(r as Rect2)
+	_dry_zone = -1
 	weather.refresh_surfaces()
 	for n: Node in [_art_back, _art_front]:
 		if n != null:
@@ -798,16 +1187,21 @@ func _arena_cp() -> int:
 	return i if i >= 0 else 1 << 30
 
 
-## La pioggia delle zone Meteo in `x`: -1 senza zone, 0 asciutto, 1 piove («inizia» come «forte»).
-func _meteo_at(x: int) -> int:
+## La pioggia delle zone Meteo nel punto `p` (i piedi): -1 senza zone, 0 asciutto, 1 piove («inizia» come
+## «forte»). Dove due zone si sovrappongono vale la più piccola (un interno asciutto dentro la pioggia
+## del livello).
+func _meteo_at(p: Vector2i) -> int:
+	var out := -1
+	var best := 1 << 62
 	for e: Dictionary in grid.entities:
 		if e["tipo"] != "Meteo":
 			continue
-		var pos: Vector2i = e["pos"]
-		var size: Vector2i = e["size"]
-		if x >= pos.x and x < pos.x + size.x:
-			return 0 if str(e["campi"].get("pioggia", "no")) == "no" else 1
-	return -1
+		var r := Rect2i(e["pos"], e["size"])
+		# I piedi sul fondo della zona contano dentro.
+		if r.has_point(p - Vector2i(0, 1)) and r.get_area() < best:
+			best = r.get_area()
+			out = 0 if str(e["campi"].get("pioggia", "no")) == "no" else 1
+	return out
 
 
 func _reset() -> void:
@@ -819,7 +1213,7 @@ func _reset() -> void:
 	var at := _checkpoint_pos(cp)
 	# Il cartello dell'arena si supera solo a scontro finito (l'arena si apre 40 px prima).
 	arena_done = cp >= _arena_cp()
-	raining = cp >= _arena_cp() or _meteo_at(at.x) == 1
+	raining = cp >= _arena_cp() or _meteo_at(at) == 1
 	switch_t = 0
 	if weather != null:
 		weather.set_rain(raining, true)
@@ -843,7 +1237,19 @@ func _reset() -> void:
 		reboot_step = 0
 	player.place(at.x, at.y)
 	player.facing = 1
+	_reset_interiors()
 	_cam = _cam_target()
+
+
+## Alla ripartenza gli interni sono già com'è giusto: niente stacco, copertura e limiti a scatto.
+func _reset_interiors() -> void:
+	_prev_feet = Vector2(player.px, player.py)
+	_zone_raw = -1
+	_zone_raw = _interior_at(_prev_feet)
+	_zone_shown = _zone_raw
+	_cut_t = 0
+	_view_snap = true
+	_tick_interiors(true)
 
 
 ## Le spie: una per cartello di ripartenza, dove GIG riparte; accese quelle già superate. Dopo il
@@ -990,7 +1396,7 @@ func _stage_after_step() -> void:
 			if _inside_garage():
 				_reset()
 	# Le zone Meteo: dove piove comincia a piovere.
-	if not raining and _meteo_at(player.px) == 1:
+	if not raining and _meteo_at(Vector2i(player.px, player.py)) == 1:
 		raining = true
 	# I rinforzi al muro, nel prologo di prima (in quello nuovo la scena è da rifare sulla torre).
 	if not seen_rinforzi and on_ground and not _multi_level() and _on_wall_top():
@@ -1200,6 +1606,190 @@ func _cam_target() -> Vector2:
 	if gy > 0 and player.py <= gy:
 		t.y = minf(t.y, float(gy - CAM_GROUND))
 	return t
+
+
+## L'interno dove stanno i piedi di GIG (-1 fuori): bordo alto escluso (sul tetto si è fuori), fondo compreso.
+## Da quello in cui si è già si esce solo oltre ZONE_HOLD pixel: un salto che sfiora il soffitto, o due
+## passi avanti e indietro sulla soglia, non fanno lampeggiare lo stacco. Sul tetto (12 px sopra la
+## galleria) si è fuori.
+func _interior_at(feet: Vector2) -> int:
+	if _zone_raw >= 0 and _zone_raw < _interiors.size() \
+			and _in_zone((_interiors[_zone_raw]["rect"] as Rect2).grow(ZONE_HOLD), feet):
+		return _zone_raw
+	for i in _interiors.size():
+		if _in_zone(_interiors[i]["rect"], feet):
+			return i
+	return -1
+
+
+static func _in_zone(r: Rect2, feet: Vector2) -> bool:
+	return feet.x >= r.position.x and feet.x < r.end.x and feet.y > r.position.y and feet.y <= r.end.y
+
+
+## Due interni che si vedono allo stesso modo (la galleria e il deposito, coi limiti uguali): fra loro
+## niente stacco.
+func _same_look(a: int, b: int) -> bool:
+	return a >= 0 and b >= 0 and _interiors[a]["cam"] == _interiors[b]["cam"]
+
+
+## Un tick degli interni (solo disegno, prima della telecamera): quando i piedi passano il bordo di un
+## interno con lo stacco, 0,3 s di nero e a metà la vista nuova (la telecamera dentro i limiti, la
+## copertura via); senza stacco la copertura sfuma. Tornando indietro nella prima metà lo stacco si
+## riavvolge.
+func _tick_interiors(force_snap: bool = false) -> void:
+	var feet := Vector2(player.px, player.py)
+	var raw := _interior_at(feet)
+	if raw != _zone_raw:
+		var cut := false
+		if not _same_look(raw, _zone_raw):
+			# Lo stacco dell'interno da cui si esce o in cui si entra, dal bordo che si passa.
+			for i: int in [_zone_raw, raw]:
+				if i < 0:
+					continue
+				var top: float = (_interiors[i]["rect"] as Rect2).position.y
+				var over := feet.y <= top or _prev_feet.y <= top
+				cut = cut or bool(_interiors[i]["stacco_alto" if over else "stacco"])
+		_zone_raw = raw
+		if _cut_t > CUT_TICKS / 2:
+			# Nella prima metà: se si torna di là lo stacco si riavvolge, altrimenti a metà si prende
+			# l'interno di adesso.
+			if raw == _zone_shown:
+				_cut_t = CUT_TICKS - _cut_t
+		elif not cut:
+			_zone_shown = raw
+		else:
+			# Uno stacco nuovo, o un altro dopo la metà di quello di prima (dal nero di adesso).
+			_cut_t = CUT_TICKS - _cut_t + (1 if _cut_t > 0 else 0)
+	_prev_feet = feet
+	var snap := force_snap
+	if _cut_t > 0:
+		_cut_t -= 1
+		if _cut_t == CUT_TICKS / 2:
+			_zone_shown = _zone_raw
+			snap = true
+			_cam = _cam_target()
+			_view_snap = true
+	# Lo zoom della vista larga cambia dentro il nero (o subito, alla ripartenza).
+	if snap and wide_cam:
+		_wide_k = _wide_target()
+	var target := 1.0
+	if _zone_shown >= 0:
+		var r: Rect2 = _interiors[_zone_shown]["rect"]
+		for s in _covers:
+			if _sprite_rect(s).intersects(r):
+				target = 0.0
+	_cover_k = target if snap else move_toward(_cover_k, target, 1.0 / CUT_TICKS)
+	_sync_dry()
+	# Dal lucernario non c'è stacco: la copertura segue i piedi, piena 40 px sopra il bordo alto, sparita
+	# sul bordo.
+	if _cut_t == 0:
+		for h in _roof_fades:
+			if feet.x >= h.position.x and feet.x < h.end.x and feet.y > h.position.y - ROOF_FADE \
+					and feet.y <= h.position.y:
+				_cover_k = (h.position.y - feet.y) / ROOF_FADE
+	# GIG sopra la copertura e le ante quando le tocca (fuori, davanti alla facciata); altrimenti con gli
+	# altri attori, sotto le persone e i droni.
+	var me := Rect2(feet.x - 16.0, feet.y - 100.0, 32.0, 100.0)
+	var over := false
+	for i in _cover_front.size():
+		if me.intersects(_cover_front[i]) and (i >= _covers.size() or _cover_k > 0.0):
+			over = true
+	# Da dentro, con la testa in un buco del tetto (sotto la grata), GIG sta sopra la terra di sopra.
+	if _cover_k < 1.0:
+		for h in _roof_holes:
+			if me.intersects(Rect2(h.position.x, h.position.y - ROOF_HEAD, h.size.x, ROOF_HEAD)):
+				over = true
+	_body.z_index = 7 if over else 0
+
+
+## I limiti della vista adesso: [sinistra, destra, alto, basso] (INF dove non ce ne sono). Quelli
+## dell'interno che si vede, o quelli delle Telecamera dove stanno i piedi.
+func _cam_limits() -> Array[float]:
+	if _zone_shown >= 0 and _zone_shown < _interiors.size():
+		return _interiors[_zone_shown]["cam"]
+	var out: Array[float] = [INF, INF, INF, INF]
+	var feet := Vector2(player.px, player.py)
+	for z in _cam_zones:
+		if _in_zone(z["rect"], feet):
+			for i in 4:
+				if is_finite(z["cam"][i]):
+					out[i] = z["cam"][i]
+	return out
+
+
+func _follow_camera() -> void:
+	_tick_interiors()
+	super._follow_camera()
+
+
+## Negli interni chiusi sopra e sotto la vista larga torna stretta: sono disegnati per l'altezza di uno
+## schermo (270 px), e a 2/3 sotto il pavimento resterebbe il vuoto.
+func _wide_target() -> float:
+	if _zone_shown >= 0 and _zone_shown < _interiors.size():
+		var lim: Array = _interiors[_zone_shown]["cam"]
+		if is_finite(lim[2]) and is_finite(lim[3]):
+			return 0.0
+	return super._wide_target()
+
+
+## Il pavimento dell'arena: dove la tavola lo ha dipinto in prospettiva (il piazzale di A5) si apre
+## quello, schiacciato col tilt dal filo del pavimento; ai lati resta quello disegnato, coi colori della
+## tavola.
+func _draw_floor() -> void:
+	super._draw_floor()
+	if tilt <= 0.0 or _arena_floor.is_empty():
+		return
+	var tex: Texture2D = _arena_floor["tex"]
+	var h := roundf(tex.get_height() * tilt)
+	if h >= 1.0:
+		_floor_node.draw_texture_rect(tex, Rect2(_arena_floor["x"], _arena_floor["y"], tex.get_width(), h), false)
+
+
+## I limiti degli interni e delle Telecamera sulla vista disegnata. Se la vista è più larga del tratto
+## sta nel mezzo; in verticale vince il bordo alto (la trave del soffitto). Quando i limiti cambiano
+## (si sale sul tetto, si scende in strada) la vista ci arriva piano; allo stacco subito.
+func _view_limits(c: Vector2, z: float) -> Vector2:
+	var lim := _cam_limits()
+	var h := View.SIZE / (2.0 * z)
+	var want := c
+	var l := lim[0]
+	var r := lim[1]
+	if is_finite(l) and is_finite(r) and r - l <= 2.0 * h.x:
+		want.x = (l + r) / 2.0
+	else:
+		if is_finite(r):
+			want.x = minf(want.x, r - h.x)
+		if is_finite(l):
+			want.x = maxf(want.x, l + h.x)
+	if is_finite(lim[3]):
+		want.y = minf(want.y, lim[3] - h.y)
+	if is_finite(lim[2]):
+		want.y = maxf(want.y, lim[2] + h.y)
+	var d := (want - c).round()
+	var key := str(lim)
+	if _view_snap:
+		_view_snap = false
+		_blend_t = 0
+		_view_push = d
+	else:
+		if key != _limit_key:
+			_blend_t = LIMIT_BLEND
+			_blend_from = _view_push
+		if _blend_t > 0:
+			_blend_t -= 1
+			_view_push = _blend_from.lerp(d, _ease(1.0 - float(_blend_t) / LIMIT_BLEND)).round()
+		else:
+			_view_push = d
+	_limit_key = key
+	return c + _view_push
+
+
+## Il nero dello stacco degli interni (a gradini, come la caduta).
+func _cut_alpha() -> float:
+	if _cut_t <= 0:
+		return 0.0
+	var k := 1.0 - absf(float(_cut_t) - CUT_TICKS / 2.0) / (CUT_TICKS / 2.0)
+	return ceilf(k * 4.0) / 4.0
 
 
 ## Il pavimento del livello: il più basso fra i piedi dei cartelli (0 se non ce ne sono).
@@ -1434,6 +2024,10 @@ func _draw_stage_hud(h: Control) -> void:
 	if switch_t > 0:
 		var k := 1.0 - absf(float(switch_t) - SWITCH_TICKS / 2.0) / (SWITCH_TICKS / 2.0)
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, clampf(k * 1.4, 0.0, 1.0)))
+	# Lo stacco degli interni.
+	var cut := _cut_alpha()
+	if cut > 0.0:
+		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, cut))
 	# Il cartello dopo il murale del passaggio (compare mentre la scena esce e l'interfaccia torna).
 	if finished and (scene == null or not scene.holds_sim()):
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, 0.6))

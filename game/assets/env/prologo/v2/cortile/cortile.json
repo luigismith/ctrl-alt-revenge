@@ -1,0 +1,26 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "coordinate": "locali al livello B, come b3.json",
+ "nota": "dalla tavola del cortile di car-grafica: l'ombra del cortile sopra la scena di B3 e sotto GIG, la luce della strada che entra dal portone in additivo, il pilastro e l'anta del portone sopra GIG; la luce fredda della strada e il led della telecamera SIDERA, che lampeggia 1 s ogni 3",
+ "pezzi": {
+  "ombra": {
+   "image": "cortile_ombra.png",
+   "x": 2683,
+   "y": 474
+  },
+  "davanti_portone": {
+   "image": "cortile_portone.png",
+   "x": 2926,
+   "y": 519
+  }
+ },
+ "emissione": {
+  "image": "cortile_luce.png",
+  "x": 2906,
+  "y": 526
+ },
+ "luci": [
+  {"nome": "strada_portone", "x": 3036, "y": 600, "colore": "#9aa4b8", "energia": 0.3, "raggio": 110, "altezza": 40},
+  {"nome": "telecamera_sidera", "x": 2987, "y": 521, "colore": "#ff4030", "energia": 0.08, "raggio": 14, "ritmo": "lampeggia"}
+ ]
+}

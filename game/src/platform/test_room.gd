@@ -451,6 +451,7 @@ func _ready() -> void:
 	layer.add_child(_hud)
 	_overlay = LevelOverlay.new()
 	layer.add_child(_overlay)
+	layer.visible = not Game.options.no_hud
 	show_boxes = Game.options.debug_boxes
 	if input.mode == PlayerInput.Mode.REPLAY and input.replay.start.has("x"):
 		_start.x = int(input.replay.start["x"])
@@ -1083,8 +1084,12 @@ func _game_zoom() -> float:
 ## Esattori.
 func _wide_tick() -> void:
 	if wide_cam:
-		var target := 1.0 if arena_phase in [ArenaPhase.NONE, ArenaPhase.LEAVE] else 0.0
-		_wide_k = move_toward(_wide_k, target, 1.0 / WIDE_TICKS)
+		_wide_k = move_toward(_wide_k, _wide_target(), 1.0 / WIDE_TICKS)
+
+
+## Dove vuole andare la prova adesso: 1 larga, 0 stretta (gli interni del prologo la stringono).
+func _wide_target() -> float:
+	return 1.0 if arena_phase in [ArenaPhase.NONE, ArenaPhase.LEAVE] else 0.0
 
 
 ## Il centro della vista del gioco: quello della telecamera, tenuto dentro la stanza se la vista è larga.
@@ -1095,6 +1100,12 @@ func _game_view_center(z: float) -> Vector2:
 	var h := (View.SIZE / (2.0 * z)).round()
 	c.x = clampf(c.x, h.x, maxf(h.x, float(grid.pixel_width()) - h.x))
 	c.y = minf(c.y, float(grid.pixel_height()) - h.y)
+	return c
+
+
+## I limiti della vista disegnata (gli interni del prologo li stringono): il centro `c` a zoom `z`,
+## spostato dove serve. Qui nessun limite.
+func _view_limits(c: Vector2, _z: float) -> Vector2:
 	return c
 
 
@@ -1116,7 +1127,7 @@ func _follow_camera() -> void:
 		shake.x = (1 - 2 * (_shake_t % 2)) * ceilf(2.0 * _shake_t / SHAKE_TICKS)
 		_shake_t -= 1
 	var z := _game_zoom()
-	var c := _game_view_center(z)
+	var c := _view_limits(_game_view_center(z), z)
 	if squeeze_on or _squeeze_k > 0.0:
 		var feet := Vector2(player.px, player.py - SQUEEZE_UP)
 		_squeeze_c = feet if _squeeze_k == 0.0 else _squeeze_c.lerp(feet, 0.5)
@@ -1504,6 +1515,9 @@ func _open_arena() -> void:
 	arena.camera.x = _arena_cam_x
 	if not lights_on:
 		arena.set_lights(false)
+	if Game.options.no_hud:
+		arena.hud.visible = false
+		arena.overlay.visible = false
 	var g := arena.player
 	# L'energia è una sola per tutta la partita (decisione A): GIG entra nell'arena con quella che ha.
 	if use_lives:

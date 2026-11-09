@@ -1,0 +1,77 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "coordinate": "del livello A, in pixel del mondo; il pavimento è a y 680 (riga 34)",
+ "passaggio": "6: A5 (il piazzale) -> A6 (il cantiere ETERNA), fuori-fuori, senza stacco: solo la soglia",
+ "pezzi": {
+  "pavimento": {
+   "image": "cantiere_pavimento.png",
+   "x": 5320,
+   "y": 678,
+   "z": "sopra la scena di A6, sotto GIG",
+   "nota": "la ghiaia del piazzale che finisce nel fango, con le due lamiere; il bordo sinistro è un taglio irregolare finché A5 non ha la tavola"
+  },
+  "dietro": {
+   "image": "cantiere_dietro.png",
+   "x": 5398,
+   "y": 522,
+   "z": "sopra la scena di A6 e il pavimento, sotto GIG",
+   "nota": "il pannello ETERNA, la lamiera di scorta, il palo lontano col lettore di badge e il lampeggiante spento, l'anta lontana; copre il taglio del muro di tufo a 5480"
+  },
+  "davanti": {
+   "image": "cantiere_davanti.png",
+   "x": 5470,
+   "y": 542,
+   "z": "sopra GIG, scroll 1, come gli stipiti di A4",
+   "nota": "il palo vicino sul piede, l'anta a rete aperta verso il cantiere, la barra LED girata verso il piazzale"
+  }
+ },
+ "emissione": {
+  "image": "cantiere_emis.png",
+  "x": 5395,
+  "y": 538,
+  "nota": "in additivo: la barra LED, le strisce arancio del pannello, il led rosso del lettore"
+ },
+ "stati": {
+  "varco_lampeggiante_spento": {
+   "image": "varco_lampeggiante_spento.png",
+   "x": 5469,
+   "y": 512
+  },
+  "varco_lampeggiante_acceso": {
+   "image": "varco_lampeggiante_acceso.png",
+   "x": 5469,
+   "y": 512
+  }
+ },
+ "luci": [
+  {
+   "nome": "led_varco",
+   "x": 5476,
+   "y": 558,
+   "colore": "#e2e9f4",
+   "energia": 0.45,
+   "raggio": 150,
+   "altezza": 30,
+   "pozza": {
+    "energia": 0.26,
+    "larghezza": 170,
+    "x": 5488,
+    "y": 682
+   }
+  },
+  {
+   "nome": "pannello_eterna",
+   "x": 5440,
+   "y": 544,
+   "colore": "#ff9a40",
+   "energia": 0.14,
+   "raggio": 60,
+   "altezza": 10
+  }
+ ],
+ "note": {
+  "lampeggiante": "si alterna insieme a lampeggianti_accesi/spenti di A6, con lo stesso tempo",
+  "led_varco": "sempre accesa: è la luce fredda del cantiere, contro il grigio caldo del piazzale",
+  "davanti": "copre GIG appena entrato, fra x 5498 e 5538, dal ginocchio in su: la rete lascia vedere attraverso"
+ }
+}

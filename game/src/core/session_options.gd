@@ -27,6 +27,8 @@ extends RefCounted
 ##   --camera-stretta       nei tratti platform la vista resta quella di sempre, 480 × 270 (la telecamera
 ##                          larga è normale dall'8 novembre 2026; vedi TestRoom.wide_cam)
 ##   --camera-larga         la telecamera larga (è già normale: resta per i comandi di prima)
+##   --senza-hud            senza l'interfaccia (barre, scritte, VAI), anche nelle arene: serve alle
+##                          riprese con Movie Maker per il teaser e il sito
 
 var autostart: bool = false
 var room: bool = false
@@ -53,6 +55,8 @@ var solo_drones: PackedStringArray = []
 var wide_camera: bool = true
 ## --b-grigio: B del prologo in grigio, col piano medio dietro.
 var grey_b: bool = false
+## --senza-hud: niente interfaccia sopra il gioco, per le riprese.
+var no_hud: bool = false
 var unknown: PackedStringArray = []
 
 
@@ -117,6 +121,8 @@ static func parse(args: PackedStringArray) -> SessionOptions:
 				o.wide_camera = false
 			"--b-grigio":
 				o.grey_b = true
+			"--senza-hud":
+				o.no_hud = true
 			"--solo-droni":
 				o.solo_drones = next.split(",", false)
 				i += 1

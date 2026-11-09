@@ -1,0 +1,100 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "coordinate": "locali al livello A, in pixel; il pavimento è a y 680 (riga 34)",
+ "passaggio": "A5: il cancello laterale e l'arena del pignoramento (celle 230-275)",
+ "scena": {
+  "image": "a5_scena.png",
+  "x": 4600,
+  "y": 402
+ },
+ "emissione": {
+  "image": "a5_emis.png",
+  "x": 4889,
+  "y": 484
+ },
+ "stati": {
+  "chiavistello_chiuso": {
+   "image": "a5_chiavistello_chiuso.png",
+   "x": 4610,
+   "y": 610
+  },
+  "chiavistello_tirato": {
+   "image": "a5_chiavistello_tirato.png",
+   "x": 4610,
+   "y": 610
+  },
+  "sigillo_1": {
+   "image": "a5_sigillo_1.png",
+   "x": 5291,
+   "y": 596
+  },
+  "sigillo_2": {
+   "image": "a5_sigillo_2.png",
+   "x": 5291,
+   "y": 596
+  }
+ },
+ "pavimento_arena": {
+  "image": "a5_piazzale_arena.png",
+  "x": 4560,
+  "y": 680,
+  "punto_di_fuga_x": 4880,
+  "persp": 240.0,
+  "fascia": 72,
+  "nota": "al posto di _draw_floor quando tilt > 0: in y = filo del pavimento, scala verticale = tilt; la prospettiva è fatta per la camera bloccata a x 4640 (centro 4880)"
+ },
+ "floor_colors": {
+  "floor": [
+   112,
+   106,
+   102
+  ],
+  "line": [
+   84,
+   80,
+   80
+  ],
+  "top": [
+   138,
+   130,
+   124
+  ],
+  "kerb": [
+   92,
+   50,
+   40
+  ],
+  "speck": [
+   136,
+   128,
+   122
+  ]
+ },
+ "luci": [
+  {
+   "nome": "sigillo",
+   "x": 5310,
+   "y": 605,
+   "colore": "#ff3a30",
+   "energia": 0.18,
+   "raggio": 48,
+   "altezza": 12,
+   "nota": "tremola con lo schermo: 1,0 su sigillo_1, 0,7 su sigillo_2"
+  },
+  {
+   "nome": "aria_purificatore",
+   "x": 4907,
+   "y": 570,
+   "colore": "#86d9a6",
+   "energia": 0.08,
+   "raggio": 30,
+   "altezza": 8
+  }
+ ],
+ "note": {
+  "chiavistello": "la leva del livello a (4640,680): stato chiavistello_chiuso, poi chiavistello_tirato quando si tira; il rettangolo dello stato tocca il punto della leva, come quadro_giu in A6",
+  "sigillo": "alterna sigillo_1 e sigillo_2 ogni 1,2 s; quando GIG ci passa davanti ronza e tremola 3 volte; non si apre",
+  "basamenti": "le cornici a y 640 coincidono con le colonne piene 262 e 268 (x 5240-5260 e 5360-5380)",
+  "moto": "la moto del rider resta il pezzo di A4 a (4665,610)"
+ }
+}

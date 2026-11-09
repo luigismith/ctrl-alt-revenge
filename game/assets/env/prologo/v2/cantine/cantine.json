@@ -1,0 +1,44 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "coordinate": "locali al livello B, come b2.json e b3.json",
+ "nota": "dalla tavola delle cantine di car-grafica, con i pezzi nelle chiavi che legge il gioco: fuori la copertura; dentro il muro, la sua emissione, le luci; con la copertura, sopra la strada e i droni, la terra sopra il soffitto, che si vede solo da dentro; sempre il telaio della botola, sotto le serrande di B2",
+ "copertura": {
+  "image": "cantine_copertura.png",
+  "x": 1216,
+  "y": 720
+ },
+ "dentro": [
+  {
+   "image": "cantine_dentro.png",
+   "x": 1218,
+   "y": 720
+  }
+ ],
+ "sopra_dentro": {
+  "image": "cantine_sopra.png",
+  "x": 1178,
+  "y": 600
+ },
+ "emissione_dentro": {
+  "image": "cantine_emis.png",
+  "x": 1218,
+  "y": 720
+ },
+ "pezzi": {
+  "telaio": {
+   "image": "cantine_telaio.png",
+   "x": 1236,
+   "y": 678,
+   "sotto": ["serranda_chiusa", "serranda_aperta"]
+  }
+ },
+ "luci_dentro": [
+  {"nome": "lampadina_0", "x": 1457, "y": 737, "colore": "#ffb878", "energia": 0.9, "raggio": 90},
+  {"nome": "lampadina_1", "x": 1700, "y": 737, "colore": "#ffb878", "energia": 0.9, "raggio": 90},
+  {"nome": "lampadina_2", "x": 2073, "y": 737, "colore": "#ffb878", "energia": 0.9, "raggio": 90},
+  {"nome": "lampadina_4", "x": 2562, "y": 737, "colore": "#ffb878", "energia": 0.9, "raggio": 90},
+  {"nome": "sensore", "x": 1934, "y": 750, "colore": "#86d9a6", "energia": 0.4, "raggio": 30},
+  {"nome": "botola", "x": 1262, "y": 770, "colore": "#a8b8d6", "energia": 0.45, "raggio": 60},
+  {"nome": "grata", "x": 2710, "y": 770, "colore": "#a8b8d6", "energia": 0.5, "raggio": 80}
+ ]
+}

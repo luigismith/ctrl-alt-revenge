@@ -12,11 +12,67 @@
   "x": 3440,
   "y": 0
  },
+ "copertura": {
+  "image": "b4_copertura.png",
+  "x": 3440,
+  "y": 430,
+  "z": "sopra la scena e le cose dentro, sotto GIG",
+  "nota": "la facciata della palazzina vista dal cortile: copre il garage fino al pilastro giallo (4142); piena fuori, a 0 quando i piedi di GIG sono in 3400-4140 x 420-680; la campata del vicino (4180-4520) è già la faccia di fuori e resta com'è"
+ },
+ "copertura_emis": {
+  "image": "b4_copertura_emis.png",
+  "x": 3440,
+  "y": 430,
+  "nota": "la finestra calda e lo schermo ARIA+: si spegne insieme alla copertura"
+ },
+ "dentro": {
+  "image": "b4_dentro.png",
+  "x": 3340,
+  "y": 390,
+  "nota": "il muro interno sopra e attorno alla porta (3340-3440), il soffitto e la fascia; si vede solo dentro, sopra la scena di B3"
+ },
+ "luce_porta": {
+  "image": "b4_luce_porta.png",
+  "x": 3408,
+  "y": 540,
+  "nota": "la luce fredda della porta aperta sul pavimento; si spegne quando la porta si chiude"
+ },
+ "stati": {
+  "porta_dentro": {
+   "image": "b4_porta_dentro.png",
+   "x": 3358,
+   "y": 550,
+   "nota": "la porta chiusa vista da dentro, quando scatta si_chiude_dopo"
+  }
+ },
+ "stipiti": {
+  "fuori": {
+   "image": "b4_stipiti_fuori.png",
+   "x": 3352,
+   "y": 544
+  },
+  "dentro": {
+   "image": "b4_stipiti_dentro.png",
+   "x": 3352,
+   "y": 544
+  },
+  "nota": "sopra GIG; si scambiano con lo stacco"
+ },
+ "telecamera": {
+  "dentro": [
+   3352,
+   420,
+   4520,
+   690
+  ],
+  "stacco": "0,3 s sulla porta (colonne 168-169), nei due sensi",
+  "lucernario": "nessuno stacco: la copertura sfuma mentre GIG passa la linea del tetto (y 420)"
+ },
  "note": {
   "registro": "lo scaffale è vuoto alla colonna 190: il registro (190, 28, piede a y 580) è uno sprite a parte, da fare quando car-storia avrà deciso l'oggetto; la resa da Vista è uno shader sul contorno",
   "luce": "la lampada sul banco è dipinta; se si vuole viva, una PointLight2D calda (255,200,130) a x 3500, y 610",
   "lucernario": "il fascio di pioggia sotto il lucernario aperto (186-189) è dipinto: la pioggia del gioco, dentro il garage, cade solo lì",
-  "fondo_chiuso": "207-225 è Pieno, dipinto come nel prologo di prima (la stanza buia coi pilastri gialli)"
+  "fondo_chiuso": "207-225 è Pieno: il garage accanto, murato a blocchetti, con la serranda abbassata, il nastro e il sigillo «PIGNORATO · RECUPERO CREDITI» e il lucchetto connesso col led rosso (nella _emis)"
  },
  "luci": [
   {
