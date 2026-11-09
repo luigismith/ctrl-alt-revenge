@@ -1,9 +1,10 @@
 {
  "id": "rider",
- "closeups": [{"name": "rider_dx", "faces": "right", "variants": ["talk"],
+ "closeups": [{"name": "rider_dx", "faces": "right", "variants": ["blink", "talk"],
                "ai": {"base": "chatgpt/rider_dx_v3.png", "render": "rider_dx.png", "colors": 24,
                       "canon": ["#b8845e", "#8a5c40", "#c4b89e", "#e8761c", "#3c3c46"], "mouth": [55, 56, 13, 4], "open_px": 2,
-                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche la bocca"}}],
+                      "lenti": {"riquadri": [[48, 32, 34, 12]], "colore": "#e8761c"},
+                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche la bocca e, al posto delle palpebre (gli occhi sono dietro gli occhiali da polvere), il riflesso sulle lenti"}}],
  "base": "thug_punk",
  "outfit": "rider",
  "hair_meshes": [],
@@ -78,7 +79,7 @@
   "backpack": {}
  },
  "palette": {
-  "max_colors": 28,
+  "max_colors": 44,
   "ramps": {
    "SKIN": {
     "mid": "#b8845e",
@@ -410,11 +411,13 @@
    "mat_thr": {
     "HELMET": [
      -0.05,
-     0.4
+     0.4,
+     0.7
     ],
     "BAG": [
      -0.05,
-     0.4
+     0.4,
+     0.7
     ],
     "METAL": [
      0.0,
@@ -425,12 +428,14 @@
     "HELMET": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "BAG": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "METAL": [
      1,

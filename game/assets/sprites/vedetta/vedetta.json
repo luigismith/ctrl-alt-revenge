@@ -1,0 +1,29 @@
+{
+  "id": "vedetta",
+  "format": 1,
+  "image": "vedetta.png",
+  "normal_image": "vedetta_n.png",
+  "pixels_per_meter": 60,
+  "animations": {
+    "patrol": {
+      "loop": true,
+      "frames": [
+        {"rect": [1, 1, 62, 28], "anchor": [31, 28], "ticks": 2, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"beacon": [-3, -24], "lamp": [12, -11]}},
+        {"rect": [64, 1, 63, 27], "anchor": [31, 27], "ticks": 2, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"beacon": [-3, -24], "lamp": [13, -11]}}
+      ]
+    },
+    "spot": {
+      "loop": true,
+      "frames": [
+        {"rect": [128, 1, 62, 28], "anchor": [31, 28], "ticks": 2, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"beacon": [-3, -24], "lamp": [12, -11]}},
+        {"rect": [191, 1, 63, 27], "anchor": [31, 27], "ticks": 2, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"beacon": [-3, -24], "lamp": [13, -11]}}
+      ]
+    },
+    "broken": {
+      "loop": false,
+      "frames": [
+        {"rect": [1, 30, 59, 35], "anchor": [27, 35], "ticks": 30, "hurt": [], "hit": [], "events": [], "tags": ["spento"], "dx": 0, "points": {"beacon": [1, -23], "lamp": [10, -5]}}
+      ]
+    }
+  }
+}

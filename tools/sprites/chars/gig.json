@@ -341,7 +341,7 @@
  "palette": {
   "outline": "#140e1e",
   "rim": "#e0559b",
-  "max_colors": 26,
+  "max_colors": 44,
   "protect": [
    "#140e1e",
    "#e0559b",
@@ -676,7 +676,11 @@
    "HAIR": 0.8,
    "METAL": 0.8,
    "METAL_LIGHT": 0.8,
-   "BELT": 0.85
+   "BELT": 0.85,
+   "TOP": 0.88,
+   "PANTS": 0.88,
+   "BOOTS": 0.88,
+   "SKIN": 0.88
   },
   "big_mats": [
    "SKIN",
@@ -714,6 +718,12 @@
   ],
   "torso_pad": 5
  },
+ "closeups": [{"name": "gig_ciano_sx", "faces": "left", "blink_eyes": ["eye_l"], "mouth_thin": false,
+               "_nota": "primo piano per le scene dal riavvio in poi (murales.md, [PP]): come gig_spento_sx, ma con l'occhio cyber acceso; la luce cyan dal basso la mette la base di ChatGPT. Si chiude solo l'occhio vero",
+               "ai": {"base": "chatgpt/gig_ciano_sx_v1.png", "render": "gig_ciano_sx.png", "colors": 20,
+                      "canon": ["#c98466", "#9a5a44", "#7a7f87"], "eyes": [[33, 54, 11, 4]], "mouth": [21, 72, 16, 4],
+                      "open_px": 2,
+                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche palpebra e bocca"}}],
  "portrait": {
   "action": "Idle_Loop",
   "frame": 1,
@@ -1919,7 +1929,7 @@
   "selout": true,
   "pp_lines": true,
   "band_mode": 2,
-  "capsule_n": 0.85,
+  "capsule_n": 0.6,
   "pal_mode": "cel",
   "smear_skip": [
    "toe_l",
@@ -1935,8 +1945,8 @@
     4
    ]
   },
-  "ao_k": 0,
-  "min_cluster": 28,
+  "ao_k": 0.25,
+  "min_cluster": 10,
   "cel": {
    "thr": [
     0.22
@@ -1976,19 +1986,18 @@
       2
      ]
     ],
-    "thr": 0.25,
+    "thr": 0.2,
     "keep": 0.15,
     "r_px": [
      1.0,
      2.0
     ]
    },
-   "n_smooth": 2.0,
+   "n_smooth": 1.2,
    "head_n": 0.5,
    "spec_top": true,
    "relabel": {
-    "TOP_FOLD": "TOP",
-    "PANTS_FOLD": "PANTS"
+    "TOP_FOLD": "TOP"
    },
    "pal": {},
    "shadow_mix": {
@@ -2013,22 +2022,28 @@
     "SKIN_DARK"
    ],
    "mat_thr": {
-    "HOOD": [],
+    "HOOD": [
+     0.0,
+     0.45
+    ],
     "TOP_LINING": [],
     "BOOT_SOLE": [
      0.22
     ],
     "TOP": [
      -0.1,
-     0.3
+     0.3,
+     0.62
     ],
     "PANTS": [
-     0.05,
-     0.5
+     0.0,
+     0.42,
+     0.7
     ],
     "SKIN": [
      -0.05,
-     0.45
+     0.4,
+     0.7
     ],
     "METAL": [
      0.22,
@@ -2037,11 +2052,18 @@
     "METAL_DARK": [
      0.22,
      0.7
+    ],
+    "BOOTS": [
+     -0.1,
+     0.3,
+     0.65
     ]
    },
    "mat_idx": {
     "HOOD": [
-     2
+     1,
+     2,
+     3
     ],
     "TOP_LINING": [
      1
@@ -2053,17 +2075,20 @@
     "TOP": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "SKIN": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "PANTS": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "METAL": [
      1,
@@ -2074,6 +2099,12 @@
      1,
      3,
      5
+    ],
+    "BOOTS": [
+     1,
+     2,
+     3,
+     4
     ]
    },
    "line_min": 3,

@@ -34,7 +34,7 @@
   "goggles": {}
  },
  "palette": {
-  "max_colors": 28,
+  "max_colors": 44,
   "ramps": {
    "TOP": {
     "mid": "#f07818",
@@ -223,14 +223,16 @@
    "mat_thr": {
     "TOP_DARK": [
      -0.05,
-     0.4
+     0.4,
+     0.7
     ]
    },
    "mat_idx": {
     "TOP_DARK": [
      1,
      2,
-     3
+     3,
+     4
     ]
    }
   }

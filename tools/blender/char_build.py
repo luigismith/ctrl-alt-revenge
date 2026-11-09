@@ -1987,7 +1987,7 @@ def build(job):
     kind = job["outfit"]
     if kind == "gig":
         objs, L = build_gig(ctx)
-    elif kind in ("rider", "esattore", "messo", "toto", "addolorata", "mimmo"):
+    elif kind in ("rider", "esattore", "messo", "toto", "addolorata", "mimmo", "perdono", "signora", "fruttivendolo"):
         import char_enemies
         objs, L = char_enemies.build(globals(), ctx, kind)
     else:

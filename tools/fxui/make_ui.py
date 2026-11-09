@@ -59,6 +59,27 @@ def make_msg(text: str, H: int = 24) -> np.ndarray:
     return title.render([text], bigfont.metrics(H), MSG)
 
 
+def make_abbonamento_scaduto() -> np.ndarray:
+    """Fine partita al posto di GAME OVER (decisione 51): ABBONAMENTO crema su SCADUTO rosso, come un timbro.
+
+    Le due righe si fanno a parte (i riempimenti di title.render valgono solo sulla prima riga)
+    e si impilano centrate, con la seconda che sale di 3 px sotto la prima."""
+    import dataclasses
+    red = dataclasses.replace(MSG, fill=[P.SPARK_ORA, P.SPARK_RED, P.RED])
+    rows = [title.render(["ABBONAMENTO"], bigfont.metrics(20), MSG),
+            title.render(["SCADUTO"], bigfont.metrics(24), red)]
+    gap = -3
+    W = max(r.shape[1] for r in rows)
+    out = np.zeros((sum(r.shape[0] for r in rows) + gap * (len(rows) - 1), W, 4), np.uint8)
+    y = 0
+    for r in rows:
+        x = (W - r.shape[1]) // 2
+        m = r[..., 3] > 0
+        out[y:y + r.shape[0], x:x + r.shape[1]][m] = r[m]
+        y += r.shape[0] + gap
+    return out
+
+
 def make_big_digits(H: int = 24) -> tuple[np.ndarray, list[int]]:
     """Cifre 0-9 grandi nello stile di msg_* (stessa altezza, bordo, estrusione e ombra), su una striscia di
     10 fotogrammi larghi uguali, ogni cifra centrata nel suo: per il conto alla rovescia di CONTINUA?, che
@@ -254,7 +275,10 @@ def build() -> dict:
     put("msg_pause", "msg_pause.png", make_msg("PAUSA"), note="Pausa (sopra al menu).")
     put("msg_continue", "msg_continue.png", make_msg("CONTINUA?"), note="Dopo l'ultima vita.")
     put("msg_game_over", "msg_game_over.png", make_msg("GAME OVER"),
-        note="Facoltativo: se il conto alla rovescia di CONTINUA? arriva a zero.")
+        note="Non più usato in gioco: dalla decisione 51 la fine partita è msg_abbonamento_scaduto.")
+    put("msg_abbonamento_scaduto", "msg_abbonamento_scaduto.png", make_abbonamento_scaduto(),
+        note=("Fine partita, al posto di GAME OVER (decisione 51): due righe, ABBONAMENTO crema e SCADUTO "
+              "rosso come un timbro; da centrare in orizzontale."))
     put("msg_demo_end", "msg_demo_end.png", make_msg("FINE DELLA DEMO"), note="Schermata finale.")
     digits, dframe = make_big_digits()
     put("big_digits", "big_digits.png", digits, frame=dframe, count=10, ticks=1,

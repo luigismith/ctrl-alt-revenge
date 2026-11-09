@@ -132,8 +132,10 @@ class Rig:
                     D[lo] = F @ swing(self.rest_dir[lo], lo_b)
                 if "hand" in L or "foot" in L:
                     D[en] = F @ swing(self.rest_dir[en], Vector(L.get("hand", L.get("foot"))))
-                elif "foot_world" in L:
-                    D[en] = C @ swing(self.rest_dir[en], Vector(L["foot_world"]))
+                elif "foot_world" in L or "hand_world" in L:
+                    # orientata nel mondo (riferimento "facing"): il piede piatto, o la mano che tiene dritto un
+                    # bastone qualunque cosa faccia il busto (il bordone dei perdoni)
+                    D[en] = C @ swing(self.rest_dir[en], Vector(L.get("foot_world", L.get("hand_world"))))
                 elif kind == "leg":
                     D[en] = C @ Matrix.Identity(3)
                 else:

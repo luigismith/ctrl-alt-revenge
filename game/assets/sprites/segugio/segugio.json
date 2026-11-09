@@ -1,0 +1,59 @@
+{
+  "id": "segugio",
+  "format": 1,
+  "image": "segugio.png",
+  "normal_image": "segugio_n.png",
+  "pixels_per_meter": 60,
+  "animations": {
+    "idle": {
+      "loop": true,
+      "frames": [
+        {"rect": [1, 1, 58, 42], "anchor": [26, 42], "ticks": 30, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [28, -31], "beacon": [-6, -34], "vent": [-20, -21], "collar": [10, -27]}}
+      ]
+    },
+    "patrol": {
+      "loop": true,
+      "frames": [
+        {"rect": [60, 1, 58, 42], "anchor": [26, 42], "ticks": 8, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [28, -31], "beacon": [-5, -33], "vent": [-20, -21], "collar": [10, -28]}},
+        {"rect": [119, 1, 58, 43], "anchor": [27, 43], "ticks": 8, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [27, -32], "beacon": [-6, -34], "vent": [-21, -22], "collar": [9, -28]}},
+        {"rect": [178, 1, 58, 42], "anchor": [26, 42], "ticks": 8, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [28, -31], "beacon": [-6, -34], "vent": [-20, -21], "collar": [10, -27]}},
+        {"rect": [1, 45, 58, 43], "anchor": [26, 43], "ticks": 8, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [28, -32], "beacon": [-5, -34], "vent": [-20, -22], "collar": [10, -28]}}
+      ]
+    },
+    "sniff": {
+      "loop": true,
+      "frames": [
+        {"rect": [60, 45, 54, 36], "anchor": [26, 36], "ticks": 10, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [22, -11], "beacon": [-5, -34], "vent": [-20, -22], "collar": [11, -24]}},
+        {"rect": [115, 45, 55, 36], "anchor": [26, 36], "ticks": 10, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [24, -12], "beacon": [-5, -34], "vent": [-20, -22], "collar": [11, -24]}}
+      ]
+    },
+    "bark": {
+      "loop": true,
+      "frames": [
+        {"rect": [171, 45, 57, 45], "anchor": [27, 45], "ticks": 6, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"eye": [24, -41], "beacon": [-6, -33], "mouth": [23, -36], "vent": [-20, -21], "collar": [8, -30]}},
+        {"rect": [1, 91, 57, 45], "anchor": [27, 45], "ticks": 6, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"eye": [24, -39], "beacon": [-6, -33], "mouth": [23, -34], "vent": [-21, -21], "collar": [8, -30]}}
+      ]
+    },
+    "dash": {
+      "loop": true,
+      "frames": [
+        {"rect": [59, 91, 63, 42], "anchor": [31, 44], "ticks": 3, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"eye": [28, -31], "beacon": [-5, -35], "vent": [-20, -23], "collar": [10, -29]}},
+        {"rect": [123, 91, 60, 42], "anchor": [29, 44], "ticks": 3, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"eye": [26, -33], "beacon": [-7, -34], "vent": [-21, -21], "collar": [8, -29]}},
+        {"rect": [184, 91, 60, 40], "anchor": [28, 40], "ticks": 3, "hurt": [], "hit": [], "events": [], "tags": ["avviso"], "dx": 0, "points": {"eye": [28, -26], "beacon": [-5, -34], "vent": [-20, -22], "collar": [10, -26]}}
+      ]
+    },
+    "pant": {
+      "loop": true,
+      "frames": [
+        {"rect": [1, 137, 59, 40], "anchor": [27, 40], "ticks": 12, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [28, -24], "beacon": [-6, -33], "vent": [-20, -20], "collar": [10, -26]}},
+        {"rect": [61, 137, 59, 40], "anchor": [28, 40], "ticks": 12, "hurt": [], "hit": [], "events": [], "tags": ["ronda"], "dx": 0, "points": {"eye": [27, -23], "beacon": [-6, -33], "vent": [-21, -21], "collar": [9, -25]}}
+      ]
+    },
+    "broken": {
+      "loop": false,
+      "frames": [
+        {"rect": [121, 137, 61, 28], "anchor": [31, 28], "ticks": 30, "hurt": [], "hit": [], "events": [], "tags": ["spento"], "dx": 0, "points": {"eye": [26, -7], "beacon": [-5, -25], "vent": [-20, -14], "collar": [10, -15]}}
+      ]
+    }
+  }
+}

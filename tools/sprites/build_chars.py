@@ -413,6 +413,24 @@ def ground_contact(cfg, names, sprites, anchors):
         anchors[n] = fixed
 
 
+def clip_ground(cfg, names, sprites, anchors):
+    """Con "clip_ground": true nell'animazione, quello che scende sotto i piedi della guardia si taglia: è un
+    oggetto rigido in mano (il bordone dei perdoni) che, quando la mano si abbassa, nel 3D passerebbe sotto il
+    pavimento; tagliato, sembra appoggiato a terra."""
+    want = [n for n in names if cfg["anims"][n].get("clip_ground")]
+    if not want:
+        return
+    foot = sprite_bottom(sprites["idle"][0]) - anchors["idle"][0][1]
+    for n in want:
+        cut = []
+        for sp, (ax, ay) in zip(sprites[n], anchors[n]):
+            y = max(0, ay + foot)
+            cut.append(int((sp[y:, :, 3] > 0).sum()))
+            sp[y:, :, 3] = 0
+        if any(cut):
+            C.say(f"  {n}: tagliati al suolo {cut} px")
+
+
 def step_assemble(cid):
     cfg = C.char_cfg(cid)
     meta = C.load_json(os.path.join(raw_dir(cid), "meta.json"))
@@ -439,6 +457,7 @@ def step_assemble(cid):
         else:
             anchors[n] = [anchor_of(fd, mode, guard_pelvis_h(cid, fdata)) for fd in fdata[n]]
     ground_contact(cfg, names, sprites, anchors)
+    clip_ground(cfg, names, sprites, anchors)
     # offset delle vittime (solo GIG)
     victims, vlog = {}, []
     if cid == "gig":

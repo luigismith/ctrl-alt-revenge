@@ -1,0 +1,16 @@
+{
+ "id": "signora_dopo",
+ "_nota": "La signora del cimitero dopo aver dato a GIG fiori e lumino (prologo, A4): le mani vuote, la borsa al braccio. Guarda su verso la quinta fila e poi dà i taralli dalla borsa (il premio lo mostra il gioco).",
+ "base": "signora",
+ "outfit_cfg": {"fiori": false, "lumino": false},
+ "anims_keep": [],
+ "anims": {
+  "idle": {"src": "tl:signora_ferma", "clip_ground": true, "loop": true, "period": 80,
+           "frames": [{"at": 0, "t": 40}, {"at": 40, "t": 40}]},
+  "guarda_su": {"src": "tl:signora_guarda_su", "clip_ground": true, "loop": true, "period": 72,
+                "frames": [{"at": 0, "t": 36}, {"at": 36, "t": 36}]},
+  "taralli": {"src": "tl:signora_taralli", "clip_ground": true,
+              "frames": [{"at": 0, "t": 8}, {"at": 8, "t": 8}, {"at": 16, "t": 8}, {"at": 24, "t": 10},
+                         {"at": 34, "t": 16}]}
+ }
+}

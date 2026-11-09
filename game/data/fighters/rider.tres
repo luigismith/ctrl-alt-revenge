@@ -23,10 +23,12 @@ wait_lane_offset = Vector2(17.5, 32.5)
 cooldown_ticks = Vector2i(30, 54)
 approach_timeout = 120
 palette_variants = [{}, {
+"#fccb6b": "#97c981",
 "#d9a541": "#76a960",
 "#b8882c": "#61904c",
 "#794117": "#485e2f"
 }, {
+"#fccb6b": "#ad8abe",
 "#d9a541": "#8e6ba1",
 "#b8882c": "#775688",
 "#794117": "#46375a"

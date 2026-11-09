@@ -217,7 +217,7 @@
  "palette": {
   "outline": "#140e1e",
   "rim": "#e0559b",
-  "max_colors": 20,
+  "max_colors": 44,
   "protect": [
    "#140e1e",
    "#e0559b"
@@ -432,7 +432,10 @@
   "spec_mats": {
    "BRASS": 0.75,
    "BOOTS": 0.86,
-   "BELT": 0.85
+   "BELT": 0.85,
+   "TOP": 0.88,
+   "PANTS": 0.88,
+   "SKIN": 0.88
   },
   "big_mats": [
    "SKIN",
@@ -941,14 +944,14 @@
   "selout": true,
   "pp_lines": true,
   "band_mode": 2,
-  "capsule_n": 0.85,
+  "capsule_n": 0.6,
   "pal_mode": "cel",
   "stamps": {
    "face": true,
    "eye": "dark"
   },
-  "ao_k": 0,
-  "min_cluster": 28,
+  "ao_k": 0.25,
+  "min_cluster": 10,
   "cel": {
    "thr": [
     0.22
@@ -988,25 +991,25 @@
       2
      ]
     ],
-    "thr": 0.25,
+    "thr": 0.2,
     "keep": 0.15,
     "r_px": [
      1.0,
      2.0
     ]
    },
-   "n_smooth": 2.0,
+   "n_smooth": 1.2,
    "head_n": 0,
    "spec_top": true,
    "relabel": {
-    "TOP_FOLD": "TOP",
-    "PANTS_FOLD": "PANTS"
+    "TOP_FOLD": "TOP"
    },
    "pal": {},
    "shadow_mix": {
     "*": 0.35,
     "TOP": 0.0,
-    "SKIN": 0.0
+    "SKIN": 0.0,
+    "PANTS": 0.0
    },
    "islands": {
     "mats": [
@@ -1031,15 +1034,23 @@
     ],
     "TOP": [
      -0.1,
-     0.3
+     0.3,
+     0.62
     ],
     "PANTS": [
-     0.18,
-     0.6
+     0.0,
+     0.42,
+     0.7
     ],
     "SKIN": [
      -0.05,
-     0.45
+     0.4,
+     0.7
+    ],
+    "BOOTS": [
+     -0.1,
+     0.3,
+     0.65
     ]
    },
    "mat_idx": {
@@ -1056,15 +1067,24 @@
     "TOP": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "SKIN": [
      1,
      2,
-     3
+     3,
+     4
     ],
     "PANTS": [
      1,
+     2,
+     3,
+     4
+    ],
+    "BOOTS": [
+     1,
+     2,
      3,
      4
     ]

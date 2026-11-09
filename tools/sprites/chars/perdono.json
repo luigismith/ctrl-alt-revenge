@@ -1,0 +1,570 @@
+{
+ "id": "perdono",
+ "base": "thug_punk",
+ "outfit": "perdono",
+ "hair_meshes": [],
+ "_nota": "il confratello del Carmine della processione dei Misteri (Giovedì santo, 2087): camice bianco, cappuccio a punta, mozzetta crema senza stemma, cappello nero bordato di blu sulle spalle, scapolare, cinghia e rosario, bordone, scalzo (Luigi, 8 novembre 2026)",
+ "reshape": {
+  "pelvis": [
+   0.98,
+   1,
+   0.98
+  ],
+  "spine_01": [
+   0.98,
+   1.02,
+   1.0
+  ],
+  "spine_02": [
+   0.92,
+   1.02,
+   0.9
+  ],
+  "spine_03": [
+   0.88,
+   1.0,
+   0.84
+  ],
+  "clavicle_l": [
+   0.92,
+   0.8,
+   0.92
+  ],
+  "clavicle_r": [
+   0.92,
+   0.8,
+   0.92
+  ],
+  "neck_01": [
+   0.85,
+   1.05,
+   0.85
+  ],
+  "upperarm_l": [
+   0.78,
+   1.0,
+   0.78
+  ],
+  "upperarm_r": [
+   0.78,
+   1.0,
+   0.78
+  ],
+  "lowerarm_l": [
+   0.78,
+   1.0,
+   0.78
+  ],
+  "lowerarm_r": [
+   0.78,
+   1.0,
+   0.78
+  ],
+  "hand_l": [
+   0.9,
+   0.95,
+   0.9
+  ],
+  "hand_r": [
+   0.9,
+   0.95,
+   0.9
+  ],
+  "thigh_l": [
+   0.82,
+   1.0,
+   0.82
+  ],
+  "thigh_r": [
+   0.82,
+   1.0,
+   0.82
+  ],
+  "calf_l": [
+   0.8,
+   1.0,
+   0.8
+  ],
+  "calf_r": [
+   0.8,
+   1.0,
+   0.8
+  ]
+ },
+ "proportions": {
+  "Head": {
+   "scale": [
+    1.25,
+    1.25,
+    1.25
+   ]
+  },
+  "hand_l": {
+   "scale": [
+    1.3,
+    1.3,
+    1.3
+   ],
+   "inherit": "NONE"
+  },
+  "hand_r": {
+   "scale": [
+    1.3,
+    1.3,
+    1.3
+   ],
+   "inherit": "NONE"
+  },
+  "foot_l": {
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "inherit": "NONE"
+  },
+  "foot_r": {
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "inherit": "NONE"
+  },
+  "clavicle_l": {
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  "clavicle_r": {
+   "scale": [
+    1.0,
+    1.0,
+    1.0
+   ]
+  }
+ },
+ "outfit_cfg": {
+  "top": {
+   "offset": 0.022,
+   "cuff_t": 0.9,
+   "cuff_w": 0.03,
+   "hem_dz": 0.03,
+   "collar_dz": -0.02
+  },
+  "pants_push": 0.004,
+  "top_push": 0.004,
+  "robe": {
+   "dust_h": 0.045
+  },
+  "cappuccio": {},
+  "mozzetta": {},
+  "scapolare": {},
+  "cinghia": {},
+  "rosario": {},
+  "cappello": {},
+  "bordone": {}
+ },
+ "anims_keep": [],
+ "anims": {
+  "idle": {
+   "src": "tl:perdono_fermo",
+   "clip_ground": true,
+   "loop": true,
+   "period": 80,
+   "frames": [
+    {
+     "at": 0,
+     "t": 40
+    },
+    {
+     "at": 40,
+     "t": 40
+    }
+   ]
+  },
+  "nazzica": {
+   "src": "tl:perdono_nazzica",
+   "clip_ground": true,
+   "loop": true,
+   "period": 128,
+   "frames": [
+    {
+     "at": 0,
+     "t": 16,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 16,
+     "t": 16
+    },
+    {
+     "at": 32,
+     "t": 16
+    },
+    {
+     "at": 48,
+     "t": 16
+    },
+    {
+     "at": 64,
+     "t": 16,
+     "ev": [
+      "step"
+     ]
+    },
+    {
+     "at": 80,
+     "t": 16
+    },
+    {
+     "at": 96,
+     "t": 16
+    },
+    {
+     "at": 112,
+     "t": 16
+    }
+   ]
+  },
+  "barcollo": {
+   "src": "tl:perdono_barcollo",
+   "clip_ground": true,
+   "frames": [
+    {
+     "at": 0,
+     "t": 5
+    },
+    {
+     "at": 5,
+     "t": 7
+    },
+    {
+     "at": 12,
+     "t": 9
+    },
+    {
+     "at": 21,
+     "t": 11
+    },
+    {
+     "at": 32,
+     "t": 13
+    }
+   ]
+  },
+  "scansa": {
+   "src": "tl:perdono_scansa",
+   "clip_ground": true,
+   "frames": [
+    {
+     "at": 0,
+     "t": 4
+    },
+    {
+     "at": 4,
+     "t": 8
+    },
+    {
+     "at": 12,
+     "t": 18
+    },
+    {
+     "at": 30,
+     "t": 8
+    },
+    {
+     "at": 38,
+     "t": 7
+    }
+   ]
+  }
+ },
+ "palette": {
+  "max_colors": 44,
+  "ramps": {
+   "SKIN": {
+    "mid": "#cc9a7e",
+    "dh_dark": 16,
+    "vd": 0.72
+   },
+   "TOP": {
+    "mid": "#e4e2ea",
+    "dark_target": 245,
+    "dh_dark": 14,
+    "vd": 0.7,
+    "vl": 1.07
+   },
+   "COLLAR": {
+    "mid": "#e0cfa4",
+    "dark_target": 30,
+    "vd": 0.74,
+    "vl": 1.08
+   },
+   "BELT": {
+    "mid": "#1e1c24",
+    "vd": 0.8,
+    "vl": 1.6
+   },
+   "HELMET": {
+    "mid": "#25232c",
+    "dark_target": 250,
+    "vd": 0.78,
+    "vl": 1.55
+   },
+   "LACE": {
+    "list": [
+     "#121638",
+     "#1c2a66",
+     "#2a44a2",
+     "#4a6ad2",
+     "#8ea6f2"
+    ]
+   },
+   "BAG": {
+    "mid": "#7a5434",
+    "dark_target": 20,
+    "vd": 0.7,
+    "vl": 1.3
+   },
+   "STUD": {
+    "mid": "#2a2630",
+    "vd": 0.75,
+    "vl": 1.6
+   },
+   "DUST": {
+    "mid": "#9a5c4c",
+    "dark_target": 10,
+    "vd": 0.78,
+    "vl": 1.12
+   }
+  },
+  "spec": {
+   "TOP": [
+    "TOP",
+    [
+     -0.08,
+     0.38,
+     0.74
+    ]
+   ],
+   "TOP_DARK": [
+    "TOP",
+    null,
+    1
+   ],
+   "TOP_LINING": [
+    "COLLAR",
+    null,
+    1
+   ],
+   "HOOD": [
+    "TOP",
+    [
+     -0.08,
+     0.38,
+     0.74
+    ]
+   ],
+   "HOOD_DARK": [
+    "TOP",
+    null,
+    1
+   ],
+   "EYE_DARK": [
+    "BELT",
+    null,
+    0
+   ],
+   "COLLAR": [
+    "COLLAR",
+    [
+     -0.05,
+     0.4,
+     0.75
+    ]
+   ],
+   "BELT": [
+    "BELT",
+    [
+     0.5
+    ]
+   ],
+   "HELMET": [
+    "HELMET",
+    [
+     -0.05,
+     0.45
+    ]
+   ],
+   "LACE": [
+    "LACE",
+    null,
+    2
+   ],
+   "BAG": [
+    "BAG",
+    [
+     0.0,
+     0.45
+    ]
+   ],
+   "STUD": [
+    "STUD",
+    [
+     0.4
+    ]
+   ],
+   "WRAP": [
+    "TOP",
+    [
+     -0.05,
+     0.4
+    ]
+   ],
+   "WRAP_EDGE": [
+    "TOP",
+    null,
+    1
+   ],
+   "PANTS_RIP": [
+    "DUST",
+    [
+     0.3
+    ]
+   ]
+  },
+  "spec_mats": {
+   "TOP": 0.9,
+   "HOOD": 0.9,
+   "COLLAR": 0.88,
+   "HELMET": 0.8,
+   "BELT": 0.85,
+   "SKIN": 0.88,
+   "STUD": 0.7
+  },
+  "big_mats": [
+   "SKIN",
+   "TOP",
+   "HOOD",
+   "COLLAR",
+   "SKIN_DARK"
+  ],
+  "rim_mats": [
+   "TOP",
+   "HOOD",
+   "COLLAR",
+   "SKIN"
+  ]
+ },
+ "beauty_cols": {
+  "SKIN": "#cc9a7e",
+  "SKIN_DARK": "#9a705a",
+  "KNUCKLE": "#b88a70",
+  "TOP": "#e4e2ea",
+  "TOP_DARK": "#a8a6b8",
+  "TOP_LINING": "#b8a880",
+  "HOOD": "#e4e2ea",
+  "HOOD_DARK": "#a8a6b8",
+  "EYE_DARK": "#101014",
+  "COLLAR": "#e0cfa4",
+  "BELT": "#1e1c24",
+  "HELMET": "#25232c",
+  "LACE": "#2a44a2",
+  "BAG": "#7a5434",
+  "STUD": "#2a2630",
+  "WRAP": "#e8e6ee",
+  "WRAP_EDGE": "#c8c6d2",
+  "PANTS_RIP": "#b0664c",
+  "BROW": "#5a4034",
+  "EYE_SOCKET": "#9a705a",
+  "NOSE_SHADOW": "#b08670",
+  "MOUTH": "#4a1c26"
+ },
+ "pixel_cfg": {
+  "stamps": {
+   "face": false
+  },
+  "mat_lines": [
+   [
+    "COLLAR",
+    "TOP"
+   ],
+   [
+    "COLLAR",
+    "HOOD"
+   ],
+   [
+    "BELT",
+    "TOP"
+   ],
+   [
+    "HELMET",
+    "COLLAR"
+   ],
+   [
+    "SKIN",
+    "PANTS_RIP"
+   ],
+   [
+    "HOOD",
+    "TOP"
+   ]
+  ],
+  "cel": {
+   "mat_thr": {
+    "HOOD": [
+     -0.1,
+     0.3,
+     0.62
+    ],
+    "TOP": [
+     -0.1,
+     0.3,
+     0.62
+    ],
+    "COLLAR": [
+     -0.05,
+     0.35,
+     0.65
+    ],
+    "TOP_LINING": []
+   },
+   "mat_idx": {
+    "HOOD": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "TOP": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "COLLAR": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "TOP_LINING": [
+     1
+    ]
+   },
+   "islands": {
+    "mats": [
+     "TOP_LINING",
+     "HOOD_DARK",
+     "TOP_DARK"
+    ],
+    "min_px": 6
+   }
+  }
+ }
+}

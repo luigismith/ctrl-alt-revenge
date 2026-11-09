@@ -4,6 +4,21 @@
   96
  ],
  "faces": "right",
+ "eyes": [
+  [
+   53,
+   36,
+   8,
+   7
+  ],
+  [
+   72,
+   36,
+   6,
+   6
+  ]
+ ],
+ "lenti": true,
  "mouth": [
   55,
   56,
@@ -12,6 +27,7 @@
  ],
  "mouth_dark": "#140e1e",
  "variants": [
+  "blink",
   "talk"
  ],
  "fonte": "ChatGPT (OpenAI), dal nostro render 3D; ridotto in pixel art dai nostri script"

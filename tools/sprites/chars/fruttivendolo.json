@@ -1,0 +1,119 @@
+{
+ "id": "fruttivendolo",
+ "_nota": "Il fruttivendolo dei Tamburi (prologo, B2; Giovedì santo 2087, sui 45 anni), sotto la pioggia accanto alla sua bici col sigillo PIGNORATO: robusto, la pancia, k-way blu lucido bagnato col cappuccio arrotolato, capelli neri bagnati appiccicati alla testa, baffi, grembiule di tela beige con la licenza ARIA+ scaduta appuntata sulla pettorina, pantaloni da lavoro e stivali di gomma.",
+ "base": "thug_punk",
+ "outfit": "fruttivendolo",
+ "hair_meshes": ["Hair_SimpleParted", "Hair_Beard"],
+ "anims_keep": [],
+ "reshape": {
+  "pelvis": [1.06, 1, 1.06],
+  "spine_01": [1.1, 1.0, 1.18],
+  "spine_02": [1.08, 1.0, 1.08],
+  "spine_03": [1.04, 1.0, 0.98],
+  "clavicle_l": [1, 0.92, 1],
+  "clavicle_r": [1, 0.92, 1],
+  "neck_01": [1.1, 0.88, 1.1],
+  "upperarm_l": [0.95, 1.0, 0.95],
+  "upperarm_r": [0.95, 1.0, 0.95],
+  "lowerarm_l": [0.95, 1.0, 0.95],
+  "lowerarm_r": [0.95, 1.0, 0.95],
+  "hand_l": [1, 1, 1],
+  "hand_r": [1, 1, 1],
+  "thigh_l": [1.06, 0.97, 1.06],
+  "thigh_r": [1.06, 0.97, 1.06],
+  "calf_l": [1.0, 0.97, 1.0],
+  "calf_r": [1.0, 0.97, 1.0]
+ },
+ "proportions": {
+  "Head": {"scale": [1.18, 1.18, 1.18]},
+  "hand_l": {"scale": [1.35, 1.35, 1.35], "inherit": "NONE"},
+  "hand_r": {"scale": [1.35, 1.35, 1.35], "inherit": "NONE"},
+  "foot_l": {"scale": [1.08, 1.08, 1.08], "inherit": "NONE"},
+  "foot_r": {"scale": [1.08, 1.08, 1.08], "inherit": "NONE"}
+ },
+ "outfit_cfg": {
+  "top": {"hem_dz": -0.08, "cuff_t": 0.92, "cuff_w": 0.035, "offset": 0.026, "collar_dz": -0.004, "thick": 0.012},
+  "boots": {"style": "v7", "top_z": 0.30, "size": 1.04, "sole_t": 0.03, "heel_t": 0.034},
+  "hood": {},
+  "hair_mesh": "Hair_SimpleParted",
+  "hair_push": 0.0015,
+  "beard_len": 0.4,
+  "beard_thick": 0.006,
+  "baffi": {"up": 0.024, "down": 0.002, "half_w": 0.046, "droop": 0.014},
+  "grembiule": {},
+  "licenza": {},
+  "push_body": {"belly": 0.06},
+  "pants_push": 0.012,
+  "brow_bushy": 1.4,
+  "brow_lift": 0.008
+ },
+ "anims": {
+  "idle": {"src": "tl:frutt_ansia", "clip_ground": true, "loop": true, "period": 64,
+           "frames": [{"at": 0, "t": 16}, {"at": 16, "t": 16}, {"at": 32, "t": 16}, {"at": 48, "t": 16}]},
+  "sollievo": {"src": "tl:frutt_sollievo", "clip_ground": true,
+               "frames": [{"at": 0, "t": 6}, {"at": 6, "t": 6}, {"at": 12, "t": 6}, {"at": 18, "t": 6},
+                          {"at": 24, "t": 8}]},
+  "botola": {"src": "tl:frutt_botola", "clip_ground": true,
+             "frames": [{"at": 0, "t": 5}, {"at": 5, "t": 5}, {"at": 10, "t": 6}, {"at": 16, "t": 5},
+                        {"at": 21, "t": 5}, {"at": 26, "t": 5}, {"at": 31, "t": 5}, {"at": 36, "t": 12}]},
+  "diqua": {"src": "tl:frutt_diqua", "clip_ground": true, "loop": true, "period": 32,
+            "frames": [{"at": 0, "t": 8}, {"at": 8, "t": 8}, {"at": 16, "t": 8}, {"at": 24, "t": 8}]}
+ },
+ "palette": {
+  "max_colors": 40,
+  "ramps": {
+   "SKIN": {"mid": "#c08a6a", "dh_dark": 16, "vd": 0.72},
+   "HAIR": {"mid": "#1e1a1e", "vd": 0.75, "vl": 2.0},
+   "BEARD": {"mid": "#2a2224"},
+   "TOP": {"mid": "#3a5490", "dark_target": 245, "dh_dark": 10, "vd": 0.66, "vl": 1.35},
+   "HOOD": {"mid": "#3a5490", "dark_target": 245, "dh_dark": 10, "vd": 0.66, "vl": 1.35},
+   "COLLAR": {"mid": "#c8bca0", "dark_target": 30, "vd": 0.74, "vl": 1.1},
+   "PANTS": {"mid": "#3e3c40", "dark_target": 250, "vd": 0.72, "vl": 1.4},
+   "BOOTS": {"mid": "#2e4030", "dark_target": 150, "vd": 0.7, "vl": 1.5},
+   "SOLE": {"mid": "#1a1c1a", "vd": 0.8, "vl": 1.6},
+   "PATCH": {"mid": "#d8d4c8", "vd": 0.78, "vl": 1.05},
+   "PAD": {"mid": "#8cc4a4", "dark_target": 160, "vd": 0.74, "vl": 1.12}
+  },
+  "spec": {
+   "HAIR": ["HAIR", [0.2, 0.6]],
+   "TOP": ["TOP", [-0.08, 0.38, 0.74]],
+   "TOP_DARK": ["TOP", null, 1],
+   "TOP_LINING": ["TOP", null, 1],
+   "HOOD": ["HOOD", [-0.08, 0.38, 0.74]],
+   "HOOD_DARK": ["HOOD", null, 1],
+   "COLLAR": ["COLLAR", [-0.05, 0.4, 0.75]],
+   "PANTS": ["PANTS", [-0.08, 0.38, 0.76]],
+   "PANTS_FOLD": ["PANTS", null, 1],
+   "BOOTS": ["BOOTS", [-0.1, 0.36, 0.76]],
+   "BOOT_CUFF": ["BOOTS", null, 1],
+   "BOOT_SOLE": ["SOLE", [0.45]],
+   "PATCH": ["PATCH", [0.0, 0.45]],
+   "PAD": ["PAD", [0.0, 0.45]],
+   "BEARD": ["BEARD", [0.02, 0.55]],
+   "BEARD_EDGE": ["BEARD", null, 1]
+  },
+  "spec_mats": {"TOP": 0.6, "HOOD": 0.6, "HAIR": 0.6, "BOOTS": 0.7, "SKIN": 0.82, "COLLAR": 0.9, "PATCH": 0.7},
+  "big_mats": ["SKIN", "TOP", "HOOD", "COLLAR", "PANTS", "BOOTS", "SKIN_DARK"],
+  "rim_mats": ["TOP", "HOOD", "SKIN", "COLLAR"]
+ },
+ "beauty_cols": {
+  "SKIN": "#c08a6a", "SKIN_DARK": "#8e5e46", "SKIN_CREASE": "#a06e54", "KNUCKLE": "#b07a5c",
+  "HAIR": "#1e1a1e", "BEARD": "#2a2224", "BEARD_EDGE": "#1a1416", "BROW": "#1e1a1e",
+  "TOP": "#3a5490", "TOP_DARK": "#26386a", "TOP_LINING": "#2c4078",
+  "HOOD": "#3a5490", "HOOD_DARK": "#26386a",
+  "COLLAR": "#c8bca0", "PATCH": "#d8d4c8", "PAD": "#8cc4a4",
+  "PANTS": "#3e3c40", "PANTS_FOLD": "#2e2c30", "BELT": "#2a2628",
+  "BOOTS": "#2e4030", "BOOT_SOLE": "#1a1c1a", "BOOT_CUFF": "#24342a", "LACE": "#2e4030",
+  "EYE_DARK": "#101010", "EYE_SOCKET": "#8e5e46", "NOSE_SHADOW": "#a06e54", "MOUTH": "#4a1c26"
+ },
+ "pixel_cfg": {
+  "stamps": {"face": false},
+  "mat_lines": [["COLLAR", "TOP"], ["COLLAR", "PANTS"], ["HOOD", "TOP"], ["BOOTS", "PANTS"], ["PATCH", "COLLAR"]],
+  "cel": {
+   "mat_thr": {"TOP": [-0.1, 0.3, 0.62], "HOOD": [-0.1, 0.3, 0.62], "COLLAR": [-0.05, 0.35, 0.65],
+               "TOP_LINING": []},
+   "mat_idx": {"TOP": [1, 2, 3, 4], "HOOD": [1, 2, 3, 4], "COLLAR": [1, 2, 3, 4], "TOP_LINING": [1]},
+   "islands": {"mats": ["TOP_LINING", "HOOD_DARK", "TOP_DARK"], "min_px": 6}
+  }
+ }
+}

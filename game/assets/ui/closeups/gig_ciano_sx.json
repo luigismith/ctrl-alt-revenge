@@ -1,0 +1,28 @@
+{
+ "size": [
+  96,
+  96
+ ],
+ "faces": "left",
+ "eyes": [
+  [
+   33,
+   54,
+   11,
+   4
+  ]
+ ],
+ "lid": "#5c2f24",
+ "mouth": [
+  21,
+  72,
+  16,
+  5
+ ],
+ "mouth_dark": "#140e1e",
+ "variants": [
+  "blink",
+  "talk"
+ ],
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D; ridotto in pixel art dai nostri script"
+}

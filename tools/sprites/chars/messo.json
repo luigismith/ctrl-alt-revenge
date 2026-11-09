@@ -1,9 +1,10 @@
 {
  "id": "messo",
- "closeups": [{"name": "messo_dx", "faces": "right", "variants": ["talk"],
+ "closeups": [{"name": "messo_dx", "faces": "right", "variants": ["blink", "talk"],
                "ai": {"base": "chatgpt/messo_dx_v3.png", "render": "messo_dx.png", "colors": 24,
                       "canon": ["#dcb49c", "#a8806a", "#a8c0cc", "#4a4a54"], "mouth": [56, 52, 12, 4], "open_px": 2,
-                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche la bocca"}}],
+                      "lenti": {"riquadri": [[50, 26, 30, 16]], "colore": "#a8c0cc"},
+                      "_nota": "il volto in stile murales viene da ChatGPT (decisione 68); lo riduce closeup_ai.py, che disegna anche la bocca e, al posto delle palpebre (gli occhi sono dietro gli occhiali da polvere), il riflesso sulle lenti"}}],
  "base": "thug_punk",
  "outfit": "messo",
  "hair_meshes": [
@@ -318,7 +319,7 @@
   }
  },
  "palette": {
-  "max_colors": 28,
+  "max_colors": 44,
   "ramps": {
    "SKIN": {
     "mid": "#dcb49c",

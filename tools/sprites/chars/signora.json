@@ -1,0 +1,121 @@
+{
+ "id": "signora",
+ "_nota": "La signora del cimitero (prologo, A4; Giovedì santo 2087, sugli 80 anni, vedova): magra e curva, velo nero di pizzo, cappotto lungo antracite, calze scure e scarpe basse, borsa bordeaux all'avambraccio sinistro, il mazzo di crisantemi bianchi nella destra e il lumino rosso acceso nella sinistra. Del 2087 ha il filtro ARIA+ stinto abbassato sotto il mento. Sul corpo femminile, ma lontana da Addolorata nel viso, nella figura e nei colori (car-regia, 8 novembre 2026). Dopo aver dato fiori e lumino a GIG è la variante signora_dopo.",
+ "base": "thug_punk",
+ "corpo": "f",
+ "outfit": "signora",
+ "hair_meshes": [],
+ "anims_keep": [],
+ "reshape": {
+  "pelvis": [0.95, 1, 0.95],
+  "spine_01": [0.92, 0.93, 0.92],
+  "spine_02": [0.9, 0.93, 0.88],
+  "spine_03": [0.88, 0.92, 0.84],
+  "clavicle_l": [0.95, 0.84, 0.95],
+  "clavicle_r": [0.95, 0.84, 0.95],
+  "neck_01": [0.85, 0.92, 0.85],
+  "upperarm_l": [0.72, 0.98, 0.72],
+  "upperarm_r": [0.72, 0.98, 0.72],
+  "lowerarm_l": [0.74, 0.98, 0.74],
+  "lowerarm_r": [0.74, 0.98, 0.74],
+  "hand_l": [0.9, 0.95, 0.9],
+  "hand_r": [0.9, 0.95, 0.9],
+  "thigh_l": [0.85, 0.89, 0.85],
+  "thigh_r": [0.85, 0.89, 0.85],
+  "calf_l": [0.8, 0.9, 0.8],
+  "calf_r": [0.8, 0.9, 0.8]
+ },
+ "proportions": {
+  "Head": {"scale": [1.2, 1.2, 1.2]},
+  "hand_l": {"scale": [1.2, 1.2, 1.2], "inherit": "NONE"},
+  "hand_r": {"scale": [1.2, 1.2, 1.2], "inherit": "NONE"},
+  "foot_l": {"scale": [0.95, 0.95, 0.95], "inherit": "NONE"},
+  "foot_r": {"scale": [0.95, 0.95, 0.95], "inherit": "NONE"},
+  "clavicle_l": {"scale": [1.0, 0.92, 1.0]},
+  "clavicle_r": {"scale": [1.0, 0.92, 1.0]}
+ },
+ "outfit_cfg": {
+  "top": {"hem_dz": -0.02, "cuff_t": 0.92, "cuff_w": 0.03, "offset": 0.024, "collar_dz": -0.01, "thick": 0.012},
+  "cappotto": {"top_dz": 0.04, "hem_dz": -0.14, "gap_top": 0.012, "gap": 0.05, "flare": 0.06},
+  "boots": {"style": "v7", "top_z": 0.07, "size": 0.9, "sole_t": 0.018, "heel_t": 0.03},
+  "velo": {"open_hi": 0.05, "open_lo": -0.08, "open_y": 0.035, "open_w": 0.08},
+  "filtro": {"dz": -0.03, "gap": 0.014, "r": 0.014, "sy": 1.1, "filtro": {"r": 0.022, "t": 0.014}},
+  "borsa": {},
+  "fiori": {},
+  "lumino": {},
+  "pants_push": 0.004,
+  "top_push": 0.004,
+  "brow_bushy": 0.7,
+  "brow_lift": 0.004
+ },
+ "anims": {
+  "idle": {"src": "tl:signora_ferma", "clip_ground": true, "loop": true, "period": 80,
+           "frames": [{"at": 0, "t": 40}, {"at": 40, "t": 40}]},
+  "porge": {"src": "tl:signora_porge", "clip_ground": true,
+            "frames": [{"at": 0, "t": 5}, {"at": 5, "t": 5}, {"at": 10, "t": 8}, {"at": 18, "t": 22}]}
+ },
+ "palette": {
+  "max_colors": 40,
+  "ramps": {
+   "SKIN": {"mid": "#d2ab96", "dh_dark": 14, "vd": 0.74},
+   "HAIR": {"mid": "#8e8a8c", "vd": 0.78, "vl": 1.25},
+   "TOP": {"mid": "#2e2a2c", "dark_target": 270, "dh_dark": 8, "vd": 0.74, "vl": 1.5},
+   "HOOD": {"mid": "#1e1a1e", "dark_target": 270, "vd": 0.78, "vl": 1.7},
+   "PANTS": {"mid": "#3a3034", "dark_target": 270, "vd": 0.74, "vl": 1.4},
+   "BOOTS": {"mid": "#221e20", "vd": 0.78, "vl": 1.6},
+   "BAG": {"mid": "#5a2a30", "dark_target": 330, "vd": 0.7, "vl": 1.35},
+   "COLLAR": {"mid": "#d8ccb0", "dark_target": 30, "vd": 0.76, "vl": 1.08},
+   "PATCH": {"mid": "#eeeae0", "dark_target": 40, "vd": 0.78, "vl": 1.04},
+   "CREST": {"mid": "#4a6a3a", "dark_target": 140, "vd": 0.7, "vl": 1.25},
+   "RED": {"mid": "#b0202a", "dark_target": 340, "vd": 0.66, "vl": 1.3},
+   "PAD": {"mid": "#9ab8a8", "dark_target": 170, "vd": 0.76, "vl": 1.12},
+   "METAL": {"mid": "#a8a088", "vd": 0.7, "vl": 1.2},
+   "FLAME": {"list": ["#ffb040", "#ffc860", "#ffe090", "#fff0c0", "#fff8e0"]}
+  },
+  "spec": {
+   "HAIR": ["HAIR", [0.3]],
+   "TOP": ["TOP", [-0.08, 0.38, 0.74]],
+   "TOP_DARK": ["TOP", null, 1],
+   "TOP_LINING": ["TOP", null, 1],
+   "HOOD": ["HOOD", [-0.05, 0.42]],
+   "HOOD_DARK": ["HOOD", null, 0],
+   "PANTS": ["PANTS", [-0.08, 0.4]],
+   "PANTS_FOLD": ["PANTS", [-0.08, 0.4]],
+   "BOOTS": ["BOOTS", [0.0, 0.45]],
+   "BOOT_CUFF": ["BOOTS", null, 1],
+   "BAG": ["BAG", [-0.05, 0.4, 0.78]],
+   "COLLAR": ["COLLAR", [-0.05, 0.4]],
+   "PATCH": ["PATCH", [-0.05, 0.4]],
+   "CREST": ["CREST", [0.0, 0.45]],
+   "RED": ["RED", [0.0, 0.45]],
+   "PAD": ["PAD", [0.0, 0.45]],
+   "METAL": ["METAL", [0.4]],
+   "METAL_DARK": ["PAD", null, 0],
+   "GLOW_LINE": ["FLAME", null, 2]
+  },
+  "spec_mats": {"TOP": 0.92, "HOOD": 0.9, "SKIN": 0.9, "BAG": 0.8, "RED": 0.7, "BOOTS": 0.86},
+  "big_mats": ["SKIN", "TOP", "HOOD", "PANTS", "BAG", "SKIN_DARK"],
+  "rim_mats": ["TOP", "HOOD", "SKIN", "BAG"]
+ },
+ "beauty_cols": {
+  "SKIN": "#d2ab96", "SKIN_DARK": "#a07c6a", "SKIN_CREASE": "#b08c78", "KNUCKLE": "#bc9480",
+  "HAIR": "#8e8a8c", "BROW": "#6e6a6c",
+  "TOP": "#2e2a2c", "TOP_DARK": "#1e1a1c", "TOP_LINING": "#242022",
+  "HOOD": "#1e1a1e", "HOOD_DARK": "#121012",
+  "PANTS": "#3a3034", "PANTS_FOLD": "#3a3034", "BELT": "#2a2428",
+  "BOOTS": "#221e20", "BOOT_SOLE": "#141214", "BOOT_CUFF": "#221e20", "LACE": "#221e20",
+  "BAG": "#5a2a30", "METAL": "#a8a088", "METAL_DARK": "#56645e",
+  "COLLAR": "#d8ccb0", "PATCH": "#eeeae0", "CREST": "#4a6a3a", "CREST_DARK": "#30482a",
+  "RED": "#b0202a", "GLOW_LINE": "#ffc860", "PAD": "#9ab8a8",
+  "EYE_DARK": "#101012", "EYE_SOCKET": "#a07c6a", "NOSE_SHADOW": "#b08c78", "MOUTH": "#5a2a30"
+ },
+ "pixel_cfg": {
+  "stamps": {"face": false},
+  "mat_lines": [["HOOD", "SKIN"], ["HOOD", "TOP"], ["BAG", "TOP"], ["PATCH", "TOP"], ["COLLAR", "TOP"]],
+  "cel": {
+   "mat_thr": {"TOP": [-0.1, 0.3, 0.62], "HOOD": [-0.05, 0.4], "TOP_LINING": []},
+   "mat_idx": {"TOP": [1, 2, 3, 4], "HOOD": [1, 2, 3], "TOP_LINING": [1]},
+   "islands": {"mats": ["TOP_LINING", "HOOD_DARK", "TOP_DARK"], "min_px": 6}
+  }
+ }
+}

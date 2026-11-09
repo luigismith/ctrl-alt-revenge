@@ -820,12 +820,224 @@ def keys_messo_call():
                             arm_r=dict(up=V(-0.42, -0.02, 0.91), lo=V(-0.30, 0.10, 0.95))))
 
 
+# ============================================================== i perdoni del Carmine (processione del Giovedì santo)
+# Il bordone nella destra (il braccio vicino alla telecamera), dritto: si scrive sulla posa ferma (perdono_fermo/base,
+# vedi char_enemies.make_bordone). La sinistra pende lungo il fianco. Testa china sotto il cappuccio.
+PERDONO_BORDONE = dict(up=V(-0.12, -0.38, -0.92), lo=V(-0.08, -0.88, 0.46), hand_world=V(0.0, -1.0, 0.0))
+PERDONO_GIU = dict(up=V(0.12, -0.04, -0.99), lo=V(0.06, -0.28, -0.96))
+PERDONO_LEGS = dict(leg_l=dict(ik=(0.10, -0.02, 0.086), pole=(0.2, -1, 0)),
+                    leg_r=dict(ik=(-0.10, 0.03, 0.086), pole=(-0.2, -1, 0)))
+PERDONO_STRIDE = 0.427     # passo doppio (un ciclo, due passi) a 0,2 m/s in 128 tick: i 12 px/s della Processione
+PERDONO_DUTY = 0.625       # piede a terra per 80 tick su 128, in volo per 48: il passo lento, mai di corsa
+
+
+def _perdono(**kw):
+    d = dict(hip=(0.0, 0.0, 0.94), pelvis=(0, 0, 0), spine=(4, 0, 0), neck=(12, 0, 0),
+             arm_l=dict(PERDONO_GIU), arm_r=dict(PERDONO_BORDONE), **PERDONO_LEGS)
+    d.update(kw)
+    return _st(**d)
+
+
+def keys_perdono_fermo():
+    """il perdono fermo in fila: dritto, la testa china, il bordone dritto nella destra. "base" e "breath"."""
+    return dict(base=_perdono(), breath=_perdono(hip=(0.0, 0.0, 0.943), spine=(2, 0, 0), neck=(10, 0, 0)))
+
+
+def _foot(p, x, lift):
+    """piede nel ciclo della nazzicata (p in [0, 1)): a terra scivola indietro a velocità costante, in volo torna
+    avanti appena alzato (piedi scalzi: il passo è basso, quasi strisciato)."""
+    s = PERDONO_STRIDE * PERDONO_DUTY
+    if p < PERDONO_DUTY:
+        u = p / PERDONO_DUTY
+        return dict(ik=(x, -s / 2 + s * u, 0.086), pole=(0.2 if x > 0 else -0.2, -1, 0))
+    u = (p - PERDONO_DUTY) / (1 - PERDONO_DUTY)
+    return dict(ik=(x, s / 2 - s * u, 0.086 + lift * math.sin(math.pi * u)), pole=(0.2 if x > 0 else -0.2, -1, 0))
+
+
+def keys_perdono_nazzica():
+    """la nazzicata: il passo lento della processione, che dondola da un piede all'altro. Il peso va sul piede a terra
+    (anca di lato e bacino che si inclina), le spalle rispondono al contrario e il cappuccio segue il busto. Otto
+    chiavi ogni 16 tick sul ciclo di 128 (due passi); il piede sinistro tocca terra a 0, il destro a 64."""
+    k = {}
+    for i in range(8):
+        p = i / 8
+        w = math.sin(2 * math.pi * (p - 0.06))            # +1 peso sul sinistro, -1 sul destro
+        bob = -math.cos(4 * math.pi * (p - 0.06))         # su a metà appoggio, giù quando i piedi si scambiano
+        k["n%d" % i] = _perdono(hip=(0.030 * w, 0.0, 0.94 + 0.006 * bob), pelvis=(0, -5 * w, 3 * w),
+                                spine=(4 + 1.0 * bob, 7 * w, -4 * w), neck=(12, -3 * w, 0),
+                                arm_l=dict(up=V(0.12, -0.04 + 0.05 * w, -0.99), lo=V(0.06, -0.28 + 0.06 * w, -0.96)),
+                                leg_l=_foot(p, 0.10, 0.045), leg_r=_foot((p + 0.5) % 1.0, -0.10, 0.045))
+    return k
+
+
+def keys_perdono_barcollo():
+    """lo spintone: GIG passa di corsa e il confratello di coda, preso da dietro, pende in avanti; il destro fa un
+    passo per non cadere, la sinistra si apre a cercare l'equilibrio, il bordone si inclina. Poi si riprende e torna
+    in fila (45 tick, come l'apertura della Processione)."""
+    k = {}
+    k["hit"] = _perdono(hip=(0.0, -0.05, 0.93), pelvis=(10, 0, 0), spine=(16, 0, 0), neck=(-14, 0, 0),
+                        arm_l=dict(up=V(0.55, 0.30, -0.78), lo=V(0.60, 0.10, -0.79)),
+                        arm_r=dict(PERDONO_BORDONE, hand_world=V(0.0, -1.0, 0.0)),
+                        leg_l=dict(ik=(0.10, -0.02, 0.086), pole=(0.2, -1, 0)),
+                        leg_r=dict(ik=(-0.10, 0.10, 0.12), pole=(-0.2, -1, 0)))
+    k["lurch"] = _perdono(hip=(0.0, -0.13, 0.88), pelvis=(16, 0, -4), spine=(26, 0, -4), neck=(-8, 0, 0),
+                          arm_l=dict(up=V(0.75, -0.25, -0.61), lo=V(0.80, -0.40, -0.45)),
+                          arm_r=dict(up=V(-0.30, -0.55, -0.78), lo=V(-0.10, -0.66, 0.74), hand_world=V(0.0, -1.0, 0.0)),
+                          leg_l=dict(ik=(0.10, 0.02, 0.086), pole=(0.2, -1, 0)),
+                          leg_r=dict(ik=(-0.11, -0.22, 0.086), pole=(-0.2, -1, 0)))
+    k["catch"] = _perdono(hip=(0.0, -0.10, 0.90), pelvis=(6, 0, -2), spine=(8, 0, -2), neck=(6, 0, 0),
+                          arm_l=dict(up=V(0.45, -0.10, -0.89), lo=V(0.40, -0.35, -0.85)),
+                          leg_l=dict(ik=(0.10, 0.02, 0.086), pole=(0.2, -1, 0)),
+                          leg_r=dict(ik=(-0.11, -0.20, 0.086), pole=(-0.2, -1, 0)))
+    k["settle"] = _perdono(hip=(0.0, -0.06, 0.93), pelvis=(0, 0, 0), spine=(2, 0, 0), neck=(14, 0, 0),
+                           leg_l=dict(ik=(0.10, -0.02, 0.086), pole=(0.2, -1, 0)),
+                           leg_r=dict(ik=(-0.10, -0.12, 0.10), pole=(-0.2, -1, 0)))
+    k["base"] = _perdono()
+    return k
+
+
+def keys_perdono_scansa():
+    """la fila che si apre: il confratello si tira indietro col busto e fa un passo dietro per lasciar passare,
+    il bordone stretto al corpo e la sinistra al petto; resta fermo finché GIG è passato, poi torna in fila."""
+    back = _perdono(hip=(0.0, 0.07, 0.93), pelvis=(-8, 0, 0), spine=(-12, 0, 0), neck=(-2, 0, 0),
+                    arm_l=dict(up=V(0.25, -0.15, -0.95), lo=V(-0.75, -0.45, 0.48)),
+                    arm_r=dict(up=V(-0.10, -0.05, -0.99), lo=V(-0.05, -0.75, 0.66), hand_world=V(0.0, -1.0, 0.0)),
+                    leg_l=dict(ik=(0.10, 0.02, 0.086), pole=(0.2, -1, 0)),
+                    leg_r=dict(ik=(-0.11, 0.24, 0.086), pole=(-0.2, -1, 0)))
+    hold = _perdono(hip=(0.0, 0.08, 0.935), pelvis=(-6, 0, 0), spine=(-9, 0, 0), neck=(4, 0, 0),
+                    arm_l=dict(back["arm_l"]), arm_r=dict(back["arm_r"]),
+                    leg_l=dict(back["leg_l"]), leg_r=dict(back["leg_r"]))
+    return dict(base=_perdono(), back=back, hold=hold)
+
+
+# ============================================================== le due persone del prologo che chiedono aiuto a GIG
+# La signora del cimitero (A4): curva, la borsa appesa all'avambraccio sinistro, che resta in avanti e orizzontale in
+# tutte le pose (la borsa si scrive su signora_ferma/base, vedi char_enemies.make_borsa); nella sinistra il lumino,
+# nella destra il mazzo di crisantemi stretto al petto. Dopo (signora_dopo) ha le mani vuote.
+SIG_HIP = 0.81
+SIG_BORSA = dict(up=V(0.10, -0.14, -0.985), lo=V(-0.20, -0.975, 0.10))
+SIG_FIORI = dict(up=V(-0.06, -0.30, -0.95), lo=V(0.22, -0.66, 0.72), hand_world=V(0.0, -1.0, 0.0))
+SIG_PETTO = dict(up=V(-0.04, -0.22, -0.97), lo=V(0.42, -0.50, 0.76))
+SIG_LEGS = dict(leg_l=dict(ik=(0.08, -0.03, 0.086), pole=(0.2, -1, 0)),
+                leg_r=dict(ik=(-0.08, 0.04, 0.086), pole=(-0.2, -1, 0)))
+
+
+def _signora(**kw):
+    d = dict(hip=(0.0, 0.03, SIG_HIP), pelvis=(6, 0, 0), spine=(22, 0, 0), neck=(-10, 0, 0),
+             arm_l=dict(SIG_BORSA), arm_r=dict(SIG_FIORI), **SIG_LEGS)
+    d.update(kw)
+    return _st(**d)
+
+
+def keys_signora_ferma():
+    """la signora ferma davanti alla lapide (A4): curva, il mento avanti, i fiori al petto. "base" e "breath"."""
+    return dict(base=_signora(), breath=_signora(hip=(0.0, 0.03, SIG_HIP + 0.004), spine=(20, 0, 0), neck=(-11, 0, 0)))
+
+
+def keys_signora_porge():
+    """porge a GIG fiori e lumino: si sporge, le due braccia in avanti all'altezza del petto. "reach" è lo slancio,
+    "hold" la tenuta."""
+    arms = dict(arm_r=dict(up=V(-0.14, -0.84, -0.52), lo=V(-0.04, -0.99, 0.10), hand_world=V(0.0, -1.0, 0.0)),
+                arm_l=dict(up=V(0.10, -0.80, -0.59), lo=V(-0.10, -0.99, 0.06)))
+    return dict(base=_signora(),
+                reach=_signora(hip=(0.0, -0.01, SIG_HIP - 0.006), spine=(22, 0, 0), neck=(-8, 0, 0), **arms),
+                hold=_signora(hip=(0.0, 0.0, SIG_HIP - 0.003), spine=(19, 0, 0), neck=(-6, 0, 0), **arms))
+
+
+def keys_signora_guarda_su():
+    """dopo: guarda su verso la quinta fila, dove GIG è salito, con la destra al petto (mani vuote). "a" e "b": la
+    testa che cerca."""
+    return dict(a=_signora(spine=(6, 0, 0), neck=(-30, 0, 0), arm_r=dict(SIG_PETTO)),
+                b=_signora(spine=(5, 0, 2), neck=(-34, 0, -4), arm_r=dict(SIG_PETTO)))
+
+
+def keys_signora_taralli():
+    """dopo, i taralli: la destra fruga nella borsa e poi porge in avanti (il premio lo mostra il gioco)."""
+    give = dict(up=V(-0.14, -0.84, -0.52), lo=V(-0.04, -0.99, 0.12))
+    return dict(base=_signora(arm_r=dict(SIG_PETTO)),
+                dig=_signora(spine=(20, 0, 6), neck=(10, 0, 4),
+                             arm_r=dict(ik=(0.06, -0.26, 0.86), pole=(-0.6, -0.4, -1.0))),
+                dig2=_signora(spine=(21, 0, 7), neck=(12, 0, 4),
+                              arm_r=dict(ik=(0.08, -0.25, 0.84), pole=(-0.6, -0.4, -1.0))),
+                give=_signora(spine=(16, 0, 0), neck=(-6, 0, 0), arm_r=dict(give)))
+
+
+# Il fruttivendolo dei Tamburi (B2): robusto, sotto la pioggia, accanto alla bici col sigillo PIGNORATO.
+FR_HIP = 0.925
+FR_GIU_L = dict(up=V(0.14, -0.02, -0.99), lo=V(0.08, -0.24, -0.97))
+FR_GIU_R = dict(up=V(-0.14, -0.02, -0.99), lo=V(-0.08, -0.24, -0.97))
+FR_LEGS = dict(leg_l=dict(ik=(0.12, -0.04, 0.086), pole=(0.25, -1, 0)),
+               leg_r=dict(ik=(-0.12, 0.06, 0.086), pole=(-0.25, -1, 0)))
+
+
+def _frutt(**kw):
+    d = dict(hip=(0.0, 0.0, FR_HIP), pelvis=(0, 0, 0), spine=(2, 0, 0), neck=(0, 0, 0),
+             arm_l=dict(FR_GIU_L), arm_r=dict(FR_GIU_R), **FR_LEGS)
+    d.update(kw)
+    return _st(**d)
+
+
+def keys_frutt_ansia():
+    """fermo in ansia accanto alla bici sigillata: la destra si gratta la nuca, la sinistra sul fianco, il peso che
+    passa da un piede all'altro. "a" sul sinistro, "b" sul destro."""
+    fianco = dict(ik=(0.20, -0.02, 1.00), pole=(1.0, 0.4, 0.0))
+    return dict(a=_frutt(hip=(0.025, 0.0, FR_HIP - 0.004), pelvis=(0, -4, 2), spine=(6, 4, -2), neck=(10, 0, 6),
+                         arm_r=dict(ik=(-0.05, 0.07, 1.56), pole=(-1.0, -0.4, 0.2)), arm_l=dict(fianco)),
+                b=_frutt(hip=(-0.025, 0.0, FR_HIP - 0.004), pelvis=(0, 4, -2), spine=(6, -4, 2), neck=(8, 0, -6),
+                         arm_r=dict(ik=(-0.06, 0.05, 1.58), pole=(-1.0, -0.4, 0.2)), arm_l=dict(fianco)))
+
+
+def keys_frutt_sollievo():
+    """il sollievo del grazie, che si legga di profilo: "open" le braccia su sopra la testa e la testa indietro (il
+    peso che se ne va), "bob" giù di un poco, le mani giunte davanti al petto e un mezzo inchino verso GIG (grazie,
+    compà). Le braccia aperte di lato, di profilo, sembravano uno slancio in avanti."""
+    up = dict(arm_l=dict(up=V(0.30, -0.18, 0.94), lo=V(0.16, -0.24, 0.96)),
+              arm_r=dict(up=V(-0.30, -0.18, 0.94), lo=V(-0.16, -0.24, 0.96)))
+    giunte = dict(arm_l=dict(ik=(0.035, -0.30, 1.22), pole=(1.0, 0.2, -0.6)),
+                  arm_r=dict(ik=(-0.035, -0.30, 1.22), pole=(-1.0, 0.2, -0.6)))
+    return dict(still=_frutt(),
+                open=_frutt(hip=(0.0, 0.01, FR_HIP + 0.01), spine=(-8, 0, 0), neck=(-18, 0, 0), **up),
+                bob=_frutt(hip=(0.0, -0.005, FR_HIP - 0.025), spine=(10, 0, 0), neck=(8, 0, 0), **giunte))
+
+
+def keys_frutt_botola():
+    """si china, afferra la maniglia della botola della cantina e la alza: "chin" giù con le mani a terra davanti,
+    "alza" a metà, "su" in piedi con le braccia alte che tengono l'anta."""
+    legs = dict(leg_l=dict(ik=(0.15, -0.06, 0.086), pole=(0.35, -1, 0)),
+                leg_r=dict(ik=(-0.15, 0.12, 0.086), pole=(-0.35, -1, 0)))
+    pl, pr = (0.6, 0.2, -1.0), (-0.6, 0.2, -1.0)
+    return dict(still=_frutt(),
+                chin=_frutt(hip=(0.0, 0.08, 0.54), pelvis=(42, 0, 0), spine=(30, 0, 0), neck=(-30, 0, 0),
+                            arm_l=dict(ik=(0.08, -0.46, 0.16), pole=pl), arm_r=dict(ik=(-0.08, -0.46, 0.16), pole=pr),
+                            **legs),
+                alza=_frutt(hip=(0.0, 0.05, 0.74), pelvis=(26, 0, 0), spine=(12, 0, 0), neck=(-14, 0, 0),
+                            arm_l=dict(ik=(0.08, -0.44, 0.70), pole=pl), arm_r=dict(ik=(-0.08, -0.44, 0.70), pole=pr),
+                            **legs),
+                su=_frutt(hip=(0.0, 0.03, FR_HIP - 0.01), pelvis=(2, 0, 0), spine=(-4, 0, 0), neck=(-10, 0, 0),
+                          arm_l=dict(ik=(0.09, -0.40, 1.40), pole=pl), arm_r=dict(ik=(-0.09, -0.40, 1.40), pole=pr),
+                          **legs))
+
+
+def keys_frutt_diqua():
+    """di qua, svelto: il braccio destro indica avanti, verso la cantina, poi fa il gesto di venire."""
+    return dict(point=_frutt(spine=(4, 0, 10), neck=(-4, 0, -8),
+                             arm_r=dict(up=V(-0.24, -0.90, -0.36), lo=V(-0.12, -0.99, 0.02))),
+                call=_frutt(spine=(4, 0, 8), neck=(-4, 0, -6),
+                            arm_r=dict(up=V(-0.26, -0.80, -0.54), lo=V(-0.10, -0.40, 0.91))))
+
+
 KEYSETS = dict(hack=keys_hack, idle=keys_idle, jab1=keys_jab1, jab2=keys_jab2, hook=keys_hook, hurt_high=keys_hurt_high, double_jump=keys_double_jump, ledge_hang=keys_ledge_hang,
                wall_slide=keys_wall_slide, wall_run=keys_wall_run, air_dash=keys_air_dash,
                esa_block=keys_esa_block, esa_charge_wind=keys_esa_charge_wind, esa_charge_run=keys_esa_charge_run,
                esa_dizzy=keys_esa_dizzy, ledge_hang_one=keys_ledge_hang_one, mazza=keys_mazza,
                rider_pignora=keys_rider_pignora, messo_idle=keys_messo_idle, messo_read=keys_messo_read,
-               messo_laser=keys_messo_laser, messo_call=keys_messo_call)
+               messo_laser=keys_messo_laser, messo_call=keys_messo_call,
+               perdono_fermo=keys_perdono_fermo, perdono_nazzica=keys_perdono_nazzica,
+               perdono_barcollo=keys_perdono_barcollo, perdono_scansa=keys_perdono_scansa,
+               signora_ferma=keys_signora_ferma, signora_porge=keys_signora_porge,
+               signora_guarda_su=keys_signora_guarda_su, signora_taralli=keys_signora_taralli,
+               frutt_ansia=keys_frutt_ansia, frutt_sollievo=keys_frutt_sollievo, frutt_botola=keys_frutt_botola,
+               frutt_diqua=keys_frutt_diqua)
 
 # tracce: (tick, chiave, easing verso questa chiave). Le stesse tracce valgono per tutti i corpi.
 TRACKS = dict(
@@ -858,6 +1070,24 @@ TRACKS = dict(
     messo_read=[(0, "a"), (24, "b", "smooth"), (48, "a", "smooth")],
     messo_laser=[(0, "aim"), (6, "point", "dec")],
     messo_call=[(0, "up_a"), (10, "up_b", "smooth"), (20, "up_a", "smooth")],
+    perdono_fermo=[(0, "base"), (40, "breath", "smooth"), (80, "base", "smooth")],
+    perdono_nazzica=[(0, "n0")] + [(16 * i, "n%d" % (i % 8), "lin") for i in range(1, 9)],
+    perdono_barcollo=[(0, "hit"), (6, "lurch", "dec"), (15, "catch", "smooth"), (27, "settle", "smooth"),
+                      (45, "base", "smooth")],
+    perdono_scansa=[(0, "base"), (8, "back", "dec"), (14, "hold", "smooth"), (32, "hold", "hold"),
+                    (45, "base", "smooth")],
+    signora_ferma=[(0, "base"), (40, "breath", "smooth"), (80, "base", "smooth")],
+    signora_porge=[(0, "base"), (10, "reach", "dec"), (18, "hold", "smooth"), (40, "hold", "hold")],
+    signora_guarda_su=[(0, "a"), (36, "b", "smooth"), (72, "a", "smooth")],
+    signora_taralli=[(0, "base"), (8, "dig", "smooth"), (16, "dig2", "smooth"), (24, "dig", "smooth"),
+                     (34, "give", "dec"), (50, "give", "hold")],
+    frutt_ansia=[(0, "a"), (32, "b", "smooth"), (64, "a", "smooth")],
+    frutt_sollievo=[(0, "still"), (6, "open", "dec"), (12, "bob", "smooth"), (18, "open", "smooth"),
+                    (24, "bob", "smooth"), (32, "open", "smooth")],
+    frutt_botola=[(0, "still"), (10, "chin", "smooth"), (16, "chin", "hold"), (26, "alza", "smooth"),
+                  (36, "su", "dec"), (48, "su", "hold")],
+    frutt_diqua=[(0, "point"), (8, "call", "smooth"), (16, "point", "smooth"), (24, "call", "smooth"),
+                 (32, "point", "smooth")],
 )
 
 

@@ -20,6 +20,9 @@ piano, alla chiave "ai":
   eyes     per ogni occhio che si chiude, il riquadro [x, y, w, h] a 96 px dove cercarlo
   mouth    il riquadro [x, y, w, h] della bocca chiusa (la riga scura delle labbra)
   open_px  quanto si apre la bocca al centro, in pixel
+  lenti    per chi ha gli occhi dietro lenti opache (occhiali da polvere, decisione 52): al posto delle palpebre
+           il "blink" è un riflesso che passa in diagonale su ogni lente. {"riquadri": [[x, y, w, h], ...],
+           "colore": colore della lente, "riflesso": colore del riflesso (di base #f5f5f0)}
 
 Uso (Python del laboratorio):
   python -I tools/sprites/closeup_ai.py gig_spento messo      primi piani "ai" di questi personaggi
@@ -300,6 +303,35 @@ def paint_blink(img, reg, lash):
     return out, bbox_of(reg), lid
 
 
+def paint_lenti(img, cfg):
+    """il riflesso sulle lenti opache: in ogni lente (i pixel del colore della lente dentro i riquadri, una
+    componente connessa per lente) una banda diagonale di 2 px a un terzo della lente e una di 1 px ai due terzi,
+    come la luce che scivola su un vetro. -> (immagine, riquadri delle lenti)"""
+    out = img.copy()
+    lens = hx(cfg["colore"])
+    glint = hx(cfg.get("riflesso", "#f5f5f0"))
+    near = np.abs(img[..., :3].astype(np.int32) - np.array(lens)).sum(-1) <= 12
+    box_m = np.zeros(img.shape[:2], bool)
+    for x, y, w, h in cfg["riquadri"]:
+        box_m[y:y + h, x:x + w] = True
+    lab, n = ndimage.label(near & box_m & (img[..., 3] > 0))
+    rects = []
+    for i in range(1, n + 1):
+        m = lab == i
+        if m.sum() < 6:
+            continue
+        ys, xs = np.nonzero(m)
+        diag = (xs - xs.min()) + (ys - ys.min())
+        d0 = int(round(diag.max() * 0.3))
+        d1 = int(round(diag.max() * 0.62))
+        band = (diag == d0) | (diag == d0 + 1) | (diag == d1)
+        out[ys[band], xs[band], :3] = glint
+        rects.append(bbox_of(m))
+    if not rects:
+        raise SystemExit(f"lenti: nessuna lente {cfg['colore']} nei riquadri {cfg['riquadri']}")
+    return out, rects
+
+
 def mouth_line(img, box):
     """la bocca chiusa: in ogni colonna del riquadro il pixel più scuro, se è più scuro dei vicini sopra e sotto.
     -> ({x: y}, colore scuro)"""
@@ -428,6 +460,11 @@ def build(cid, zoom=None):
             res["eyes"] = rects
             res["lid"] = tohex(lid)
             notes.append(f"occhi chiusi {len(rects)}")
+        elif "blink" in variants and ai.get("lenti"):
+            out["blink"], rects = paint_lenti(base, ai["lenti"])
+            res["eyes"] = rects
+            res["lenti"] = True
+            notes.append(f"riflesso su {len(rects)} lenti")
         if "talk" in variants and ai.get("mouth"):
             line, dark = mouth_line(base, ai["mouth"])
             dark = hx(ai["mouth_dark"]) if ai.get("mouth_dark") else dark

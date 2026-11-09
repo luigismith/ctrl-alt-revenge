@@ -64,8 +64,8 @@ EV_RE = re.compile(r"^(sfx:[a-z_]+|fx:[a-z_]+(@[a-z_]+)?|glint|step)$")
 # punti del fotogramma (§4), relativi all'ancora: pugni, punte dei piedi, centro della testa, presa delle mani
 POINTS = {"fist_l", "fist_r", "foot_l", "foot_r", "head", "grip"}
 OUTLINE = (0x14, 0x0e, 0x1e)
-# 30 colori (pipeline v7): rampe ridotte dentro ogni materiale, più contorni e dettagli
-MAX_COLORS = 30
+# 48 colori: dall'8 novembre 2026 pelle, stoffa e stivali hanno 4 toni (variante B), e i personaggi arrivano a 44
+MAX_COLORS = 48
 
 
 class Report:
