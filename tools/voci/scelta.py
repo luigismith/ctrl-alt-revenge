@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 """La pagina per scegliere le voci a orecchio: anteprime trattate delle prese migliori e dati.json.
 
-Uso (Python isolato, dopo «scegli» di voci.py per ogni proposta di voce da confrontare):
+Uso (Python isolato, dopo «scegli» di voci.py per ogni proposta di voce da confrontare; le anteprime hanno il filtro TV):
   python -I -X utf8 tools/voci/scelta.py [--capitolo prologo] [--battute <file>] [--voci <file>] [--lab <cartella>]
 
 Scrive in <lab>\\voci\\scelta\\: audio\\<voce>\\<scena>__<id>__<seme>.ogg e dati.json. La pagina è scelta/index.html,
@@ -51,18 +51,26 @@ def main():
     ap.add_argument("--lab", default=V.TTS, help="la cartella tts del laboratorio")
     a = ap.parse_args()
     a.battute = a.battute or os.path.join(V.REPO, "docs", "lore", "battute", a.capitolo + ".json")
-    a.voce, a.solo, a.uscita = None, None, None
+    a.voce, a.solo, a.uscita, a.tv = None, None, None, None
     cfg, lines = V.load(a.voci), V.load(a.battute)
     pag = cfg.get("pagina", {})
-    FUOCO, TITOLI = pag.get("fuoco", {}), pag.get("titoli", {})
+    FUOCO, TITOLI, NOMI = pag.get("fuoco", {}), pag.get("titoli", {}), cfg.get("nomi_demo", {})
     voci_dir = os.path.join(a.lab, "voci")
     out = os.path.join(voci_dir, "scelta")
-    tere_prop = list(cfg["voci"]["tere"]["proposte"])
-    radici = {"messo": {cfg["voci"]["messo"]["voce"]: os.path.join(voci_dir, a.capitolo)}, "tere": {}}
-    for p in tere_prop:
-        r = os.path.join(voci_dir, a.capitolo) if p == cfg["voci"]["tere"]["voce"] else os.path.join(voci_dir, "alternative", "tere_" + p)
-        if os.path.exists(os.path.join(r, "_scelte.json")):
-            radici["tere"][p] = r
+    main_root = os.path.join(voci_dir, a.capitolo)
+    # Le voci con le proposte (quelle in prova prima): ogni proposta ha la sua cartella in alternative\<voce>_<proposta>,
+    # tranne la voce già scelta, che sta nella cartella del capitolo. Le voci senza proposte hanno solo la cartella del capitolo.
+    con_proposte = sorted((b for b, v in cfg["voci"].items() if v.get("proposte")), key=lambda b: not cfg["voci"][b].get("in_prova"))
+    radici = {}
+    for base, v in cfg["voci"].items():
+        if "come" in v:
+            continue
+        radici[base] = {}
+        for p in (list(v["proposte"]) if v.get("proposte") else [v["voce"]]):
+            dentro = p == v["voce"] and not v.get("in_prova")
+            r = main_root if dentro else os.path.join(voci_dir, "alternative", "%s_%s" % (base, p))
+            if os.path.exists(os.path.join(r, "_scelte.json")):
+                radici[base][p] = r
     asr = V.Asr(os.path.join(a.lab, "modelli", cfg["modelli"]["controllo"]["cartella"]))
     who = cfg["chi_ha_la_voce"][a.capitolo]
     scelte_cache = {}
@@ -75,12 +83,12 @@ def main():
             key = "%s/%s" % (scena, lid)
             vkey = who[scena].get(lid)
             if not vkey:
-                spk = lid.rsplit("_", 1)[0].upper()
-                righe.append({"key": key, "chi": spk, "testo": text, "voce": False})
+                spk = lid.rsplit("_", 1)[0]
+                righe.append({"key": key, "chi": NOMI.get(spk, spk.upper()), "testo": text, "voce": False})
                 continue
             base, bcfg, own = V.resolve(cfg, vkey)
             tr = own.get("trattamento") or bcfg["trattamento"]
-            riga = {"key": key, "chi": "MESSO" if base == "messo" else "TERE", "base": base, "testo": text, "voce": True,
+            riga = {"key": key, "chi": NOMI.get(base, base.upper()), "base": base, "testo": text, "voce": True,
                     "trattamento": tr, "fuoco": FUOCO.get(key), "prese": {}, "attuale": {}}
             if own.get("dove"):
                 riga["dove"] = own["dove"]
@@ -116,7 +124,7 @@ def main():
                                 item["clip"] = [round(max(0.0, t0 - 0.08), 2), round(min(w.size / sr, t1 + 0.15), 2)]
                                 if fz.get("fruscio"):
                                     item["fruscio_ms"] = fruscio_ms(w, sr, t0)
-                    V.ffmpeg(["-i", tmp, "-c:a", "libvorbis", "-q:a", "6", dst])
+                    V.codifica(a, cfg, tr, tmp, dst)  # il filtro TV, lo stesso delle voci del gioco
                     os.remove(tmp)
                     lista.append(item)
                 # Le migliori per voce: la scelta attuale prima, poi l'ordine di «scegli».
@@ -139,21 +147,28 @@ def main():
                 print("%-22s %-10s %s" % (key, nome, " ".join(str(x["seme"]) for x in lista)), flush=True)
             righe.append(riga)
         scene.append({"scena": scena, "righe": righe})
-    demo = {}
-    for p in tere_prop:
-        f = "demo_voci_%s.mp4" % a.capitolo if p == cfg["voci"]["tere"]["voce"] else "demo_voci_%s_tere-%s.mp4" % (a.capitolo, p)
-        if os.path.exists(os.path.join(voci_dir, "demo", f)):
-            demo[p] = "../demo/" + f
+    gruppi = []
+    for base in con_proposte:
+        v = cfg["voci"][base]
+        props = []
+        for p in v["proposte"]:
+            dentro = p == v["voce"] and not v.get("in_prova")
+            f = "demo_voci_%s.mp4" % a.capitolo if dentro else "demo_voci_%s_%s-%s.mp4" % (a.capitolo, base, p)
+            props.append({"nome": p, "titolo": TITOLI.get(p, p), "descrizione": v["proposte"][p]["instruct"],
+                          "demo": "../demo/" + f if os.path.exists(os.path.join(voci_dir, "demo", f)) else None,
+                          "pronta": p in radici[base]})
+        testi = pag.get("voci", {}).get(base, {})
+        gruppi.append({"base": base, "chi": NOMI.get(base, base.upper()), "titolo": testi.get("titolo", base), "nota": testi.get("nota", ""),
+                       "attuale": v["voce"], "in_prova": bool(v.get("in_prova")), "proposte": props})
     dati = {
         "capitolo": a.capitolo,
         "generato": __import__("time").strftime("%Y-%m-%d %H:%M"),
-        "voce_tere_attuale": cfg["voci"]["tere"]["voce"],
-        "voci_tere": [{"nome": p, "titolo": TITOLI.get(p, p), "descrizione": cfg["voci"]["tere"]["proposte"][p]["instruct"],
-                       "demo": demo.get(p), "pronta": p in radici["tere"]} for p in tere_prop],
+        "tv": V.tv_livello(a, cfg)[0],
+        "voci_proposte": gruppi,
         "voce_messo": {"nome": cfg["voci"]["messo"]["voce"], "titolo": TITOLI.get(cfg["voci"]["messo"]["voce"]),
                        "descrizione": cfg["voci"]["messo"]["riferimento"]["instruct"]},
         "scene": scene,
-        "pagina": {k: v for k, v in pag.items() if k not in ("fuoco", "titoli")},
+        "pagina": {k: v for k, v in pag.items() if k not in ("fuoco", "titoli", "voci")},
     }
     V.save(dati, os.path.join(out, "dati.json"))
     print(os.path.join(out, "dati.json"))

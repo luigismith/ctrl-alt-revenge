@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- SPDX-FileCopyrightText: 2026 Luigi Massari -->
 <!-- SPDX-License-Identifier: MIT -->
-<!-- La pagina per scegliere le voci a orecchio. Il codice sta nel repo; audio, battute e testi delle scene arrivano
+<!-- La pagina per scegliere le voci a orecchio: le voci con più proposte, le prese di ogni battuta, il filtro TV. Il codice sta nel repo; audio, battute e testi delle scene arrivano
      da dati.json e tv.json, che scrivono scelta.py e scelta_tv.py nel laboratorio. Si apre con apri_scelta.cmd. -->
 <html lang="it">
 <head>
@@ -11,7 +11,7 @@
 <style>
 :root{
   --bg:#0d1014; --pannello:#151a20; --pannello2:#1b222a; --linea:#2a333d; --testo:#e8ecef; --tenue:#8d99a6; --fioco:#5d6874;
-  --messo:#5ee0d6; --messo-f:rgba(94,224,214,.12); --tere:#ffb15c; --tere-f:rgba(255,177,92,.12);
+  --messo:#5ee0d6; --messo-f:rgba(94,224,214,.12); --tere:#ffb15c; --tere-f:rgba(255,177,92,.12); --gig:#8fb8ff; --gig-f:rgba(143,184,255,.12);
   --rosso:#ff6b6b; --verde:#8be38b; --giallo:#ffd166;
   --mono:"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",monospace;
   --sans:"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
@@ -23,7 +23,7 @@ body{margin:0;background:var(--bg);color:var(--testo);font:15px/1.5 var(--sans);
 header{padding:40px 0 24px;border-bottom:1px solid var(--linea);margin-bottom:28px}
 .sopra{font:600 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--fioco)}
 h1{font-size:34px;line-height:1.1;margin:8px 0 10px;letter-spacing:-.01em}
-h1 b{color:var(--tere)}
+h1 b{color:var(--gig)}
 .intro{color:var(--tenue);max-width:760px;margin:0}
 .legenda{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px;font-size:13px;color:var(--tenue)}
 .legenda span{display:inline-flex;align-items:center;gap:6px}
@@ -32,7 +32,12 @@ h2::after{content:"";flex:1;height:1px;background:var(--linea)}
 .voci{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .voce{background:var(--pannello);border:1px solid var(--linea);border-radius:10px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:10px}
 .voce:hover{border-color:#3b4652}
-.voce.sel{border-color:var(--tere);background:linear-gradient(var(--tere-f),var(--tere-f)),var(--pannello)}
+.gruppo{--c:var(--tenue);--cf:rgba(255,255,255,.05)}
+.gruppo.tere,.battuta.tere,.tv-riga.tere{--c:var(--tere);--cf:var(--tere-f)}
+.gruppo.gig,.battuta.gig,.tv-riga.gig{--c:var(--gig);--cf:var(--gig-f)}
+.battuta.messo,.tv-riga.messo{--c:var(--messo);--cf:var(--messo-f)}
+.gruppo-nota{color:var(--tenue);font-size:14px;margin:0 0 12px}
+.voce.sel{border-color:var(--c);background:linear-gradient(var(--cf),var(--cf)),var(--pannello)}
 .voce .tit{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px}
 .voce .desc{color:var(--tenue);font-size:13.5px;margin:0}
 .voce .en{color:var(--fioco);font-size:12px;font-style:italic;margin:0}
@@ -41,18 +46,16 @@ h2::after{content:"";flex:1;height:1px;background:var(--linea)}
 .pallino{width:16px;height:16px;border-radius:50%;border:2px solid var(--fioco);flex:none;display:inline-block;position:relative}
 .sel .pallino,.presa.sel .pallino{border-color:currentColor}
 .sel .pallino::after,.presa.sel .pallino::after{content:"";position:absolute;inset:3px;border-radius:50%;background:currentColor}
-.voce.sel .tit{color:var(--tere)}
+.voce.sel .tit{color:var(--c)}
 .scena-nome{font:600 22px var(--sans);margin:44px 0 4px}
 .scena-sotto{color:var(--fioco);font-size:13px;margin:0 0 16px}
 .muta{display:flex;gap:12px;padding:8px 14px;color:var(--fioco);font-size:14px;border-left:2px solid var(--linea);margin:6px 0 6px 6px}
 .muta .chi{font:600 11px var(--mono);letter-spacing:.12em;padding-top:3px;min-width:46px}
 .battuta{background:var(--pannello);border:1px solid var(--linea);border-radius:12px;margin:14px 0;overflow:hidden}
-.battuta.messo{border-left:3px solid var(--messo)}
-.battuta.tere{border-left:3px solid var(--tere)}
+.battuta{border-left:3px solid var(--c)}
 .testa{padding:16px 18px 12px;display:flex;gap:14px;align-items:flex-start}
 .chi-b{font:700 11px var(--mono);letter-spacing:.14em;padding:4px 8px;border-radius:4px;flex:none;margin-top:3px}
-.messo .chi-b{color:var(--messo);background:var(--messo-f)}
-.tere .chi-b{color:var(--tere);background:var(--tere-f)}
+.battuta .chi-b{color:var(--c);background:var(--cf)}
 .testo{font-size:19px;line-height:1.4;font-weight:500}
 .dove{display:block;font-size:12px;color:var(--fioco);font-weight:400;margin-top:2px}
 .fuoco{margin:0 18px 12px;padding:10px 12px;border-radius:8px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);font-size:13.5px;color:#f1dfb0}
@@ -63,12 +66,11 @@ h2::after{content:"";flex:1;height:1px;background:var(--linea)}
 .col.altra{opacity:.62}
 .col.altra:hover{opacity:1}
 .col-tit{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fioco);margin:2px 0 8px;display:flex;justify-content:space-between;gap:8px}
-.col.scelta .col-tit{color:var(--tere)}
+.col.scelta .col-tit{color:var(--c)}
 .presa{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:9px 10px;border-radius:8px;border:1px solid transparent;cursor:pointer;margin:4px 0;color:var(--tenue)}
 .presa:hover{background:rgba(255,255,255,.03)}
 .presa.sel{border-color:currentColor;background:rgba(255,255,255,.035)}
-.messo .presa.sel{color:var(--messo)}
-.tere .presa.sel{color:var(--tere)}
+.battuta .presa.sel{color:var(--c)}
 .presa .riga1{display:flex;align-items:center;gap:10px;min-width:0}
 .presa .nome{font:600 13px var(--mono);color:var(--testo)}
 .presa .info{font:12px var(--mono);color:var(--fioco)}
@@ -103,7 +105,7 @@ textarea:focus{outline:none;border-color:var(--tenue)}
 .piede .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
 .stato{flex:1;font-size:13.5px;color:var(--tenue)}
 .stato b{color:var(--testo);font-weight:600}
-.salva{font:600 15px var(--sans);padding:12px 22px;border-radius:9px;border:0;background:var(--tere);color:#1a1206;cursor:pointer}
+.salva{font:600 15px var(--sans);padding:12px 22px;border-radius:9px;border:0;background:var(--gig);color:#0b1426;cursor:pointer}
 .salva:hover{filter:brightness(1.08)}
 .salva:disabled{opacity:.5;cursor:default}
 .errore{color:var(--rosso)}
@@ -127,8 +129,7 @@ textarea:focus{outline:none;border-color:var(--tenue)}
 .tv-riga{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:10px 16px;border-top:1px solid var(--linea)}
 .tv-riga .t{font-size:15px}
 .tv-riga .t .chi-b{margin:0 8px 0 0;display:inline-block;font-size:10px;padding:2px 6px}
-.tv-riga.messo .chi-b{color:var(--messo);background:var(--messo-f)}
-.tv-riga.tere .chi-b{color:var(--tere);background:var(--tere-f)}
+.tv-riga .chi-b{color:var(--c);background:var(--cf)}
 .tv-bott{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .tvb{font:600 12px var(--mono);padding:6px 10px;border-radius:20px;border:1px solid var(--linea);background:var(--bg);color:var(--tenue);cursor:pointer;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden}
 .tvb:hover{border-color:var(--tenue);color:var(--testo)}
@@ -155,7 +156,7 @@ textarea:focus{outline:none;border-color:var(--tenue)}
   <header>
     <div class="sopra">CTRL+ALT REVENGE · laboratorio · <span id="cap"></span></div>
     <h1><span id="titolo">Le voci</span>: <b>ascolta e scegli</b></h1>
-    <p class="intro">Prima il suono della TV: le stesse battute a più intensità del filtro, per scegliere quanto devono sembrare uscite da un televisore a tubo. Sotto ci sono le voci e le prese di ogni battuta: si possono ancora cambiare. Quando hai finito, premi <b>Salva le scelte</b>: le legge Claude. Le voci restano su questo PC.</p>
+    <p class="intro">Prima le voci da scegliere: ognuna ha la sua demo con le scene intere. Sotto ci sono le battute, scena per scena, con le prese migliori di ogni voce; tutte hanno già il filtro TV. Quando hai finito, premi <b>Salva le scelte</b>: le legge Claude. Le voci restano su questo PC.</p>
     <div class="legenda">
       <span><span class="badge ok">Whisper ✓</span> Whisper ha capito tutte le lettere</span>
       <span><span class="badge med">~2 lettere</span> lettere sentite male, spesso è Whisper che sbaglia</span>
@@ -163,22 +164,21 @@ textarea:focus{outline:none;border-color:var(--tenue)}
     </div>
   </header>
 
-  <h2>1 · Il suono della TV</h2>
-  <p class="tv-intro">Il filtro è l'ultimo passo, sopra il trattamento di ogni battuta: <b>banda stretta</b> da altoparlante piccolo, <b>un filo di saturazione</b> e di <b>compressione</b>, <b>la stanza</b> appena accennata e il <b>ronzio di riga</b> della TV, a 15.625 Hz (il PAL italiano). Il ronzio lo sentono soprattutto le orecchie giovani, e con le cuffie. Tutte le versioni hanno lo stesso volume, così il confronto è giusto. Scegli un livello cliccando la sua scheda; con i pulsanti delle battute passi da un livello all'altro sulla stessa frase.</p>
+  <div class="fatto" id="fatto" hidden></div>
+  <div id="gruppi"></div>
+
+  <div id="scene"></div>
+
+  <h2>Il suono della TV · già scelto</h2>
+  <p class="tv-intro">Il filtro è l'ultimo passo, sopra il trattamento di ogni battuta: <b>banda stretta</b> da altoparlante piccolo, <b>un filo di saturazione</b> e di <b>compressione</b>, <b>la stanza</b> appena accennata e il <b>ronzio di riga</b> della TV, a 15.625 Hz (il PAL italiano). L'hai scelto il 7 novembre e vale per tutte le voci; si può ancora cambiare. Qui ci sono le voci di allora, il messo e Tere.</p>
   <div class="livelli" id="livelli"></div>
   <div class="tv-tab" id="tv-tab"></div>
   <p class="tv-nota" id="tv-nota"></p>
 
-  <h2>2 · La voce di Tere</h2>
-  <div class="fatto" id="fatto" hidden></div>
-  <div class="voci" id="voci"></div>
-
-  <div id="scene"></div>
-
   <h2>Note per Claude</h2>
   <div class="finale">
     <p>Qualcosa che non va in generale: un tono, una pronuncia, una voce da rifare?</p>
-    <textarea id="nota-generale" placeholder="Per esempio: il messo più lento, Tere meno roca…"></textarea>
+    <textarea id="nota-generale" placeholder="Per esempio: GIG più lento, più accento di Taranto, il messo più freddo…"></textarea>
   </div>
 </div>
 
@@ -195,7 +195,11 @@ const ICON_PLAY = '<svg viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="cur
 const ICON_STOP = '<svg viewBox="0 0 14 14"><rect x="3" y="3" width="8" height="8" rx="1" fill="currentColor"/></svg>';
 
 let D = null, TV = null;
-const S = {voce_tere: null, messo: {}, tere: {}, note: {}, nota_generale: "", tv: null};
+// S.voci: la proposta scelta per ogni voce che ne ha. S.prese[voce] è {scena/id: seme} per le voci senza proposte
+// (il messo), {proposta: {scena/id: seme}} per le altre.
+const S = {voci: {}, prese: {messo: {}}, note: {}, nota_generale: "", tv: null};
+const gruppo = base => ((D && D.voci_proposte) || []).find(g => g.base === base);
+const statoPrese = (base, voce) => { const t = (S.prese[base] ||= {}); return gruppo(base) ? (t[voce] ||= {}) : t; };
 let sporco = false, salvatoAlle = null;
 
 // ---------- audio
@@ -248,20 +252,29 @@ function badgeCer(p, testo){
 function el(tag, cls, html){ const e = document.createElement(tag); if(cls) e.className = cls; if(html!=null) e.innerHTML = html; return e; }
 
 function disegnaVoci(){
-  const box = document.getElementById("voci"); box.innerHTML = "";
-  D.voci_tere.forEach(v => {
-    const c = el("div", "voce"+(S.voce_tere===v.nome?" sel":""));
-    c.innerHTML = '<div class="tit"><span class="pallino"></span>'+esc(v.titolo)+(v.nome===D.voce_tere_attuale?' <span class="badge med" style="color:var(--tenue);background:var(--pannello2)">proposta di Claude</span>':'')+'</div>'+
-      '<p class="desc">'+esc(IT[v.nome]||"")+'</p><p class="en">'+esc(v.descrizione)+'</p>';
-    if(v.demo){ const vid = el("video"); vid.controls = true; vid.preload = "metadata"; vid.src = v.demo; vid.addEventListener("play", ferma); vid.addEventListener("click", e=>e.stopPropagation()); c.appendChild(vid); }
-    else c.appendChild(el("div","manca", v.pronta ? "Demo non trovata." : "Prese non ancora pronte."));
-    c.addEventListener("click", () => { S.voce_tere = v.nome; segna(); disegnaVoci(); disegnaScene(); });
-    box.appendChild(c);
+  const box = document.getElementById("gruppi"); box.innerHTML = "";
+  let n = 1;
+  D.voci_proposte.forEach(g => {
+    box.appendChild(el("h2", null, (n++)+" · "+esc(g.titolo)));
+    const sez = el("div", "gruppo "+g.base);
+    if(g.nota) sez.appendChild(el("p","gruppo-nota",esc(g.nota)));
+    const grid = el("div","voci");
+    g.proposte.forEach(v => {
+      const c = el("div", "voce"+(S.voci[g.base]===v.nome?" sel":""));
+      const segno = v.nome===g.attuale ? (g.in_prova ? "proposta di Claude" : "la voce scelta") : "";
+      c.innerHTML = '<div class="tit"><span class="pallino"></span>'+esc(v.titolo)+(segno?' <span class="badge med" style="color:var(--tenue);background:var(--pannello2)">'+segno+'</span>':'')+'</div>'+
+        '<p class="desc">'+esc(IT[v.nome]||"")+'</p><p class="en">'+esc(v.descrizione)+'</p>';
+      if(v.demo){ const vid = el("video"); vid.controls = true; vid.preload = "metadata"; vid.src = v.demo; vid.addEventListener("play", ferma); vid.addEventListener("click", e=>e.stopPropagation()); c.appendChild(vid); }
+      else c.appendChild(el("div","manca", v.pronta ? "Demo non trovata." : "Prese non ancora pronte."));
+      c.addEventListener("click", () => { S.voci[g.base] = v.nome; segna(); disegnaVoci(); disegnaScene(); });
+      grid.appendChild(c);
+    });
+    sez.appendChild(grid); box.appendChild(sez);
   });
 }
 
 function rigaPresa(p, riga, gruppo, voce, idx){
-  const stato = riga.base === "messo" ? S.messo : (S.tere[voce] ||= {});
+  const stato = statoPrese(riga.base, voce);
   const r = el("div", "presa"+(stato[riga.key]===p.seme?" sel":""));
   const play = el("button","play",ICON_PLAY); play.title = "Ascolta";
   const barra = el("div","barra","<i></i>");
@@ -286,7 +299,7 @@ function rigaPresa(p, riga, gruppo, voce, idx){
 }
 
 function rigaRifare(riga, gruppo, voce){
-  const stato = riga.base === "messo" ? S.messo : (S.tere[voce] ||= {});
+  const stato = statoPrese(riga.base, voce);
   const r = el("div","rifare"+(stato[riga.key]==="rifare"?" sel":""), '<span class="pallino"></span>Nessuna va bene: rifalla');
   r.addEventListener("click", () => { stato[riga.key] = "rifare"; segna(); gruppo.querySelectorAll(".presa,.rifare").forEach(x=>x.classList.remove("sel")); r.classList.add("sel"); });
   return r;
@@ -294,23 +307,24 @@ function rigaRifare(riga, gruppo, voce){
 
 function disegnaScene(){
   const box = document.getElementById("scene"); box.innerHTML = "";
-  let n = 2;
+  let n = D.voci_proposte.length + 1;
   D.scene.forEach(sc => {
     box.appendChild(el("h2", null, (n++)+" · "+esc(NOMI_SCENA[sc.scena]||sc.scena)));
     box.appendChild(el("p","scena-sotto", esc(SOTTO_SCENA[sc.scena]||"")));
     sc.righe.forEach(riga => {
       if(!riga.voce){
-        const m = el("div","muta"); m.innerHTML = '<span class="chi">'+esc(riga.chi)+'</span><span>'+esc(riga.testo)+' <span style="color:#46505b">· testo a pressione, senza voce</span></span>'; box.appendChild(m); return;
+        const m = el("div","muta"); m.innerHTML = '<span class="chi">'+esc(riga.chi)+'</span><span>'+esc(riga.testo)+' <span style="color:#46505b">· per ora senza voce</span></span>'; box.appendChild(m); return;
       }
       const card = el("div","battuta "+riga.base);
       card.innerHTML = '<div class="testa"><span class="chi-b">'+esc(riga.chi)+'</span><div class="testo">«'+esc(riga.testo)+'»'+(riga.dove?'<span class="dove">'+esc(riga.dove)+'</span>':'')+'</div></div>';
       if(riga.fuoco) card.appendChild(el("div","fuoco","<b>Da ascoltare: "+esc(riga.fuoco.etichetta)+".</b> "+esc(riga.fuoco.nota)));
-      const voci = riga.base === "messo" ? [D.voce_messo.nome] : D.voci_tere.map(v=>v.nome).filter(v=>riga.prese[v]);
+      const g = gruppo(riga.base);
+      const voci = g ? g.proposte.map(v=>v.nome).filter(v=>riga.prese[v]) : Object.keys(riga.prese);
       const cols = el("div","colonne"+(voci.length===3?" c3":""));
       voci.forEach(v => {
-        const col = el("div","col"+(riga.base==="tere" ? (v===S.voce_tere?" scelta":" altra") : ""));
-        const tit = riga.base==="messo" ? D.voce_messo.titolo : (D.voci_tere.find(x=>x.nome===v)||{}).titolo;
-        col.appendChild(el("div","col-tit","<span>"+esc(tit||v)+"</span><span>"+(riga.base==="tere"?(v===S.voce_tere?"la voce scelta":"per confronto"):"")+"</span>"));
+        const col = el("div","col"+(g ? (v===S.voci[g.base]?" scelta":" altra") : ""));
+        const tit = g ? (g.proposte.find(x=>x.nome===v)||{}).titolo : (riga.base==="messo" ? D.voce_messo.titolo : v);
+        col.appendChild(el("div","col-tit","<span>"+esc(tit||v)+"</span><span>"+(g?(v===S.voci[g.base]?"la voce scelta":"per confronto"):"")+"</span>"));
         (riga.prese[v]||[]).forEach((p,i) => col.appendChild(rigaPresa(p, riga, col, v, i)));
         col.appendChild(rigaRifare(riga, col, v));
         cols.appendChild(col);
@@ -356,7 +370,7 @@ function disegnaTv(){
   TV.scene.forEach(sc => {
     tab.appendChild(el("div","tv-scena",esc(NOMI_SCENA[sc.scena]||sc.scena)));
     sc.righe.forEach(r => {
-      const row = el("div","tv-riga "+(r.chi==="MESSO"?"messo":"tere"));
+      const row = el("div","tv-riga "+(r.chi==="MESSO"?"messo":(r.chi==="GIG"?"gig":"tere")));
       row.appendChild(el("div","t",'<span class="chi-b">'+esc(r.chi)+'</span>'+esc(r.testo)));
       const bb = el("div","tv-bott");
       TV.livelli.forEach(L => {
@@ -395,15 +409,18 @@ function aggiorna(){
   const st = document.getElementById("stato"), btn = document.getElementById("salva");
   btn.disabled = !sporco;
   const tot = D.scene.reduce((a,s)=>a+s.righe.filter(r=>r.voce).length,0);
-  const vt = (D.voci_tere.find(v=>v.nome===S.voce_tere)||{}).titolo||"?";
-  const rif = Object.values(S.messo).filter(x=>x==="rifare").length + Object.values(S.tere[S.voce_tere]||{}).filter(x=>x==="rifare").length;
+  let rif = Object.values(S.prese.messo||{}).filter(x=>x==="rifare").length, voci = "";
+  D.voci_proposte.forEach(g => {
+    rif += Object.values((S.prese[g.base]||{})[S.voci[g.base]]||{}).filter(x=>x==="rifare").length;
+    voci += " · "+esc(g.chi.charAt(0)+g.chi.slice(1).toLowerCase())+": <b>"+esc((g.proposte.find(v=>v.nome===S.voci[g.base])||{}).titolo||"?")+"</b>";
+  });
   const lt = TV ? ((TV.livelli.find(l=>l.nome===S.tv)||{}).titolo||"?") : "?";
-  st.innerHTML = "TV: <b>"+esc(lt)+"</b> · Tere: <b>"+esc(vt)+"</b> · "+tot+" battute con la voce"+(rif?" · <b>"+rif+" da rifare</b>":"")+" · "+
+  st.innerHTML = "TV: <b>"+esc(lt)+"</b>"+voci+" · "+tot+" battute con la voce"+(rif?" · <b>"+rif+" da rifare</b>":"")+" · "+
     (sporco ? "<b>modifiche non salvate</b>" : (salvatoAlle ? "salvate alle "+esc(salvatoAlle) : "ancora le scelte di Claude"));
 }
 async function salva(){
   const btn = document.getElementById("salva"); btn.disabled = true;
-  const corpo = {capitolo: D.capitolo, voce_tere: S.voce_tere, prese: {messo: S.messo, tere: S.tere}, note: Object.fromEntries(Object.entries(S.note).filter(([k,v])=>v.trim())), nota_generale: S.nota_generale, tv: S.tv};
+  const corpo = {capitolo: D.capitolo, voci: S.voci, voce_tere: S.voci.tere, prese: S.prese, note: Object.fromEntries(Object.entries(S.note).filter(([k,v])=>v.trim())), nota_generale: S.nota_generale, tv: S.tv};
   try{
     const r = await fetch("/salva", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(corpo)});
     if(!r.ok) throw new Error(r.status);
@@ -420,17 +437,18 @@ async function avvia(){
   Object.entries(P.scene || {}).forEach(([k, v]) => { NOMI_SCENA[k] = v.nome; SOTTO_SCENA[k] = v.sotto || ""; });
   if(P.titolo){ document.getElementById("titolo").textContent = P.titolo; document.title = P.titolo; }
   if(P.fatto){ const f = document.getElementById("fatto"); f.textContent = P.fatto; f.hidden = false; }
-  S.voce_tere = D.voce_tere_attuale;
+  D.voci_proposte.forEach(g => { S.voci[g.base] = g.attuale; });
   try{ const r = await fetch("tv.json"); if(r.ok){ TV = await r.json(); S.tv = TV.livello_attuale; } }catch(e){}
   D.scene.forEach(sc => sc.righe.forEach(r => { if(!r.voce) return;
-    Object.entries(r.attuale).forEach(([v,seme]) => { if(r.base==="messo") S.messo[r.key] = seme; else (S.tere[v] ||= {})[r.key] = seme; }); }));
+    Object.entries(r.attuale).forEach(([v,seme]) => { statoPrese(r.base, v)[r.key] = seme; }); }));
   try{
     const r = await fetch("scelte_luigi.json");
     if(r.ok){ const j = await r.json();
-      if(j.voce_tere) S.voce_tere = j.voce_tere;
+      Object.assign(S.voci, j.voce_tere ? {tere: j.voce_tere} : {}, j.voci||{});
       if(j.tv) S.tv = j.tv;
-      Object.assign(S.messo, (j.prese||{}).messo||{});
-      Object.entries((j.prese||{}).tere||{}).forEach(([v,o]) => Object.assign(S.tere[v] ||= {}, o));
+      Object.entries(j.prese||{}).forEach(([base,o]) => {
+        if(gruppo(base)) Object.entries(o).forEach(([v,x]) => Object.assign(statoPrese(base, v), x));
+        else Object.assign(S.prese[base] ||= {}, o); });
       S.note = j.note||{}; S.nota_generale = j.nota_generale||""; salvatoAlle = (j.salvato||"").slice(11,16)||null; }
   }catch(e){}
   const ng = document.getElementById("nota-generale"); ng.value = S.nota_generale;

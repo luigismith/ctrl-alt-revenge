@@ -99,14 +99,20 @@ def device():
 
 
 def voiced_lines(a, cfg, lines):
-    """[(scena, id, chiave voce, testo)] nell'ordine del file delle battute."""
+    """[(scena, id, chiave voce, testo)] nell'ordine del file delle battute.
+    Una voce con "in_prova": true (le proposte non ancora scelte) entra solo se la si chiede con --solo,
+    così le sue prese non finiscono nel manifest del gioco."""
     who = cfg["chi_ha_la_voce"][a.capitolo]
     out = []
     for scena, battute in lines["scene"].items():
         for lid, text in battute.items():
             v = who.get(scena, {}).get(lid)
-            if v:
-                out.append((scena, lid, v, text))
+            if not v:
+                continue
+            base, bcfg, _ = resolve(cfg, v)
+            if bcfg.get("in_prova") and not (a.solo and base in a.solo):
+                continue
+            out.append((scena, lid, v, text))
     return out
 
 
@@ -172,6 +178,11 @@ def fase_riferimenti(a, cfg, lines):
             wavs, sr = model.generate_voice_design(text=text, instruct=p["instruct"], language="Italian")
             w = tidy(wavs[0], sr)
             sf.write(wav_p, w, sr, subtype="PCM_16")
+            st = p.get("tono_semitoni")
+            if st:  # un abbassamento leggero, con le formanti ferme: la voce scende senza diventare un mostro
+                tmp = wav_p[:-4] + "_tono.wav"
+                ffmpeg(["-i", wav_p, "-af", "rubberband=pitch=%.6f:formant=preserved:pitchq=quality" % 2 ** (st / 12), tmp])
+                os.replace(tmp, wav_p)
             open(txt_p, "w", encoding="utf-8").write(text)
             print("riferimento %s_%s: %.1f s in %.1f s" % (base, name, w.size / sr, time.perf_counter() - t0), flush=True)
     _ = ov
@@ -439,22 +450,37 @@ def fase_demo(a, cfg, lines):
     """Le scene in ordine di copione: voce dove c'è, silenzio col testo per chi non ha voce. Sottotitoli col nome."""
     root = out_root(a)
     man = load(os.path.join(root, "manifest.json"))
+    for b in man["battute"].values():
+        b["file"] = os.path.join(root, b["file"])
+    # Con --uscita (una proposta a parte) le altre voci vengono dal manifest del capitolo: la scena si sente intera.
+    main_root = os.path.join(a.lab, "voci", a.capitolo)
+    main_p = os.path.join(main_root, "manifest.json")
+    if os.path.abspath(root) != os.path.abspath(main_root) and os.path.exists(main_p):
+        for k, b in load(main_p)["battute"].items():
+            if k not in man["battute"]:
+                b["file"] = os.path.join(main_root, b["file"])
+                man["battute"][k] = b
     pd = cfg["pause_demo"]
     sr_man = int(man.get("campionamento_hz", 24000))
     who_names = cfg.get("nomi_demo", {})  # prefisso dell'id della battuta -> nome nei sottotitoli
     sr = sr_man
     seq, subs, t = [], [], 0.0
     scenes = [s for s in lines["scene"] if any(k.startswith(s + "/") for k in man["battute"])]
+    if a.solo:  # la demo di una proposta: solo le scene dove quella voce parla (la signora non deve aspettare tutto il prologo)
+        who = cfg["chi_ha_la_voce"][a.capitolo]
+        scenes = [s for s in scenes if any(resolve(cfg, v)[0] in a.solo for v in who.get(s, {}).values())]
     for scena in scenes:
-        title = scena.upper().replace("_", " ")
+        title = (cfg.get("pagina", {}).get("scene", {}).get(scena, {}).get("nome") or scena.replace("_", " ")).upper()
         subs.append((t, t + 1.6, "", "— %s —" % title))
         seq.append(np.zeros(int(sr * 2.0), dtype=np.float32)); t += 2.0
         for lid, text in lines["scene"][scena].items():
             key = "%s/%s" % (scena, lid)
             spk = who_names.get(re.sub(r"_\d+$", "", lid), lid.split("_")[0].upper())
             if key in man["battute"]:
-                w, _ = sf.read(os.path.join(root, man["battute"][key]["file"]), dtype="float32")
+                w, _ = sf.read(man["battute"][key]["file"], dtype="float32")
                 d = w.size / sr
+            elif cfg["chi_ha_la_voce"][a.capitolo].get(scena, {}).get(lid):
+                continue  # ha una voce, ma non è fra quelle montate (un'altra voce ancora in prova)
             else:
                 d = max(pd["gig_minimo_s"], len(text) / pd["gig_caratteri_al_s"])
                 w = np.zeros(int(sr * d), dtype=np.float32)
@@ -497,7 +523,7 @@ def main():
     ap.add_argument("--voci", default=os.path.join(REPO, "docs", "lore", "voci", "voci.json"))
     ap.add_argument("--lab", default=TTS, help="la cartella tts del laboratorio")
     ap.add_argument("--voce", action="append", help="voce=proposta, per provare un'altra proposta")
-    ap.add_argument("--solo", action="append", help="solo questa voce base (messo, tere)")
+    ap.add_argument("--solo", action="append", help="solo questa voce base (messo, tere, gig); serve per le voci in prova")
     ap.add_argument("--tv", help="livello del filtro TV al posto di quello di voci.json (o senza)")
     ap.add_argument("--uscita", help="cartella di uscita al posto di <lab>\\voci\\<capitolo>")
     a = ap.parse_args()
