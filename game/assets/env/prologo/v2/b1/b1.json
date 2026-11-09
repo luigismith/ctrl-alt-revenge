@@ -1,0 +1,70 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "scena": {
+  "image": "b1_scena.png",
+  "x": 0,
+  "y": 0,
+  "nota": "colonne 0-35 dalla riga 0 alla 43; alla 36 comincia B2, la strada si cuce a specchio"
+ },
+ "emissione": {
+  "image": "b1_emis.png",
+  "x": 0,
+  "y": 0
+ },
+ "luci": [
+  {
+   "nome": "ologramma",
+   "x": 116,
+   "y": 472,
+   "colore": "#bfe8d4",
+   "energia": 0.45,
+   "raggio": 110,
+   "altezza": 40,
+   "alone": {
+    "energia": 0.3,
+    "raggio": 150,
+    "vuoto": 0.5
+   },
+   "ritmo": "pulsa"
+  },
+  {
+   "nome": "purificatore",
+   "x": 228,
+   "y": 564,
+   "colore": "#9fe0b8",
+   "energia": 0.4,
+   "raggio": 80,
+   "altezza": 20,
+   "alone": {
+    "energia": 0.2,
+    "raggio": 90,
+    "vuoto": 0.3
+   }
+  },
+  {
+   "nome": "schermo_pensilina",
+   "x": 349,
+   "y": 565,
+   "colore": "#cfeedd",
+   "energia": 0.55,
+   "raggio": 120,
+   "altezza": 30,
+   "alone": {
+    "energia": 0.25,
+    "raggio": 140,
+    "vuoto": 0.35
+   },
+   "pozza": {
+    "y": 686,
+    "larghezza": 200,
+    "energia": 0.25
+   }
+  }
+ ],
+ "note": {
+  "ologramma": "«FIORI ARIA+ · sempre freschi» è mezzo trasparente: se si vuole vivo, un tremolio d'alfa",
+  "muro": "il muro di cinta è quello di A6 (346-347), visto dalla strada: tufo sotto, pannelli ETERNA sopra",
+  "chiesa": "il fianco della chiesa (30-35) col portone di legno è fondo, senza nome; la tettoia 31-35 è sopra il portone",
+  "luci": "i punti di car-grafica (ologramma 116,472; purificatore 228,564; schermo della pensilina 349,565) resi luci vive, menta come la luce di ARIA+ in B2"
+ }
+}

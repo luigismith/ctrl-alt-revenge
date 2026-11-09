@@ -1,0 +1,80 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "coordinate": "locali al livello B (worldX 6960 nel mondo)",
+ "scena": {
+  "image": "b3_scena.png",
+  "x": 2560,
+  "y": 200,
+  "nota": "colonne 128-171; sopra il lastricato comincia alla 134 (prima c'è B2); sotto, la cantina parte dalla 128 e continua in B2"
+ },
+ "stati": {
+  "sacchetto": {
+   "image": "b3_sacchetto.png",
+   "x": 2783,
+   "y": 654
+  },
+  "fumo_1": {
+   "image": "b3_fumo_1.png",
+   "x": 2764,
+   "y": 356
+  },
+  "fumo_2": {
+   "image": "b3_fumo_2.png",
+   "x": 2766,
+   "y": 354
+  },
+  "fumo_3": {
+   "image": "b3_fumo_3.png",
+   "x": 2768,
+   "y": 352
+  },
+  "porta_chiusa": {
+   "image": "b3_porta_chiusa.png",
+   "x": 3358,
+   "y": 550
+  }
+ },
+ "note": {
+  "sacchetto": "sparisce quando GIG prende i taralli (Ristoro a 139)",
+  "fumo": "tre fotogrammi in ciclo, 0,25 s l'uno, sopra il cappello della canna fumaria",
+  "porta_chiusa": "si mostra quando la porta della 168 si chiude dietro GIG (si_chiude_dopo)",
+  "luce": "la luce calda della porta del forno è dipinta; se si vuole viva, una PointLight2D arancio (255,170,80) a x 2830, y 654",
+  "cantina": "la luce fredda della grata è dipinta; una PointLight2D grigia debole a x 2710, y 760 la rende viva"
+ },
+ "luci": [
+  {
+   "nome": "forno",
+   "x": 2830,
+   "y": 654,
+   "colore": "#ffaa50",
+   "energia": 0.9,
+   "raggio": 130,
+   "altezza": 30,
+   "alone": {
+    "energia": 0.5,
+    "raggio": 180,
+    "vuoto": 0.3
+   },
+   "pozza": {
+    "y": 686,
+    "larghezza": 300,
+    "energia": 0.45
+   },
+   "ritmo": "tremola"
+  },
+  {
+   "nome": "grata",
+   "x": 2710,
+   "y": 760,
+   "colore": "#a9b1b8",
+   "energia": 0.4,
+   "raggio": 100,
+   "altezza": 20,
+   "alone": {
+    "energia": 0.15,
+    "raggio": 100,
+    "vuoto": 0.2
+   }
+  }
+ ]
+}

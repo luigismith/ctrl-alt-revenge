@@ -1,0 +1,42 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "coordinate": "locali al livello B (worldX 6960 nel mondo)",
+ "scena": {
+  "image": "b4_scena.png",
+  "x": 3440,
+  "y": 0,
+  "nota": "colonne 172-227 dalla riga 0 alla 43: il garage di fuga.py spostato di (-2640, +220); la facciata con la porta (168-171) è di B3"
+ },
+ "emissione": {
+  "image": "b4_emis.png",
+  "x": 3440,
+  "y": 0
+ },
+ "note": {
+  "registro": "lo scaffale è vuoto alla colonna 190: il registro (190, 28, piede a y 580) è uno sprite a parte, da fare quando car-storia avrà deciso l'oggetto; la resa da Vista è uno shader sul contorno",
+  "luce": "la lampada sul banco è dipinta; se si vuole viva, una PointLight2D calda (255,200,130) a x 3500, y 610",
+  "lucernario": "il fascio di pioggia sotto il lucernario aperto (186-189) è dipinto: la pioggia del gioco, dentro il garage, cade solo lì",
+  "fondo_chiuso": "207-225 è Pieno, dipinto come nel prologo di prima (la stanza buia coi pilastri gialli)"
+ },
+ "luci": [
+  {
+   "nome": "lampada",
+   "x": 3500,
+   "y": 610,
+   "colore": "#ffc882",
+   "energia": 0.9,
+   "raggio": 130,
+   "altezza": 30,
+   "alone": {
+    "energia": 0.5,
+    "raggio": 180,
+    "vuoto": 0.3
+   },
+   "pozza": {
+    "y": 686,
+    "larghezza": 260,
+    "energia": 0.4
+   }
+  }
+ ]
+}

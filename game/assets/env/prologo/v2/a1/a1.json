@@ -1,0 +1,35 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "scena": {
+  "image": "a1_scena.png",
+  "x": 0,
+  "y": 200,
+  "nota": "colonne 0-35, dalla riga 10 alla 39 (y 200-800)"
+ },
+ "emissione": {
+  "image": "a1_emis.png",
+  "x": 0,
+  "y": 200
+ },
+ "luci": [
+  {
+   "nome": "fontanella",
+   "x": 677,
+   "y": 612,
+   "colore": "#e6f2ec",
+   "energia": 0.2,
+   "raggio": 50,
+   "altezza": 10,
+   "alone": {
+    "energia": 0.12,
+    "raggio": 65,
+    "vuoto": 0.4
+   }
+  }
+ ],
+ "note": {
+  "riuso": "le colonne 0-25 sono la vecchia scena.png pixel per pixel, spostata in giù di 220 (ci si scioglie MP06/MP08)",
+  "casse": "le casse «FONTANELLE DELLA BONIFICA» (28-30, alte 4) e la fontanella SIDERA (33) sono nuove, dal kit N5",
+  "vecchia_scena": "da qui fino alla 145 la vecchia scena.png non va più disegnata: A1-A3 la sostituiscono"
+ }
+}

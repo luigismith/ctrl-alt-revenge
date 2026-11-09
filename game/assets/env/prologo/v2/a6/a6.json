@@ -1,0 +1,83 @@
+{
+ "scena": {
+  "image": "a6_scena.png",
+  "x": 5480,
+  "y": 200
+ },
+ "davanti": {
+  "image": "a6_davanti.png",
+  "origin_x": 5480,
+  "scroll": 1.4,
+  "scroll_y": 1.35,
+  "y": 100,
+  "z": 1002,
+  "x_from": 5480,
+  "x_to": 6960,
+  "fade_in": 60,
+  "fade_out": 100
+ },
+ "stati": {
+  "lampeggianti_spenti": {
+   "image": "a6_lampeggianti_spenti.png",
+   "x": 5536,
+   "y": 596
+  },
+  "lampeggianti_accesi": {
+   "image": "a6_lampeggianti_accesi.png",
+   "x": 5536,
+   "y": 596
+  },
+  "quadro_giu": {
+   "image": "a6_quadro_giu.png",
+   "x": 6687,
+   "y": 602
+  },
+  "quadro_su": {
+   "image": "a6_quadro_su.png",
+   "x": 6687,
+   "y": 603
+  },
+  "fari_spenti": {
+   "image": "a6_fari_spenti.png",
+   "x": 5880,
+   "y": 484
+  },
+  "fari_accesi": {
+   "image": "a6_fari_accesi.png",
+   "x": 5880,
+   "y": 484
+  },
+  "led_eterna": {
+   "image": "a6_led_eterna.png",
+   "x": 6900,
+   "y": 342
+  },
+  "cancelletto_chiuso": {
+   "image": "a6_cancelletto_chiuso.png",
+   "x": 6742,
+   "y": 540
+  },
+  "cancelletto_aperto": {
+   "image": "a6_cancelletto_aperto.png",
+   "x": 6742,
+   "y": 540
+  },
+  "scintille_1": {
+   "image": "a6_scintille_1.png",
+   "x": 6675,
+   "y": 666
+  },
+  "scintille_2": {
+   "image": "a6_scintille_2.png",
+   "x": 6675,
+   "y": 666
+  }
+ },
+ "note": {
+  "lampeggianti": "accesi e spenti si alternano (il lampeggio); restano accesi anche dopo la leva",
+  "quadro": "giù prima della leva, su dopo: con su si accendono i fari e si apre il cancelletto",
+  "led_eterna": "le strisce arancio dei pannelli ETERNA sul muro di fondo: sempre accese, con un respiro lento",
+  "scintille": "due fotogrammi alternati sopra la pozza elettrica (334-335)",
+  "cartellone": "il cartellone ETERNA sta oltre il muro, nella scena: niente parallasse"
+ }
+}

@@ -7,7 +7,7 @@ CTRL+ALT REVENGE si sviluppa su due PC: quello di **lavoro** e quello di **casa*
 | Cosa | Dove | Come arriva sull'altro PC |
 |---|---|---|
 | **Repo**: codice, grafica ed effetti sonori del gioco, documenti, script | `Documenti\ClaudeCode\ctrlaltrevenge`, nel OneDrive di lavoro | da solo, con OneDrive. GitHub ne tiene una copia di sicurezza |
-| **Laboratorio**: Godot, Blender, FFmpeg, Python, modelli 3D, musica segnaposto, ricerca | `%USERPROFILE%\ctrlaltrevenge-lab`, su ogni PC, **fuori** da OneDrive | lo crea lo script `prepara_laboratorio.ps1` (vedi sotto) |
+| **Laboratorio**: Godot, Blender, FFmpeg, LDtk, Python, modelli 3D, musica segnaposto, ricerca | `%USERPROFILE%\ctrlaltrevenge-lab`, su ogni PC, **fuori** da OneDrive | lo crea lo script `prepara_laboratorio.ps1` (vedi sotto) |
 | **Cartella privata condivisa**: modelli CC0, note private, ricerca, locandine, skill di Claude | `Documenti\ClaudeCode\ctrlaltrevenge-lab-condiviso`, nel OneDrive di lavoro, accanto al repo | da sola, con OneDrive. La riempie lo script `aggiorna_condiviso.ps1` |
 | **Storia e gameplay**: `docs\lore\` (con `gameplay.md`) | nella cartella del repo, ma fuori dal repo pubblico | da sola, con OneDrive. La copia di sicurezza è un repo privato su GitHub |
 | **Brani di Suno** | solo nel laboratorio di ogni PC (`suno\` e `music\`) | non viaggiano: vedi la sezione 4 |
@@ -64,6 +64,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup\prepara_labora
 |---|---|
 | 1. Prerequisiti | controlla git con Git Bash, Python 3.14 (comando `py`) e uv |
 | 2-4. Godot, Blender, FFmpeg | li scarica dai siti ufficiali e controlla che siano identici agli originali (hash) |
+| LDtk | scarica l'installer ufficiale di LDtk 1.5.3, l'editor dei livelli (vedi [`ldtk.md`](ldtk.md)), ne controlla l'hash e lo estrae con 7-Zip senza eseguirlo |
 | 5-6. Python | crea il venv del laboratorio e installa PyMusicLooper, con le versioni fissate |
 | 7. Cartella condivisa e musica | copia nel laboratorio `sources`, `note-private`, `suno` (solo i testi) e `ricerca-2026-11-03`; se `music` è vuota, ricrea la musica segnaposto CC0 (scarica circa 40 MB) |
 | 8. Skill | installa le sei skill di Godot in `%USERPROFILE%\.claude\skills` |
@@ -74,9 +75,9 @@ Si può rilanciare quando si vuole: salta ciò che è già a posto. Opzioni util
 
 | Opzione | A cosa serve |
 |---|---|
-| `-InstallaMancanti` | installa con winget git, Python 3.14 e uv, se mancano |
+| `-InstallaMancanti` | installa con winget git, Python 3.14, uv e 7-Zip, se mancano |
 | `-Forza` | quando qualcosa sembra rotto: reinstalla i programmi, ricrea i due ambienti Python, ricopia le skill e riscrive Gioca.bat. Non vale per il passo 7: dalla cartella condivisa arrivano sempre e solo i file più nuovi |
-| `-Solo godot,verifica` | fa solo i passi indicati (nomi: prerequisiti, godot, blender, ffmpeg, venv, pymusiclooper, condivisi, skill, gioca, verifica) |
+| `-Solo godot,verifica` | fa solo i passi indicati (nomi: prerequisiti, godot, blender, ffmpeg, ldtk, venv, pymusiclooper, condivisi, skill, gioca, verifica) |
 | `-SaltaVerifica` | non lancia i test alla fine |
 
 Se preferisci installare tu i prerequisiti, questi sono i comandi (poi chiudi e riapri PowerShell):

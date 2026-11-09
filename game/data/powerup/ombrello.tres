@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PowerUpDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/powerup_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ombrello"
+label = "OMBRELLO"
+color = Color(0.9412, 0.9569, 0.9725, 1)
+durata = 0
+amount = 10.0
+only_while_used = true
+glide_fall = 0.9

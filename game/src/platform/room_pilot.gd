@@ -52,6 +52,9 @@ func _decide(_tick: int) -> int:
 	var hk := _hack_keys()
 	if hk >= 0:
 		return hk
+	# Il sigillo della Vedetta: si stacca pestando SALTO.
+	if p.stuck_left > 0:
+		return InputFrame.JUMP if _tick % 4 == 0 else 0
 	var keys := InputFrame.RIGHT if _dir > 0 else InputFrame.LEFT
 	var g := p.grid
 	var T := SolidGrid.TILE
@@ -97,6 +100,10 @@ func _decide(_tick: int) -> int:
 				return keys | InputFrame.DOWN
 			# Muro o fosso davanti: salto pieno.
 			var wall := g.rect_hits_solid(r, p.py - 25, r + 18, p.py)
+			# La processione davanti: dalla strada non si scavalca. Lo spintone (SCATTO attaccato alla coda)
+			# apre la fila, e poi la Vedetta lo prende: il sigillo si stacca pestando SALTO, qui sopra.
+			if _procession_ahead(r):
+				return keys | (InputFrame.DASH if _tick % 20 == 0 else 0)
 			var gap := not g.floor_at(r, r + 22, p.py, true)
 			if (wall or gap) and _jump_hold == 0 and p.state == PlatformPlayer.State.GROUND and not _last_jump:
 				_jump_hold = 22
@@ -124,6 +131,17 @@ func _decide(_tick: int) -> int:
 		_jump_hold -= 1
 		keys |= InputFrame.JUMP
 	return keys
+
+
+## Una processione subito davanti ai piedi di GIG.
+func _procession_ahead(r: int) -> bool:
+	if room == null:
+		return false
+	var feet := Rect2i(r, player.py - 25, 30, 25)
+	for s: Rect2i in room.processions.shields():
+		if s.intersects(feet):
+			return true
+	return false
 
 
 ## Il prossimo pannello del piano, quando è vicino: ci va (saltando sul ballatoio o scendendone),

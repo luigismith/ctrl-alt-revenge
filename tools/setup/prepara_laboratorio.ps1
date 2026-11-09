@@ -41,7 +41,7 @@
 
 .PARAMETER Solo
     Fa solo i passi indicati, per esempio  -Solo godot,verifica
-    Nomi dei passi: prerequisiti, godot, blender, ffmpeg, venv, pymusiclooper, condivisi, skill, gioca, verifica.
+    Nomi dei passi: prerequisiti, godot, blender, ffmpeg, ldtk, venv, pymusiclooper, condivisi, skill, gioca, verifica.
 
 .PARAMETER SaltaVerifica
     Non fa la verifica finale (importazione e test).
@@ -77,7 +77,7 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'comune.ps1')
 
-$PassiValidi = @('prerequisiti', 'godot', 'blender', 'ffmpeg', 'venv', 'pymusiclooper', 'condivisi', 'skill', 'gioca', 'verifica')
+$PassiValidi = @('prerequisiti', 'godot', 'blender', 'ffmpeg', 'ldtk', 'venv', 'pymusiclooper', 'condivisi', 'skill', 'gioca', 'verifica')
 # Con "powershell -File" una lista come "godot,verifica" arriva come una stringa sola: la divido qui.
 $Solo = @($Solo | ForEach-Object { $_ -split '[,;\s]+' } | Where-Object { $_ } | ForEach-Object { $_.ToLowerInvariant() })
 foreach ($passo in $Solo) {
@@ -267,6 +267,12 @@ function Expand-Archivio {
         Stop-Errore "Nell'archivio $Zip ho trovato $estratti file su $($Estrai.Count) attesi." @('Avvisa Claude: forse il manifesto va aggiornato.')
     }
     if ($estratti -eq 0) { Stop-Errore "L'archivio $Zip non contiene i file attesi." @('Avvisa Claude: forse il manifesto va aggiornato.') }
+    Move-Estrazione $tmp $Destinazione
+    Write-Ok "$estratti file estratti."
+}
+
+# Porta in $Destinazione i file estratti in $Tmp ("<destinazione>.nuovo").
+function Move-Estrazione([string]$Tmp, [string]$Destinazione) {
     if (-not [System.IO.Directory]::Exists($Destinazione)) {
         New-Cartella (Split-Path $Destinazione -Parent)
         [System.IO.Directory]::Move($tmp, $Destinazione)
@@ -282,10 +288,57 @@ function Expand-Archivio {
         }
         if ([System.IO.Directory]::Exists($tmp)) { Remove-Item -LiteralPath $tmp -Recurse -Force }
     }
-    Write-Ok "$estratti file estratti."
 }
 
-# ------------------------------------------------------------------ strumenti (Godot, Blender, FFmpeg, uv di riserva)
+# 7-Zip, che serve solo per gli installer NSIS (LDtk): $null se non c'è.
+function Find-7Zip {
+    $candidati = @()
+    $c = Get-Command 7z.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($null -ne $c) { $candidati += $c.Source }
+    foreach ($radice in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, (Join-Path $env:LOCALAPPDATA 'Programs'))) {
+        if ($radice) { $candidati += (Join-Path $radice '7-Zip\7z.exe') }
+    }
+    foreach ($chiave in @('HKCU:\SOFTWARE\7-Zip', 'HKLM:\SOFTWARE\7-Zip')) {
+        $p = (Get-ItemProperty -Path $chiave -Name Path -ErrorAction SilentlyContinue).Path
+        if ($p) { $candidati += (Join-Path $p '7z.exe') }
+    }
+    return @($candidati | Where-Object { [System.IO.File]::Exists($_) }) | Select-Object -First 1
+}
+
+# Estrae un installer NSIS senza eseguirlo: con 7-Zip prende l'archivio interno ($Interno), poi lo apre.
+function Expand-Nsis([string]$Installer, [string]$Destinazione, [string]$Interno, $Estrattore) {
+    $7z = Find-7Zip
+    if (-not $7z -and $InstallaMancanti) {
+        Write-Info "$($Estrattore.nome) manca: lo installo con winget..."
+        [void](Install-ConWinget $Estrattore.winget)
+        $7z = Find-7Zip
+    }
+    if (-not $7z) {
+        Stop-Errore "Per estrarre $(Split-Path -Leaf $Installer) serve $($Estrattore.nome)." @(
+            "Installalo con  winget install --id $($Estrattore.winget) -e   (o da $($Estrattore.pagina)) e rilancia lo script.",
+            'Oppure rilancia lo script con -InstallaMancanti: lo installa lui con winget.')
+    }
+    $tmp = "$Destinazione.nuovo"
+    $cartellaInterna = "$Destinazione.interno"
+    foreach ($d in @($tmp, $cartellaInterna)) {
+        if ([System.IO.Directory]::Exists($d)) { Remove-Item -LiteralPath $d -Recurse -Force }
+        New-Cartella $d
+    }
+    Write-Info "Estraggo $(Split-Path -Leaf $Installer) con $($Estrattore.nome), senza eseguirlo..."
+    & $7z e $Installer $Interno "-o$cartellaInterna" -y | Out-Null
+    $archivio = Join-Path $cartellaInterna (Split-Path -Leaf ($Interno -replace '/', '\'))
+    if ($LASTEXITCODE -ne 0 -or -not [System.IO.File]::Exists($archivio)) {
+        Stop-Errore "Nell'installer $Installer non trovo $Interno." @('Avvisa Claude: forse il manifesto va aggiornato.')
+    }
+    & $7z x $archivio "-o$tmp" -y | Out-Null
+    $codice = $LASTEXITCODE
+    Remove-Item -LiteralPath $cartellaInterna -Recurse -Force
+    if ($codice -ne 0) { Stop-Errore "$($Estrattore.nome) non è riuscito ad aprire $Interno (codice $codice)." @('Rilancia lo script con -Forza; se si ripete, avvisa Claude.') }
+    Move-Estrazione $tmp $Destinazione
+    Write-Ok 'installer estratto.'
+}
+
+# ------------------------------------------------------------------ strumenti (Godot, Blender, FFmpeg, LDtk, uv di riserva)
 
 # Restituisce $null se lo strumento è a posto, altrimenti il problema trovato.
 function Test-Strumento($S, [string]$Dir) {
@@ -344,7 +397,11 @@ function Install-Strumento($S, [string]$Dir, [string]$CartellaDownload) {
         Write-Info '-Forza: lo reinstallo.'
     }
     $zip = Get-Archivio $S.download $CartellaDownload
-    Expand-Archivio -Zip $zip -Destinazione $Dir -Radice ([string](Get-Campo $S 'radice_zip' '')) -Estrai @(Get-Campo $S 'estrai' @())
+    if ((Get-Campo $S 'formato' 'zip') -eq 'nsis') {
+        Expand-Nsis $zip $Dir ([string]$S.archivio_interno) $S.estrattore
+    } else {
+        Expand-Archivio -Zip $zip -Destinazione $Dir -Radice ([string](Get-Campo $S 'radice_zip' '')) -Estrai @(Get-Campo $S 'estrai' @())
+    }
     Complete-Strumento $S $Dir $CartellaDownload
     $problema = Test-Strumento $S $Dir
     if ($problema) {
@@ -716,7 +773,7 @@ function Assert-Condiviso {
             'Sul PC di lavoro la riempie tools\setup\aggiorna_condiviso.ps1.',
             'Qui deve arrivare con OneDrive: controlla che OneDrive sia acceso e che la cartella ClaudeCode sia sincronizzata.',
             'Se sta altrove, indica il percorso con -Condiviso o con la variabile CAR_CONDIVISO.',
-            'Per installare intanto solo i programmi: -Solo prerequisiti,godot,blender,ffmpeg,venv,pymusiclooper')
+            'Per installare intanto solo i programmi: -Solo prerequisiti,godot,blender,ffmpeg,ldtk,venv,pymusiclooper')
     }
 }
 
@@ -1079,6 +1136,7 @@ try {
         @{ Nome = 'godot'; Titolo = 'Godot 4.7.2'; Azione = { Invoke-Strumento 'godot' } },
         @{ Nome = 'blender'; Titolo = 'Blender 4.5.15'; Azione = { Invoke-Strumento 'blender' } },
         @{ Nome = 'ffmpeg'; Titolo = 'FFmpeg 9.0.2'; Azione = { Invoke-Strumento 'ffmpeg' } },
+        @{ Nome = 'ldtk'; Titolo = 'LDtk 1.5.3, l''editor dei livelli'; Azione = { Invoke-Strumento 'ldtk' } },
         @{ Nome = 'venv'; Titolo = 'venv di Python (NumPy, Pillow, SciPy)'; Azione = { Invoke-Venv } },
         @{ Nome = 'pymusiclooper'; Titolo = 'PyMusicLooper 3.6.0'; Azione = { Invoke-PyMusicLooper } },
         @{ Nome = 'condivisi'; Titolo = $titoloCondivisi; Azione = { Invoke-Condivisi } },

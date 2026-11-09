@@ -63,7 +63,15 @@
       202,
       31
     ],
-    "note": "Facoltativo: se il conto alla rovescia di CONTINUA? arriva a zero."
+    "note": "Non più usato in gioco: dalla decisione 51 la fine partita è msg_abbonamento_scaduto."
+  },
+  "msg_abbonamento_scaduto": {
+    "image": "msg_abbonamento_scaduto.png",
+    "size": [
+      228,
+      55
+    ],
+    "note": "Fine partita, al posto di GAME OVER (decisione 51): due righe, ABBONAMENTO crema e SCADUTO rosso come un timbro; da centrare in orizzontale."
   },
   "msg_demo_end": {
     "image": "msg_demo_end.png",

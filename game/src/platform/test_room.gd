@@ -31,6 +31,9 @@ const SIGNS := {
 	"j": ["CORSA SUL MURO", "di corsa contro il muro, SALTO: qualche passo in su"],
 	"k": ["HACKING", "tieni SU sotto la centralina, poi corri"],
 	"l": ["DUE PANNELLI", "tempi diversi: conta l'ordine"],
+	"m": ["POLVERE A RAFFICHE", "sta' in alto, o passa svelto: fa male dopo 1 s"],
+	"n": ["MASCHERINA", "20 s senza polvere"],
+	"o": ["ABBONAMENTO", "una vita in più, al massimo 3"],
 	"g": ["FINE DELLA STANZA", "R o SELECT per ricominciare"],
 }
 
@@ -75,6 +78,9 @@ const C_GRID := Color8(46, 46, 56)
 const C_SOLID := Color8(92, 92, 106)
 const C_SOLID_TOP := Color8(140, 140, 156)
 const C_THIN := Color8(120, 120, 136)
+## L'acqua delle buche senza fondo, nel grigio.
+const C_WATER := Color8(28, 46, 70)
+const C_WATER_TOP := Color8(84, 128, 160)
 const C_TEXT := Color8(232, 228, 214)
 const C_DIM := Color8(160, 156, 150)
 const C_CYAN := Color8(64, 232, 255)
@@ -96,6 +102,23 @@ const CAPTION_TO := 140
 ## combatte con il sistema dello slice (un Level ospitato, a corsie); a scontro finito compare VAI,
 ## la telecamera torna laterale e si riprende a saltare.
 enum ArenaPhase { NONE, ENTER, FIGHT, LEAVE }
+
+## Le vite (Luigi, 8 novembre 2026: cadere in una fossa costa una vita, e anche il KO nell'arena).
+## Solo nei tratti che le accendono con use_lives (il prologo): la stanza di prova riparte e basta.
+## La caduta: GIG esce dal fondo per FALL_OUT px, lo schermo si scurisce in FALL_FADE tick e resta
+## nero fino a FALL_TICKS; poi riparte dall'ultima ripartenza e lampeggia per RESPAWN_BLINK tick.
+const FALL_OUT := 24
+const FALL_FADE := 30
+const FALL_TICKS := 50
+const RESPAWN_BLINK := 60
+const RESPAWN_FADE := 15
+## Senza vite: CONTINUA? da 9 a 0, una cifra ogni CONTINUE_TICKS; i primi CONTINUE_GRACE tick non
+## si risponde (il tasto ancora premuto). Poi GAME OVER per GAME_OVER_TICKS e il titolo.
+const CONTINUE_TICKS := 60
+const CONTINUE_GRACE := 20
+const GAME_OVER_TICKS := 150
+## Quanto resta la scritta RIPARTENZA dopo un cartello di ripartenza superato.
+const CHECKPOINT_TAG := 90
 ## La fascia calpestabile dell'arena in coordinate dello schermo, come nello slice: il bordo dietro
 ## coincide con la linea del pavimento del platform.
 const ARENA_BAND := Vector2(188, 260)
@@ -111,6 +134,9 @@ const PERSP := 240.0
 ## Posizione dell'arena rispetto al suo cartello ("f"): telecamera bloccata e punto d'ingresso.
 const ARENA_CAM_FROM_SIGN := -170
 const ARENA_TRIGGER_FROM_SIGN := -40
+## Nei livelli LDtk l'arena è una zona: la telecamera si ferma sul suo lato sinistro e lo scontro
+## parte quando GIG arriva a questa distanza da lì (come col cartello: 170 - 40).
+const ARENA_TRIGGER_IN := ARENA_TRIGGER_FROM_SIGN - ARENA_CAM_FROM_SIGN
 ## Gli Esattori dell'arena (decisione 63): due rider, che arrivano in gruppo, e poi l'esattore di
 ## professione, che para e carica.
 const ARENA_SPAWNS := [
@@ -127,12 +153,48 @@ var panels: Dictionary = PANELS
 var arena_spawns: Array = ARENA_SPAWNS
 ## Nome dell'ondata dell'arena (per i conteggi e i replay) e scritta in alto a sinistra.
 var arena_id: String = "arena_prova"
+## Le zone tossiche e i power-up dei segni della mappa di testo (quelli LDtk hanno i loro campi).
+var hazard_marks: Dictionary = {"~": {"tipo": "polvere"}, "%": {"tipo": "polvere", "ciclo_s": 6.0, "attiva_s": 6.0}}
+var powerup_marks: Dictionary = {"1": "mascherina", "2": "abbonamento"}
+var hazards := Hazards.new()
+## I droni fuori dalle arene (Colomba, Vedetta, Segugio), dalle entità Nemico del livello LDtk.
+var drones := Drones.new()
+## Persone, oggetti, ristori e battute in gioco.
+var favors := Favors.new()
+## Le processioni: muri morbidi che avanzano piano e che il faro della Vedetta non tocca.
+var processions := Processions.new()
 var hud_title: String = "STANZA DI PROVA"
+## Le vite contano (le accende il prologo); il numero sta in Game.lives, per tutta la partita.
+var use_lives: bool = false
+## La caduta in corso: tick dall'uscita dal fondo (-1 = nessuna).
+var fall_t: int = -1
+## CONTINUA?: tick da quando è comparso (-1 = nascosto) e la cifra che resta.
+var continue_t: int = -1
+var continue_left: int = -1
+## GAME OVER: tick da quando è comparso (-1 = no).
+var over_t: int = -1
+## Il lampeggio dopo una ripartenza, e la scritta RIPARTENZA (tick che restano).
+var respawn_blink: int = 0
+var checkpoint_tag: int = 0
 ## La grafica del tratto (un layers.json, vedi Backdrop): i piani dello sfondo con la parallasse e la
 ## scena disegnata sui blocchi. Vuota nella stanza di prova, che resta in grigio.
 var env_path: String = ""
 ## Fin dove arriva la grafica, in px del mondo: lì non si disegnano i blocchi grigi né il fondo grigio.
 var art_until_x: int = 0
+## La grafica di una mappa vecchia su una nuova: quanto scende (in px del mondo) e, se non è 0, fin
+## dove si usa (la scena si taglia lì, e da lì in poi la stanza resta in grigio).
+var art_offset_y: int = 0
+var art_crop_x: int = 0
+## I piani della grafica di prima da lasciare fuori (per nome), quando su una mappa nuova non c'entrano.
+var art_skip: PackedStringArray = []
+## False: della grafica di prima solo i piani, senza le scene (quando le tavole nuove le sostituiscono).
+var art_scenes: bool = true
+## I tratti disegnati più avanti nella mappa (per esempio le tavole del prologo), in px del mondo:
+## lì niente blocchi grigi né righe, e il fondo grigio solo sotto (sopra si vede il cielo).
+var art_holes: Array[Rect2] = []
+## Da questa x del mondo in poi il fondo grigio non si dipinge (-1: dappertutto): i blocchi grigi
+## restano, e dietro si vedono i piani della vestizione (nel prologo, A5 e A6 non ancora vestiti).
+var art_open_from: int = -1
 ## Quanto si schiaccia la stanza a telecamera inclinata. Con la grafica niente: la pixel art schiacciata
 ## perderebbe righe.
 var tilt_squash: float = TILT_SQUASH
@@ -199,6 +261,11 @@ var _fx_glow: Glow
 ## Le luci accese o spente (F5 nelle build di debug, --no-lights): il tempo, l'arena, i lampi.
 var lights_on: bool = true
 var _spark_rng := RandomNumberGenerator.new()
+## L'ultimo tick in cui ha suonato il faro rosso di una Vedetta.
+var _faro_t: int = -1000
+## Chi suona le voci delle battute in gioco (favors.voices).
+var _line_voice: AudioStreamPlayer
+const FARO_GAP := 45
 
 ## La scena nel motore in corso (decisione 68), o null. La chiede il tratto con request_scene() nel
 ## tick in cui parte, dopo averne applicato l'esito alla simulazione; parte nello stesso fotogramma.
@@ -212,10 +279,57 @@ var _scene_request: Dictionary = {}
 var _extras: Array[ScenePuppet] = []
 ## Lo zoom del disegno (1 nel gioco; durante le scene lo decide il lettore).
 var zoom: float = 1.0
+## La telecamera larga (normale dall'8 novembre 2026; --camera-stretta la spegne). Il disegno passa alla
+## risoluzione della finestra (S pixel dello schermo per pixel del gioco); nel platform la vista si allarga
+## a (S-1)/S, cioè un pixel dello schermo in meno per pixel del gioco, così i pixel restano quadrati e
+## tutti uguali (a 1440 × 810 si vede 720 × 405, a 1080p 640 × 360). All'arrivo degli Esattori stringe a 1
+## mentre l'arena si apre, e si riallarga all'uscita. Sotto i 3 pixel per pixel (finestre più piccole di
+## 1440 × 810, come spesso la demo web) resta la vista di sempre, 480 × 270; se la finestra cambia misura
+## si passa dall'una all'altra. È solo disegno: `_cam`, la telecamera della logica, e tutto quello che
+## decide il gioco restano uguali a ogni misura della finestra.
+var wide_cam: bool = false
+## La telecamera che si stringe su GIG (solo disegno: `_cam`, quella della logica, non cambia). Da
+## quando `squeeze_on` è vero lo zoom va in SQUEEZE_TICKS da quello del gioco a SQUEEZE_ZOOM, e il centro
+## passa sopra GIG (SQUEEZE_UP pixel del mondo sopra i piedi), seguendolo morbido. Nel prologo è la corsa
+## da sola dell'uscita sul tetto: all'apice del salto l'inquadratura è già quasi quella dell'aggancio a
+## MP13.
+var squeeze_on: bool = false
+var _squeeze_k: float = 0.0
+var _squeeze_c: Vector2 = Vector2.ZERO
+const SQUEEZE_TICKS := 45
+const SQUEEZE_ZOOM := 2.0
+const SQUEEZE_UP := 40.0
+## Pixel dello schermo per pixel del gioco a zoom 1 (1 senza la prova: il disegno a 480×270).
+var _px_s: int = 1
+## 0 = stretta, 1 = larga; si muove di 1/WIDE_TICKS a tick, con l'ease.
+var _wide_k: float = 1.0
+const WIDE_TICKS := 60
+## La telecamera larga è accesa (anche quando la finestra è troppo piccola e la vista è quella di
+## sempre), e lo stiramento della finestra da rimettere all'uscita.
+var _wide_on: bool = false
+var _scale_mode_before: Window.ContentScaleMode = Window.CONTENT_SCALE_MODE_VIEWPORT
 var _view_c: Vector2 = Vector2.ZERO
 var _art_back: Node2D
 var _art_front: Node2D
+## Altri piani davanti, che seguono lo zoom ma non sfumano col taglio della grafica.
+var _art_extra: Array[Node2D] = []
+## I piani disegnati allo zoom della vista, come il piano di gioco (i fondi larghi): il nodo ha l'origine
+## nell'angolo in alto a sinistra dello schermo, cioè di quello che si vede del mondo, e chi lo riempie
+## conta la parallasse da lì (vedi _visible_rect).
+var _art_view: Array[Node2D] = []
 var _signs_node: Node2D
+## Le basi dei registri (vedi Registri), dalle entità Registro della mappa.
+var registri := Registri.new()
+## La Vista, l'occhio destro di GIG: accesa finché il tasto è tenuto (Luigi, 9 novembre 2026). Non cambia
+## la simulazione, solo quello che si vede; entra nell'impronta dove ci sono basi.
+var vista: bool = false
+## Quanto è accesa sullo schermo, da 0 a 1 (si accende e si spegne in VISTA_FADE tick): solo disegno.
+var _vista_k: float = 0.0
+const VISTA_FADE := 6
+## Il velo della Vista: verde acqua scuro, sopra a tutto il mondo e sotto ai cartelli.
+const C_VISTA_VEIL := Color(0.02, 0.20, 0.26, 0.36)
+## L'occhio rispetto al punto `head` del fotogramma (verso la faccia, un po' sopra).
+const VISTA_EYE := Vector2i(4, -3)
 
 
 func configure(opts: Dictionary) -> void:
@@ -234,17 +348,11 @@ func _ready() -> void:
 	moves = load(MOVES) as PlatformMoves
 	if moves == null:
 		moves = PlatformMoves.new()
-	grid = SolidGrid.load_file(map_path)
-	if grid.marks.has("G"):
-		_start = grid.marks["G"][0]
+	_load_map()
 	if Game.options.start_x >= 0.0:
 		_start.x = roundi(Game.options.start_x)
-	if grid.marks.has("f"):
-		var f: Vector2i = grid.marks["f"][0]
-		_floor_y = f.y
-		_arena_cam_x = clampi(f.x + ARENA_CAM_FROM_SIGN, 0, grid.pixel_width() - View.W)
-		_arena_trigger_x = f.x + ARENA_TRIGGER_FROM_SIGN
-	_build_gates()
+		if Game.options.start_y >= 0.0:
+			_start.y = roundi(Game.options.start_y)
 	_spark_rng.seed = 7
 	# La musica del livello, se il laboratorio ha i brani (non tocca la simulazione).
 	if sound:
@@ -261,6 +369,18 @@ func _ready() -> void:
 	_floor_node.draw.connect(_draw_floor)
 	_view.add_child(_floor_node)
 	_build_art()
+	# Le firme di Totò sul muro: sopra la grafica del livello, dietro a GIG.
+	var tags := Node2D.new()
+	tags.draw.connect(func() -> void:
+		if arena == null:
+			favors.draw_tags(tags, tick, _visible_rect()))
+	_view.add_child(tags)
+	# Le basi dei registri: oggetti del mondo, dietro a GIG.
+	var reg := Node2D.new()
+	reg.draw.connect(func() -> void:
+		if arena == null:
+			registri.draw_bodies(reg, _visible_rect()))
+	_view.add_child(reg)
 	var sheet := SpriteSheet.get_sheet(&"gig")
 	player = PlatformPlayer.new(moves, grid, sheet)
 	# prima del riavvio (prologo) GIG ha il braccio morto: luci spente e il braccio che pende
@@ -279,12 +399,42 @@ func _ready() -> void:
 	_body.material = mat
 	_body.light_mask = Fighter.LIGHT_MASK_ACTORS if sheet.has_normals else 1
 	_view.add_child(_body)
+	# I perdoni, le Persone e i droni con lo sprite vero (Segugio, Vedetta), sotto gli effetti: come GIG, con la normal map e la
+	# luce a gradini. Coni, aloni e scritte restano nel nodo degli effetti.
+	var drone_bodies := Node2D.new()
+	drone_bodies.z_index = 5
+	var dmat := ShaderMaterial.new()
+	dmat.shader = Fighter._get_flash_shader()
+	drone_bodies.material = dmat
+	drone_bodies.light_mask = Fighter.LIGHT_MASK_ACTORS
+	drone_bodies.draw.connect(func() -> void:
+		if arena == null:
+			processions.draw_bodies(drone_bodies, tick, _visible_rect())
+			favors.draw_bodies(drone_bodies, tick, _visible_rect(), player)
+			drones.draw_bodies(drone_bodies, tick, _visible_rect()))
+	_view.add_child(drone_bodies)
 	var fx := Node2D.new()
 	fx.z_index = 5
 	fx.draw.connect(func() -> void: _draw_fx(fx))
 	_view.add_child(fx)
 	_fx_glow = Glow.new(fx)
 	lights_on = not Game.options.no_lights
+	if Game.options.wide_camera:
+		_setup_wide_cam()
+	# La Vista: il velo sopra a tutto il mondo e al primo piano (z 1000), e sopra al velo quello che
+	# rivela (il contorno e le onde delle basi, anche dietro i muri finti) e l'occhio di GIG; la copia
+	# di un registro e la sua scritta si vedono anche senza.
+	var veil := Node2D.new()
+	veil.z_index = 1050
+	veil.draw.connect(func() -> void: _draw_vista_veil(veil))
+	_view.add_child(veil)
+	var revealed := Node2D.new()
+	revealed.z_index = 1060
+	revealed.draw.connect(func() -> void:
+		if arena == null:
+			registri.draw_overlay(revealed, _visible_rect(), _vista_k, tick, _cyber_fist())
+			_draw_vista_eye(revealed))
+	_view.add_child(revealed)
 	# I cartelli sopra tutto il mondo, anche sopra il primo piano della grafica (z 1000).
 	var signs_node := Node2D.new()
 	signs_node.z_index = 1100
@@ -316,6 +466,42 @@ func _ready() -> void:
 	_update_art()
 
 
+## Legge la mappa di `map_path`: la griglia, i cartelli, la partenza, l'arena e i cancelli. La chiama
+## _ready, e il prologo quando passa da un livello all'altro dello stesso file (poi tocca a lui
+## rimettere GIG sulla griglia nuova).
+func _load_map() -> void:
+	grid = SolidGrid.load_file(map_path)
+	if not grid.signs.is_empty():
+		signs = grid.signs  # i testi dei cartelli stanno nel livello LDtk
+	if grid.marks.has("G"):
+		_start = grid.marks["G"][0]
+	_floor_y = 460
+	_arena_cam_x = -1
+	_arena_trigger_x = -1
+	if not grid.arenas.is_empty():
+		var r: Rect2i = grid.arenas[0]["rect"]
+		_floor_y = r.end.y
+		_arena_cam_x = clampi(r.position.x, 0, grid.pixel_width() - View.W)
+		_arena_trigger_x = r.position.x + ARENA_TRIGGER_IN
+	elif grid.marks.has("f"):
+		var f: Vector2i = grid.marks["f"][0]
+		_floor_y = f.y
+		_arena_cam_x = clampi(f.x + ARENA_CAM_FROM_SIGN, 0, grid.pixel_width() - View.W)
+		_arena_trigger_x = f.x + ARENA_TRIGGER_FROM_SIGN
+	if player != null:
+		player.grid = grid
+	_build_gates()
+	hazards.build(grid, hazard_marks, powerup_marks)
+	drones.build(grid)
+	if not Game.options.solo_drones.is_empty():
+		for i in range(drones.drones.size() - 1, -1, -1):
+			if drones.drones[i].tipo not in Game.options.solo_drones:
+				drones.drones.remove_at(i)
+	favors.build(grid)
+	processions.build(grid)
+	registri.setup(grid.entities)
+
+
 ## Da ridefinire nei tratti che non sono la stanza di prova: mappa, cartelli, pannelli, arena.
 func _setup_stage() -> void:
 	pass
@@ -330,8 +516,10 @@ func _build_art() -> void:
 	if not bd.load_json(env_path):
 		push_warning("Grafica del tratto non valida (%s): resta il grigio" % "; ".join(bd.errors))
 		return
+	if not art_skip.is_empty():
+		bd.layers.assign(bd.layers.filter(func(l: Backdrop.Layer) -> bool: return not art_skip.has(l.name)))
 	backdrop = bd
-	art_until_x = bd.level_width
+	art_until_x = bd.level_width if art_crop_x <= 0 else mini(art_crop_x, bd.level_width)
 	tilt_squash = 0.0
 	var back := Node2D.new()
 	back.name = "Sfondo"
@@ -343,16 +531,22 @@ func _build_art() -> void:
 	_art_back = back
 	_art_front = front
 	bd.build(back, front, 1)
-	for sc: Dictionary in bd.scenes:
+	for sc: Dictionary in (bd.scenes if art_scenes else []):
 		var tex := SpriteSheet.load_texture(bd.dir.path_join(str(sc["image"])))
 		if tex == null:
 			push_warning("Scena mancante: %s" % sc["image"])
+			continue
+		var sx := int(sc.get("x", 0))
+		if art_crop_x > 0 and sx >= art_until_x:
 			continue
 		var s := Sprite2D.new()
 		s.name = "Scena_%d" % _scene_art.size()
 		s.centered = false
 		s.texture = tex
-		s.position = Vector2(int(sc.get("x", 0)), int(sc.get("y", 0)))
+		s.position = Vector2(sx, int(sc.get("y", 0)) + art_offset_y)
+		if art_crop_x > 0 and sx + tex.get_width() > art_until_x:
+			s.region_enabled = true
+			s.region_rect = Rect2(0, 0, art_until_x - sx, tex.get_height())
 		s.show_behind_parent = true
 		_room_node.add_child(s)
 		_scene_art.append(s)
@@ -363,7 +557,11 @@ func _update_art() -> void:
 	if backdrop == null:
 		return
 	var c := (_view_c - View.SIZE / 2.0).round()
-	backdrop.update(int(c.x), tick, c.y - backdrop.cam_ref_y)
+	backdrop.update(int(c.x), tick, c.y - backdrop.cam_ref_y - art_offset_y)
+	# Con la grafica tagliata il primo piano (più veloce della stanza) sfuma mentre il taglio entra
+	# nello schermo.
+	if art_crop_x > 0 and _art_front != null:
+		_art_front.modulate.a = clampf((art_until_x + 40 - _vis_x1()) / 80.0, 0.0, 1.0)
 
 
 ## Il tick del tratto, prima di GIG: può cambiare l'ingresso (per esempio vuoto durante una vignetta).
@@ -386,6 +584,12 @@ func _stage_hash() -> Array:
 	return []
 
 
+## Il braccio è vivo: la Vista si accende e le basi dei registri si copiano. Il prologo lo vuole dopo il
+## riavvio.
+func _arm_alive() -> bool:
+	return true
+
+
 ## Disegno del tratto: nel mondo (sopra i blocchi) e sull'interfaccia.
 func _draw_stage(_v: Node2D) -> void:
 	pass
@@ -400,6 +604,7 @@ func _reset() -> void:
 	_clear_extras()
 	arena_done = false
 	_reset_hacking()
+	_reset_hazards()
 	player.place(_start.x, _start.y)
 	player.facing = 1
 	_sparks.clear()
@@ -460,28 +665,349 @@ func _sim_tick() -> void:
 		_reset()
 	var frame := input.next_frame(tick)
 	tick += 1
+	if respawn_blink > 0:
+		respawn_blink -= 1
+	if checkpoint_tag > 0:
+		checkpoint_tag -= 1
+	if use_lives and _lives_tick(frame):
+		return
 	if arena_phase != ArenaPhase.NONE:
 		_arena_tick(frame)
 		return
 	frame = _stage_tick(frame)
+	vista = frame.is_held(InputFrame.VISTA) and _arm_alive()
+	# La copia di un registro: GIG si china col polso nella culla, fermo finché finisce.
+	if not registri.is_empty():
+		if registri.step(frame, player, _arm_alive()):
+			frame = InputFrame.new()
+		for e in registri.events:
+			_on_event(e)
 	var hack_events := PackedStringArray()
 	frame = _hack_tick(frame, hack_events)
 	# Collegato al pannello, GIG alza il braccio cyber verso la cassetta.
 	player.pose_override = &"hack" if hack_panel != "" else &""
+	if registri.busy():
+		player.pose_override = &"crouch"
 	player.step(frame)
 	for e in player.events:
 		_on_event(e)
 	for e in hack_events:
 		_on_event(e)
 	_stage_after_step()
-	if player.py > grid.pixel_height() + 80:
+	if not processions.is_empty():
+		processions.step(player, frame.was_pressed(InputFrame.DASH))
+		drones.shields = processions.shields()
+		for e: Array in processions.events:
+			var s: Array = PROC_SFX.get(String(e[0]), [])
+			if not s.is_empty():
+				Sfx.play_at(s[0], e[1], 0.05, s[1])
+		if processions.pushed:
+			drones.alert_pending = true
+	if not hazards.is_empty() and _hazards_tick():
+		return
+	if not drones.is_empty() and _drones_tick():
+		return
+	if not favors.is_empty():
+		_favors_tick(frame)
+	if use_lives and player.py > grid.pixel_height() + FALL_OUT:
+		_start_fall()
+	elif player.py > grid.pixel_height() + 80:
 		_reset()
 	elif _arena_starts():
 		_open_arena()
 
 
+# ------------------------------------------------------------------ zone tossiche e power-up
+
+## Alla ripartenza: energia piena, power-up perso, corsa e caduta normali.
+func _reset_hazards() -> void:
+	hazards.reset()
+	drones.reset()
+	favors.reset()
+	if _line_voice != null:
+		_line_voice.stop()
+	processions.reset()
+	drones.shields = processions.shields()
+	registri.reset()
+	vista = false
+	player.jab_block = false
+	Game.energy = Game.ENERGY_MAX
+	player.glide_fall = 0.0
+	player.speed_pct = 100
+	player.boost_pct = 100
+	# Il colpo solo c'è dove ci sono droni: altrove ATTACCO resta libero.
+	player.can_jab = not drones.is_empty()
+
+
+## Zone e power-up, dopo il passo di GIG: true se GIG è rimasto senza energia (la simulazione si ferma).
+func _hazards_tick() -> bool:
+	var dmg := hazards.step(tick, player, Game.energy)
+	for e in hazards.events:
+		_on_event(e)
+	return dmg > 0 and hurt(dmg)
+
+
+## Persone, oggetti e ristori, dopo il passo di GIG e dei droni (che possono servire a una Persona).
+func _favors_tick(frame: InputFrame) -> void:
+	favors.arena_done = arena_done
+	Game.energy = favors.step(player, frame.was_pressed(InputFrame.UP), drones, Game.energy)
+	for e: Array in favors.events:
+		if e[0] == "scarica":
+			Game.scarica = Game.SCARICA_MAX
+		elif e[0] == "firma":
+			Game.add_score(Favors.FIRMA_POINTS)
+			Game.stats[&"firme"] = Game.stats.get(&"firme", 0) + 1
+			# Schegge di vernice: rosa e arancio, come la tag.
+			for i in 10:
+				var a := TAU * i / 10.0 + _spark_rng.randf_range(-0.2, 0.2)
+				var sp := _spark_rng.randf_range(0.8, 1.8)
+				_spark(e[1], e[2], cos(a) * sp, sin(a) * sp - 0.6, _spark_rng.randi_range(12, 22),
+					C_TAG_PINK if i % 2 == 0 else C_TAG_ORANGE)
+		var s: Array = FAVOR_SFX.get(String(e[0]), [])
+		if not s.is_empty():
+			Sfx.play_at(s[0], e[1], 0.05, s[1])
+	for v: AudioStream in favors.voices:
+		_play_line_voice(v)
+	if favors.changed:
+		_on_favor_opened()
+
+
+## La voce di una battuta in gioco: una alla volta, la nuova ferma quella prima.
+func _play_line_voice(v: AudioStream) -> void:
+	if _line_voice == null:
+		_line_voice = AudioStreamPlayer.new()
+		_line_voice.bus = Sfx.BUS
+		add_child(_line_voice)
+	_line_voice.stream = v
+	_line_voice.play()
+
+
+## Una battuta in gioco detta da fuori dai favori (Tere alla base del registro): il fumetto, se i favori
+## girano in questo tratto, e la voce.
+func _say_in_game(id: String, tag: String) -> void:
+	var before := favors.voices.size()
+	favors._say(id, Vector2.ZERO, true, tag)
+	if favors.is_empty():
+		# Senza favori nessuno farebbe scorrere il fumetto: resta solo la voce.
+		favors.bubbles.clear()
+	for i in range(before, favors.voices.size()):
+		_play_line_voice(favors.voices[i])
+	favors.voices.resize(before)
+
+
+## Una Persona ha aperto i suoi premi: chi ha i cancelli li riapplica (il prologo).
+func _on_favor_opened() -> void:
+	pass
+
+
+## I suoni dei favori (segnaposto, dagli effetti che ci sono).
+const FAVOR_SFX := {
+	"ristoro": [&"ui_confirm", -2.0], "preso": [&"grab", -2.0], "posato": [&"ui_confirm", -4.0],
+	"chiede": [&"ui_move", -6.0], "grazie": [&"glint", -2.0], "battuta": [&"ui_move", -8.0],
+	"firma": [&"glint", 0.0],
+}
+## I colori delle schegge delle firme (dallo sprite della tag).
+const C_TAG_PINK := Color8(244, 110, 160)
+const C_TAG_ORANGE := Color8(250, 160, 50)
+
+
+## I droni, dopo il passo di GIG: true se GIG è rimasto senza energia. Le spinte, i rimbalzi e i
+## sigilli li dà il drone a GIG, che ne scrive gli eventi: si suonano qui.
+func _drones_tick() -> bool:
+	var n := player.events.size()
+	var dmg := drones.step(player)
+	for i in range(n, player.events.size()):
+		_on_event(player.events[i])
+	for e: Array in drones.events:
+		_on_drone_event(e)
+	return dmg > 0 and hurt(dmg)
+
+
+## Gli eventi dei droni hanno il punto dove succedono: lì il suono e le scintille.
+func _on_drone_event(e: Array) -> void:
+	var name: String = e[0]
+	# Il faro che si accende e si spegne sul bordo della luce suona una volta sola ogni tanto.
+	if name == "faro_rosso":
+		if tick - _faro_t < FARO_GAP:
+			return
+		_faro_t = tick
+	var x: float = e[1]
+	var y: float = e[2]
+	if sound and DRONE_SFX.has(name):
+		var s: Array = DRONE_SFX[name]
+		Sfx.play_at(s[0], x, 0.05, s[1])
+	match name:
+		"drone_rotto":
+			for i in 16:
+				var a := _spark_rng.randf_range(0.0, TAU)
+				var sp := _spark_rng.randf_range(1.0, 3.0)
+				_spark(x, y, cos(a) * sp, sin(a) * sp - 1.0, _spark_rng.randi_range(10, 22), C_LED_RED if i % 3 == 0 else C_TEXT)
+		"corazza", "sigillo_muro":
+			for i in 5:
+				_spark(x, y, _spark_rng.randf_range(-1.5, 1.5), -_spark_rng.randf_range(0.5, 1.5), 8, C_DIM)
+		"pignorato", "morso":
+			for i in 8:
+				var a := _spark_rng.randf_range(0.0, TAU)
+				_spark(x, y, cos(a) * 2.0, sin(a) * 2.0, 12, C_LED_RED)
+
+
+## GIG perde energia: a zero, con le vite si perde una vita (decisione B di Luigi, 8 novembre 2026);
+## nella stanza si ricomincia. True se è finita così.
+func hurt(dmg: int) -> bool:
+	Game.energy = maxi(Game.energy - dmg, 0)
+	if Game.energy > 0:
+		return false
+	_on_event("ko_energia")
+	if use_lives:
+		fall_t = 0
+		Game.lose_life()
+		Game.count(&"ko_energia")
+	else:
+		_reset()
+	return true
+
+
+## La barra dell'energia sull'HUD, da `x`: restituisce dove finisce.
+func _draw_energy(h: Control, x: float) -> float:
+	var w := 60.0
+	var f := roundf(w * float(mini(Game.energy, Game.ENERGY_MAX)) / Game.ENERGY_MAX)
+	h.draw_rect(Rect2(x - 1, 4, w + 2, 7), Color(0, 0, 0, 0.7))
+	var c := C_OK if Game.energy > Game.ENERGY_MAX / 3 else (C_HAZARD if Game.energy > Game.ENERGY_MAX / 6 else C_LED_RED)
+	h.draw_rect(Rect2(x, 5, f, 5), c)
+	h.draw_rect(Rect2(x, 5, f, 1), c.lightened(0.35))
+	# Oltre il massimo (la scarcella): una seconda fascia chiara sopra la barra piena.
+	if Game.energy > Game.ENERGY_MAX:
+		h.draw_rect(Rect2(x, 5, roundf(w * float(Game.energy - Game.ENERGY_MAX) / Game.ENERGY_MAX), 2), C_TEXT)
+	return x + w
+
+
+# ------------------------------------------------------------------ vite
+
+## La parte del tick che riguarda le vite: true se la simulazione resta ferma (caduta, CONTINUA?,
+## GAME OVER). A CONTINUA? si risponde coi tasti del fotogramma registrato, così i replay tornano.
+func _lives_tick(frame: InputFrame) -> bool:
+	# Sotto CONTINUA? e ABBONAMENTO SCADUTO, fuori dall'arena, GIG sta fermo alla ripartenza (senza
+	# questo passo resterebbe disegnato nella posa della caduta).
+	if (over_t >= 0 or continue_t >= 0) and arena == null:
+		player.step(InputFrame.new())
+	if over_t >= 0:
+		over_t += 1
+		if over_t == GAME_OVER_TICKS:
+			quit_to_title.emit()
+		return true
+	if continue_t >= 0:
+		continue_t += 1
+		if continue_t > CONTINUE_GRACE and (frame.was_pressed(InputFrame.ATTACK) or frame.was_pressed(InputFrame.JUMP)):
+			_continue_run()
+		elif continue_t % CONTINUE_TICKS == 0:
+			continue_left -= 1
+			if continue_left < 0:
+				continue_t = -1
+				over_t = 0
+				if _overlay != null:
+					_overlay.game_over_ticks = 0
+				if sound:
+					Music.stop(1.0)
+			if _overlay != null:
+				_overlay.continue_count = continue_left
+		return true
+	if fall_t >= 0:
+		fall_t += 1
+		# GIG continua a cadere, fuori dallo schermo, mentre si fa buio.
+		player.step(InputFrame.new())
+		if fall_t >= FALL_TICKS:
+			fall_t = -1
+			_reset()
+			respawn_blink = RESPAWN_BLINK
+			if Game.lives <= 0:
+				_open_continue()
+		return true
+	if arena != null and arena.wants_continue:
+		_open_continue()
+		return true
+	return false
+
+
+func _start_fall() -> void:
+	fall_t = 0
+	Game.lose_life()
+	Game.count(&"cadute")
+	if sound:
+		Sfx.play_at(&"body_fall", player.px)
+
+
+func _open_continue() -> void:
+	continue_t = 0
+	continue_left = 9
+	if _overlay != null:
+		_overlay.continue_count = continue_left
+	if sound:
+		Music.duck(true)
+
+
+func _continue_run() -> void:
+	continue_t = -1
+	continue_left = -1
+	if _overlay != null:
+		_overlay.continue_count = -1
+	Game.continue_run()
+	if arena != null and arena.wants_continue:
+		# Nell'arena GIG rientra dall'alto, come nello slice.
+		arena.wants_continue = false
+		arena.player.respawn()
+	else:
+		respawn_blink = RESPAWN_BLINK
+	if sound:
+		Sfx.play_at(&"ui_confirm", player.px)
+		Music.duck(false)
+
+
+## Superata una ripartenza (la chiama il tratto): la spia si accende e compare RIPARTENZA.
+func _on_checkpoint() -> void:
+	checkpoint_tag = CHECKPOINT_TAG
+	if sound:
+		Sfx.play_at(&"ui_confirm", player.px)
+
+
+## Da ridefinire nei tratti con le ripartenze: [posizione dei piedi, accesa] per ogni spia.
+func _checkpoint_lamps() -> Array:
+	return []
+
+
+## Le spie delle ripartenze, a terra dove GIG riparte: spente in grigio, accese in cyan col bagliore.
+func _draw_checkpoint_lamps(n: Node2D) -> void:
+	for l: Array in _checkpoint_lamps():
+		var at := Vector2(l[0])
+		if at.x < _vis_x0() - 40 or at.x > _vis_x1() + 40:
+			continue
+		var lit: bool = l[1]
+		var dark := Color8(40, 44, 52)
+		n.draw_rect(Rect2(at + Vector2(-1, -11), Vector2(3, 11)), dark)
+		n.draw_rect(Rect2(at + Vector2(-3, -1), Vector2(7, 1)), dark)
+		var top := at + Vector2(-2, -15)
+		n.draw_rect(Rect2(top, Vector2(5, 4)), C_CYAN if lit else Color8(84, 88, 96))
+		if lit:
+			n.draw_rect(Rect2(top + Vector2(1, 1), Vector2(3, 2)), C_TEXT)
+			var pulse := 1.0 + 0.6 * float(checkpoint_tag) / CHECKPOINT_TAG
+			_fx_glow.halo(top + Vector2(2, 2), roundi(6.0 * pulse), Color(C_CYAN, 0.45))
+
+
+func _draw_lives_hud(h: Control) -> void:
+	# Il buio della caduta, a gradini come le altre dissolvenze, e la luce che torna alla ripartenza.
+	var dark := 0.0
+	if fall_t >= 0:
+		dark = clampf(float(fall_t) / FALL_FADE, 0.0, 1.0)
+	elif respawn_blink > RESPAWN_BLINK - RESPAWN_FADE:
+		dark = float(respawn_blink - (RESPAWN_BLINK - RESPAWN_FADE)) / RESPAWN_FADE
+	if dark > 0.0:
+		h.draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0, 0, 0, ceilf(dark * 4.0) / 4.0))
+	if checkpoint_tag > CHECKPOINT_TAG - 30 or (checkpoint_tag > 0 and (checkpoint_tag / 10) % 2 == 0):
+		UiFont.draw_text(h, Vector2(View.CX, 18), "RIPARTENZA", C_CYAN, 1, 1)
+
+
 func _exit_tree() -> void:
 	_save_recording()
+	_drop_wide_cam()
 
 
 func _save_recording() -> void:
@@ -496,12 +1022,84 @@ func _save_recording() -> void:
 
 # ------------------------------------------------------------------ telecamera
 
+## I tick che restano del tremito della vista (solo grafica, fuori dall'impronta).
+var _shake_t: int = 0
+const SHAKE_TICKS := 8
+
+
 func _cam_target() -> Vector2:
 	# Un po' avanti nella direzione dello sguardo, con GIG nel terzo basso dello schermo.
 	return Vector2(player.px + player.facing * 45 - View.CX, player.py - 188)
 
 
+## La telecamera larga: il disegno alla risoluzione della finestra, a multipli interi, finché la finestra
+## ne regge almeno 3; segue i cambi di misura della finestra.
+func _setup_wide_cam() -> void:
+	# Senza schermo (i test, i replay) niente: la logica non cambia e il disegno resta quello di sempre.
+	if DisplayServer.get_name() == "headless":
+		return
+	var win := get_tree().root
+	_scale_mode_before = win.content_scale_mode
+	_wide_on = true
+	if not win.size_changed.is_connected(_fit_wide_cam):
+		win.size_changed.connect(_fit_wide_cam)
+	_fit_wide_cam()
+
+
+## Larga o stretta secondo la finestra adesso: sotto i 3 pixel per pixel la vista larga non avrebbe pixel
+## interi abbastanza fitti, e resta quella di sempre.
+func _fit_wide_cam() -> void:
+	if not _wide_on or not is_inside_tree():
+		return
+	var win := get_tree().root
+	var s := maxi(1, mini(win.size.x / View.W, win.size.y / View.H))
+	wide_cam = s >= 3
+	_px_s = s if wide_cam else 1
+	win.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS if wide_cam else _scale_mode_before
+
+
+## All'uscita dalla stanza (verso le scene, il titolo, lo slice) il disegno torna come l'ha trovato.
+func _drop_wide_cam() -> void:
+	if not _wide_on:
+		return
+	_wide_on = false
+	var win := get_tree().root
+	if win.size_changed.is_connected(_fit_wide_cam):
+		win.size_changed.disconnect(_fit_wide_cam)
+	win.content_scale_mode = _scale_mode_before
+	wide_cam = false
+	_px_s = 1
+
+
+## Lo zoom del gioco adesso: 1, o con la prova fra 1 e (S-1)/S.
+func _game_zoom() -> float:
+	if not wide_cam:
+		return 1.0
+	var wide := float(_px_s - 1) / _px_s
+	return lerpf(1.0, wide, _ease(_wide_k))
+
+
+## Un tick della prova: larga nel platform e quando GIG esce dall'arena, stretta quando arrivano gli
+## Esattori.
+func _wide_tick() -> void:
+	if wide_cam:
+		var target := 1.0 if arena_phase in [ArenaPhase.NONE, ArenaPhase.LEAVE] else 0.0
+		_wide_k = move_toward(_wide_k, target, 1.0 / WIDE_TICKS)
+
+
+## Il centro della vista del gioco: quello della telecamera, tenuto dentro la stanza se la vista è larga.
+func _game_view_center(z: float) -> Vector2:
+	var c := _cam.round() + View.SIZE / 2.0
+	if z >= 1.0:
+		return c
+	var h := (View.SIZE / (2.0 * z)).round()
+	c.x = clampf(c.x, h.x, maxf(h.x, float(grid.pixel_width()) - h.x))
+	c.y = minf(c.y, float(grid.pixel_height()) - h.y)
+	return c
+
+
 func _follow_camera() -> void:
+	_wide_tick()
 	if arena_phase != ArenaPhase.NONE:
 		_arena_camera()
 		return
@@ -512,7 +1110,23 @@ func _follow_camera() -> void:
 	_cam.y += (t.y - _cam.y) * k
 	_cam.x = clampf(_cam.x, 0.0, float(grid.pixel_width() - View.W))
 	_cam.y = clampf(_cam.y, float(-80), float(grid.pixel_height() - View.H))
-	_place_view(_cam.round() + View.SIZE / 2.0, 1.0)
+	# Il colpo di un Rompibile: la vista trema pochi tick, di lato (solo grafica).
+	var shake := Vector2.ZERO
+	if _shake_t > 0:
+		shake.x = (1 - 2 * (_shake_t % 2)) * ceilf(2.0 * _shake_t / SHAKE_TICKS)
+		_shake_t -= 1
+	var z := _game_zoom()
+	var c := _game_view_center(z)
+	if squeeze_on or _squeeze_k > 0.0:
+		var feet := Vector2(player.px, player.py - SQUEEZE_UP)
+		_squeeze_c = feet if _squeeze_k == 0.0 else _squeeze_c.lerp(feet, 0.5)
+		_squeeze_k = move_toward(_squeeze_k, 1.0 if squeeze_on else 0.0, 1.0 / SQUEEZE_TICKS)
+		var e := _ease(_squeeze_k)
+		var zs := exp(lerpf(log(z), log(SQUEEZE_ZOOM), e))
+		c = c.lerp(_squeeze_c, e)
+		c.y = minf(c.y, float(grid.pixel_height()) - View.H / (2.0 * zs))
+		z = zs
+	_place_view(c, z, shake)
 
 
 ## Mette la vista: il punto `center` del mondo al centro dello schermo, ingrandito `z` volte intorno al
@@ -522,12 +1136,32 @@ func _place_view(center: Vector2, z: float, shake: Vector2 = Vector2.ZERO) -> vo
 	zoom = z
 	_view_c = center
 	var half := View.SIZE / 2.0
+	# Posizioni a pixel interi dello schermo (con la prova della telecamera larga, più fitti di quelli
+	# del gioco).
+	var s := float(_px_s)
 	_view.scale = Vector2(z, z)
-	_view.position = half - (center * z).round() + shake
-	for n: Node2D in [_art_back, _art_front]:
+	_view.position = half - (center * z * s).round() / s + shake
+	# Con la telecamera larga i piani dello sfondo non si rimpiccioliscono: la telecamera arretra, il
+	# piano di gioco si allarga e lo sfondo lontano resta com'è (e copre lo schermo con le sue immagini,
+	# fatte per la vista a 480).
+	var zb := maxf(z, 1.0) if wide_cam else z
+	for n: Node2D in [_art_back, _art_front] + _art_extra:
+		if n != null:
+			n.scale = Vector2(zb, zb)
+			n.position = (half * (1.0 - zb) * s).round() / s + shake
+	for n: Node2D in _art_view:
 		if n != null:
 			n.scale = Vector2(z, z)
-			n.position = (half * (1.0 - z)).round() + shake
+			n.position = shake
+
+
+## I bordi sinistro e destro di quello che si vede del mondo (per non disegnare quello che sta fuori).
+func _vis_x0() -> float:
+	return _visible_rect().position.x
+
+
+func _vis_x1() -> float:
+	return _visible_rect().end.x
 
 
 ## Quello che si vede del mondo adesso (con lo zoom delle scene è più piccolo dello schermo).
@@ -539,11 +1173,15 @@ func _visible_rect() -> Rect2:
 # ------------------------------------------------------------------ disegno
 
 func _sync_visual() -> void:
+	_vista_k = move_toward(_vista_k, 1.0 if vista and arena == null else 0.0, 1.0 / VISTA_FADE)
 	# A telecamera inclinata la stanza dietro il pavimento si schiaccia verso la linea del pavimento.
 	var s := 1.0 - tilt_squash * tilt
 	_room_node.scale = Vector2(1, s)
 	_room_node.position = Vector2(0, _floor_y * (1.0 - s))
-	_body.visible = arena == null
+	_body.visible = arena == null and (respawn_blink == 0 or (respawn_blink / 4) % 2 == 0)
+	# Dopo un colpo dei droni GIG lampeggia finché è intoccabile; col sigillo addosso no.
+	if player.inv_t > 0 and player.hurt_t == 0 and player.stuck_left == 0 and (player.inv_t / 3) % 2 == 1:
+		_body.visible = false
 	if arena != null:
 		arena.player.sync_visual()
 		# Mentre la telecamera si inclina il livello non fa step(), che di solito ridisegna le ombre.
@@ -570,8 +1208,50 @@ func _draw_back() -> void:
 	var r := _visible_rect()
 	var x0 := maxf(r.position.x - 8, float(art_until_x))
 	var x1 := r.end.x + 8
+	if art_open_from >= 0:
+		x1 = minf(x1, float(art_open_from))
 	if x1 > x0:
-		_view.draw_rect(Rect2(x0, r.position.y - 8, x1 - x0, r.size.y + 16), C_BG)
+		var skies: Array[Rect2] = []
+		for h in art_holes:
+			skies.append(Rect2(h.position.x, -100000, h.size.x, h.end.y + 100000))
+		for q in _outside_all(Rect2(x0, r.position.y - 8, x1 - x0, r.size.y + 16), skies):
+			_view.draw_rect(q, C_BG)
+
+
+## I pezzi di `r` fuori da `hole` (r stesso se non si toccano).
+static func _outside(r: Rect2, hole: Rect2) -> Array[Rect2]:
+	var h := r.intersection(hole)
+	if not h.has_area():
+		return [r]
+	var out: Array[Rect2] = []
+	if h.position.y > r.position.y:
+		out.append(Rect2(r.position.x, r.position.y, r.size.x, h.position.y - r.position.y))
+	if h.end.y < r.end.y:
+		out.append(Rect2(r.position.x, h.end.y, r.size.x, r.end.y - h.end.y))
+	if h.position.x > r.position.x:
+		out.append(Rect2(r.position.x, h.position.y, h.position.x - r.position.x, h.size.y))
+	if h.end.x < r.end.x:
+		out.append(Rect2(h.end.x, h.position.y, r.end.x - h.end.x, h.size.y))
+	return out
+
+
+## I pezzi di `r` fuori da tutti gli `holes`.
+static func _outside_all(r: Rect2, holes: Array[Rect2]) -> Array[Rect2]:
+	var out: Array[Rect2] = [r]
+	for h in holes:
+		var next: Array[Rect2] = []
+		for q in out:
+			next.append_array(_outside(q, h))
+		out = next
+	return out
+
+
+## La cella `r` sta tutta dentro un tratto disegnato.
+func _in_art(r: Rect2) -> bool:
+	for h in art_holes:
+		if h.encloses(r):
+			return true
+	return false
 
 
 func _draw_room() -> void:
@@ -582,17 +1262,23 @@ func _draw_room() -> void:
 	# Con la stanza schiacciata dall'inclinazione si vedono un paio di file in più in alto.
 	var y0 := maxi(int(vr.position.y) / SolidGrid.TILE - 3, 0)
 	var y1 := mini(int(vr.end.y) / SolidGrid.TILE + 1, grid.height - 1)
-	# Una riga ogni metro (3 blocchi), per leggere le misure a occhio.
+	# Una riga ogni metro (3 blocchi), per leggere le misure a occhio; non dove il fondo è aperto.
 	var t := SolidGrid.TILE
-	for cx in range(x0, x1 + 1):
+	var gx1 := x1 if art_open_from < 0 else mini(x1, art_open_from / t - 1)
+	for cx in range(x0, gx1 + 1):
 		if cx % 3 == 0:
-			v.draw_rect(Rect2(cx * t, y0 * t, 1, (y1 - y0 + 1) * t), C_GRID)
+			for q in _outside_all(Rect2(cx * t, y0 * t, 1, (y1 - y0 + 1) * t), art_holes):
+				v.draw_rect(q, C_GRID)
 	for cy in range(y0, y1 + 1):
-		if cy % 3 == 1:
-			v.draw_rect(Rect2(x0 * t, cy * t, (x1 - x0 + 1) * t, 1), C_GRID)
+		if cy % 3 == 1 and gx1 >= x0:
+			for q in _outside_all(Rect2(x0 * t, cy * t, (gx1 - x0 + 1) * t, 1), art_holes):
+				v.draw_rect(q, C_GRID)
+	_draw_water(v, x0, x1)
 	for cy in range(y0, y1 + 1):
 		for cx in range(x0, x1 + 1):
 			if _gate_cells.has(Vector2i(cx, cy)):
+				continue
+			if _in_art(Rect2(cx * t, cy * t, t, t)):
 				continue
 			match grid.cell(cx, cy):
 				SolidGrid.Cell.SOLID:
@@ -602,6 +1288,7 @@ func _draw_room() -> void:
 				SolidGrid.Cell.THIN:
 					v.draw_rect(Rect2(cx * t, cy * t, t, 4), C_THIN)
 					v.draw_rect(Rect2(cx * t, cy * t, t, 1), C_SOLID_TOP)
+	hazards.draw_zones(v, tick, vr)
 	_draw_hacking(v)
 	_draw_stage(v)
 	if show_boxes and arena == null:
@@ -610,6 +1297,49 @@ func _draw_room() -> void:
 		v.draw_rect(Rect2(r.position + Vector2(0, r.size.y - 1), Vector2(r.size.x, 1)), C_BOX)
 		v.draw_rect(Rect2(r.position, Vector2(1, r.size.y)), C_BOX)
 		v.draw_rect(Rect2(r.position + Vector2(r.size.x - 1, 0), Vector2(1, r.size.y)), C_BOX)
+
+
+## Nel grigio, l'acqua nelle buche senza fondo (le colonne vuote fino all'ultima riga della mappa),
+## perché si legga che lì si cade e si perde la vita: il pelo sta una cella sotto il bordo più basso
+## dei due lati, e si muove piano con le onde. È solo disegno.
+func _draw_water(v: Node2D, x0: int, x1: int) -> void:
+	var t := SolidGrid.TILE
+	var bottom := grid.height - 1
+	var cx := maxi(x0, 0)
+	while cx <= x1:
+		if grid.cell(cx, bottom) != SolidGrid.Cell.EMPTY:
+			cx += 1
+			continue
+		# la buca intera, anche fuori dalla vista
+		var a := cx
+		while a > 0 and grid.cell(a - 1, bottom) == SolidGrid.Cell.EMPTY:
+			a -= 1
+		var b := cx
+		while b < grid.width - 1 and grid.cell(b + 1, bottom) == SolidGrid.Cell.EMPTY:
+			b += 1
+		var lip := -1
+		for wx: int in [a - 1, b + 1]:
+			if wx < 0 or wx >= grid.width:
+				continue
+			var r := bottom
+			while r > 0 and grid.cell(wx, r - 1) == SolidGrid.Cell.SOLID:
+				r -= 1
+			lip = maxi(lip, r)
+		if lip >= 0 and lip < bottom:
+			var top := (lip + 1) * t
+			var w := Rect2(a * t, top, (b - a + 1) * t, (grid.height - lip - 1) * t)
+			v.draw_rect(w, C_WATER)
+			v.draw_rect(Rect2(w.position.x, top, w.size.x, 2), C_WATER_TOP)
+			# le creste: trattini chiari che scorrono piano sotto la pioggia
+			var ph := (tick / 6) % 16
+			var x := int(w.position.x) - 16 + ph
+			while x < int(w.end.x):
+				var x_a := maxi(x, int(w.position.x))
+				var x_b := mini(x + 6, int(w.end.x))
+				if x_b > x_a:
+					v.draw_rect(Rect2(x_a, top + 5, x_b - x_a, 1), C_WATER_TOP)
+				x += 16
+		cx = b + 1
 
 
 ## I cartelli non si schiacciano con la stanza (il testo in pixel verrebbe storto): si sposta
@@ -621,7 +1351,7 @@ func _draw_signs(v: Node2D) -> void:
 		if not grid.marks.has(k):
 			continue
 		var p: Vector2i = grid.marks[k][0]
-		if p.x < _cam.x - 250 or p.x > _cam.x + View.W + 250:
+		if p.x < _vis_x0() - 250 or p.x > _vis_x1() + 250:
 			_caption_alpha.erase(k)
 			continue
 		var lines: Array = signs[k]
@@ -645,7 +1375,7 @@ func _draw_caption(v: Node2D, k: String, p: Vector2i, y: float, lines: Array) ->
 	var t0 := str(lines[0])
 	var t1 := str(lines[1])
 	var w := float(maxi(UiFont.text_width(t0), UiFont.text_width(t1, 1, true)) + 14)
-	var x := clampf(roundf(p.x - w / 2.0), _cam.x + 4.0, _cam.x + View.W - 4.0 - w)
+	var x := clampf(roundf(p.x - w / 2.0), _vis_x0() + 4.0, _vis_x1() - 4.0 - w)
 	# Entrando sale di qualche px, come un fumetto che si posa.
 	var r := Rect2(x, y - 5.0 + roundf((1.0 - a) * 4.0), w, 29.0)
 	var ink := Color(C_CAPTION_INK, a)
@@ -709,11 +1439,28 @@ func _draw_hud() -> void:
 		# Nell'arena c'è l'interfaccia dello slice, con la vita di GIG e del nemico.
 		_draw_stage_hud(h)
 		return
+	drones.draw_hud(h)
 	h.draw_rect(Rect2(0, 0, View.W, 15), Color(0, 0, 0, 0.55))
-	UiFont.draw_text(h, Vector2(4, 2), hud_title, C_CYAN)
-	var st := "COLLEGATO" if hack_panel != "" else player.state_name()
-	UiFont.draw_text(h, Vector2(View.W - 4, 2), st, C_CYAN if hack_panel != "" else C_TEXT, 1, 2)
-	if backdrop != null and not show_boxes:
+	favors.draw_tags_hud(h)
+	if use_lives:
+		# Decisione A di Luigi (8 novembre 2026): le vite e l'energia insieme, in alto a sinistra; il
+		# nome del tratto va a destra.
+		var lives := "GIG ×%d" % maxi(Game.lives, 0)
+		UiFont.draw_text(h, Vector2(4, 2), lives, UiArt.color("lives", C_TEXT))
+		var ex := _draw_energy(h, 4 + UiFont.text_width(lives) + 8)
+		if not hazards.is_empty():
+			hazards.draw_hud(h, ex + 10, tick)
+		UiFont.draw_text(h, Vector2(View.W - 4, 2), hud_title, C_CYAN, 1, 2)
+		_draw_lives_hud(h)
+	else:
+		UiFont.draw_text(h, Vector2(4, 2), hud_title, C_CYAN)
+		if not hazards.is_empty() or not drones.is_empty():
+			var ex := _draw_energy(h, 4 + UiFont.text_width(hud_title) + 10)
+			hazards.draw_hud(h, ex + 10, tick)
+		var st :="COLLEGATO" if hack_panel != "" else player.state_name()
+		UiFont.draw_text(h, Vector2(View.W - 4, 2), st, C_CYAN if hack_panel != "" else C_TEXT, 1, 2)
+	# La riga dei numeri del salto è di sviluppo: si accende con i riquadri (F1 o --debug-boxes).
+	if not show_boxes:
 		_draw_stage_hud(h)
 		return
 	var sub := float(PlatformPlayer.SUB)
@@ -747,7 +1494,7 @@ func _arena_data() -> Dictionary:
 
 func _open_arena() -> void:
 	arena = Level.new()
-	arena.configure({"seed": 1, "input": input, "embedded": true, "auto_tick": false, "card": false, "sound": sound,
+	arena.configure({"seed": 1, "input": input, "embedded": true, "lives": use_lives, "auto_tick": false, "card": false, "sound": sound,
 		"data": _arena_data(), "start_x": float(player.px), "start_y": ARENA_BAND.x})
 	# Il bordo dietro della fascia sta sulla linea del pavimento del platform.
 	arena.position = Vector2(0, _floor_y - ARENA_BAND.x)
@@ -758,6 +1505,9 @@ func _open_arena() -> void:
 	if not lights_on:
 		arena.set_lights(false)
 	var g := arena.player
+	# L'energia è una sola per tutta la partita (decisione A): GIG entra nell'arena con quella che ha.
+	if use_lives:
+		g.hp = clampi(Game.energy, 1, g.data.max_hp)
 	# Prima del riavvio il braccio resta bloccato anche nell'arena: il foglio spento e la sola destra.
 	if player.arm_locked:
 		g.use_sheet(&"gig_spento")
@@ -789,6 +1539,8 @@ func _arena_tick(frame: InputFrame) -> void:
 				_on_arena_fight()
 		ArenaPhase.FIGHT:
 			arena.step(frame)
+			if use_lives:
+				Game.energy = clampi(g.hp, 0, Game.ENERGY_MAX)
 			# Zona liberata (il livello ha già acceso VAI): si esce appena GIG è libero e coi piedi a terra.
 			if arena.waves_cleared > 0 and arena.active_wave.is_empty() and g.is_free() and g.ph <= 0.0:
 				arena_phase = ArenaPhase.LEAVE
@@ -839,7 +1591,8 @@ func _arena_camera() -> void:
 			back.x = clampf(back.x, 0.0, float(grid.pixel_width() - View.W))
 			back.y = clampf(back.y, -80.0, float(grid.pixel_height() - View.H))
 			_cam = lock.lerp(back, _ease(float(_arena_t) / TILT_OUT))
-	_place_view(_cam.round() + View.SIZE / 2.0, 1.0, Vector2(arena.camera.shake))
+	var z := _game_zoom()
+	_place_view(_game_view_center(z), z, Vector2(arena.camera.shake))
 
 
 static func _ease(k: float) -> float:
@@ -919,7 +1672,12 @@ func scene_frame(space: String, rif: String) -> Dictionary:
 
 ## Il centro dell'inquadratura del gioco, nel mondo della stanza.
 func scene_camera_center() -> Vector2:
-	return _cam.round() + View.SIZE / 2.0
+	return _view_c if _squeeze_k > 0.0 else _cam.round() + View.SIZE / 2.0
+
+
+## Lo zoom da cui parte una scena: quello della telecamera che si stringe, se c'è, se no 1.
+func scene_camera_zoom() -> float:
+	return zoom if _squeeze_k > 0.0 else 1.0
 
 
 ## Quello che una scena può mostrare, nel mondo della stanza: sotto, non oltre il fondo dell'arena (o
@@ -984,7 +1742,8 @@ func _on_scene_handoff(_id: String) -> void:
 func scene_end(_sp: ScenePlayer) -> void:
 	scene = null
 	scene_ui_alpha(1.0)
-	_place_view(_cam.round() + View.SIZE / 2.0, 1.0)
+	var z := _game_zoom()
+	_place_view(_game_view_center(z), z)
 
 
 func _tick_extras() -> void:
@@ -1114,7 +1873,22 @@ func state_hash() -> int:
 	var g: Array = []
 	for s: String in gates:
 		g.append(gates[s]["timer"])
-	return hash([player.state_hash(), hack_panel, hack_t, g, hacks_done] + _stage_hash())
+	var lv: Array = [fall_t, continue_t, continue_left, over_t, respawn_blink, Game.lives] if use_lives else []
+	# Le zone e i power-up, e con loro l'energia, solo nei tratti che li hanno: le impronte di prima restano.
+	var hz: Array = hazards.state_hash() + [Game.energy] if not hazards.is_empty() else []
+	var dr: Array = drones.state_hash() + [Game.energy] if not drones.is_empty() else []
+	if not favors.is_empty():
+		dr += favors.state_hash() + [Game.energy]
+		if Game.scarica > 0:
+			dr.append(Game.scarica)
+	if not processions.is_empty():
+		dr += processions.state_hash()
+	# Le basi dei registri e la Vista, solo dove ci sono basi.
+	if not registri.is_empty():
+		dr += registri.state_hash() + [vista, Game.registri.size()]
+	# Le celle Rompibile rotte, solo dove ce ne sono: le impronte di prima restano.
+	var br: Array = [Array(grid.broken)] if not grid.broken.is_empty() else []
+	return hash([player.state_hash(), hack_panel, hack_t, g, hacks_done] + lv + hz + dr + br + _stage_hash())
 
 
 ## I pannelli sul muro di fondo e i cancelli, con il conto alla rovescia.
@@ -1123,13 +1897,13 @@ func _draw_hacking(v: Node2D) -> void:
 		if not grid.marks.has(id) or not gates.has(panels[id]["gate"]):
 			continue
 		var m := _panel_pos(id)
-		if m.x < _cam.x - 60 or m.x > _cam.x + View.W + 60:
+		if m.x < _vis_x0() - 60 or m.x > _vis_x1() + 60:
 			continue
 		_draw_panel(v, id, gates[panels[id]["gate"]])
 	for s: String in gates:
 		var gt: Dictionary = gates[s]
 		var g: Rect2i = gt["rect"]
-		if g.end.x < _cam.x - 20 or g.position.x > _cam.x + View.W + 20:
+		if g.end.x < _vis_x0() - 20 or g.position.x > _vis_x1() + 20:
 			continue
 		# Il cancello sale verso il soffitto: resta visibile la parte che non è ancora rientrata.
 		var h := roundf(g.size.y * (1.0 - float(gt["lift"])))
@@ -1291,6 +2065,16 @@ func _draw_contact(n: Node2D) -> void:
 func _on_event(e: String) -> void:
 	_event_sound(e)
 	match e:
+		"braccio_a_vuoto":
+			# SALTO in aria prima del riavvio: il braccio prova la Spinta e non parte. Poche scintille
+			# spente dal pugno, che col braccio morto sta sul petto, sotto la barba: nascono sul davanti
+			# della sagoma e schizzano in avanti, così escono subito sul fondo scuro; ricadono e muoiono
+			# presto (le prime due appena cyan), senza bagliore.
+			var fist := _cyber_fist() + Vector2(14 * player.facing, 0)
+			for i in 5:
+				var vx := _spark_rng.randf_range(1.3, 2.4) * player.facing
+				var vy := _spark_rng.randf_range(-1.5, -0.2)
+				_spark(fist.x, fist.y, vx, vy, _spark_rng.randi_range(11, 17), C_CYAN_DEAD if i > 1 else C_CYAN_WEAK)
 		"spinta":
 			# La scarica del braccio verso il basso: un ventaglio di scintille cyan.
 			for i in 14:
@@ -1307,6 +2091,16 @@ func _on_event(e: String) -> void:
 				var a := _spark_rng.randf_range(-0.35, 0.35) + (PI if player.facing > 0 else 0.0)
 				var s := _spark_rng.randf_range(1.5, 3.5)
 				_spark(player.px - player.facing * 8, player.py - 55, cos(a) * s * 1.25, sin(a) * s * 1.25, _spark_rng.randi_range(8, 16), C_CYAN)
+		"rompe":
+			# Lo scatto sfonda un Rompibile: schegge in avanti e in alto, da tutta la parte rotta.
+			var r := Rect2(player.last_break)
+			for i in 22:
+				var a := _spark_rng.randf_range(-0.9, 0.5)
+				var s := _spark_rng.randf_range(1.0, 3.4)
+				var y := r.position.y + _spark_rng.randf() * r.size.y
+				_spark(r.get_center().x, y, cos(a) * s * player.facing, sin(a) * s, _spark_rng.randi_range(14, 28),
+					C_SPLINTER if i % 3 != 0 else C_PLASTER)
+			_shake_t = SHAKE_TICKS
 		"walljump", "wallrun":
 			# Il colpo contro il muro, dal lato del muro.
 			var wx := player.px + player.wall_dir * 13
@@ -1329,16 +2123,58 @@ func _on_event(e: String) -> void:
 		"hack_cut":
 			for i in 4:
 				_spark(_cyber_fist().x, _cyber_fist().y, _spark_rng.randf_range(-1.0, 1.0), -_spark_rng.randf_range(0.2, 1.0), 8, C_DIM)
+		"powerup":
+			var pc: Color = hazards.held.color if hazards.held != null else C_CYAN
+			for i in 14:
+				var a := _spark_rng.randf_range(0.0, TAU)
+				var s := _spark_rng.randf_range(0.8, 2.2)
+				_spark(player.px, player.py - 50, cos(a) * s, sin(a) * s - 0.6, _spark_rng.randi_range(12, 22), pc)
 		"slide":
 			for i in 5:
 				_spark(player.px - player.facing * 10, player.py - 2, -player.facing * _spark_rng.randf_range(0.5, 1.5), -_spark_rng.randf_range(0.2, 0.8), 12, C_DIM)
+		"registro_lampo":
+			# Il lampo della copia, piccolo come quello della Spinta, e Tere: «Questo lo teniamo.»
+			var b: Registri.Base = registri.basi[registri.copying]
+			for i in 10:
+				var a := _spark_rng.randf_range(-0.85, -0.15) * PI
+				var s := _spark_rng.randf_range(0.8, 2.2)
+				_spark(b.px.x, b.px.y - Registri.SIZE.y, cos(a) * s, sin(a) * s, _spark_rng.randi_range(8, 16), C_CYAN)
+			_say_in_game(Registri.LINE_TERE, "TERE")
 
 
-## I suoni degli eventi: salto, atterraggio, hacking e cancelli.
+## I suoni degli eventi: salto, atterraggio, hacking e cancelli, power-up e zone tossiche. La tosse e il
+## clic del braccio a vuoto (ui_move) sono segnaposto finché car-musica non li fa.
 const EVENT_SFX := {
+	"powerup": [&"pickup", 0.0], "powerup_fine": [&"ui_move", -4.0], "tosse": [&"body_thud", -12.0], "ko_energia": [&"ko", -2.0],
 	"jump": [&"jump", 0.0], "spinta": [&"whoosh_light", -2.0], "scatto": [&"whoosh_heavy", -2.0],
 	"land": [&"land", 0.0], "hack_start": [&"hack", 0.0], "hack_done": [&"zap", 0.0],
 	"hack_cut": [&"ui_move", -4.0], "gate_close": [&"bin_hit", -8.0],
+	"jab": [&"whoosh_light", -4.0], "colpito": [&"hit_medium", -2.0], "rimbalzo": [&"jump", -2.0],
+	"sigillo": [&"block", 0.0], "strappo": [&"grab", -8.0], "staccato": [&"throw", -4.0],
+	"rompe": [&"bin_break", 0.0], "braccio_a_vuoto": [&"ui_move", -6.0],
+	# La base del registro: il clic della culla, il ronzio che sale, il bip di SIDERA che diventa cyan
+	# (segnaposto finché car-musica non li fa).
+	"registro_clic": [&"grab", -4.0], "registro_ronzio": [&"hack", -6.0], "registro_lampo": [&"zap", -4.0],
+	"registro_copiato": [&"glint", -2.0],
+}
+## Le scintille spente del braccio bloccato: un grigio appena azzurro.
+const C_CYAN_DEAD := Color8(122, 148, 158)
+## Le prime due, appena cyan.
+const C_CYAN_WEAK := Color8(60, 172, 192)
+## Le schegge dei Rompibili: legno marcio e intonaco.
+const C_SPLINTER := Color8(150, 104, 62)
+const C_PLASTER := Color8(206, 194, 170)
+## I suoni dei droni, nel punto dove succedono. Segnaposto dalla cartella degli effetti, finché
+## car-musica non fa la sirena, il latrato e il ronzio delle eliche.
+## Lo spintone ai confratelli: una spallata smorzata.
+const PROC_SFX := {"spintone": [&"body_thud", -6.0]}
+
+const DRONE_SFX := {
+	"drone_rotto": [&"bin_break", -2.0], "corazza": [&"block", -6.0], "colomba_lente": [&"glint", -6.0],
+	"spruzzo": [&"whoosh_light", -8.0], "accecato": [&"zap", -10.0], "faro_rosso": [&"ui_move", -6.0],
+	"sirena": [&"go_arrow", -4.0], "sigillo_sparato": [&"throw", -6.0], "sigillo_muro": [&"bin_hit", -10.0],
+	"pignorato": [&"hit_light", -4.0], "abbaio": [&"hit_heavy", -6.0], "scatto_segugio": [&"whoosh_heavy", -4.0],
+	"morso": [&"hit_heavy", -2.0], "non_identificabile": [&"glint", -4.0],
 }
 
 
@@ -1388,20 +2224,32 @@ func _draw_fx(n: Node2D) -> void:
 		_draw_panel_glow()
 	if hack_panel != "" and arena == null:
 		_draw_contact(n)
+	if arena == null:
+		_draw_checkpoint_lamps(n)
+		hazards.draw_pickups(n, tick, _visible_rect(), _fx_glow)
+		processions.draw(n, tick, _visible_rect())
+		favors.draw(n, tick, _visible_rect(), player)
+		drones.draw(n, tick, _visible_rect(), _fx_glow)
+		drones.draw_reach(n, tick, player, favors.wanted_drones())
+		favors.draw_bubbles(n, _visible_rect(), player)
 	_draw_arm_glow()
 	for s: Array in _sparks:
 		var a := float(s[4]) / float(s[5])
 		var burst: bool = s[7]
 		# Le scintille cyan sbiadiscono nel bianco, come una scarica; quelle del riavvio vanno dal bianco
 		# al cyan al verde acqua, con la scia dietro.
-		var c: Color = _burst_color(1.0 - a) if burst else (s[6] if a > 0.4 else C_TEXT)
+		# Le scintille spente del braccio bloccato non schiariscono e non fanno alone: si spengono e basta.
+		var dead: bool = s[6] == C_CYAN_DEAD or s[6] == C_CYAN_WEAK
+		var c: Color = _burst_color(1.0 - a) if burst else (s[6] if a > 0.4 or dead else C_TEXT)
+		if dead and a > 0.75:
+			c = Color(s[6]).lightened(0.4)
 		c.a = a
 		var p := Vector2(roundf(s[0]), roundf(s[1]))
 		var big := a >= 0.5
 		if burst:
 			n.draw_line(p, (p - Vector2(s[2], s[3]) * 3.0).round(), Color(c, a * 0.45), 1.0)
 		n.draw_rect(Rect2(p, Vector2(2, 2) if big else Vector2.ONE), c)
-		if s[6] != C_DIM:
+		if s[6] != C_DIM and not dead:
 			_fx_glow.halo(p, 3 if big else 2, Color(c, (0.55 if burst else 0.4) * a))
 
 
@@ -1413,7 +2261,7 @@ func _draw_panel_glow() -> void:
 		if not grid.marks.has(id) or not gates.has(panels[id]["gate"]):
 			continue
 		var r := _panel_rect(id)
-		if r.end.x < _cam.x - 20 or r.position.x > _cam.x + View.W + 20:
+		if r.end.x < _vis_x0() - 20 or r.position.x > _vis_x1() + 20:
 			continue
 		var sr := Rect2(r.position.x + 4, r.position.y + 15, r.size.x - 8, 14)
 		var led := Vector2(r.end.x - 8, r.position.y + 34)
@@ -1435,6 +2283,42 @@ func _draw_panel_glow() -> void:
 
 
 ## Il braccio cyber acceso (fuori dall'arena, dopo il riavvio): un alone cyan che respira sul pugno.
+## Il velo della Vista su quello che si vede: la tinta verde acqua, righe di scansione appena accennate
+## e i bordi più scuri. Segnaposto finché car-grafica non lo rifà.
+func _draw_vista_veil(n: Node2D) -> void:
+	if _vista_k <= 0.0:
+		return
+	var r := _visible_rect().grow(2)
+	n.draw_rect(r, Color(C_VISTA_VEIL, C_VISTA_VEIL.a * _vista_k))
+	var line := Color(C_CYAN, 0.05 * _vista_k)
+	var y := floorf(r.position.y / 3.0) * 3.0 + float(tick % 3)
+	while y < r.end.y:
+		n.draw_rect(Rect2(r.position.x, y, r.size.x, 1), line)
+		y += 3.0
+	for i in 8:
+		var e := Color(0.0, 0.04, 0.06, 0.07 * _vista_k)
+		var w := 6.0 * (i + 1)
+		n.draw_rect(Rect2(r.position.x, r.position.y, w, r.size.y), e)
+		n.draw_rect(Rect2(r.end.x - w, r.position.y, w, r.size.y), e)
+		n.draw_rect(Rect2(r.position.x, r.position.y, r.size.x, w * 0.6), e)
+		n.draw_rect(Rect2(r.position.x, r.end.y - w * 0.6, r.size.x, w * 0.6), e)
+
+
+## L'occhio destro di GIG acceso, sopra al velo: un punto cyan con l'alone.
+func _draw_vista_eye(n: Node2D) -> void:
+	if _vista_k <= 0.0 or not _body.visible or player.anim == null:
+		return
+	var h := Vector2i(5, -95)
+	if player.anim.frame().points.has("head"):
+		h = player.anim.frame().points["head"]
+	var a := player.sprite_anchor()
+	var eye := Vector2(a.x + player.facing * (h.x + VISTA_EYE.x), a.y + h.y + VISTA_EYE.y).round()
+	var k := _vista_k * (0.85 + 0.15 * sin(tick * 0.2))
+	n.draw_circle(eye, 6.0, Color(C_CYAN, 0.10 * k))
+	n.draw_circle(eye, 3.0, Color(C_CYAN, 0.30 * k))
+	n.draw_rect(Rect2(eye.x - 1, eye.y, 2, 1), Color(0.85, 1.0, 1.0, k))
+
+
 func _draw_arm_glow() -> void:
 	if arena != null or not _body.visible or player.anim == null or player.anim.sheet.id != &"gig":
 		return

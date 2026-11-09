@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PowerUpDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/powerup_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"abbonamento"
+label = "ABBONAMENTO"
+pickup_text = "RINNOVATO"
+color = Color(1.0000, 0.7843, 0.2510, 1)
+durata = 3
+extra_life = 1
+max_lives = 3

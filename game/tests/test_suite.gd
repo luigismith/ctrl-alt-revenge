@@ -57,15 +57,29 @@ func run(tree_root: Node) -> bool:
 	_test_arm_locked()
 	_test_room_arena()
 	_test_room_hacking()
+	_test_hazards()
+	_test_room_hazards()
+	_test_drones()
+	_test_drone_sprites()
+	_test_procession_sprites()
+	_test_favors()
+	_test_firme()
+	_test_breakables()
+	_test_scene_hook()
+	_test_processions()
 	_test_rider()
 	_test_esattore()
 	_test_messo()
+	_test_prologue_lives()
+	_test_ldtk()
 	_test_rider_frenzy()
 	_test_prologue()
+	_test_prologue_v2()
 	_test_scene_files()
 	_test_pignoramento()
 	_test_rinforzi()
 	_test_scene_voices()
+	_test_scene_thoughts()
 	_test_scene_mural()
 	_test_scene_writing()
 	_test_title_menu()
@@ -97,6 +111,10 @@ func _test_title_menu() -> void:
 ## lenta, con la musica che sfuma → lo slice, con la sua scheda e coi tasti, anche se il prologo l'ha
 ## giocato il pilota → la dissolvenza torna corta.
 func _test_new_game_chain() -> void:
+	# La telecamera larga è normale; --camera-stretta la spegne.
+	check(SessionOptions.parse(PackedStringArray([])).wide_camera
+		and not SessionOptions.parse(PackedStringArray(["--camera-stretta"])).wide_camera,
+		"Opzioni: la telecamera larga è accesa senza opzioni, --camera-stretta la spegne")
 	var saved := Game.options
 	Game.options = SessionOptions.parse(PackedStringArray(["--autopilot", "stanza"]))
 	Game.options.room = false
@@ -1128,6 +1146,7 @@ const _U := InputFrame.UP
 const _D := InputFrame.DOWN
 const _J := InputFrame.JUMP
 const _S := InputFrame.DASH
+const _A := InputFrame.ATTACK
 
 
 ## Una griglia vuota larga w e alta h celle, con il pavimento pieno dalla riga floor_row in giù.
@@ -1515,6 +1534,989 @@ func _test_platform() -> void:
 	check(_count_events(ev, "wallrun") == 0, "Platform: da fermi contro il muro non c'è la corsa sul muro", "corse %d" % _count_events(ev, "wallrun"))
 
 
+# --- Platform: zone tossiche e power-up ------------------------------------------------------------
+
+## Una corsia di 60 celle col pavimento alla riga 7: "~" è una zona corta (3 celle), "%" una lunga
+## (12 celle); `extra` mette dei segni (power-up) alla riga 6, colonna → segno.
+static func _hz_grid(extra: Dictionary = {}) -> SolidGrid:
+	var rows := PackedStringArray()
+	for y in 8:
+		var r := ""
+		for x in 60:
+			var c := "#" if y == 7 else "."
+			if y >= 2 and y <= 6 and x >= 10 and x <= 12:
+				c = "~"
+			if y >= 2 and y <= 6 and x >= 25 and x <= 36:
+				c = "%"
+			if y == 6 and extra.has(x):
+				c = extra[x]
+			r += c
+		rows.append(r)
+	return SolidGrid.from_rows(rows)
+
+
+## GIG da x per `ticks` tick coi tasti di fn(t), con le zone e i power-up dati: l'energia che resta
+## (partendo da `energy`), il tick del primo danno, le zone e GIG.
+func _hz_run(g: SolidGrid, zm: Dictionary, pm: Dictionary, x: int, ticks: int, fn: Callable, energy: int = 120) -> Dictionary:
+	var hz := Hazards.new()
+	hz.build(g, zm, pm)
+	var p := _pp(g, x, 7)
+	var e := energy
+	var first := -1
+	var prev := 0
+	for t in ticks:
+		var held: int = fn.call(t)
+		p.step(InputFrame.new(held, held & ~prev))
+		prev = held
+		var d := hz.step(t, p, e)
+		e -= d
+		if d > 0 and first < 0:
+			first = t
+	return {"energy": e, "first": first, "hz": hz, "p": p}
+
+
+func _test_hazards() -> void:
+	var ok := true
+	for id: String in ["bomboletta", "abbonamento", "mascherina", "sovraccarico", "giubbotto", "badge", "ombrello"]:
+		var d := Hazards.powerup(id)
+		ok = ok and d != null and d.id == StringName(id) and d.label != ""
+	for id: String in ["polvere", "fanghi", "gas", "seno", "nube"]:
+		var d := Hazards.hazard(id)
+		ok = ok and d != null and d.id == StringName(id) and d.damage_s > 0.0
+	var pol := Hazards.hazard("polvere")
+	check(ok and pol.damage_s == 2.0 and pol.delay_s == 1.0 and pol.cycle_s == 6.0 and pol.active_s == 3.0
+		and Hazards.powerup("mascherina").start_amount() == 1200 and Hazards.hazard("fanghi").min_energy == 1
+		and Hazards.powerup("bomboletta").start_amount() == 3,
+		"Zone e power-up: i tipi del catalogo si leggono coi loro numeri")
+
+	var g := _hz_grid()
+	var always := {"tipo": "polvere", "ciclo_s": 6.0, "attiva_s": 6.0}
+	var hz := Hazards.new()
+	hz.build(g, {"~": always, "%": always})
+	check(hz.zones.size() == 2 and hz.zones[0].rect == Rect2i(200, 40, 60, 100) and hz.zones[1].rect == Rect2i(500, 40, 240, 100),
+		"Zone: ogni gruppo di celle col segno diventa un rettangolo", "%d zone" % hz.zones.size())
+
+	# Chi passa svelto non paga: la zona corta si attraversa in meno di un secondo.
+	var r := _hz_run(g, {"~": always}, {}, 150, 80, func(_t: int) -> int: return _R)
+	check(r["energy"] == 120 and r["p"].px > 300, "Zone: chi passa svelto non paga", "energia %d, x %d" % [r["energy"], r["p"].px])
+	# Chi resta dentro paga dopo 1 s, poi 2 punti al secondo: un punto ogni 30 tick.
+	r = _hz_run(g, {"%": always}, {}, 600, 360, func(_t: int) -> int: return 0)
+	check(r["energy"] == 110 and r["first"] >= 60 and r["first"] <= 90, "Zone: dentro la polvere si paga dopo 1 s, poi 2 punti al secondo",
+		"energia %d, primo danno al tick %d" % [r["energy"], r["first"]])
+	# A raffiche (3 s accesa ogni 6): si paga solo da accesa, e il ritardo riparte a ogni raffica.
+	r = _hz_run(g, {"%": {"tipo": "polvere"}}, {}, 600, 720, func(_t: int) -> int: return 0)
+	var z: Hazards.Zone = r["hz"].zones[0]
+	check(r["energy"] == 112 and z.warning(330) and not z.warning(329) and not z.is_active(359) and z.is_active(360),
+		"Zone: la polvere va a raffiche, col preavviso di mezzo secondo", "energia %d" % r["energy"])
+	# La mascherina: la si prende davanti alla polvere e la si passa senza danno.
+	r = _hz_run(_hz_grid({20: "1"}), {"%": always}, {"1": "mascherina"}, 300, 200, func(_t: int) -> int: return _R)
+	var rh: Hazards = r["hz"]
+	check(r["energy"] == 120 and r["p"].px > 760 and rh.held != null and rh.held.id == &"mascherina" and rh.left < rh.total,
+		"Power-up: con la mascherina la polvere non fa male", "energia %d, x %d" % [r["energy"], r["p"].px])
+	# Uno alla volta: il nuovo sostituisce il vecchio; l'abbonamento agisce subito e non tocca quello che si ha.
+	Game.reset_run()
+	Game.lives = 2
+	r = _hz_run(_hz_grid({16: "1", 19: "3", 22: "2", 40: "2"}), {}, {"1": "mascherina", "3": "sovraccarico", "2": "abbonamento"}, 300, 200,
+		func(_t: int) -> int: return _R)
+	rh = r["hz"]
+	check(rh.held != null and rh.held.id == &"sovraccarico" and rh.damage_mult() == 2 and rh.breaks_guard() and not rh.immune(),
+		"Power-up: uno alla volta, il nuovo sostituisce il vecchio", "ha %s" % (rh.held.id if rh.held != null else &"niente"))
+	check(Game.lives == 3 and rh.toast == "RINNOVATO", "Power-up: l'abbonamento dà una vita, fino a tre",
+		"vite %d, scritta %s" % [Game.lives, rh.toast])
+	Game.reset_run()
+	# I fanghi rallentano e non portano l'energia sotto 1.
+	r = _hz_run(g, {"%": {"tipo": "fanghi"}}, {}, 500, 60, func(_t: int) -> int: return _R, 2)
+	var free := _hz_run(g, {}, {}, 500, 60, func(_t: int) -> int: return _R)
+	check(r["energy"] == 1 and r["p"].px < free["p"].px - 50, "Zone: i fanghi rallentano e non uccidono da soli",
+		"energia %d, x %d contro %d" % [r["energy"], r["p"].px, free["p"].px])
+	# L'ombrello: in caduta, tenendo SALTO, si plana; il tempo passa solo planando.
+	var tall := _room(20, 40, 39)
+	var hu := Hazards.new()
+	hu.build(tall)
+	hu._take(Hazards.powerup("ombrello"))
+	var pu := PlatformPlayer.new(PlatformMoves.new(), tall)
+	pu.place(200, 100)
+	var max_vy := 0
+	for t in 90:
+		pu.step(InputFrame.new(_J, _J if t == 0 else 0))
+		hu.step(t, pu, 120)
+		if t > 40:
+			max_vy = maxi(max_vy, pu.vy)
+	var pn := PlatformPlayer.new(PlatformMoves.new(), tall)
+	pn.place(200, 100)
+	for t in 90:
+		pn.step(InputFrame.new(_J, _J if t == 0 else 0))
+	check(max_vy <= PlatformPlayer.to_sub(0.9) and pu.py < pn.py - 100 and hu.left < hu.total and hu.left > hu.total - 90,
+		"Power-up: con l'ombrello si plana tenendo SALTO, e il tempo passa solo planando",
+		"vy %d, y %d contro %d, resta %d/%d" % [max_vy, pu.py, pn.py, hu.left, hu.total])
+	# Il giubbotto assorbe tre colpi, la bomboletta ha tre usi, il badge si spegne attaccando.
+	var hg := Hazards.new()
+	hg._take(Hazards.powerup("giubbotto"))
+	var absorbed := [hg.absorb_hit(), hg.absorb_hit(), hg.absorb_hit(), hg.absorb_hit()]
+	hg._take(Hazards.powerup("bomboletta"))
+	var used := [hg.use(), hg.use(), hg.use(), hg.use()]
+	hg._take(Hazards.powerup("badge"))
+	var hidden := hg.invisible()
+	hg.on_attack()
+	check(absorbed == [true, true, true, false] and used == [true, true, true, false] and hidden and not hg.invisible(),
+		"Power-up: giubbotto da tre colpi, bomboletta da tre usi, badge che si spegne attaccando",
+		"%s %s %s" % [absorbed, used, hidden])
+
+	# Dal livello LDtk: i campi maggiori di zero cambiano il tipo, gli altri lo lasciano.
+	var gl := _room(40, 10, 9)
+	gl.entities.append({"tipo": "Tossica", "pos": Vector2i(100, 80), "size": Vector2i(120, 100),
+		"campi": {"tipo": "gas", "danno_s": 0.0, "ritardo_s": 0.5, "ciclo_s": 0.0, "attiva_s": 0.0}})
+	gl.entities.append({"tipo": "PowerUp", "pos": Vector2i(300, 160), "size": Vector2i(20, 20),
+		"campi": {"tipo": "badge", "ricompare": false}})
+	var hl := Hazards.new()
+	hl.build(gl)
+	var zl: Hazards.Zone = hl.zones[0] if not hl.zones.is_empty() else null
+	var ok_l := zl != null and zl.def.id == &"gas" and zl.damage10 == 40 and zl.delay_t == 30 and zl.cycle_t == 240 \
+		and zl.active_t == 90 and zl.rect == Rect2i(100, 80, 120, 100) and hl.pickups.size() == 1 and not hl.pickups[0].respawns
+	if ok_l:
+		hl.pickups[0].taken = true
+		hl.reset()
+		ok_l = hl.pickups[0].taken
+		hl.reset(true)
+		ok_l = ok_l and not hl.pickups[0].taken
+	check(ok_l, "Zone e power-up: dal livello LDtk, coi campi che cambiano il tipo; senza «ricompare» un power-up non torna")
+
+
+## Nella stanza di prova: le due polveri, la mascherina e l'abbonamento; a energia zero si ricomincia,
+## con le vite se ne perde una.
+func _test_room_hazards() -> void:
+	var gm := SolidGrid.load_file(TestRoom.MAP)
+	var m: Vector2i = gm.marks["m"][0]
+	var gx: Vector2i = gm.marks["g"][0]
+	var runs: Array[Dictionary] = []
+	for k in 2:
+		var room := _hack_room(Vector2i(m.x - 40, m.y), Callable(), ["P"])
+		room.hacks_done["P"] = 1
+		Game.lives = 2
+		var tall: Hazards.Zone = room.hazards.zones[1]
+		var out := {"masked": false, "e_in": -1, "e_out": -1, "end": -1}
+		for t in 2400:
+			room._sim_tick()
+			var inside := room.player.right() > tall.rect.position.x and room.player.left() < tall.rect.end.x
+			if inside and out["e_in"] < 0:
+				out["e_in"] = Game.energy
+				out["masked"] = room.hazards.immune()
+			if out["e_in"] >= 0 and out["e_out"] < 0 and room.player.left() > tall.rect.end.x:
+				out["e_out"] = Game.energy
+			if room.player.px >= gx.x - 20 and out["end"] < 0:
+				out["end"] = t
+			if out["end"] >= 0 and t > out["end"] + 120:
+				break
+		out["zones"] = room.hazards.zones.size()
+		out["pickups"] = room.hazards.pickups.size()
+		out["lives"] = Game.lives
+		out["hash"] = room.state_hash()
+		runs.append(out)
+		_free_room(room)
+	var a := runs[0]
+	check(a["zones"] == 2 and a["pickups"] == 2, "Stanza: in fondo ci sono le due polveri, la mascherina e l'abbonamento",
+		"%d zone, %d power-up" % [a["zones"], a["pickups"]])
+	check(a["masked"] and a["e_in"] > 0 and a["e_out"] == a["e_in"] and a["lives"] == 3 and a["end"] > 0,
+		"Stanza: il pilota prende la mascherina, passa la polvere alta senza danno, prende l'abbonamento e arriva in fondo",
+		"maschera %s, energia %d → %d, vite %d, fine %d" % [a["masked"], a["e_in"], a["e_out"], a["lives"], a["end"]])
+	check(runs[0]["hash"] == runs[1]["hash"] and runs[0]["end"] == runs[1]["end"], "Stanza: due giri nelle zone tossiche vengono uguali")
+
+	# A energia zero: nella stanza si ricomincia con l'energia piena, con le vite se ne perde una.
+	var tz: Rect2i = Hazards._components(gm.marks["%"])[0]
+	var inside_at := Vector2i(tz.get_center().x, gm.marks["n"][0].y)
+	var room2 := _hack_room(inside_at, func(_t: int) -> int: return 0)
+	Game.energy = 1
+	var refilled := -1
+	for t in 200:
+		room2._sim_tick()
+		if Game.energy == Game.ENERGY_MAX:
+			refilled = t
+			break
+	check(refilled >= 60 and refilled <= 95, "Energia: a zero nella stanza si ricomincia, con l'energia piena", "tick %d" % refilled)
+	_free_room(room2)
+	var room3 := _hack_room(inside_at, func(_t: int) -> int: return 0)
+	room3.use_lives = true
+	Game.energy = 1
+	for t in 100:
+		room3._sim_tick()
+	check(room3.fall_t >= 0 and Game.lives == 2 and Game.energy == 0, "Energia: a zero, con le vite, se ne perde una",
+		"buio %d, vite %d, energia %d" % [room3.fall_t, Game.lives, Game.energy])
+	_free_room(room3)
+	Game.reset_run()
+
+
+# --- Platform: i droni (Colomba, Vedetta, Segugio) ---------------------------------------------------
+
+## Una corsia di 60 celle col pavimento alla riga 12 (y = 240) e un drone per ogni voce di `ds`:
+## [tipo, cella, stato, colonne del percorso].
+static func _dr_grid(ds: Array) -> SolidGrid:
+	var rows := PackedStringArray()
+	for y in 13:
+		rows.append("#".repeat(60) if y == 12 else ".".repeat(60))
+	var g := SolidGrid.from_rows(rows)
+	var i := 0
+	for d: Array in ds:
+		var c: Vector2i = d[1]
+		var path: Array = []
+		for col: int in d[3]:
+			path.append(Vector2i(col, c.y))
+		g.entities.append({"tipo": "Nemico", "iid": "d%d" % i, "livello": "T", "pos": c, "size": Vector2i(25, 100),
+			"px": Vector2i(c.x * SolidGrid.TILE + SolidGrid.TILE / 2, (c.y + 1) * SolidGrid.TILE),
+			"campi": {"tipo": d[0], "stato": d[2], "percorso": path}})
+		i += 1
+	return g
+
+
+## GIG da x (in aria se `y` è sopra il pavimento) per `ticks` tick coi tasti di fn(t), coi droni
+## della griglia: il danno, gli eventi dei droni e di GIG, il primo tick col danno.
+func _dr_run(g: SolidGrid, x: int, y: int, ticks: int, fn: Callable) -> Dictionary:
+	var dr := Drones.new()
+	dr.build(g)
+	var p := PlatformPlayer.new(PlatformMoves.new(), g)
+	p.place(x, y)
+	p.can_jab = true
+	var dmg := 0
+	var first := -1
+	var ev: Array = []
+	var pev: Array = []
+	var blind := 0
+	var prev := 0
+	for t in ticks:
+		var held: int = fn.call(t)
+		p.step(InputFrame.new(held, held & ~prev))
+		prev = held
+		var n := p.events.size()
+		var d := dr.step(p)
+		for e in p.events:
+			pev.append(e)
+		for e: Array in dr.events:
+			ev.append(e[0])
+		blind = maxi(blind, dr.blind_t)
+		dmg += d
+		if d > 0 and first < 0:
+			first = t
+	return {"dmg": dmg, "first": first, "ev": ev, "pev": pev, "dr": dr, "p": p, "blind": blind,
+		"hash": hash([p.state_hash(), dr.state_hash()])}
+
+
+func _test_drones() -> void:
+	var still := func(_t: int) -> int: return 0
+	var right := func(_t: int) -> int: return InputFrame.RIGHT
+	# Il Segugio: GIG fermo davanti, al limite della vista. Il primo scatto si ferma corto (la vista
+	# arriva più in là dello scatto), ma il Segugio si avvicina e al secondo morde: 8 e una spinta.
+	var r := _dr_run(_dr_grid([["segugio", Vector2i(30, 11), "ronda", [20, 40]]]), 760, 240, 300, still)
+	var ev: Array = r["ev"]
+	var bite := ev.find("morso")
+	check(ev.find("abbaio") == 0 and ev.find("scatto_segugio") == 1 and bite > 2 and r["dmg"] >= Drones.DASH_DAMAGE
+		and (r["pev"] as Array).has("colpito"),
+		"Segugio: abbaia e scatta; il primo scatto resta corto, chi resta fermo viene morso al secondo (8 e una spinta)",
+		"eventi %s, danno %d" % [str(ev), r["dmg"]])
+	var r2 := _dr_run(_dr_grid([["segugio", Vector2i(30, 11), "ronda", [20, 40]]]), 760, 240, 300, still)
+	check(r["hash"] == r2["hash"], "Droni: due giri uguali vengono uguali")
+	# Alle spalle, entro 3 celle: lo fiuta, dopo mezzo secondo si gira e abbaia.
+	r = _dr_run(_dr_grid([["segugio", Vector2i(30, 11), "ronda", [20, 40]]]), 540, 240, 120, still)
+	var dg: Drones.Drone = (r["dr"] as Drones).drones[0]
+	check((r["ev"] as Array).has("abbaio") and dg.dir == -1, "Segugio: GIG alle spalle, lo fiuta, si gira e abbaia",
+		"eventi %s, verso %d" % [str(r["ev"]), dg.dir])
+	# Saltandolo mentre scatta, non morde.
+	var hop := func(t: int) -> int: return InputFrame.JUMP if t >= 30 and t < 50 else 0
+	r = _dr_run(_dr_grid([["segugio", Vector2i(30, 11), "ronda", [20, 40]]]), 720, 240, 140, hop)
+	check((r["ev"] as Array).has("scatto_segugio") and not (r["ev"] as Array).has("morso"),
+		"Segugio: chi lo salta mentre scatta non viene morso", "eventi %s, danno %d" % [str(r["ev"]), r["dmg"]])
+
+	# Il salto in testa: GIG cade sul dorso, il Segugio si rompe e GIG rimbalza, senza danno.
+	r = _dr_run(_dr_grid([["segugio", Vector2i(30, 11), "fermo", []]]), 610, 120, 40, still)
+	var dr: Drones = r["dr"]
+	check(dr.is_broken("d0") and r["dmg"] == 0 and (r["pev"] as Array).has("rimbalzo"),
+		"Droni: un salto in testa li rompe al primo colpo, e GIG ci rimbalza sopra",
+		"rotto %s, danno %d, eventi %s" % [dr.is_broken("d0"), r["dmg"], str(r["pev"])])
+
+	# Il jab: sul Segugio che non ansima fa solo «tonk»; la Colomba posata si rompe e il gradino sparisce.
+	var press := func(t: int) -> int: return InputFrame.ATTACK if t == 2 else 0
+	r = _dr_run(_dr_grid([["segugio", Vector2i(21, 11), "fermo", []]]), 360, 240, 20, press)
+	dr = r["dr"]
+	check(not dr.is_broken("d0") and (r["ev"] as Array).has("corazza"), "Segugio: il jab rimbalza sulla corazza, se non ansima",
+		"eventi %s" % str(r["ev"]))
+	var gc := _dr_grid([["colomba", Vector2i(20, 11), "fermo", []]])
+	var dc := Drones.new()
+	dc.build(gc)
+	dc.reset()
+	var perch := gc.cell(20, 11) == SolidGrid.Cell.THIN
+	gc.set_cell(20, 11, SolidGrid.Cell.EMPTY)
+	r = _dr_run(gc, 370, 240, 20, press)
+	dr = r["dr"]
+	dr.reset()
+	check(perch and dr.is_broken("d0") and gc.cell(20, 11) == SolidGrid.Cell.EMPTY and r["dmg"] == 0,
+		"Colomba: posata fa da gradino; col jab si rompe e il gradino sparisce",
+		"gradino %s, rotta %s, cella %d" % [perch, dr.is_broken("d0"), gc.cell(20, 11)])
+
+	# Il segno a portata di jab: il riquadro è quello del colpo vero, nei tick in cui colpisce, e lo
+	# porta solo il drone che una Persona chiede e non ha ancora avuto.
+	var pj := PlatformPlayer.new(PlatformMoves.new(), _dr_grid([]))
+	pj.place(600, 240)
+	pj.can_jab = true
+	var same := true
+	var seen := 0
+	var pprev := 0
+	for t in 14:
+		var held: int = InputFrame.ATTACK if t == 1 else 0
+		pj.step(InputFrame.new(held, held & ~pprev))
+		pprev = held
+		var jb := pj.jab_box()
+		if jb.has_area():
+			seen += 1
+			same = same and jb == Drones.jab_reach(pj)
+	var fv := Favors.new()
+	var qa := Favors.Person.new()
+	qa.serve = "v1"
+	var qb := Favors.Person.new()
+	qb.serve = "v2"
+	qb.thanked = true
+	fv.persone.append(qa)
+	fv.persone.append(qb)
+	var want := fv.wanted_drones()
+	check(seen > 0 and same and want.size() == 1 and want[0] == "v1",
+		"Droni: il segno «a portata di jab» usa il riquadro del colpo vero, e solo sul drone chiesto da una Persona",
+		"tick col colpo %d, uguali %s, chiesti %s" % [seen, same, str(want)])
+
+	# La Colomba in ronda: GIG sotto, la lente si accende, scende e spruzza; acceca, niente danno.
+	r = _dr_run(_dr_grid([["colomba", Vector2i(20, 4), "ronda", [15, 25]]]), 410, 240, 120, still)
+	ev = r["ev"]
+	check(ev.find("colomba_lente") >= 0 and ev.find("spruzzo") > ev.find("colomba_lente") and r["blind"] > 0 and r["dmg"] == 0,
+		"Colomba: GIG sotto, si accende la lente, poi scende e spruzza: acceca e non toglie energia",
+		"eventi %s, accecato %d, danno %d" % [str(ev), r["blind"], r["dmg"]])
+
+	# La Vedetta: GIG nel cono per 1 s, luce rossa, sirena, sigillo; incollato si stacca con 8 tasti.
+	var mash := func(t: int) -> int: return InputFrame.JUMP if t > 200 and t % 4 == 0 else 0
+	r = _dr_run(_dr_grid([["vedetta", Vector2i(20, 3), "ronda", [15, 25]]]), 480, 240, 320, mash)
+	ev = r["ev"]
+	var pev: Array = r["pev"]
+	check(ev.find("faro_rosso") >= 0 and ev.find("sirena") > ev.find("faro_rosso") and ev.find("sigillo_sparato") > ev.find("sirena")
+		and ev.has("pignorato") and r["dmg"] == Drones.SEAL_DAMAGE and pev.has("sigillo") and pev.has("staccato")
+		and pev.count("strappo") == Drones.SEAL_PRESSES - 1,
+		"Vedetta: vede GIG, luce rossa, sirena e sigillo «pignorato» da 6; si stacca con 8 tasti",
+		"eventi %s, danno %d, strappi %d" % [str(ev), r["dmg"], pev.count("strappo")])
+	# Sotto una tettoia il faro non arriva.
+	var gt := _dr_grid([["vedetta", Vector2i(20, 3), "ronda", [15, 25]]])
+	for x in range(18, 32):
+		gt.set_cell(x, 6, SolidGrid.Cell.THIN)
+	r = _dr_run(gt, 480, 240, 300, still)
+	check(not (r["ev"] as Array).has("faro_rosso"), "Vedetta: sotto una tettoia GIG non si vede", "eventi %s" % str(r["ev"]))
+
+	# I droni del prologo: sei Colombe in A; in B tre Vedette in ronda, quella della bici e il Segugio.
+	var count := func(level: String) -> Dictionary:
+		var d := Drones.new()
+		d.build(SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#" + level))
+		var c := {}
+		for x in d.drones:
+			c[x.tipo] = int(c.get(x.tipo, 0)) + 1
+		return c
+	var ca: Dictionary = count.call("Prologo_A_Cimitero")
+	var cb: Dictionary = count.call("Prologo_B_Fuga")
+	check(ca.get("colomba", 0) == 6 and cb.get("vedetta", 0) == 4 and cb.get("segugio", 0) == 1,
+		"Droni: il prologo ha sei Colombe al cimitero, quattro Vedette e un Segugio nella Fuga", "A %s, B %s" % [ca, cb])
+
+
+# --- Platform: i favori (ristori, oggetti, Persone e battute) ---------------------------------------
+
+## La corsia dei droni con le entità dei favori: [tipo, iid, x, y, campi], coi piedi a (x, y).
+static func _fv_grid(ents: Array, drones: Array = []) -> SolidGrid:
+	var g := _dr_grid(drones)
+	for e: Array in ents:
+		g.entities.append({"tipo": e[0], "iid": e[1], "livello": "T", "px": Vector2i(e[2], e[3]),
+			"pos": Vector2i(e[2] / SolidGrid.TILE, e[3] / SolidGrid.TILE - 1), "size": Vector2i(20, 20), "campi": e[4]})
+	return g
+
+
+## Gli sprite veri del Segugio e della Vedetta: ogni fase ha la sua animazione, i punti per gli aloni
+## e la luce del fotogramma; la Colomba resta greybox. Il disegno non tocca la simulazione.
+func _test_drone_sprites() -> void:
+	var dr := Drones.new()
+	var need := {"vedetta": ["patrol", "spot", "broken"],
+		"segugio": ["idle", "patrol", "sniff", "bark", "dash", "pant", "broken"]}
+	var pts := {"vedetta": ["beacon", "lamp"], "segugio": ["eye", "beacon", "vent", "collar"]}
+	for tipo: String in need:
+		var sh := dr._sheet(tipo)
+		var miss: Array = []
+		var bad: Array = []
+		if sh != null:
+			for a: String in need[tipo]:
+				if not sh.has_anim(StringName(a)):
+					miss.append(a)
+					continue
+				for f in sh.clip(StringName(a)).frames:
+					var lit := f.tags & (AnimFrame.TAG_LIGHT_PATROL | AnimFrame.TAG_LIGHT_ALERT | AnimFrame.TAG_LIGHT_OFF)
+					for k: String in pts[tipo]:
+						if not f.points.has(k):
+							bad.append("%s senza %s" % [a, k])
+					if lit == 0:
+						bad.append("%s senza luce" % a)
+		check(sh != null and sh.has_normals and miss.is_empty() and bad.is_empty() and sh.warnings.is_empty(),
+			"Droni: lo sprite di %s ha animazioni, normal map, punti e luci" % tipo,
+			"mancano %s; %s; avvisi %s" % [miss, bad.slice(0, 3), sh.warnings.slice(0, 3) if sh != null else []])
+	check(dr._sheet("colomba") == null, "Droni: la Colomba resta greybox", "")
+	# Ogni fase porta a un'animazione che c'è, a destra e a sinistra il fotogramma è lo stesso.
+	var missing: Array = []
+	for tipo: String in need:
+		var d := Drones.Drone.new()
+		d.tipo = tipo
+		for ph: int in Drones.Phase.values():
+			d.phase = ph
+			for br: bool in [false, true]:
+				d.broken = br
+				var n := dr.anim_name(d)
+				if not (n in need[tipo].map(func(a: String) -> StringName: return StringName(a))) or dr._sprite_frame(d, 37) == null:
+					missing.append("%s/%d/%s" % [tipo, ph, n])
+	check(missing.is_empty(), "Droni: ogni fase del Segugio e della Vedetta ha la sua animazione", str(missing.slice(0, 4)))
+	# La Vedetta che punta GIG dopo lo spintone ha la luce d'avviso, quella rotta è spenta.
+	var dv := Drones.Drone.new()
+	dv.tipo = "vedetta"
+	dv.lock = 5
+	var fl := dr._sprite_frame(dv, 3)
+	dv.broken = true
+	var fb := dr._sprite_frame(dv, 3)
+	check(fl != null and fl.has_tag(AnimFrame.TAG_LIGHT_ALERT) and fb != null and fb.has_tag(AnimFrame.TAG_LIGHT_OFF),
+		"Droni: la Vedetta che punta GIG è in avviso, quella rotta è spenta", "")
+
+## I perdoni veri della processione: le animazioni coi tempi del gioco (la nazzicata alla velocità
+## della fila, barcollo e scansa lunghi quanto la fila aperta) e quale tocca a chi.
+func _test_procession_sprites() -> void:
+	var pr := Processions.new()
+	var sh := pr._sheet()
+	var ok := sh != null and sh.has_normals and sh.warnings.is_empty()
+	var info := ""
+	if ok:
+		for a: String in ["nazzica", "barcollo", "scansa", "idle"]:
+			if not sh.has_anim(StringName(a)):
+				ok = false
+				info += " manca " + a
+		if ok:
+			var tot := [sh.clip(&"nazzica").total_ticks(), sh.clip(&"barcollo").total_ticks(), sh.clip(&"scansa").total_ticks()]
+			ok = tot == [2 * Processions.NAZZICA_PHASE, Processions.PUSH_OPEN, Processions.PUSH_OPEN] \
+				and sh.clip(&"nazzica").loop and not sh.clip(&"barcollo").loop
+			info = str(tot)
+	check(ok, "Processione: lo sprite dei perdoni ha nazzica, barcollo, scansa e idle coi tempi del gioco", info)
+	var w := Processions.Walk.new()
+	w.dir = 1
+	w.moving = true
+	var walk := [Processions.anim_name(w, 0), Processions.anim_name(w, 1)]
+	w.moving = false
+	var still := Processions.anim_name(w, 0)
+	w.open_t = Processions.PUSH_OPEN
+	var push := [Processions.anim_name(w, 0), Processions.anim_name(w, 1)]
+	w.dir = -1
+	var push_left := [Processions.anim_name(w, 0), Processions.anim_name(w, 1)]
+	check(walk == [&"nazzica", &"nazzica"] and still == &"idle" and push == [&"barcollo", &"scansa"] \
+			and push_left == [&"scansa", &"barcollo"],
+		"Processione: barcolla quello di coda, si scansa quello davanti, nazzica chi avanza",
+		"%s %s %s %s" % [walk, still, push, push_left])
+	# I due della coppia vanno sfasati di mezzo ciclo.
+	w.open_t = 0
+	w.moving = true
+	var f0 := pr.brother_frame(w, 0, 10)
+	var f1 := pr.brother_frame(w, 1, 10 + Processions.NAZZICA_PHASE)
+	var f2 := pr.brother_frame(w, 1, 10)
+	check(f0 != null and f0 == f1 and f0 != f2, "Processione: i due confratelli nazzicano sfasati", "")
+
+## Le firme di Totò (le tag REVENGE): si prendono passandoci sopra, una volta sola, e restano prese
+## alla ripartenza; quelle in alto non si prendono da terra. Nella Fuga del prologo ce ne sono tre.
+func _test_firme() -> void:
+	var right := func(_t: int, _p: PlatformPlayer, _f: Favors) -> int: return InputFrame.RIGHT
+	var tags := [["Firma", "f1", 500, 220, {"numero": 1}], ["Firma", "f2", 600, 60, {"numero": 2}]]
+	var r := _fv_run(_fv_grid(tags), 300, 200, right)
+	var fv: Favors = r["fv"]
+	check(not fv.is_empty() and fv.firme.size() == 2 and fv.firme[0].numero == 1 and fv.firme[0].taken
+		and not fv.firme[1].taken and (r["ev"] as Array).count("firma") == 1 and fv.firme_prese() == 1,
+		"Firme: GIG prende la tag passandoci sopra, quella in alto resta", "eventi %s" % str(r["ev"]))
+	var r2 := _fv_run(_fv_grid(tags), 300, 200, right)
+	check(r["hash"] == r2["hash"], "Firme: due giri uguali vengono uguali")
+	fv.reset()
+	var kept := fv.firme[0].taken
+	fv.reset(true)
+	check(kept and not fv.firme[0].taken, "Firme: la tag presa resta presa alla ripartenza, non a partita nuova", "")
+	var fb := Favors.new()
+	fb.build(SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#Prologo_B_Fuga"))
+	var nums: Array = []
+	for f in fb.firme:
+		nums.append(f.numero)
+	nums.sort()
+	check(nums == [1, 2, 3] and fb.tag_sheet() != null and fb.tag_sheet().has_anim(&"accesa") and fb.tag_sheet().has_anim(&"presa"),
+		"Firme: nella Fuga del prologo ci sono le tre tag REVENGE, con lo sprite accesa e presa", str(nums))
+
+## I Rompibili: pieni finché GIG non li sfonda di spalla. Dopo il riavvio con lo scatto: a terra SCATTO
+## parte solo con un Rompibile davanti, in aria lo scatto rompe quello che incontra. Prima del riavvio,
+## col braccio bloccato, a piena corsa. Il muro pieno resta.
+func _test_breakables() -> void:
+	# Un muro alla colonna 20, con una porta marcia alta quanto GIG (righe 10-14) sul pavimento (riga 15).
+	var door := func(rompibile: bool) -> SolidGrid:
+		var g := _room(40, 20, 15)
+		_box(g, 20, 20, 0, 14)
+		if rompibile:
+			for y in range(10, 15):
+				g.breakable[y * g.width + 20] = true
+		return g
+	var push := func(t: int) -> int: return _R | (_S if t == 20 else 0)
+	var g: SolidGrid = door.call(true)
+	var p := _pp(g, 340, 15)
+	var ev := _run_pp(p, 60, push)
+	var names: Array = []
+	for e: Array in ev:
+		names.append(e[1])
+	check(g.cell(20, 12) == SolidGrid.Cell.EMPTY and g.cell(20, 9) == SolidGrid.Cell.SOLID and g.broken.size() == 5
+		and g.breakable.is_empty() and p.px > 420 and names.count("rompe") == 1,
+		"Rompibili: la spallata rompe la porta marcia e GIG passa", "GIG %d, rotte %d, eventi %s" % [p.px, g.broken.size(), names])
+	var g2: SolidGrid = door.call(false)
+	var p2 := _pp(g2, 340, 15)
+	_run_pp(p2, 60, push)
+	check(g2.cell(20, 12) == SolidGrid.Cell.SOLID and p2.px < 400 and p2.state != PlatformPlayer.State.DASH,
+		"Rompibili: davanti a un muro pieno SCATTO a terra non fa niente", "GIG %d" % p2.px)
+	# Dopo il riavvio la corsa da sola non rompe: ci vuole lo scatto.
+	var run := func(_t: int) -> int: return _R
+	var g5: SolidGrid = door.call(true)
+	var p5 := _pp(g5, 240, 15)
+	_run_pp(p5, 60, run)
+	check(g5.broken.is_empty() and p5.px < 400, "Rompibili: dopo il riavvio la corsa senza scatto non rompe", "rotte %d" % g5.broken.size())
+	# Col braccio bloccato (prima del riavvio): a piena corsa la spalla sfonda la porta, appoggiati no.
+	var g3: SolidGrid = door.call(true)
+	var p3 := _pp(g3, 240, 15)
+	p3.arm_locked = true
+	var ev3 := _run_pp(p3, 70, run)
+	check(g3.broken.size() == 5 and p3.px > 420 and _count_events(ev3, "rompe") == 1,
+		"Rompibili: col braccio bloccato la porta si sfonda a piena corsa", "GIG %d, rotte %d" % [p3.px, g3.broken.size()])
+	var g6: SolidGrid = door.call(true)
+	var p6 := _pp(g6, 384, 15)
+	p6.arm_locked = true
+	_run_pp(p6, 40, push)
+	check(g6.broken.is_empty() and p6.px < 400, "Rompibili: col braccio bloccato, senza rincorsa, la porta resta",
+		"GIG %d, rotte %d" % [p6.px, g6.broken.size()])
+	# In aria: una parete di cassette alta (righe 4-11, sopra il pavimento una fessura di 3 celle piene).
+	var g4 := _room(40, 20, 15)
+	_box(g4, 20, 20, 0, 14)
+	for y in range(4, 12):
+		g4.breakable[y * g4.width + 20] = true
+	var p4 := _pp(g4, 340, 15)
+	var hop := func(t: int) -> int: return _R | (_J if t >= 2 and t < 14 else 0) | (_S if t == 14 else 0)
+	_run_pp(p4, 80, hop)
+	check(g4.broken.size() == 8 and p4.px > 420, "Rompibili: lo scatto in aria rompe la parete e GIG passa",
+		"GIG %d,%d, rotte %d" % [p4.px, p4.py, g4.broken.size()])
+	# Nel prologo: la porticina di A4 sono le sei celle Rompibile della colonna 188, righe 22-27.
+	var ga := SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#Prologo_A_Cimitero")
+	var cells: Array = ga.breakable.keys()
+	cells.sort()
+	var want: Array = []
+	for y in range(22, 28):
+		want.append(y * ga.width + 188)
+	check(cells == want, "Rompibili: in A la porticina della scala è Rompibile", str(cells))
+
+## I raccordi fra gioco e murale (l'aggancio): aprendo MP13 la telecamera del gioco va dove lo sprite di
+## GIG combacia con la sua figura, la figura compare per prima e lo spray parte da lei; sciogliendo MP08
+## il murale se ne va dai bordi verso la figura di GIG, che sfuma per ultima.
+func _test_scene_hook() -> void:
+	var sd := SceneData.load_scene(Prologue.PASSAGGIO)
+	check(sd.errors.is_empty() and str((sd.steps[1] as Dictionary).get("aggancio", "")) == "gig",
+		"Aggancio: il passaggio al capitolo 1 aggancia MP13 a GIG", "; ".join(sd.errors))
+	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	# GIG come al fermo del prologo: in aria, sulla posa della figura.
+	room.player.anim.show_frame(&"jump_arc", Prologue.OUTRO_ARC)
+	room._scene_request = {"id": Prologue.PASSAGGIO, "poses": {"gig": room.scene_pose_player("")}}
+	room._start_scene()
+	var sp := room.scene
+	var frames := 0
+	while sp.mural() == null and frames < 200:
+		room._scene_frame()
+		frames += 1
+	var m := sp.mural()
+	check(m != null and m.hooked == "gig" and frames >= ScenePlayer.HOOK_TICKS and frames <= ScenePlayer.HOOK_TICKS + 3,
+		"Aggancio: prima la telecamera del gioco va su GIG, poi il murale", "fotogramma %d" % frames)
+	if m == null:
+		_free_room(room)
+		return
+	var p: ScenePuppet = sp.puppets["gig"]
+	var sr := p.body_rect()
+	var z := room.zoom
+	var s_feet := room._view.position + Vector2(sr.get_center().x, sr.end.y) * z
+	var fr := m.figure_rect("gig")
+	var v := m.view()
+	var f_feet := View.SIZE / 2.0 + (Vector2(fr.get_center().x, fr.end.y) - Vector2(v[0])) * float(v[1])
+	# La figura è la stessa posa dello sprite: altezza e larghezza combaciano tutte e due (entro un pixel
+	# del gioco a zoom 2); lo zoom del gioco è il 2 intero chiesto dal passaggio ("aggancio_zoom").
+	var s_size := sr.size * z
+	var f_size := fr.size * float(v[1])
+	check(s_feet.distance_to(f_feet) <= 3.0 and absf(s_size.y - f_size.y) <= 1.0 and absf(s_size.x - f_size.x) <= 2.0
+			and is_equal_approx(z, 2.0),
+		"Aggancio: all'apertura di MP13 lo sprite di GIG e la sua figura combaciano (piedi e grandezza), a zoom 2",
+		"sprite %s grande %s, figura %s grande %s, zoom del gioco %.2f" % [s_feet, s_size, f_feet, f_size, z])
+	# Le gocce cyan sotto i piedi della figura non sono corpo: i piedi sono quelli veri.
+	var tex_h := 0.0
+	for f: Dictionary in m._figures:
+		if str(f["name"]) == "gig":
+			tex_h = (f["tex"] as Texture2D).get_size().y
+	check(fr.size.y > 60.0 and fr.size.y < tex_h - 10.0,
+		"Aggancio: il corpo della figura di MP13 non conta le gocce sotto i piedi", "alto %.0f su %.0f" % [fr.size.y, tex_h])
+	for i in SceneMural.HOOK_FADE_TICKS:
+		room._scene_frame()
+	var fig_a := 0.0
+	var other_a := 1.0
+	for f: Dictionary in m._figures:
+		if str(f["name"]) == "gig":
+			fig_a = (f["sprite"] as Sprite2D).modulate.a
+		else:
+			other_a = minf(other_a, (f["sprite"] as Sprite2D).modulate.a)
+	check(m.amount() < 0.4 and fig_a >= 0.99 and other_a == 0.0 and p.modulate.a <= 0.01
+			and is_equal_approx(float(m._mat.get_shader_parameter(&"focus_mix")), SceneMural.HOOK_MIX)
+			and Vector2(m._mat.get_shader_parameter(&"focus")) == fr.get_center(),
+		"Aggancio: la figura compare per prima, le altre a fine spray, lo sprite sfuma sotto di lei e lo spray parte dalla figura",
+		"spray %.2f, figura %.2f, altre %.2f, sprite %.2f" % [m.amount(), fig_a, other_a, p.modulate.a])
+	_free_room(room)
+
+	# Sciogliendo MP08 (le figure di MP06): dai bordi verso GIG, che resta fino in fondo.
+	var m8 := SceneMural.new()
+	m8.setup({"id": "prologo/mp08_titolo", "rivela": false})
+	check(m8.hook("gig") and not m8.hook("nessuno") and m8.hooked == "gig", "Aggancio: MP08 aggancia la figura di GIG di MP06")
+	m8.melt(90)
+	var c8 := m8.figure_rect("gig").get_center()
+	check(bool(m8._mat.get_shader_parameter(&"melt_inward")) and Vector2(m8._mat.get_shader_parameter(&"melt_center")) == c8,
+		"Aggancio: MP08 si scioglie verso la figura di GIG")
+	var gig_a: Array = []
+	var far_a: Array = []
+	for i in 90:
+		m8.tick()
+		for f: Dictionary in m8._figures:
+			if str(f["name"]) == "gig":
+				gig_a.append((f["sprite"] as Sprite2D).modulate.a)
+			elif str(f["name"]) == "perdoni":
+				far_a.append((f["sprite"] as Sprite2D).modulate.a)
+	check(gig_a.size() == 90 and far_a.size() == 90 and gig_a[60] == 1.0 and far_a[60] < 1.0 and gig_a[89] == 0.0 and m8.is_closed(),
+		"Aggancio: sciogliendo, la figura di GIG se ne va per ultima",
+		"GIG %s, perdoni %s" % [gig_a.slice(55, 90, 5), far_a.slice(55, 90, 5)])
+	m8.free()
+
+## GIG da x sul pavimento per `ticks` tick coi tasti di fn(t, p, favori), coi favori e i droni
+## della griglia: l'energia alla fine, gli eventi dei favori e i favori.
+func _fv_run(g: SolidGrid, x: int, ticks: int, fn: Callable, energy: int = 60) -> Dictionary:
+	var fv := Favors.new()
+	fv.build(g)
+	var dr := Drones.new()
+	dr.build(g)
+	var p := PlatformPlayer.new(PlatformMoves.new(), g)
+	p.place(x, 240)
+	p.can_jab = true
+	var ev: Array = []
+	var prev := 0
+	var opened_at := -1
+	for t in ticks:
+		var held: int = fn.call(t, p, fv)
+		var fr := InputFrame.new(held, held & ~prev)
+		prev = held
+		p.step(fr)
+		dr.step(p)
+		energy = fv.step(p, fr.was_pressed(InputFrame.UP), dr, energy)
+		for e: Array in fv.events:
+			ev.append(e[0])
+		if fv.changed and opened_at < 0:
+			opened_at = t
+	return {"energy": energy, "ev": ev, "fv": fv, "dr": dr, "p": p, "opened_at": opened_at,
+		"hash": hash([p.state_hash(), fv.state_hash(), energy])}
+
+
+func _test_favors() -> void:
+	var right := func(_t: int, _p: PlatformPlayer, _f: Favors) -> int: return InputFrame.RIGHT
+	# I ristori: si prendono passandoci sopra; non superano 120, la scarcella arriva a 150.
+	var r := _fv_run(_fv_grid([["Ristoro", "r0", 400, 240, {"tipo": "taralli"}]]), 300, 60, right, 50)
+	var r2 := _fv_run(_fv_grid([["Ristoro", "r0", 400, 240, {"tipo": "taralli"}]]), 300, 60, right, 110)
+	var r3 := _fv_run(_fv_grid([["Ristoro", "r0", 400, 240, {"tipo": "scarcella"}]]), 300, 60, right, 100)
+	var r4 := _fv_run(_fv_grid([["Ristoro", "r0", 400, 240, {"tipo": "taralli"}]]), 300, 60, right, 140)
+	check(r["energy"] == 70 and (r["ev"] as Array).count("ristoro") == 1 and r2["energy"] == Game.ENERGY_MAX
+		and r3["energy"] == Favors.OVER_MAX and r4["energy"] == 140,
+		"Ristori: i taralli danno 20 fino a 120, la scarcella arriva a 150 e niente toglie l'energia in più",
+		"taralli %d, al tetto %d, scarcella %d, sopra %d" % [r["energy"], r2["energy"], r3["energy"], r4["energy"]])
+
+	# La Persona che non chiede niente ringrazia subito, e il ristoro del premio compare solo allora.
+	var prize := [["Persona", "q0", 500, 240, {"id": "x", "chiede": "", "serve": "", "premio": ["r0"], "ringrazia": ""}],
+		["Ristoro", "r0", 600, 240, {"tipo": "panzerotto"}]]
+	var fv0 := Favors.new()
+	fv0.build(_fv_grid(prize))
+	r = _fv_run(_fv_grid(prize), 300, 200, right, 40)
+	var fv: Favors = r["fv"]
+	var far := [["Persona", "q0", 1100, 240, {"id": "x", "chiede": "", "serve": "", "premio": ["r0"], "ringrazia": ""}],
+		["Ristoro", "r0", 600, 240, {"tipo": "panzerotto"}]]
+	r2 = _fv_run(_fv_grid(far), 300, 200, right, 40)
+	check(fv0.ristori[0].hidden and fv.persone[0].thanked and fv.is_open("r0") and r["energy"] == 100
+		and not (r2["fv"] as Favors).ristori[0].taken and r2["energy"] == 40,
+		"Persone: il ristoro del premio è nascosto finché la Persona non ringrazia",
+		"nascosto %s, grazie %s, energia %d, senza grazie %d" % [fv0.ristori[0].hidden, fv.persone[0].thanked, r["energy"], r2["energy"]])
+
+	# I fiori: SU li prende, GIG li porta al loculo e SU li posa; la signora ringrazia e apre il premio.
+	var flowers := [["Oggetto", "o0", 400, 240, {"tipo": "fiori", "per": "L0"}],
+		["Battuta", "L0", 700, 240, {"chi": "persona", "id_testo": "", "quando": "vista"}],
+		["Persona", "q0", 900, 240, {"id": "signora", "chiede": "", "serve": "L0", "premio": ["g0"], "ringrazia": ""}]]
+	var carry := func(t: int, p: PlatformPlayer, f: Favors) -> int:
+		if t < 6:
+			return InputFrame.UP if t == 3 else 0
+		if f.oggetti[0].state == 1 and p.px >= 700:
+			return InputFrame.UP if t % 8 == 0 else 0
+		return InputFrame.RIGHT
+	r = _fv_run(_fv_grid(flowers), 400, 200, carry)
+	fv = r["fv"]
+	var ev: Array = r["ev"]
+	check(ev.find("preso") >= 0 and ev.find("posato") > ev.find("preso") and ev.find("grazie") > ev.find("posato")
+		and fv.oggetti[0].state == 2 and fv.oggetti[0].px == Vector2i(700, 240) and fv.is_open("g0"),
+		"Oggetti: SU prende i fiori, al loculo SU li posa, e la signora ringrazia e apre il premio",
+		"eventi %s, stato %d" % [str(ev), fv.oggetti[0].state])
+	r2 = _fv_run(_fv_grid(flowers), 400, 200, carry)
+	check(r["hash"] == r2["hash"], "Favori: due giri uguali vengono uguali")
+	# Le pose della signora, solo disegno: tiene i fiori (che per terra non si disegnano), li porge quando
+	# chiede, guarda su verso il loculo quando GIG li ha presi, ringrazia coi taralli e poi resta lì.
+	var fp := Favors.new()
+	fp.build(_fv_grid(flowers))
+	var sg: Favors.Person = fp.persone[0]
+	var sp_poses := []
+	var held0 := fp.in_hands(fp.oggetti[0])
+	sp_poses.append("%s %d" % [fp.person_pose(sg, 1000, 5)[1], fp.person_pose(sg, 1000, 5)[3]])
+	sg.asked = true
+	sp_poses.append("%s %d" % [fp.person_pose(sg, 1000, 5)[1], fp.person_pose(sg, 1000, 5)[3]])
+	fp.oggetti[0].state = 1
+	sp_poses.append("%s %d" % [fp.person_pose(sg, 1000, 5)[1], fp.person_pose(sg, 1000, 5)[3]])
+	fp.oggetti[0].state = 2
+	sg.thanked = true
+	sp_poses.append("%s %d" % [fp.person_pose(sg, 1000, 5)[1], fp.person_pose(sg, 1000, 5)[3]])
+	sg.thanked_t = 500
+	sp_poses.append("%s %d" % [fp.person_pose(sg, 1000, 5)[1], fp.person_pose(sg, 1000, 5)[3]])
+	var sheets_ok := fp.person_sheet("signora") != null and fp.person_sheet("signora_dopo") != null 		and fp.person_sheet("fruttivendolo") != null and fp.person_sheet("x") == null
+	check(sheets_ok and held0 and not fp.in_hands(fp.oggetti[0])
+			and sp_poses == ["idle 1", "porge 1", "guarda_su -1", "taralli 1", "idle 1"],
+		"Persone: la signora ha lo sprite vero, tiene i fiori, li porge, guarda il loculo e ringrazia coi taralli",
+		"fogli %s, in mano %s, pose %s" % [sheets_ok, held0, sp_poses])
+	# Lontano dal loculo i fiori non si posano; alla ripartenza tornano a terra, il favore fatto resta.
+	var wrong := func(t: int, _p: PlatformPlayer, _f: Favors) -> int:
+		return InputFrame.UP if t == 3 or t == 40 else (InputFrame.RIGHT if t > 5 and t < 20 else 0)
+	r = _fv_run(_fv_grid(flowers), 400, 60, wrong)
+	fv = r["fv"]
+	var still_held: bool = fv.held != null
+	fv.reset()
+	var done: Favors = r2["fv"]
+	done.reset()
+	check(still_held and fv.held == null and fv.oggetti[0].state == 0 and fv.oggetti[0].px == Vector2i(400, 240)
+		and done.persone[0].thanked and done.is_open("g0") and done.oggetti[0].state == 2,
+		"Oggetti: lontano dal posto giusto restano in mano; alla ripartenza tornano a terra, i favori fatti restano",
+		"in mano %s, stato %d" % [still_held, fv.oggetti[0].state])
+
+	# La Persona servita da un drone rotto: GIG rompe la Colomba col jab, e lei ringrazia.
+	var jab := func(t: int, _p: PlatformPlayer, _f: Favors) -> int: return InputFrame.ATTACK if t == 2 else 0
+	var gd := _fv_grid([["Persona", "q0", 450, 240, {"id": "f", "chiede": "", "serve": "d0", "premio": ["g0"], "ringrazia": ""}]],
+		[["colomba", Vector2i(20, 11), "fermo", []]])
+	r = _fv_run(gd, 370, 30, jab)
+	fv = r["fv"]
+	var broke: bool = (r["dr"] as Drones).is_broken("d0")
+	check(broke and fv.persone[0].thanked and fv.is_open("g0") and r["opened_at"] > 0,
+		"Persone: il fruttivendolo ringrazia quando il drone che gli serve è rotto, e il premio si apre",
+		"rotto %s, grazie %s, aperto al tick %d" % [broke, fv.persone[0].thanked, r["opened_at"]])
+
+	# Le battute: «vista» quando GIG è vicino, «passaggio» quando la supera; una volta sola.
+	var back := func(t: int, _p: PlatformPlayer, _f: Favors) -> int: return InputFrame.RIGHT if t < 200 else InputFrame.LEFT
+	r = _fv_run(_fv_grid([["Battuta", "b0", 600, 240, {"chi": "gig", "id_testo": "", "quando": "vista"}],
+		["Battuta", "b1", 650, 240, {"chi": "gig", "id_testo": "", "quando": "passaggio"}]]), 300, 400, back)
+	fv = r["fv"]
+	check((r["ev"] as Array).count("battuta") == 2 and fv.battute[0].said and fv.battute[1].said,
+		"Battute: la «vista» e il «passaggio» si dicono una volta sola", "eventi %s" % str(r["ev"]))
+
+	# Il caffè dà uno scatto: GIG corre più lontano, poi torna alla velocità normale.
+	r = _fv_run(_fv_grid([["Ristoro", "r0", 330, 240, {"tipo": "caffe"}]]), 300, 120, right)
+	r2 = _fv_run(_fv_grid([["Ristoro", "r0", 330, 240, {"tipo": "taralli"}]]), 300, 120, right)
+	r3 = _fv_run(_fv_grid([["Ristoro", "r0", 330, 240, {"tipo": "caffe"}]]), 300, 260, right)
+	var pc: PlatformPlayer = r["p"]
+	var pt: PlatformPlayer = r2["p"]
+	check(pc.px > pt.px + 20 and pc.boost_pct == Favors.COFFEE_PCT and (r3["p"] as PlatformPlayer).boost_pct == 100
+		and (r3["fv"] as Favors).coffee_t == 0,
+		"Ristori: il caffè dà uno scatto di due secondi e mezzo, poi la corsa torna normale",
+		"col caffè %d, coi taralli %d" % [pc.px, pt.px])
+
+	# La bombola di ARIA+ non ridà energia: ricarica la Scarica.
+	r = _fv_run(_fv_grid([["Ristoro", "r0", 400, 240, {"tipo": "bombola"}]]), 300, 60, right, 50)
+	check(r["energy"] == 50 and (r["ev"] as Array).has("scarica"),
+		"Ristori: la bombola ricarica la Scarica e non l'energia", "energia %d, eventi %s" % [r["energy"], str(r["ev"])])
+
+	# La battuta «dopo_arena» aspetta la fine dell'arena, ovunque sia GIG, e si dice una volta.
+	var fa0 := Favors.new()
+	var ga := _fv_grid([["Battuta", "b0", 2000, 240, {"chi": "gig", "id_testo": "", "quando": "dopo_arena"}]])
+	fa0.build(ga)
+	var pa := PlatformPlayer.new(PlatformMoves.new(), ga)
+	pa.place(300, 240)
+	var said := 0
+	for t in 120:
+		fa0.arena_done = t >= 60
+		fa0.step(pa, false, null, 60)
+		said += (fa0.events as Array).filter(func(e: Array) -> bool: return e[0] == "battuta").size()
+		if t == 59 and fa0.battute[0].said:
+			said = -100
+	check(said == 1, "Battute: la «dopo_arena» parte appena finisce l'arena, una volta sola", "dette %d" % said)
+
+	# Le voci delle battute in gioco del prologo: dove ci sono testi e voci (sviluppo), tornano tutte.
+	if SceneLines.available("prologo") and SceneVoices.dir_of("prologo") != "":
+		var mute: Array = []
+		for id: String in ["signora_1", "signora_2", "fruttivendolo_1", "loculo_marito"]:
+			var tx := SceneLines.find("prologo", Favors.LINES_SCENE, id)
+			if tx == "" or SceneVoices.voice("prologo", Favors.LINES_SCENE, id, tx).is_empty():
+				mute.append(id)
+		check(mute.is_empty(), "Voci: le battute in gioco del prologo hanno la voce giusta", "mute %s" % str(mute))
+
+	# Il prologo: la signora coi fiori e tre ristori al cimitero; il fruttivendolo nella Fuga.
+	# Quello che chiedono e i premi puntano a cose che esistono.
+	var census := func(level: String) -> Array:
+		var g := SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#" + level)
+		var f := Favors.new()
+		f.build(g)
+		var d := Drones.new()
+		d.build(g)
+		var ok := true
+		for q in f.persone:
+			var known := q.serve == ""
+			for it in f.oggetti:
+				known = known or it.per == q.serve
+			for x in d.drones:
+				known = known or x.iid == q.serve
+			ok = ok and known and not q.premio.is_empty()
+			for e: Dictionary in g.entities:
+				if String(e["iid"]) in q.premio:
+					ok = ok and String(e["tipo"]) in ["Ristoro", "Cancello"]
+		return [f.persone.size(), f.oggetti.size(), f.ristori.size(), ok]
+	var fa: Array = census.call("Prologo_A_Cimitero")
+	var fb: Array = census.call("Prologo_B_Fuga")
+	check(fa[0] == 1 and fa[1] == 1 and fa[2] >= 3 and fa[3] and fb[0] == 1 and fb[3],
+		"Favori: nel prologo la signora coi fiori al cimitero e il fruttivendolo nella Fuga, coi riferimenti giusti",
+		"A %s, B %s" % [fa, fb])
+
+
+# --- Platform: le processioni (muro morbido, portone, la Vedetta davanti ai cappucci) -----------------
+
+## La corsia dei droni con una processione di 80×100 coi piedi a (x, 240), che va fino alla
+## colonna `to` e gira nel portone della colonna `door` (-1: niente portone).
+static func _pr_grid(x: int, to: int, door: int, vel: float = 0.6, drones: Array = []) -> SolidGrid:
+	var g := _dr_grid(drones)
+	var c := {"percorso": [Vector2i(x / SolidGrid.TILE, 11), Vector2i(to, 11)], "velocita": vel, "nascosta": false}
+	if door >= 0:
+		c["sparisce_a"] = Vector2i(door, 11)
+	g.entities.append({"tipo": "Processione", "iid": "p0", "livello": "T", "px": Vector2i(x, 240),
+		"pos": Vector2i(x / SolidGrid.TILE, 7), "size": Vector2i(80, 100), "campi": c})
+	return g
+
+
+## GIG da x per `ticks` tick coi tasti di fn(t), con le processioni e i droni della griglia, nell'ordine
+## della stanza: GIG, processioni, droni.
+func _pr_run(g: SolidGrid, x: int, ticks: int, fn: Callable) -> Dictionary:
+	var pr := Processions.new()
+	pr.build(g)
+	var dr := Drones.new()
+	dr.build(g)
+	var p := PlatformPlayer.new(PlatformMoves.new(), g)
+	p.place(x, 240)
+	p.can_jab = true
+	var ev: Array = []
+	var evt: Array = []
+	var dmg := 0
+	var jabs := 0
+	var prev := 0
+	for t in ticks:
+		var held: int = fn.call(t)
+		var fr := InputFrame.new(held, held & ~prev)
+		p.step(fr)
+		prev = held
+		if p.jab_t > 0:
+			jabs += 1
+		pr.step(p, fr.was_pressed(InputFrame.DASH))
+		for e: Array in pr.events:
+			ev.append(e[0])
+			evt.append([e[0], t])
+		dr.shields = pr.shields()
+		if pr.pushed:
+			dr.alert_pending = true
+		dmg += dr.step(p)
+		for e: Array in dr.events:
+			ev.append(e[0])
+			evt.append([e[0], t])
+	return {"ev": ev, "evt": evt, "pr": pr, "dr": dr, "p": p, "dmg": dmg, "jabs": jabs,
+		"hash": hash([p.state_hash(), pr.state_hash(), dr.state_hash()])}
+
+
+func _test_processions() -> void:
+	var right := func(_t: int) -> int: return InputFrame.RIGHT
+	var still := func(_t: int) -> int: return 0
+	# Il muro morbido: GIG che le corre dietro si ferma al bordo, senza danno, e lei va avanti.
+	var r := _pr_run(_pr_grid(400, 40, -1), 250, 200, right)
+	var p: PlatformPlayer = r["p"]
+	var w: Processions.Walk = (r["pr"] as Processions).walks[0]
+	check(p.right() <= w.rect().position.x and p.right() >= w.rect().position.x - 4 and r["dmg"] == 0 and w.px() > 400,
+		"Processione: GIG che le va contro si ferma al bordo, senza danno, e lei avanza",
+		"GIG %d, bordo %d, processione %d" % [p.right(), w.rect().position.x, w.px()])
+	# GIG fermo davanti: lei aspetta che si tolga.
+	r = _pr_run(_pr_grid(400, 40, -1), 470, 600, still)
+	p = r["p"]
+	w = (r["pr"] as Processions).walks[0]
+	check(w.rect().end.x <= p.left() and w.px() < 440 and p.px == 470,
+		"Processione: con GIG fermo davanti si ferma e aspetta", "fine %d, GIG %d" % [w.rect().end.x, p.left()])
+	# Vicino a lei il jab non parte; lontano sì.
+	var jab := func(t: int) -> int: return InputFrame.ATTACK if t % 30 == 5 else 0
+	r = _pr_run(_pr_grid(400, 40, -1), 335, 60, jab)
+	var r2 := _pr_run(_pr_grid(400, 40, -1), 150, 60, jab)
+	check(r["jabs"] == 0 and r2["jabs"] > 0, "Processione: vicino ai confratelli il colpo non parte",
+		"vicino %d, lontano %d" % [r["jabs"], r2["jabs"]])
+	# Alla fine del percorso gira nel portone e sparisce: non ferma più niente.
+	r = _pr_run(_pr_grid(400, 22, 23), 100, 500, still)
+	var pr: Processions = r["pr"]
+	check((r["ev"] as Array).count("portone") == 1 and pr.walks[0].gone and pr.shields().is_empty(),
+		"Processione: alla fine gira nel portone e sparisce", "eventi %s" % str(r["ev"]))
+	r2 = _pr_run(_pr_grid(400, 22, 23), 100, 500, still)
+	check(r["hash"] == r2["hash"], "Processione: due giri uguali vengono uguali")
+
+	# La Vedetta sopra la processione: il faro si ferma sui cappucci, «SOGGETTO NON IDENTIFICABILE», e
+	# GIG lì accanto non viene visto. Senza processione, lo stesso GIG lo vede.
+	var ved := [["vedetta", Vector2i(20, 3), "ronda", [15, 25]]]
+	r = _pr_run(_pr_grid(420, 40, -1, 0.0, ved), 480, 240, still)
+	var ev: Array = r["ev"]
+	var r3 := _dr_run(_dr_grid(ved), 480, 240, 240, still)
+	var d: Drones.Drone = (r["dr"] as Drones).drones[0]
+	check(ev.has("non_identificabile") and not ev.has("faro_rosso") and r["dmg"] == 0 and (r3["ev"] as Array).has("faro_rosso"),
+		"Vedetta: davanti ai cappucci si ferma, «non identificabile», e GIG accanto alla processione passa",
+		"eventi %s, senza processione %s, fase %d" % [str(ev), str(r3["ev"]), d.phase])
+
+	# Lo spintone: SCATTO a terra attaccato alla coda. La fila si apre e GIG passa davanti; senza
+	# SCATTO resta dietro. La Vedetta lì sopra lo prende subito: faro rosso, poi il sigillo.
+	var shove := func(t: int) -> int: return InputFrame.RIGHT | (InputFrame.DASH if t == 60 else 0)
+	r = _pr_run(_pr_grid(400, 40, -1), 250, 160, shove)
+	p = r["p"]
+	w = (r["pr"] as Processions).walks[0]
+	r2 = _pr_run(_pr_grid(400, 40, -1), 250, 160, right)
+	check((r["ev"] as Array).count("spintone") == 1 and p.left() >= w.rect().end.x and r["dmg"] == 0
+		and (r2["p"] as PlatformPlayer).right() <= (r2["pr"] as Processions).walks[0].rect().position.x,
+		"Processione: con lo spintone la fila si apre e GIG passa davanti; senza resta dietro",
+		"GIG %d, fronte %d, eventi %s" % [p.left(), w.rect().end.x, str(r["ev"])])
+	var shove2 := func(t: int) -> int: return InputFrame.RIGHT | (InputFrame.DASH if t == 30 else 0)
+	r = _pr_run(_pr_grid(420, 40, -1, 0.0, ved), 330, 120, shove2)
+	var et: Array = r["evt"]
+	var t_push := -1
+	var t_red := -1
+	var t_seal := -1
+	for x: Array in et:
+		if x[0] == "spintone" and t_push < 0:
+			t_push = x[1]
+		elif x[0] == "faro_rosso" and t_push >= 0 and t_red < 0:
+			t_red = x[1]
+		elif x[0] == "sigillo_sparato" and t_push >= 0 and t_seal < 0:
+			t_seal = x[1]
+	check(t_push >= 0 and t_red >= t_push and t_red <= t_push + 1 and t_seal > t_red and t_seal <= t_push + Drones.ALERT_TICKS + 2,
+		"Vedetta: dopo lo spintone il faro prende GIG subito e il sigillo parte",
+		"spintone %d, faro %d, sigillo %d" % [t_push, t_red, t_seal])
+	r2 = _pr_run(_pr_grid(420, 40, -1, 0.0, ved), 330, 120, shove2)
+	check(r["hash"] == r2["hash"], "Processione: due spintoni uguali vengono uguali")
+
+	# Nella Fuga del prologo c'è una processione, che finisce nel portone.
+	var pb := Processions.new()
+	pb.build(SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#Prologo_B_Fuga"))
+	check(pb.walks.size() == 1 and pb.walks[0].door and not pb.walks[0].hidden and pb.walks[0].stops.size() >= 2,
+		"Processione: nella Fuga del prologo c'è la processione, che finisce nel portone",
+		"%d processioni" % pb.walks.size())
+
+
 # --- Platform: l'arena della stanza -----------------------------------------------------------------
 
 ## Un giro nell'arena della stanza col pilota automatico, partendo 100 px prima del punto d'ingresso
@@ -1577,6 +2579,29 @@ func _test_arm_locked() -> void:
 	var ev := _run_pp(p, 120, func(t: int) -> int: return _J if (t < 20 or (t >= 22 and t < 50)) else 0)
 	check(_count_events(ev, "spinta") == 0 and absi(p.last_peak - full) <= 1, "Braccio bloccato: niente Spinta, il salto resta quello semplice",
 		"spinte %d, %d px contro %d" % [_count_events(ev, "spinta"), p.last_peak, full])
+	# Il SALTO premuto in aria non fa niente, ma lo si sente: l'evento del clic a vuoto, una volta.
+	check(_count_events(ev, "braccio_a_vuoto") == 1, "Braccio bloccato: SALTO in aria fa il clic a vuoto, una volta",
+		"clic %d" % _count_events(ev, "braccio_a_vuoto"))
+	# Premuto poco prima di atterrare diventa il salto all'atterraggio: niente clic.
+	p = _pp(g, 125, 10)
+	p.arm_locked = true
+	var pa := p
+	var near := [-1]
+	ev = _run_pp(p, 150, func(t: int) -> int:
+		if t < 10:
+			return _J
+		if near[0] < 0 and pa.state == PlatformPlayer.State.AIR and pa.vy > 0 and pa.py >= 10 * T - 12:
+			near[0] = t
+			return _J
+		return 0)
+	check(near[0] > 0 and _count_events(ev, "braccio_a_vuoto") == 0 and _count_events(ev, "jump") == 2,
+		"Braccio bloccato: SALTO poco prima di atterrare è il salto dopo, senza clic",
+		"premuto al tick %d, clic %d, salti %d" % [near[0], _count_events(ev, "braccio_a_vuoto"), _count_events(ev, "jump")])
+	# Col braccio libero il SALTO in aria è la Spinta, mai il clic.
+	p = _pp(g, 125, 10)
+	ev = _run_pp(p, 120, func(t: int) -> int: return _J if (t < 20 or (t >= 22 and t < 50)) else 0)
+	check(_count_events(ev, "braccio_a_vuoto") == 0 and _count_events(ev, "spinta") == 1, "Braccio libero: SALTO in aria è la Spinta, senza clic",
+		"clic %d, spinte %d" % [_count_events(ev, "braccio_a_vuoto"), _count_events(ev, "spinta")])
 	p = _pp(g, 125, 10)
 	p.arm_locked = true
 	var dashed := [false]
@@ -2008,11 +3033,15 @@ func _test_esattore() -> void:
 
 # --- Il prologo -------------------------------------------------------------------------------------
 
-## Il prologo pronto, col pilota automatico o con gli ingressi di `input_fn`.
-func _prologue_room(input_fn: Callable = Callable()) -> Prologue:
+## Il prologo pronto, col pilota automatico o con gli ingressi di `input_fn`. Di base quello di prima,
+## in un livello solo; `file` sceglie il prologo nuovo, a due livelli.
+func _prologue_room(input_fn: Callable = Callable(), file: String = Prologue.PROLOGUE_V1) -> Prologue:
 	Game.reset_run()
+	# I registri copiati restano per la sessione: ogni giro di prova parte senza.
+	Game.registri.clear()
 	SpriteSheet.clear_cache()
 	var room := Prologue.new()
+	room.map_file = file
 	if input_fn.is_valid():
 		room.configure({"input": PlayerInput.from_provider(input_fn), "sound": false})
 	else:
@@ -2066,7 +3095,7 @@ func _prologue_run(max_ticks: int) -> Dictionary:
 
 
 func _test_prologue() -> void:
-	var gm := SolidGrid.load_file(Prologue.PROLOGUE_MAP)
+	var gm := SolidGrid.load_file(Prologue.PROLOGUE_V1)
 	var missing: Array[String] = []
 	for m: String in ["M", "X", "Z", "/"] + Prologue.CHECKPOINT_SIGNS:
 		if not gm.marks.has(m):
@@ -2138,6 +3167,19 @@ func _test_scene_voices() -> void:
 	DirAccess.remove_absolute(root + "/finto")
 	DirAccess.remove_absolute(root)
 
+
+## I pensieri di Totò (decisione 97): i tre puntini davanti, una volta sola; nelle scene del prologo
+## la voce fuori campo è un pensiero, arancio e senza nome.
+func _test_scene_thoughts() -> void:
+	var dots := UiFont.safe_text(ScenePlayer.THOUGHT_DOTS, true)
+	check(ScenePlayer.thought_text("Avevo undici anni.") == dots + "Avevo undici anni.", "Pensieri: i tre puntini davanti")
+	check(ScenePlayer.thought_text("…Già detto.") == "…Già detto.", "Pensieri: i puntini non si raddoppiano")
+	check(ScenePlayer.thought_text("...Già detto.") == "...Già detto.", "Pensieri: nemmeno con tre punti")
+	for id in ["introduzione", "ricordo_mimmo", "passaggio_1"]:
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/scene/%s.json" % id))
+		var a: Dictionary = d["attori"]["narratore"]
+		check(bool(a.get("pensiero", false)) and str(a.get("colore", "")) == "#ff9a5a" and str(a.get("nome", "x")) == "",
+			"Pensieri: in %s il narratore pensa, in arancio e senza nome" % id)
 
 ## Il passo «murale» (SceneMural): un murale finto in user://, dipinto a spray sopra il gioco nell'ordine
 ## di murale_rivela.png, che scorre e poi se ne va con lo spray all'indietro; da solo si chiude anche
@@ -2274,8 +3316,13 @@ func _test_scene_mural() -> void:
 	# Il murale vero di MP06, il cimitero: parte da zoom 2 su GIG e allarga, con le due figure.
 	var mp := SceneMural.new()
 	mp.setup({"id": "prologo/mp06_cimitero"})
-	check(mp.errors.is_empty() and mp.size == Vector2(480, 270) and mp._figures.size() == 2
-		and mp.z0 == 2.0 and mp.z1 == 1.0 and mp.c0 == Vector2(240, 190) and mp.c1 == Vector2(240, 135),
+	var mp06: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+		SceneMural.DIR_DEFAULT + "/prologo/mp06_cimitero/murale.json"))
+	var cam: Dictionary = mp06["camera"]
+	var c0 := Vector2(cam["centro_da"][0], cam["centro_da"][1])
+	var n_fig: int = (mp06["figure"] as Array).size()
+	check(mp.errors.is_empty() and mp.size == Vector2(480, 270) and n_fig >= 2 and mp._figures.size() == n_fig
+		and mp.z0 == 2.0 and mp.z1 == 1.0 and mp.c0 == c0 and mp.c1 == Vector2(240, 135),
 		"Murale: MP06 si carica con la camera di murale.json (zoom 2 su GIG, poi tutto)", "; ".join(mp.errors))
 	for i in mp.scroll_n:
 		mp.tick()
@@ -2435,8 +3482,11 @@ func _test_scene_writing() -> void:
 	var m8 := SceneMural.new()
 	m8.setup({"id": "prologo/mp08_titolo"})
 	check(SceneMural.exists({"id": "prologo/mp08_titolo"}) and m8.errors.is_empty() and m8.size == Vector2(480, 270)
-		and m8._figures.size() == 2 and m8.has_writing("logo") and m8.handoff_camera() == Vector2(0, 230),
-		"Murales: MP08 riusa MP06 con le sue figure, ha il logo e si scioglie a cam (0, 230)", "; ".join(m8.errors))
+		and m8._figures.size() == (JSON.parse_string(FileAccess.get_file_as_string(
+			SceneMural.DIR_DEFAULT + "/prologo/mp06_cimitero/murale.json"))["figure"] as Array).size()
+		and m8.has_writing("logo") and m8.handoff_camera() == Vector2(35, 230),
+		"Murales: MP08 riusa MP06 con le sue figure, ha il logo e si scioglie a cam (35, 230)",
+		"; ".join(m8.errors) + " camera %s" % m8.handoff_camera())
 	m8.free()
 	var m10 := SceneMural.new()
 	m10.setup({"id": "prologo/mp10_registro"})
@@ -2518,6 +3568,8 @@ func _test_messo() -> void:
 	if m == null:
 		Harness.free_level(lvl)
 		return
+	check(m._call_timer == Messo.FIRST_CALL and Messo.FIRST_CALL <= 120 and Messo.CALL_EVERY <= 300,
+		"Messo: la prima chiamata dei rinforzi arriva presto", "dopo %d tick, poi ogni %d" % [m._call_timer, Messo.CALL_EVERY])
 	m._call_timer = 100000
 	m._aim_timer = 0
 	var marked_at := -1
@@ -2582,7 +3634,688 @@ func _test_messo() -> void:
 	var dmg := 0
 	for id in Gig.CHAIN_ONE_ARM:
 		dmg += (load("res://data/attacks/%s.tres" % id) as AttackData).damage
-	check(dmg >= m.data.max_hp, "Messo: una combo col braccio bloccato lo mette KO", "combo %d, vita %d" % [dmg, m.data.max_hp])
+	check(dmg < m.data.max_hp and dmg * 2 >= m.data.max_hp, "Messo: servono due combo col braccio bloccato per metterlo KO",
+		"combo %d, vita %d" % [dmg, m.data.max_hp])
+	# L'autodifesa: dopo DEFEND_HITS colpi di fila, con GIG vicino, la scossa del tablet.
+	for r in lvl.fighters:
+		if r is Rider:
+			r.hp = 0
+			r.dead = true
+			r.removed = true
+			r.visible = false
+	m._call_timer = 100000
+	m._aim_timer = 100000
+	m._stop_act()
+	m.set_state(Fighter.State.IDLE, &"idle")
+	m.px = g.px + 50.0
+	m.py = g.py
+	m.facing = -1
+	m.hit_streak = Messo.DEFEND_HITS
+	var hp0 := g.hp
+	lvl.step()
+	check(m.is_pulsing(), "Messo: dopo %d colpi di fila si difende con la scossa del tablet" % Messo.DEFEND_HITS, "stato %s" % m.state)
+	var jab := load("res://data/attacks/gig_jab2.tres") as AttackData
+	check(m.try_block(g, jab), "Messo: mentre carica la scossa para i colpi")
+	m.hitstop = 0
+	var downed := false
+	for i in m.pulse_attack.startup + m.pulse_attack.active + 4:
+		lvl.step()
+		if g.state in [Fighter.State.KNOCK_AIR, Fighter.State.KNOCK_DOWN]:
+			downed = true
+	check(downed and g.hp < hp0, "Messo: la scossa butta giù GIG, se gli sta addosso", "a terra %s, vita %d → %d" % [downed, hp0, g.hp])
+	for i in 80:
+		lvl.step()
+		if not m.is_pulsing():
+			break
+	check(not m.is_pulsing() and not m.try_block(g, jab), "Messo: finita la scossa torna colpibile")
+	check(m._call_timer <= 0 or m.act == Messo.Act.CALL, "Messo: dopo la scossa chiama subito un rider", "timer %d" % m._call_timer)
+	# Lontano da GIG la serie si azzera senza scossa; e da sola, lasciato in pace, si spegne.
+	m._call_timer = 100000
+	m._stop_act()
+	for i in 60:
+		lvl.step()
+	m.set_state(Fighter.State.IDLE, &"idle")
+	m.px = g.px + 250.0
+	m.hit_streak = Messo.DEFEND_HITS
+	lvl.step()
+	check(not m.is_pulsing() and m.hit_streak == 0, "Messo: con GIG lontano la scossa non parte")
+	m.hit_streak = 2
+	for i in Messo.STREAK_RESET + 5:
+		lvl.step()
+	check(m.hit_streak == 0, "Messo: la serie di colpi si azzera dopo %d tick senza colpi" % Messo.STREAK_RESET)
+	Harness.free_level(lvl)
+
+
+# --- Le vite ----------------------------------------------------------------------------------------
+
+## GIG fuori dal fondo della mappa nel prologo: quanti tick fino alla ripartenza (o al CONTINUA?).
+func _lives_fall(room: Prologue) -> int:
+	room.player.place(room.player.px, room.grid.pixel_height() + TestRoom.FALL_OUT + 6)
+	var started := false
+	for t in TestRoom.FALL_TICKS + 20:
+		room._sim_tick()
+		started = started or room.fall_t >= 0
+		if started and room.fall_t < 0:
+			return t
+	return -1
+
+
+## Le vite del prologo (Luigi, 8 novembre 2026): la fossa costa una vita e si riparte dall'ultima
+## ripartenza; senza vite CONTINUA? e poi GAME OVER; il KO nell'arena ospitata costa una vita.
+## Il prologo disegnato in LDtk è lo stesso livello della mappa di testo da cui viene (prologo.txt,
+## rifatto dal .ldtk con tools/ldtk/livelli_ldtk.py): celle, segni nello stesso ordine e ripartenze.
+## Poi i controlli della legenda: il prologo li passa, un livello sbagliato no.
+func _test_ldtk() -> void:
+	var txt := SolidGrid.load_file("res://data/platform/prologo.txt")
+	var m := LdtkMap.read(Prologue.PROLOGUE_V1)
+	var g := m.grid
+	check(g.width == txt.width and g.height == txt.height, "ldtk: misure del prologo",
+		"%dx%d contro %dx%d" % [g.width, g.height, txt.width, txt.height])
+	check(g.cells == txt.cells, "ldtk: celle uguali alla mappa di testo")
+	check(g.marks.keys() == txt.marks.keys(), "ldtk: stesse lettere, nello stesso ordine",
+		"%s contro %s" % [g.marks.keys(), txt.marks.keys()])
+	var same := true
+	for k: String in txt.marks:
+		same = same and g.marks.get(k, []) == txt.marks[k]
+	check(same, "ldtk: segni nelle stesse posizioni")
+	check(g.checkpoints == Prologue.CHECKPOINT_SIGNS, "ldtk: le ripartenze sono i cartelli del prologo",
+		str(g.checkpoints))
+	var texts := true
+	for k: String in g.signs:
+		texts = texts and g.marks.has(k) and not String(g.signs[k][0]).is_empty()
+	check(g.signs.size() == 9 and texts, "ldtk: i nove cartelli hanno titolo", str(g.signs.keys()))
+	check(SolidGrid.load_file(Prologue.PROLOGUE_V1).cells == txt.cells, "ldtk: load_file legge il .ldtk")
+	var voids := 0
+	for v in m.values:
+		voids += int(v == LdtkMap.Val.VUOTO)
+	check(voids == 30, "ldtk: le tre fosse sono Vuoto", str(voids))
+	check(m.check(), "ldtk: il prologo passa i controlli", ", ".join(m.errors))
+	# Gli unici avvisi sono i quattro pieni sospesi che il prologo ha già (alle celle 92,12, 130,6,
+	# 236,0 e 300,9): nessuna fossa senza Vuoto e nessuna cella che il motore non fa.
+	var others := 0
+	for wn in m.warnings:
+		others += int(not wn.begins_with("pieno sospeso"))
+	check(others == 0 and m.warnings.size() == 4, "ldtk: il prologo ha solo i pieni sospesi noti", ", ".join(m.warnings))
+	# L'arena viene dalla sua zona, che cade dove la metteva il cartello f; l'uscita va fuori dal file.
+	var ar: Array[Dictionary] = g.arenas
+	var f: Vector2i = g.marks["f"][0]
+	check(ar.size() == 1 and ar[0]["id"] == "pignoramento" and ar[0]["ripartenza"] == "f"
+		and (ar[0]["rect"] as Rect2i).position.x == f.x + TestRoom.ARENA_CAM_FROM_SIGN and (ar[0]["rect"] as Rect2i).end.y == f.y,
+		"ldtk: l'arena del prologo è la sua zona, dove la metteva il cartello f", str(ar))
+	check(g.next_level == "capitolo-1" and LdtkMap.next_path(Prologue.PROLOGUE_V1, g) == "" and m.levels == PackedStringArray(["Prologo"]),
+		"ldtk: l'uscita del prologo porta al capitolo 1, fuori dal file", g.next_level)
+	_test_ldtk_levels()
+	# Un livello sbagliato: una ripartenza sopra la prima fossa e un pannello che non apre niente.
+	var bad := LdtkMap.read(Prologue.PROLOGUE_V1)
+	bad.entities.append({"tipo": "Ripartenza", "iid": "r", "livello": "Entita", "px": Vector2i(48 * 20 + 10, 480),
+		"pos": Vector2i.ZERO, "size": Vector2i(20, 20), "campi": {}})
+	bad.entities.append({"tipo": "Pannello", "iid": "p", "livello": "Entita", "px": Vector2i(1000, 400),
+		"pos": Vector2i.ZERO, "size": Vector2i(20, 20), "campi": {"apre": [], "chiude": []}})
+	# E un rider sulle piattaforme, dove stanno solo i droni; una colomba lì invece va bene.
+	for t: String in ["rider", "colomba"]:
+		bad.entities.append({"tipo": "Nemico", "iid": t, "livello": "Entita", "px": Vector2i(1200, 460),
+			"pos": Vector2i.ZERO, "size": Vector2i(25, 100), "campi": {"tipo": t, "arena": null}})
+	var failed := not bad.check()
+	var joined := " | ".join(bad.errors)
+	check(failed and "sopra la fossa" in joined and "Pannello" in joined and "Nemico rider" in joined
+		and not "Nemico colomba" in joined and bad.errors.size() == 3, "ldtk: i controlli trovano gli errori", joined)
+
+
+## Un file con due livelli, come il prologo nuovo (prologo_v2.ldtk, A e B): si legge l'uno o l'altro,
+## l'uscita di A porta a B, e l'arena di A chiude sul suo cartello.
+func _test_ldtk_levels() -> void:
+	var path := "user://test_livelli.ldtk"
+	var ent := func(tipo: String, iid: String, px: Vector2i, size: Vector2i, pivot: Array, campi: Dictionary) -> Dictionary:
+		var fi := []
+		for k: String in campi:
+			fi.append({"__identifier": k, "__value": campi[k]})
+		return {"__identifier": tipo, "iid": iid, "px": [px.x, px.y], "width": size.x, "height": size.y,
+			"__pivot": pivot, "fieldInstances": fi}
+	var level := func(id: String, w: int, ents: Array, zones: Array) -> Dictionary:
+		var csv := []
+		for y in 6:
+			for x in w:
+				csv.append(1 if y == 5 else 0)
+		return {"identifier": id, "layerInstances": [
+			{"__identifier": "Zone", "entityInstances": zones},
+			{"__identifier": "Entita", "entityInstances": ents},
+			{"__identifier": "Collisioni", "__cWid": w, "__cHei": 6, "intGridCsv": csv, "entityInstances": []}]}
+	var a: Dictionary = level.call("A", 40, [
+		ent.call("Partenza", "pa", Vector2i(30, 100), Vector2i(20, 40), [0.5, 1], {"dopo_riavvio": false}),
+		ent.call("Cartello", "cf", Vector2i(500, 100), Vector2i(20, 40), [0.5, 1], {"id": "f", "titolo": "ARENA", "riga": "", "ripartenza": true}),
+		ent.call("Uscita", "ua", Vector2i(780, 100), Vector2i(40, 100), [0.5, 1], {"prossima": "B"})],
+		[ent.call("Arena", "ar", Vector2i(200, 0), Vector2i(480, 100), [0, 0],
+			{"id": "prova", "inclinata": true, "corsie": 3, "fine": "messo_ko", "ripartenza": {"entityIid": "cf"}})])
+	var b: Dictionary = level.call("B", 30, [
+		ent.call("Partenza", "pb", Vector2i(30, 100), Vector2i(20, 40), [0.5, 1], {"dopo_riavvio": false}),
+		ent.call("Uscita", "ub", Vector2i(580, 100), Vector2i(40, 100), [0.5, 1], {"prossima": null})], [])
+	var fa := FileAccess.open(path, FileAccess.WRITE)
+	fa.store_string(JSON.stringify({"levels": [a, b]}))
+	fa.close()
+	check(LdtkMap.level_names(path) == PackedStringArray(["A", "B"]), "ldtk: un file con due livelli, A e B")
+	var ma := LdtkMap.read(path)
+	var mb := LdtkMap.read(path + "#B")
+	check(ma.grid.width == 40 and mb.grid.width == 30 and LdtkMap.read(path + "#A").grid.width == 40,
+		"ldtk: senza nome si legge il primo livello, col nome quello scelto", "%d, %d" % [ma.grid.width, mb.grid.width])
+	check(LdtkMap.next_path(path, ma.grid) == path + "#B" and LdtkMap.next_path(path + "#B", mb.grid) == "",
+		"ldtk: l'uscita di A porta a B, quella di B fuori dal file")
+	var ar: Array[Dictionary] = ma.grid.arenas
+	check(ar.size() == 1 and ar[0]["rect"] == Rect2i(200, 0, 480, 100) and ar[0]["ripartenza"] == "f" and ar[0]["fine"] == "messo_ko"
+		and mb.grid.arenas.is_empty(), "ldtk: l'arena di A è la sua zona e chiude sul cartello f", str(ar))
+	check(ma.check(), "ldtk: il livello A passa i controlli", ", ".join(ma.errors))
+	check(mb.check() and "Uscita" in " ".join(mb.warnings), "ldtk: un'uscita senza prossima è un avviso", ", ".join(mb.warnings))
+	# Un'arena senza ripartenza è un errore.
+	ma.entities[ma.entities.size() - 1]["campi"]["ripartenza"] = null
+	check(not ma.check() and "Arena prova" in " ".join(ma.errors), "ldtk: un'arena senza ripartenza è un errore", ", ".join(ma.errors))
+	LdtkMap._parsed.erase(path)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+## Il prologo nuovo, in due livelli dello stesso file: la partenza sotto l'introduzione, le ripartenze
+## di A e di B, la leva del cancello, il passaggio da A a B e la fine, sempre uguali da un giro all'altro.
+func _test_prologue_v2() -> void:
+	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	room._follow_camera()
+	check(room._levels.size() == 2 and room.level == 0 and room._cps().size() == 4,
+		"Prologo v2: due livelli, si parte da A con le sue quattro ripartenze",
+		"%d livelli, livello %d, %d ripartenze" % [room._levels.size(), room.level, room._cps().size()])
+	check(room.player.px == 230 and room.player.py == 680 and is_equal_approx(room._cam.y, 450.0),
+		"Prologo v2: GIG parte sotto la lapide e la telecamera tiene il pavimento a 230 px dall'alto",
+		"GIG %d,%d, telecamera y %.0f" % [room.player.px, room.player.py, room._cam.y])
+	# L'introduzione si scioglie nel gioco dove MP08 dice, spostato in basso come la grafica di A.
+	var m8 := SceneMural.new()
+	m8.setup({"id": "prologo/mp08_titolo"})
+	var hand: Variant = m8.handoff_camera()
+	check(room.art_offset_y == Prologue.ART_SHIFT_Y and hand is Vector2
+		and (hand as Vector2) + Vector2(0, room.art_offset_y) == room._cam.round(),
+		"Prologo v2: la partenza di A combacia con l'inquadratura di MP06 e MP08",
+		"murale %s + %d, gioco %s" % [hand, room.art_offset_y, room._cam])
+	m8.free()
+	# Le ripartenze di A: dopo l'arena (f) si riparte a scontro finito e sotto la pioggia.
+	var arena_cp := room._arena_cp()
+	room.checkpoint = arena_cp
+	room._reset()
+	var f: Vector2i = room.grid.marks[room._cps()[arena_cp]][0]
+	check(room.arena_done and room.raining and room.player.px == f.x - 30 and room.player.py == f.y,
+		"Prologo v2: la ripartenza dell'arena riparte a scontro finito, sotto la pioggia",
+		"arena %s, pioggia %s, GIG %d,%d" % [room.arena_done, room.raining, room.player.px, room.player.py])
+	# La galleria A4: la scena al suo posto, il grigio che lì non si disegna, le colonne davanti solo nel
+	# loro tratto; all'inizio la porticina è intera e il cancello del deposito chiuso.
+	var g0 := room.gallery_state()
+	var cols: Backdrop.Layer = null
+	var a4_layers: Array = room._galleries[0].layers if not room._galleries.is_empty() else []
+	for l: Backdrop.Layer in a4_layers:
+		if l.z >= 1000:
+			cols = l
+	check(room.art_holes.size() == 5 and room.art_holes[3] == Rect2(2760, 200, 1960, 520) and room._art_extra.size() == 4
+		and cols != null
+		and Backdrop.alpha(cols, 2700) == 0.0 and Backdrop.alpha(cols, 3300) == 1.0 and Backdrop.alpha(cols, 3950) == 0.0,
+		"Prologo v2: la galleria A4 è montata, con le colonne davanti nel loro tratto", "buchi %s" % [room.art_holes])
+	# A6, il cantiere davanti al muro: la scena al suo posto, il cartellone provvisorio di A4 tolto (ora è
+	# nella scena), i ferri davanti solo lungo il cantiere.
+	var a6_front: Backdrop.Layer = null
+	if room._galleries.size() > 1:
+		for l: Backdrop.Layer in room._galleries[1].layers:
+			if l.z >= 1000:
+				a6_front = l
+	var billboard := false
+	for sp: Sprite2D in room._scene_art:
+		billboard = billboard or sp.name.contains("cartellone")
+	check(room.art_holes.size() == 5 and room.art_holes[4] == Rect2(5480, 200, 1480, 600) and not billboard
+		and a6_front != null and Backdrop.alpha(a6_front, 5400) == 0.0 and Backdrop.alpha(a6_front, 6200) == 1.0,
+		"Prologo v2: la tavola A6 è montata, senza il cartellone provvisorio di A4", "buchi %s, cartellone %s" % [
+			room.art_holes, billboard])
+	# A1-A3, dall'ingresso alla galleria: tre tavole di fila da x 0 a 2920, senza la scena di prima (A1 ne
+	# riusa le colonne 0-25), e ognuna con le sue luci in additivo.
+	var old_scene := false
+	for sp: Sprite2D in room._scene_art:
+		old_scene = old_scene or str(sp.name).begins_with("Scena_")
+	var a_emis := 0
+	for n in room._room_node.get_children():
+		if n is Sprite2D and str(n.name) in ["Galleria_a1_emis", "Galleria_a2_emis", "Galleria_a3_emis"]:
+			a_emis += 1
+	check(room.art_holes.size() == 5 and room.art_holes.slice(0, 3) == [Rect2(0, 200, 720, 600),
+			Rect2(720, 200, 960, 600), Rect2(1680, 200, 1240, 600)] and not old_scene and a_emis == 3,
+		"Prologo v2: in A le tavole A1-A3 coprono da 0 a 2920, al posto della scena di prima",
+		"buchi %s, scena di prima %s, emissioni %d" % [room.art_holes, old_scene, a_emis])
+	# I fondi larghi: cielo, lontano, cappelle e lapidi di tutto A, allo zoom della vista. Della grafica di
+	# prima restano solo la prima schermata e il suo primo piano.
+	var old_names: Array = []
+	for l: Backdrop.Layer in room.backdrop.layers:
+		old_names.append(l.name)
+	var wide: Dictionary = {}
+	if room._wide_art != null:
+		for l: Backdrop.Layer in room._wide_art.layers:
+			wide[l.name] = l
+	check(wide.size() == 12 and room._art_view.size() == 1 and old_names == ["davanti"],
+		"Prologo v2: in A i fondi sono i piani larghi, al posto del cielo, del medio e del vicino di prima",
+		"larghi %s, di prima %s" % [wide.keys(), old_names])
+	# I tre veli: rosa fino ad A3, scirocco in A4, pioggia da A5. Il velo dopo sfuma sopra quello prima,
+	# che resta pieno sotto: a ogni telecamera ogni piano ha almeno un velo pieno (niente trasparenze).
+	var ramp := func(n: String, xs: Array) -> Array:
+		return xs.map(func(x: int) -> float: return snappedf(Backdrop.alpha(wide[n], x), 0.01) if wide.has(n) else -1.0)
+	var sky := [ramp.call("cielo_rosa", [2780, 3780, 3800]), ramp.call("cielo_chiude", [2780, 3280, 3780, 4680, 4700]),
+		ramp.call("cielo_pioggia", [3780, 4230, 4680, 6240])]
+	var holes: Array = []
+	if wide.size() == 12:
+		for g: String in ["cielo", "lontano", "medio", "vicino"]:
+			for x in range(0, 6241, 20):
+				var full := false
+				for l: Backdrop.Layer in room._wide_art.layers:
+					full = full or (l.name.begins_with(g + "_") and Backdrop.alpha(l, x) >= 1.0)
+				if not full:
+					holes.append("%s@%d" % [g, x])
+	check(sky == [[1.0, 1.0, 0.0], [0.0, 0.5, 1.0, 1.0, 0.0], [0.0, 0.5, 1.0, 1.0]] and holes.is_empty(),
+		"Prologo v2: lungo A i fondi passano dal rosa allo scirocco alla pioggia, senza buchi", "cielo %s, buchi %s" % [
+			sky, holes.slice(0, 6)])
+	# Coprono la vista larga (720x405) in tutto A: abbastanza larghi per la corsa del bordo sinistro
+	# (0-6240), e il medio e il vicino dipinti fino sotto il bordo basso anche con la vista più su e più giù
+	# (cima da -147 a 395): niente più cappelle che si staccano dal muro in A6.
+	var short: Array = []
+	for n: String in wide:
+		var l: Backdrop.Layer = wide[n]
+		var run := mini(l.x_to, 6240) - l.origin_x
+		if l.texture.get_width() < 720 + ceili(run * l.scroll):
+			short.append("%s largo %d" % [n, l.texture.get_width()])
+		if n.begins_with("medio") or n.begins_with("vicino"):
+			for top: int in [-147, 395]:
+				var bottom := l.y - roundi((top - room._wide_art.cam_ref_y) * l.scroll_y) + l.texture.get_height()
+				if bottom < 405:
+					short.append("%s fondo %d a cima %d" % [n, bottom, top])
+	check(wide.size() == 12 and short.is_empty(), "Prologo v2: i fondi larghi di A coprono la vista larga ovunque",
+		str(short))
+	check(g0.get("porta_intera") == true and g0.get("porta_rotta") == false and g0.get("cancello_chiuso") == true
+		and g0.get("cancello_aperto") == false,
+		"Prologo v2: la porticina è intera e il cancello del deposito chiuso", str(g0))
+	# In A6, prima della leva: il quadro giù, i fari spenti, il cancelletto chiuso, i LED accesi, e i
+	# lampeggianti che si alternano.
+	room.tick = 0
+	room._update_gallery()
+	var l0 := room.gallery_state()
+	room.tick = Prologue.BLINK_TICKS
+	room._update_gallery()
+	var l1 := room.gallery_state()
+	check(l0.get("quadro_giu") == true and l0.get("quadro_su") == false and l0.get("fari_spenti") == true
+		and l0.get("fari_accesi") == false and l0.get("cancelletto_chiuso") == true and l0.get("led_eterna") == true
+		and l0.get("lampeggianti_accesi") != l1.get("lampeggianti_accesi")
+		and l0.get("lampeggianti_accesi") != l0.get("lampeggianti_spenti"),
+		"Prologo v2: in A6, prima della leva, il quadro è giù, i fari spenti e i lampeggianti lampeggiano",
+		"%s / %s" % [l0, l1])
+	# La leva apre il suo cancello: le celle chiuse sono piene, aperte vuote.
+	var gate: Dictionary = {}
+	var lever: Dictionary = {}
+	for l: Dictionary in room._levers:
+		for g: Dictionary in room._gates2:
+			if g["iid"] in l["apre"]:
+				gate = g
+				lever = l
+	var cell: Vector2i = gate["cells"][0] if not gate.is_empty() else Vector2i.ZERO
+	var closed := not gate.is_empty() and room.grid.cell(cell.x, cell.y) == SolidGrid.Cell.SOLID
+	if not lever.is_empty():
+		room.pulled.append(String(lever["iid"]))
+		room._apply_gates()
+	check(closed and room.grid.cell(cell.x, cell.y) == SolidGrid.Cell.EMPTY,
+		"Prologo v2: la leva apre il suo cancello", "cancello %s, cella %s" % [gate.get("iid", "nessuno"), cell])
+	# Il cancello disegnato segue quello della sua leva; la porticina si rompe quando la mappa si apre.
+	for l: Dictionary in room._levers:
+		for g: Dictionary in room._gates2:
+			if g["iid"] in l["apre"] and room._gate_drawn(g["rect"]):
+				room.pulled.append(String(l["iid"]))
+	room._apply_gates()
+	room._update_gallery()
+	var g1 := room.gallery_state()
+	for y in range(22, 28):
+		room.grid.set_cell(188, y, SolidGrid.Cell.EMPTY)
+	room._update_gallery()
+	var g2 := room.gallery_state()
+	check(g1["cancello_aperto"] and not g1["cancello_chiuso"] and g1["porta_intera"]
+		and g2["porta_rotta"] and not g2["porta_intera"],
+		"Prologo v2: il cancello della galleria si apre con la leva, la porticina si mostra rotta quando si apre",
+		"%s / %s" % [g1, g2])
+	check(g1.get("quadro_su") == true and g1.get("quadro_giu") == false and g1.get("fari_accesi") == true
+		and g1.get("cancelletto_aperto") == true and g1.get("cancelletto_chiuso") == false,
+		"Prologo v2: in A6 la leva alza il quadro, accende i fari e apre il cancelletto", str(g1))
+	_free_room(room)
+
+	# Il giro intero col pilota, due volte: deve venire uguale.
+	var runs: Array[Dictionary] = []
+	for k in 2:
+		room = _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+		var out := {"arena": -1, "lever": -1, "switch": -1, "reboot": -1, "end": -1, "b_start": Vector2i(-1, -1),
+			"b_rain": false, "b_cps": 0, "b_cp": -1}
+		for t in 9000:
+			room._sim_tick()
+			room._follow_camera()
+			if room.arena_done and out["arena"] < 0:
+				out["arena"] = t
+			if not room.pulled.is_empty() and out["lever"] < 0:
+				out["lever"] = t
+			if room.level == 1 and out["switch"] < 0:
+				out["switch"] = t
+				out["b_start"] = Vector2i(room.player.px, room.player.py)
+				out["b_rain"] = room.raining
+				out["b_cps"] = room._cps().size()
+			if room.level == 1:
+				out["b_cp"] = maxi(out["b_cp"], room.checkpoint)
+			if room.rebooted and out["reboot"] < 0:
+				out["reboot"] = t
+			if room.finished:
+				out["end"] = t
+				var pose := room.scene_pose_player("")
+				out["outro"] = [room.outro_t, room.player.state == PlatformPlayer.State.AIR, room.player.vy,
+					"%s %d" % [pose["anim"], pose["index"]]]
+				break
+		out["hash"] = room.state_hash()
+		out["registri"] = Game.registri.keys()
+		runs.append(out)
+		if k == 1:
+			# Una ripartenza di B: dopo il riavvio si riparte dal banco del garage, la X.
+			var x: Vector2i = room.grid.marks["X"][0]
+			room.finished = false
+			room._reset()
+			check(room.level == 1 and room.player.px == x.x and room.player.py == x.y,
+				"Prologo v2: in B, dopo il riavvio, si riparte dal banco", "livello %d, GIG %d,%d" % [room.level, room.player.px, room.player.py])
+		_free_room(room)
+	var r := runs[0]
+	var b: Vector2i = SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#Prologo_B_Fuga").marks["G"][0]
+	check(r["arena"] > 0 and r["lever"] > r["arena"] and r["switch"] > r["lever"],
+		"Prologo v2: in A il pilota fa l'arena, tira la leva ed esce", "arena %d, leva %d, uscita %d" % [r["arena"], r["lever"], r["switch"]])
+	check(r["b_start"] == b and r["b_rain"] and r["b_cps"] == 3,
+		"Prologo v2: B comincia dalla sua partenza, sotto la pioggia, con tre ripartenze",
+		"GIG %s (partenza %s), pioggia %s, %d ripartenze" % [r["b_start"], b, r["b_rain"], r["b_cps"]])
+	check(r["b_cp"] == 2 and r["reboot"] > r["switch"] and r["end"] > r["reboot"],
+		"Prologo v2: in B il pilota passa le ripartenze, riavvia il braccio e finisce",
+		"ripartenza %d, riavvio %d, fine %d" % [r["b_cp"], r["reboot"], r["end"]])
+	var outro: Array = r.get("outro", [0, false, -1, ""])
+	check(int(outro[0]) > Prologue.OUTRO_RUN and int(outro[0]) <= 90 and bool(outro[1]) and int(outro[2]) < 0
+			and str(outro[3]) == "jump_arc %d" % Prologue.OUTRO_ARC,
+		"Prologo v2: all'uscita GIG corre e salta da solo, e il prologo finisce poco prima dell'apice, sulla posa della figura di MP13 (entro un secondo e mezzo)",
+		"tick %d, in aria %s, vy %d, posa %s" % [int(outro[0]), outro[1], int(outro[2]), outro[3]])
+	check(runs[0]["hash"] == runs[1]["hash"] and runs[0]["end"] == runs[1]["end"],
+		"Prologo v2: due giri del pilota vengono uguali", "%s / %s" % [runs[0]["hash"], runs[1]["hash"]])
+	check(str(runs[0]["registri"]) == str(["registro_prologo_1"]) and str(runs[1]["registri"]) == str(["registro_prologo_1"]),
+		"Registro: nel garage il pilota copia la base dello scaffale, con la Vista", str(runs[0]["registri"]))
+
+	# --livello sceglie il livello da cui partire.
+	Game.options.level_name = "Prologo_B_Fuga"
+	room = _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	Game.options.level_name = ""
+	check(room.level == 1 and room.player.px == b.x and room.player.py == b.y,
+		"Prologo v2: --livello Prologo_B_Fuga parte da B", "livello %d, GIG %d,%d" % [room.level, room.player.px, room.player.py])
+	# La base del registro sullo scaffale di B4: si copia con SU, solo col braccio vivo, in un secondo.
+	var regs := room.registri
+	var base: Registri.Base = regs.basi[0] if regs.basi.size() == 1 else null
+	check(base != null and base.id == "registro_prologo_1" and base.px == Vector2i(3810, 580) and not base.read,
+		"Registro: in B c'è una base sola, registro_prologo_1, sullo scaffale di B4 a (3810, 580)",
+		"basi %d" % regs.basi.size())
+	if base != null:
+		room.player.place(base.px.x - 12, base.px.y)
+		var up := InputFrame.new(InputFrame.UP, InputFrame.UP)
+		var dead := regs.step(up, room.player, false)
+		var started := regs.step(up, room.player, true)
+		var busy_ticks := 0
+		var evs: Array = []
+		while regs.step(InputFrame.new(), room.player, true):
+			busy_ticks += 1
+			evs.append_array(Array(regs.events))
+		evs.append_array(Array(regs.events))
+		check(not dead and started and busy_ticks == Registri.COPY_TICKS - 1 and base.read
+				and Game.registri.has("registro_prologo_1") and Registri.count() == 1 and room.player.facing == 1
+				and str(evs) == str(["registro_ronzio", "registro_lampo", "registro_copiato"]),
+			"Registro: SU accanto alla base copia il registro in un secondo, solo dopo il riavvio, e il conto va a 1 su 15",
+			"senza braccio %s, partita %s, %d tick, letta %s, conto %d, eventi %s" % [dead, started, busy_ticks, base.read,
+				Registri.count(), evs])
+		var again := regs.step(up, room.player, true)
+		regs.reset()
+		check(not again and base.read and regs.near(room.player) < 0,
+			"Registro: una base letta resta letta, anche alla ripartenza, e non si copia due volte", "di nuovo %s" % again)
+	Game.registri.clear()
+	# B2: le palazzine dei Tamburi, con la bici e la serranda del fruttivendolo e le luci in additivo.
+	var b0 := room.gallery_state()
+	var hole_b2: Rect2 = room.art_holes[1] if room.art_holes.size() > 1 else Rect2()
+	var emis_b2: Sprite2D = room._room_node.get_node_or_null("Galleria_b2_emis")
+	check(hole_b2 == Rect2(720, 0, 1960, 880) and emis_b2 != null and not room._scene_art.has(emis_b2)
+			and (emis_b2.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD
+			and b0.size() == 9,
+		"Prologo v2: in B le palazzine B2 sono montate, con le luci in additivo",
+		"buchi %s, stati %s" % [room.art_holes, b0])
+	# B1, la piazzetta del fioraio davanti al muro del cimitero: a (0, 0), prima di B2, con le sue luci.
+	var emis_b1: Sprite2D = room._room_node.get_node_or_null("Galleria_b1_emis")
+	check(not room.art_holes.is_empty() and room.art_holes[0] == Rect2(0, 0, 720, 880) and emis_b1 != null
+			and (emis_b1.material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD,
+		"Prologo v2: in B la tavola B1 è montata a (0, 0), prima di B2, con le luci in additivo",
+		"buchi %s" % [room.art_holes])
+	# I fondi di B sono i piani larghi (cielo, lontano, medio e il vicino dell'isolato dietro), allo zoom
+	# della vista: coprono la corsa del bordo sinistro (0-3840), e il medio e il vicino sono dipinti fino
+	# sotto il bordo basso anche con la vista più su e più giù (cima da -147 a 475).
+	var wide_b: Dictionary = {}
+	if room._wide_art != null:
+		for l: Backdrop.Layer in room._wide_art.layers:
+			wide_b[l.name] = l
+	var short_b: Array = []
+	for n: String in wide_b:
+		var l: Backdrop.Layer = wide_b[n]
+		if l.texture.get_width() < View.W + ceili((3840 - l.origin_x) * l.scroll):
+			short_b.append("%s largo %d" % [n, l.texture.get_width()])
+		if n == "medio" or n == "vicino":
+			for top: int in [-147, 475]:
+				var bottom := l.y - roundi((top - room._wide_art.cam_ref_y) * l.scroll_y) + l.texture.get_height()
+				if bottom < 405:
+					short_b.append("%s fondo %d a cima %d" % [n, bottom, top])
+	check(wide_b.keys() == ["cielo", "lontano", "medio", "vicino"] and room._art_view.size() == 1
+			and room._galleries.is_empty() and short_b.is_empty(),
+		"Prologo v2: in B i fondi sono i piani larghi, e coprono la vista larga ovunque",
+		"larghi %s, vestizioni con piani %d, corti %s" % [wide_b.keys(), room._galleries.size(), short_b])
+	check(b0.get("bici_sigillo", false) and not b0.get("bici_libera", true)
+			and b0.get("serranda_chiusa", false) and not b0.get("serranda_aperta", true),
+		"Prologo v2: in B la bici ha il sigillo e la serranda è chiusa", str(b0))
+	# Il fruttivendolo ringrazia (la sua Vedetta è rotta): apre la serranda e la bici è libera.
+	var fr: Favors.Person = null
+	for q in room.favors.persone:
+		if q.ringrazia.begins_with("fruttivendolo"):
+			fr = q
+	if fr != null:
+		fr.thanked = true
+		for pr: Variant in fr.premio:
+			room.favors.opened.append(str(pr))
+	room._apply_gates()
+	room._update_gallery()
+	var b_thanks := room.gallery_state()
+	# La botola la alza lui: si vede aperta dal fotogramma della posa in cui l'anta è sopra la testa.
+	var lift := -1
+	var fs := room.favors.person_sheet("fruttivendolo")
+	if fr != null and fs != null:
+		lift = fs.clip(&"sollievo").total_ticks()
+		for i in Favors.BOTOLA_UP_FRAME:
+			lift += fs.clip(&"botola").frames[i].ticks
+		fr.thanked_t = lift - 1
+		room._update_gallery()
+	var b_half := room.gallery_state()
+	if fr != null:
+		fr.thanked_t = lift
+	room._update_gallery()
+	var b1 := room.gallery_state()
+	check(fr != null and b1.get("bici_libera", false) and not b1.get("bici_sigillo", true)
+			and b1.get("serranda_aperta", false) and not b1.get("serranda_chiusa", true)
+			and b_thanks.get("serranda_chiusa", false) and b_half.get("serranda_chiusa", false) and lift > 0,
+		"Prologo v2: il fruttivendolo ringrazia, la bici è libera e la serranda si apre quando lui alza l'anta",
+		"subito %s, a %d-1 %s, poi %s" % [b_thanks, lift, b_half, b1])
+	# Le pose del fruttivendolo: in ansia, il grazie, la botola verso la cantina (a destra), il «di qua».
+	var poses := []
+	if fr != null and fs != null:
+		for k in [0, 10, 40, 200]:
+			fr.thanked_t = k
+			var po := room.favors.person_pose(fr, fr.px.x - 100, 7)
+			poses.append("%s %d" % [po[1], po[3]])
+		fr.thanked = false
+		poses.append("%s %d" % [room.favors.person_pose(fr, fr.px.x - 100, 7)[1], room.favors.person_pose(fr, fr.px.x - 100, 7)[3]])
+		fr.thanked = true
+		fr.thanked_t = lift
+	check(poses == ["sollievo -1", "sollievo -1", "botola 1", "diqua 1", "idle -1"],
+		"Prologo v2: il fruttivendolo ha lo sprite vero, ringrazia guardando GIG e alza la botola verso la cantina",
+		str(poses))
+	# B3, il forno e lo scavo: dopo B2 e sopra (sotto terra si toccano, colonne 128-139). All'inizio il
+	# sacchetto c'è, la porta della 168 è aperta e del fumo si vede un fotogramma alla volta.
+	var b3_above := false
+	var i2 := -1
+	for sp: Sprite2D in room._scene_art:
+		if sp.name.ends_with("b2_scena"):
+			i2 = sp.get_index()
+		elif sp.name.ends_with("b3_scena"):
+			b3_above = i2 >= 0 and sp.get_index() > i2
+	var smoke := [b0.get("fumo_1"), b0.get("fumo_2"), b0.get("fumo_3")].count(true)
+	check(room.art_holes.size() == 4 and room.art_holes[2] == Rect2(2560, 200, 880, 680) and b3_above
+			and b0.get("sacchetto") == true and b0.get("porta_chiusa") == false and smoke == 1,
+		"Prologo v2: in B la tavola B3 è montata sopra B2, col sacchetto, la porta aperta e il fumo",
+		"buchi %s, sopra %s, stati %s" % [room.art_holes, b3_above, b0])
+	# B4, il garage: dopo B3, dalla cima alla terra (colonne 172-227), con le luci dipinte in additivo.
+	# Sopra il tetto la tavola è trasparente, e lì si vedono i fondi larghi.
+	var b4_ok := false
+	for sp: Sprite2D in room._scene_art:
+		if sp.name.ends_with("b4_scena"):
+			b4_ok = sp.get_index() > i2
+	var b4_em := false
+	for n in room._room_node.get_children():
+		if n is Sprite2D and str(n.name).ends_with("b4_emis"):
+			b4_em = (n as Sprite2D).material is CanvasItemMaterial 					and ((n as Sprite2D).material as CanvasItemMaterial).blend_mode == CanvasItemMaterial.BLEND_MODE_ADD
+	check(room.art_holes.size() == 4 and room.art_holes[3] == Rect2(3440, 0, 1120, 880) and b4_ok and b4_em,
+		"Prologo v2: in B la tavola B4, il garage, è montata dopo B3 con le sue luci dipinte",
+		"buchi %s, scena %s, luci %s" % [room.art_holes, b4_ok, b4_em])
+	# Le luci vive di B2, B3 e B4 (maxischermo, portone, botola, forno, grata, lampada del garage): sei
+	# sugli attori, e sulla scena gli aloni ad anello (sei) e le pozze (maxischermo, portone, forno, lampada). Solo le
+	# tavole prendono gli aloni; il forno tremola e il maxischermo pulsa; si spengono con le altre.
+	var actors_l := 0
+	var scene_l := 0
+	var lit := true
+	for l in room._gallery_lights:
+		lit = lit and l.enabled
+		if l.range_item_cull_mask == Fighter.LIGHT_MASK_ACTORS:
+			actors_l += 1
+		elif l.range_item_cull_mask == room.LIGHT_MASK_SCENE:
+			scene_l += 1
+	var scene_masked := true
+	for sp in room._scene_art:
+		if sp is Sprite2D and str(sp.name).begins_with("Galleria_"):
+			scene_masked = scene_masked and (sp.light_mask & room.LIGHT_MASK_SCENE) != 0
+	var breathes: bool = room.light_rhythm("tremola", 10, 0.0) != room.light_rhythm("tremola", 30, 0.0) 		and room.light_rhythm("pulsa", 0, 0.0) != room.light_rhythm("pulsa", 40, 0.0) 		and room.light_rhythm("", 30, 0.0) == 1.0
+	room._set_lights(false)
+	var off := room._gallery_lights.all(func(l: PointLight2D) -> bool: return not l.enabled)
+	room._set_lights(true)
+	check(lit and off and actors_l == 9 and scene_l == 14 and scene_masked and breathes,
+		"Prologo v2: in B le luci vive illuminano gli attori, gli aloni la scena, e si spengono con F5",
+		"attori %d, scena %d, tavole %s, respiro %s, %s" % [actors_l, scene_l, scene_masked, breathes, room._gallery_lights.map(func(l: PointLight2D) -> String: return "%s %s" % [l.name, l.enabled])])
+	# GIG prende i taralli: il sacchetto sparisce. La porta si chiude dietro di lui: si vede chiusa. Il
+	# fumo passa al fotogramma dopo.
+	for it in room.favors.ristori:
+		if it.tipo == "taralli":
+			it.taken = true
+	room.door_closed = true
+	var t0 := room.tick
+	room.tick = t0 + Prologue.SMOKE_TICKS
+	room._update_gallery()
+	var b2 := room.gallery_state()
+	var moved := false
+	for k: String in ["fumo_1", "fumo_2", "fumo_3"]:
+		moved = moved or (b0.get(k) == true and b2.get(k) == false)
+	check(b2.get("sacchetto") == false and b2.get("porta_chiusa") == true and moved,
+		"Prologo v2: in B3 il sacchetto sparisce coi taralli, la porta si chiude e il fumo gira", str(b2))
+	room.tick = t0
+	room.door_closed = false
+	_free_room(room)
+
+
+func _test_prologue_lives() -> void:
+	var keys := [0]
+	var room := _prologue_room(func(_t: int) -> int: return keys[0])
+	check(room.use_lives and Game.lives == Game.START_LIVES, "Vite: il prologo comincia con %d vite" % Game.START_LIVES, "%d" % Game.lives)
+	# Le fosse non hanno fondo: sotto l'ultima riga vuota si cade fuori, sotto quella piena si sta.
+	var g := room.grid
+	var pit := -1
+	for x in g.width:
+		if g.cell(x, g.height - 1) == SolidGrid.Cell.EMPTY:
+			pit = x
+			break
+	check(pit >= 0 and g.cell(pit, g.height) == SolidGrid.Cell.EMPTY and g.cell(0, g.height) == SolidGrid.Cell.SOLID,
+		"Vite: le fosse del prologo non hanno fondo, il resto del bordo sotto sì", "colonna %d" % pit)
+	var pit_end := pit
+	while g.cell(pit_end + 1, g.height - 1) == SolidGrid.Cell.EMPTY:
+		pit_end += 1
+	room.player.place((pit + pit_end + 1) * SolidGrid.TILE / 2, g.pixel_height() - 2 * SolidGrid.TILE)
+	var fell := false
+	for i in 120:
+		room._sim_tick()
+		if room.fall_t >= 0:
+			fell = true
+			break
+	check(fell and Game.lives == Game.START_LIVES - 1, "Vite: dentro la fossa GIG cade fuori dalla mappa e perde la vita", "y %d, stato %d, vite %d" % [room.player.py, room.player.state, Game.lives])
+	while room.fall_t >= 0:
+		room._sim_tick()
+	Game.reset_run()
+	var t := _lives_fall(room)
+	check(Game.lives == Game.START_LIVES - 1 and t >= TestRoom.FALL_TICKS - 2 and room.continue_t < 0,
+		"Vite: cadere in una fossa costa una vita", "vite %d, %d tick" % [Game.lives, t])
+	var start := room._checkpoint_pos(-1)
+	check(Vector2i(room.player.px, room.player.py) == start and room.respawn_blink > 0,
+		"Vite: senza ripartenze superate si riparte dalla tomba, lampeggiando", "%s / %s" % [Vector2i(room.player.px, room.player.py), start])
+	# La ripartenza: il cartello superato coi piedi a terra accende la spia.
+	var e: Vector2i = room.grid.marks[Prologue.CHECKPOINT_SIGNS[0]][0]
+	room.player.place(e.x + 2, e.y)
+	room._sim_tick()
+	var lamps := room._checkpoint_lamps()
+	check(room.checkpoint == 0 and room.checkpoint_tag > 0 and lamps.size() == Prologue.CHECKPOINT_SIGNS.size() and lamps[0][1] and not lamps[1][1],
+		"Vite: superato il cartello la spia della ripartenza si accende", "ripartenza %d, spie %s" % [room.checkpoint, lamps])
+	_lives_fall(room)
+	check(Vector2i(room.player.px, room.player.py) == room._checkpoint_pos(0) and Game.lives == Game.START_LIVES - 2,
+		"Vite: dopo la caduta si riparte dall'ultima ripartenza", "%s, vite %d" % [Vector2i(room.player.px, room.player.py), Game.lives])
+	var h0 := room.state_hash()
+	# L'ultima vita: CONTINUA?, e ATTACCO riparte con le vite piene.
+	_lives_fall(room)
+	check(Game.lives == 0 and room.continue_t >= 0 and room.continue_left == 9 and room.state_hash() != h0,
+		"Vite: senza vite compare CONTINUA? da 9", "vite %d, conto %d" % [Game.lives, room.continue_left])
+	var px := room.player.px
+	keys[0] = _A
+	room._sim_tick()
+	keys[0] = 0
+	check(room.continue_t >= 0, "Vite: il tasto ancora premuto non risponde a CONTINUA?")
+	for i in TestRoom.CONTINUE_GRACE + 2:
+		room._sim_tick()
+	keys[0] = _A
+	room._sim_tick()
+	keys[0] = 0
+	room._sim_tick()
+	check(room.continue_t < 0 and Game.lives == Game.START_LIVES and room.player.px == px,
+		"Vite: ATTACCO a CONTINUA? riparte dalla ripartenza con %d vite" % Game.START_LIVES, "vite %d" % Game.lives)
+	# Senza risposta il conto arriva a 0, poi GAME OVER e il titolo.
+	Game.lives = 1
+	var quit := [0]
+	room.quit_to_title.connect(func() -> void: quit[0] += 1)
+	_lives_fall(room)
+	for i in TestRoom.CONTINUE_TICKS * 10 + 5:
+		room._sim_tick()
+	check(room.continue_t < 0 and room.over_t >= 0 and quit[0] == 0, "Vite: senza risposta a CONTINUA? arriva il GAME OVER", "over %d" % room.over_t)
+	for i in TestRoom.GAME_OVER_TICKS + 5:
+		room._sim_tick()
+	check(quit[0] == 1, "Vite: dopo il GAME OVER si torna al titolo, una volta", "%d" % quit[0])
+	_free_room(room)
+	# La stanza di prova non ha vite: la caduta riparte e basta.
+	Game.reset_run()
+	var tr := TestRoom.new()
+	tr.configure({"input": PlayerInput.from_provider(func(_t: int) -> int: return 0), "sound": false})
+	root.add_child(tr)
+	tr.set_physics_process(false)
+	tr.player.place(tr.player.px, tr.grid.pixel_height() + 70)
+	for i in 30:
+		tr._sim_tick()
+	check(not tr.use_lives and Game.lives == Game.START_LIVES and tr.fall_t < 0, "Vite: nella stanza di prova cadere non costa vite")
+	_free_room(tr)
+	# Il KO nell'arena ospitata da un tratto con le vite.
+	var lvl := Harness.make_level(root, PlayerInput.from_provider(func(_t: int) -> int: return 0), 375.0, 225.0)
+	lvl.embedded = true
+	lvl.embedded_lives = true
+	lvl.on_player_died()
+	check(Game.lives == Game.START_LIVES - 1 and not lvl.wants_continue, "Vite: il KO nell'arena del prologo costa una vita", "vite %d" % Game.lives)
+	Game.lives = 1
+	lvl.on_player_died()
+	check(Game.lives == 0 and lvl.wants_continue, "Vite: l'ultimo KO nell'arena chiede CONTINUA? all'ospite")
 	Harness.free_level(lvl)
 
 

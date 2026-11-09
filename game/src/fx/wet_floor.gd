@@ -7,9 +7,12 @@ extends Node2D
 ## - gli attori: ogni combattente capovolto sotto i suoi piedi (non sotto la linea del muro, perché sta
 ##   in profondità), più tenue man mano che il riflesso si allontana dai piedi.
 ## Va in un nodo del mondo sopra il pavimento e sotto le ombre e gli attori.
+## Retinatura e increspature vanno a pixel del gioco (`unit`, 1/480 × 1/270 dello schermo), anche quando
+## con la telecamera larga lo schermo si disegna a 3 o 4 pixel per pixel.
 
 const FONDO_SHADER := """
 shader_type canvas_item;
+uniform vec2 unit = vec2(0.00208333, 0.0037037);
 uniform sampler2D screen : hint_screen_texture, filter_nearest;
 uniform float line_uv = 0.7;
 uniform float depth_uv = 0.3;
@@ -18,12 +21,12 @@ uniform float t = 0.0;
 uniform vec3 tint = vec3(0.70, 0.78, 0.95);
 const float BAYER[16] = float[](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9., 15., 7., 13., 5.);
 void fragment() {
-	vec2 px = floor(SCREEN_UV / SCREEN_PIXEL_SIZE);
+	vec2 px = floor(SCREEN_UV / unit);
 	float d = clamp((SCREEN_UV.y - line_uv) / max(depth_uv, 1e-4), 0.0, 1.0);
 	// L'acqua: ogni riga si sposta di un pixel intero, di più verso chi guarda.
 	float wob = floor(sin(px.y * 0.85 + t * 0.21) * (0.6 + 1.6 * d) + 0.5);
 	float sy = line_uv - (SCREEN_UV.y - line_uv) * 1.15;
-	vec3 c = texture(screen, vec2(SCREEN_UV.x + wob * SCREEN_PIXEL_SIZE.x, sy)).rgb;
+	vec3 c = texture(screen, vec2(SCREEN_UV.x + wob * unit.x, sy)).rgb;
 	// Le luci si riflettono più del buio.
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
 	float a = strength * (1.0 - d) * (1.0 - d) * (0.25 + 1.1 * l);
@@ -35,10 +38,11 @@ void fragment() {
 
 const ATTORI_SHADER := """
 shader_type canvas_item;
+uniform vec2 unit = vec2(0.00208333, 0.0037037);
 uniform float t = 0.0;
 const float BAYER[16] = float[](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 9., 15., 7., 13., 5.);
 void fragment() {
-	vec2 px = floor(FRAGCOORD.xy);
+	vec2 px = floor(SCREEN_UV / unit);
 	float wob = floor(sin(px.y * 0.85 + t * 0.21) * 0.9 + 0.5);
 	vec4 c = texture(TEXTURE, UV + vec2(wob * TEXTURE_PIXEL_SIZE.x, 0.0));
 	float a = c.a * COLOR.a;

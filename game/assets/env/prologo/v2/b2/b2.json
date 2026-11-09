@@ -1,0 +1,98 @@
+{
+ "livello": "Prologo_B_Fuga",
+ "coordinate": "locali al livello B (worldX 6960 nel mondo)",
+ "scena": {
+  "image": "b2_scena.png",
+  "x": 720,
+  "y": 0,
+  "nota": "colonne 36-133 sopra la strada (alla 134 comincia B3); sotto, le cantine 62-127 continuano in B3 dalla 128: B3 va disegnata sopra B2"
+ },
+ "emissione": {
+  "image": "b2_emis.png",
+  "x": 720,
+  "y": 0,
+  "nota": "maxischermo, led menta di ARIA+, schermino del purificatore, citofono, lampade LED, lumino"
+ },
+ "stati": {
+  "bici_sigillo": {
+   "image": "b2_bici_sigillo.png",
+   "x": 1116,
+   "y": 629
+  },
+  "bici_libera": {
+   "image": "b2_bici_libera.png",
+   "x": 1116,
+   "y": 629
+  },
+  "serranda_chiusa": {
+   "image": "b2_serranda_chiusa.png",
+   "x": 1239,
+   "y": 673
+  },
+  "serranda_aperta": {
+   "image": "b2_serranda_aperta.png",
+   "x": 1231,
+   "y": 635
+  }
+ },
+ "note": {
+  "bici": "bici_sigillo prima, bici_libera dopo (il fruttivendolo alla 58)",
+  "serranda": "la botola della cantina (Cancello grigio alla 62, 2x2): chiusa o aperta",
+  "luci": "se si vogliono vive: una PointLight2D bianco-menta debole davanti al maxischermo (x 2337, y 260), una bianca sotto la tettoia del portone (x 1087, y 560), una grigia debole sotto la botola (x 1260, y 760)"
+ },
+ "luci": [
+  {
+   "nome": "maxischermo",
+   "x": 2337,
+   "y": 260,
+   "colore": "#cfeedd",
+   "energia": 0.55,
+   "raggio": 200,
+   "altezza": 60,
+   "alone": {
+    "energia": 0.4,
+    "raggio": 380,
+    "vuoto": 0.65
+   },
+   "pozza": {
+    "y": 686,
+    "larghezza": 460,
+    "energia": 0.38
+   },
+   "ritmo": "pulsa"
+  },
+  {
+   "nome": "portone",
+   "x": 1087,
+   "y": 560,
+   "colore": "#f2efe6",
+   "energia": 0.7,
+   "raggio": 110,
+   "altezza": 30,
+   "alone": {
+    "energia": 0.18,
+    "raggio": 120,
+    "vuoto": 0.25
+   },
+   "pozza": {
+    "y": 686,
+    "larghezza": 170,
+    "energia": 0.18
+   }
+  },
+  {
+   "nome": "botola",
+   "x": 1260,
+   "y": 760,
+   "colore": "#a9b1b8",
+   "energia": 0.4,
+   "raggio": 90,
+   "altezza": 20,
+   "alone": {
+    "energia": 0.15,
+    "raggio": 90,
+    "vuoto": 0.2
+   }
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PowerUpDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/powerup_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sovraccarico"
+label = "SOVRACCARICO"
+color = Color(0.2510, 0.9098, 1.0000, 1)
+durata = 0
+amount = 15.0
+damage_mult = 2
+breaks_guard = true

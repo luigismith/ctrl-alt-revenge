@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="HazardDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/hazard_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"polvere"
+label = "POLVERE"
+color = Color(0.8392, 0.2353, 0.1725, 1)
+damage_s = 2.0
+delay_s = 1.0
+cycle_s = 6.0
+active_s = 3.0

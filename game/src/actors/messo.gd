@@ -10,7 +10,12 @@ extends Thug
 ##   sul braccio (Gig.mark) e i rider attaccano tutti insieme. Si evita uscendo dalla corsia, come la
 ##   carica dell'esattore; un colpo al messo mentre mira lo interrompe;
 ## - «Una combo e giù»: pochi punti vita (messo.tres). KO, le chiamate finiscono e i rider già arrivati
-##   restano da battere;
+##   restano da battere. Superata l'8 novembre 2026 (Luigi: «almeno 2 combo per morire e un minimo di
+##   autodifesa»): la vita basta per due combo, e dopo DEFEND_HITS colpi di fila, appena è di nuovo in
+##   piedi, il messo si difende con la scossa del tablet (messo_impulso.tres): lo alza e si carica per
+##   un quarto di secondo, con l'anello rosso che cresce intorno ai piedi e i colpi parati; poi la
+##   scossa butta giù GIG, se è vicino. Si evita con un passo indietro. Dopo la scossa chiama un rider;
+##   la prima chiamata arriva presto (Luigi: «non chiama altri riders... o lo fa dopo troppo tempo»);
 ## - «Si può fermare»: è raggiungibile come gli altri. Contro il bordo dell'arena non ha più dove
 ##   scappare: il prologo insegna che è il primo da fermare.
 ##
@@ -22,8 +27,10 @@ enum Act { NONE, ALIGN, AIM, CALL }
 ## Più vicino di così GIG lo fa scappare; scappando cerca questa distanza.
 const KEEP_AWAY := 130.0
 const FLEE_TO := 175.0
-## Il richiamo dei rinforzi: ogni quanto, quanto dura il braccio alzato, a che tick entra il rider.
-const CALL_EVERY := 480
+## Il richiamo dei rinforzi: la prima chiamata (dall'inizio dello scontro), ogni quanto le altre, quanto
+## dura il braccio alzato, a che tick entra il rider.
+const FIRST_CALL := 90
+const CALL_EVERY := 300
 const CALL_TICKS := 44
 const CALL_AT := 22
 const MAX_RIDERS := 3
@@ -36,10 +43,19 @@ const LASER_LANE := 8.0
 const SHOT_TICKS := 10
 ## Il laser non parte da più lontano di così, né da più vicino.
 const AIM_RANGE := Vector2(60.0, 300.0)
+## L'autodifesa: i colpi di fila che la fanno scattare, i tick da libero senza colpi che azzerano il
+## conto, e la distanza (x, profondità) entro cui GIG deve essere perché il messo la tenti.
+const DEFEND_HITS := 3
+const STREAK_RESET := 60
+const PULSE_TRIGGER := Vector2(95.0, 30.0)
+const PULSE_ATTACK := "res://data/attacks/messo_impulso.tres"
+## Raggio dell'anello sul pavimento (come la hitbox della scossa) e quanto dura l'onda (solo disegno).
+const PULSE_RADIUS := 56.0
+const PULSE_WAVE := 14
 
 var act: Act = Act.NONE
 var act_t: int = 0
-var _call_timer: int = CALL_EVERY
+var _call_timer: int = FIRST_CALL
 var _aim_timer: int = 0
 ## Il colpo appena sparato (solo disegno): tick rimasti, se ha preso GIG e dove.
 var shot_t: int = 0
@@ -48,11 +64,18 @@ var shot_to: Vector2 = Vector2.ZERO
 var _fx_node: Node2D
 ## Gli aloni del laser (solo disegno).
 var _glow: Glow
+## Colpi presi di fila, e tick passati da libero dopo l'ultimo.
+var hit_streak: int = 0
+var _streak_t: int = 0
+var pulse_attack: AttackData
+## L'onda della scossa appena partita (solo disegno): tick rimasti.
+var wave_t: int = 0
 
 
 func setup_thug(type_id: StringName, lvl: Level, id: int, rng_seed: int) -> void:
 	super.setup_thug(type_id, lvl, id, rng_seed)
 	_aim_timer = rng.randi_range(AIM_EVERY.x, AIM_EVERY.y) / 2
+	pulse_attack = load(PULSE_ATTACK) as AttackData
 	_fx_node = Node2D.new()
 	_fx_node.name = "Laser"
 	_fx_node.z_as_relative = false
@@ -65,17 +88,28 @@ func setup_thug(type_id: StringName, lvl: Level, id: int, rng_seed: int) -> void
 func _think() -> void:
 	if shot_t > 0:
 		shot_t -= 1
+	if wave_t > 0:
+		wave_t -= 1
 	if state == State.ENTER:
 		_think_enter()
 		return
 	if not is_free():
 		_stop_act()
 		return
+	if hit_streak > 0:
+		_streak_t += 1
+		if _streak_t > STREAK_RESET:
+			hit_streak = 0
 	var p := level.player
 	if not ai_enabled or p == null or not p.is_alive() or p.state == State.DEAD:
 		_stop_act()
 		_walk_towards(px, py, 0.0)
 		return
+	if hit_streak >= DEFEND_HITS:
+		hit_streak = 0
+		if absf(p.px - px) <= PULSE_TRIGGER.x and absf(p.py - py) <= PULSE_TRIGGER.y:
+			_start_pulse(p)
+			return
 	if grace > 0:
 		grace -= 1
 		facing = 1 if p.px >= px else -1
@@ -100,7 +134,8 @@ func _think() -> void:
 func _think_idle(p: Fighter) -> void:
 	var dist := absf(p.px - px)
 	var close := dist < KEEP_AWAY
-	if not close and _call_timer <= 0 and riders_alive() < MAX_RIDERS:
+	# I rinforzi li chiama anche con GIG addosso: è il suo modo di difendersi (resta fermo e colpibile).
+	if _call_timer <= 0 and riders_alive() < MAX_RIDERS:
 		_start_act(Act.CALL)
 		set_state(State.IDLE, &"call")
 		return
@@ -202,6 +237,51 @@ func riders_alive() -> int:
 	return n
 
 
+# --- L'autodifesa -----------------------------------------------------------------------------
+
+## La scossa del tablet: girato verso GIG, la carica (colpi parati) e poi l'onda tutt'intorno.
+func _start_pulse(p: Fighter) -> void:
+	_stop_act()
+	facing = 1 if p.px >= px else -1
+	start_attack(pulse_attack, level.next_attack_serial())
+	Game.count(&"scosse_messo")
+
+
+func is_pulsing() -> bool:
+	return state == State.ATTACK and attack == pulse_attack
+
+
+## Durante la carica della scossa il messo para tutto, da tutte e due le parti.
+func try_block(_attacker: Entity, _atk: AttackData) -> bool:
+	if not is_pulsing() or attack_tick >= attack.startup or dead:
+		return false
+	hitstop = 4
+	_shake_ticks = 4
+	flash = FLASH_TICKS
+	return true
+
+
+func _on_hit_taken(attacker: Entity, atk: AttackData) -> void:
+	super._on_hit_taken(attacker, atk)
+	if attacker is Gig:
+		hit_streak += 1
+		_streak_t = 0
+
+
+func _end_attack() -> void:
+	var was_pulse := attack == pulse_attack
+	super._end_attack()
+	if was_pulse:
+		# Dopo la scossa i rinforzi, subito.
+		_call_timer = 0
+
+
+func _anim_output() -> void:
+	super._anim_output()
+	if is_pulsing() and attack_tick == attack.startup:
+		wave_t = PULSE_WAVE
+
+
 func _start_act(a: Act) -> void:
 	act = a
 	act_t = 0
@@ -249,6 +329,10 @@ func _draw_laser() -> void:
 		return
 	var feet := Vector2(roundf(px), roundf(py))
 	var a := pen_tip_local() + Vector2(0, -roundf(ph))
+	if is_pulsing() and attack_tick < attack.startup:
+		_draw_pulse_charge(float(attack_tick) / attack.startup)
+	if wave_t > 0:
+		_draw_pulse_wave(1.0 - float(wave_t) / PULSE_WAVE)
 	if act == Act.AIM:
 		var b := Vector2(_lane_end() - feet.x, a.y)
 		ArmMark.draw_beam(_fx_node, a, b, level.tick, float(act_t) / AIM_TICKS, _glow)
@@ -257,3 +341,35 @@ func _draw_laser() -> void:
 		ArmMark.draw_shot(_fx_node, a, to, float(shot_t) / SHOT_TICKS, _glow)
 		if shot_hit:
 			ArmMark.draw_flash(_fx_node, to, shot_t, _glow)
+
+
+## L'anello sul pavimento (un'ellisse schiacciata come la profondità dell'arena), coi pixel interi.
+func _ellipse(r: float, c: Color, dotted: bool) -> void:
+	var n := maxi(24, roundi(r * 1.6))
+	var last := Vector2(INF, INF)
+	for i in n:
+		if dotted and i % 3 == 2:
+			continue
+		var ang := TAU * i / n
+		var q := Vector2(roundf(cos(ang) * r), roundf(sin(ang) * r * 0.3))
+		if q != last:
+			_fx_node.draw_rect(Rect2(q, Vector2.ONE), c)
+			last = q
+
+
+## La carica: il tablet si accende e l'anello rosso cresce fino al raggio della scossa.
+func _draw_pulse_charge(k: float) -> void:
+	var c := Color(ArmMark.C_MARK, 0.55 + 0.45 * k)
+	_ellipse(lerpf(12.0, PULSE_RADIUS, k), c, true)
+	var hand := pen_tip_local() + Vector2(0, -roundf(ph))
+	_fx_node.draw_rect(Rect2(hand.round() - Vector2(1, 1), Vector2(3, 3)), Color(ArmMark.C_CORE, 0.6 + 0.4 * k))
+	_glow.halo(hand.round(), roundi(5.0 + 7.0 * k), Color(ArmMark.C_HOT_GLOW.lerp(ArmMark.C_MARK, k), 0.7))
+	_glow.halo(Vector2(0, -2), roundi(PULSE_RADIUS * k * 0.5), Color(ArmMark.C_MARK, 0.25 * k))
+
+
+## L'onda: l'anello bianco-rosso esce oltre il raggio e si spegne.
+func _draw_pulse_wave(u: float) -> void:
+	var c := Color(ArmMark.C_CORE.lerp(ArmMark.C_MARK, u), 1.0 - u)
+	_ellipse(PULSE_RADIUS + 18.0 * u, c, false)
+	_ellipse(PULSE_RADIUS * 0.7 + 14.0 * u, Color(ArmMark.C_MARK, 0.6 * (1.0 - u)), true)
+	_glow.halo(Vector2(0, -40), roundi(14.0 + 20.0 * u), Color(ArmMark.C_MARK, 0.5 * (1.0 - u)))

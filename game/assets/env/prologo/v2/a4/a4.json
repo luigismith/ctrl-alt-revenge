@@ -1,0 +1,52 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "coordinate": "del livello A, cam_ref_y 450; il pavimento è alla riga 34 (y 680)",
+ "scena": {
+  "image": "a4_scena.png",
+  "x": 2760,
+  "y": 200
+ },
+ "fondo_aperto_da": 2760,
+ "davanti": {
+  "image": "a4_davanti.png",
+  "origin_x": 2760,
+  "scroll": 1.4,
+  "scroll_y": 1.35,
+  "y": -28,
+  "z": 1002,
+  "x_from": 2760,
+  "x_to": 3900,
+  "fade_in": 60,
+  "fade_out": 100
+ },
+ "stati": {
+  "porta_intera": {
+   "image": "a4_porta_intera.png",
+   "x": 3750,
+   "y": 436
+  },
+  "porta_rotta": {
+   "image": "a4_porta_rotta.png",
+   "x": 3750,
+   "y": 436
+  },
+  "cancello_chiuso": {
+   "image": "a4_cancello_chiuso.png",
+   "x": 4560,
+   "y": 580
+  },
+  "cancello_aperto": {
+   "image": "a4_cancello_aperto.png",
+   "x": 4560,
+   "y": 580
+  }
+ },
+ "sfumatura": "Il cielo, il lontano, le cappelle e le lapidi dietro la galleria sono i piani larghi di tutto A (../a/a_larghi.json), con i tre veli: rosa, scirocco, pioggia. Qui restano la scena, le colonne davanti e i pezzi alla scala di gioco: la moto del rider in A5 dopo il cancello. Il cartellone ETERNA è nella scena di A6, oltre il muro.",
+ "pezzi": {
+  "moto_rider": {
+   "image": "a4_moto_rider.png",
+   "x": 4665,
+   "y": 610
+  }
+ }
+}

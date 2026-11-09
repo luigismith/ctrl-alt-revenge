@@ -118,7 +118,9 @@ func _show_credits() -> void:
 ## `after_prologue`: arriva da NUOVA PARTITA. Un replay o il pilota della riga di comando erano del
 ## prologo, non dello slice: qui si gioca coi tasti.
 func _start_level(after_prologue: bool = false) -> void:
-	Game.reset_run()
+	# La partita è una sola (Luigi, 8 novembre 2026): dopo il prologo le vite e il punteggio restano.
+	if not after_prologue:
+		Game.reset_run()
 	var o := Game.options
 	var opts := {"seed": o.level_seed, "record": o.record_path}
 	if o.start_x >= 0.0:
@@ -160,6 +162,7 @@ func _start_new_game() -> void:
 ## (NUOVA PARTITA) invece di chiudere con la fine della demo (CAPITOLI → PROLOGO). `intro`: comincia con
 ## l'introduzione coi murales (dal menu sì, dalla riga di comando --prologue no).
 func _start_prologue(then_level: bool = false, intro: bool = false) -> void:
+	Game.reset_run()
 	var p := Prologue.new()
 	p.play_intro = intro
 	if then_level:

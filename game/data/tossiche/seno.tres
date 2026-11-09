@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="HazardDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/hazard_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"seno"
+label = "ACQUA DEL PRIMO SENO"
+color = Color(0.3608, 0.4706, 0.3294, 1)
+damage_s = 3.0

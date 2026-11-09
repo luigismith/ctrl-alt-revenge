@@ -110,6 +110,8 @@ var _just_boosted: bool = false
 
 ## Eventi del tick per gli effetti e i suoni: "jump", "spinta", "land", "slide", "grab", "climb".
 var events: PackedStringArray = []
+## Dove lo scatto ha rotto un Rompibile (l'evento «rompe»): il riquadro in pixel delle celle rotte.
+var last_break: Rect2i = Rect2i()
 ## Una posa imposta da fuori (per esempio l'hacking della stanza), al posto di quella dello stato.
 ## Solo disegno: non entra nell'impronta dello stato.
 var pose_override: StringName = &""
@@ -119,6 +121,30 @@ var pose_override: StringName = &""
 var arm_locked: bool = false
 ## Tick di sforzo già fatti per tirarsi su con una mano (0 = non sta salendo).
 var strain: int = 0
+## La planata dell'ombrello (power-up): in discesa, tenendo SALTO, GIG non cade più veloce di così
+## (px/tick). 0 = niente planata. `gliding` dice se in questo tick sta planando.
+var glide_fall: float = 0.0
+var gliding: bool = false
+## La corsa rallentata (i fanghi della bonifica): la velocità massima in percentuale.
+var speed_pct: int = 100
+## Lo scatto del caffè: la velocità massima in percentuale, sopra quella delle zone. Lo decide la stanza.
+var boost_pct: int = 100
+
+## Il colpo solo contro i droni (legenda §4b): un jab a terra, un calcio in aria. Lo accende la stanza
+## solo dove ci sono droni, così altrove ATTACCO resta libero e le impronte di prima non cambiano.
+var can_jab: bool = false
+## Vicino alla processione il colpo non parte (legenda §4c): lo decide la stanza a ogni tick.
+var jab_block: bool = false
+## Tick che restano del colpo in corso (0 = nessuno); `jab_hit` dice che ha già rotto qualcosa.
+var jab_t: int = 0
+var jab_hit: bool = false
+## La spinta indietro di un colpo preso: per `hurt_t` tick i tasti non contano e GIG scivola di
+## `knock_vx` sottopixel a tick. Poi `inv_t` tick di invulnerabilità, che lampeggia.
+var hurt_t: int = 0
+var knock_vx: int = 0
+var inv_t: int = 0
+## Il sigillo «PIGNORATO» della Vedetta: incollato, si stacca dopo tante pressioni di tasti.
+var stuck_left: int = 0
 var anim: FrameAnim
 ## I fogli di GIG: col braccio cyber acceso e, se c'è, col braccio morto (prima del riavvio: luci spente, il
 ## braccio che pende). Solo disegno: la salita (ledge_climb), l'unica clip che la fisica legge, dura uguale nei due.
@@ -161,6 +187,12 @@ func place(x: int, y: int) -> void:
 	wallrun_used = false
 	wall_lock = 0
 	momentum = 0
+	jab_t = 0
+	jab_hit = false
+	hurt_t = 0
+	knock_vx = 0
+	inv_t = 0
+	stuck_left = 0
 
 
 # ------------------------------------------------------------------ geometria
@@ -227,6 +259,9 @@ func step(input: InputFrame) -> void:
 	tick += 1
 	events = PackedStringArray()
 	_just_boosted = false
+	gliding = false
+	if can_jab or hurt_t > 0 or stuck_left > 0 or inv_t > 0 or jab_t > 0:
+		input = _combat_input(input)
 	if input.was_pressed(InputFrame.JUMP):
 		buf_jump = moves.jump_buffer
 	elif buf_jump > 0:
@@ -286,10 +321,40 @@ func _tick_ground(input: InputFrame) -> void:
 		_jump()
 		_tick_air_motion(input)
 		return
+	# La spallata: a terra lo scatto non c'è, ma con un Rompibile davanti, alla portata dello scatto,
+	# SCATTO parte di spalla e lo rompe (le porte marce sono alte quanto GIG e poggiano sul piano).
+	if input.was_pressed(InputFrame.DASH) and not arm_locked and _breakable_ahead(ax if ax != 0 else facing):
+		_start_dash(ax)
+		return
+	# La spallata in corsa, col braccio bloccato (prima del riavvio lo scatto non c'è): a piena corsa
+	# GIG sfonda di spalla il Rompibile che ha davanti. Da fermo la corsa arriva piena in dieci tick
+	# (run_speed / ground_accel), quindi serve la rincorsa e appoggiarsi alla porta non basta.
+	if arm_locked and ax != 0 and signi(vx) == ax and absi(vx) >= to_sub(moves.run_speed):
+		_shoulder()
 	_stop_at_wall(ax)
 	_move_x(vx)
 	if not _on_floor():
 		_leave_ground(true)
+
+
+## Rompe il Rompibile che GIG incontra di spalla in questo tick, nel verso in cui guarda: l'evento
+## «rompe», e in last_break dove.
+func _shoulder() -> void:
+	if grid.breakable.is_empty():
+		return
+	var reach := absi(rx + vx) / SUB + 1
+	var a := right() if facing > 0 else left() - reach
+	var hit := grid.break_in(a, top(), a + reach, py)
+	if hit.has_area():
+		last_break = hit
+		events.append("rompe")
+
+
+## C'è un Rompibile davanti, nel verso `dir`, entro la strada che fa uno scatto?
+func _breakable_ahead(dir: int) -> bool:
+	var reach := ceili(moves.dash_speed * moves.dash_ticks)
+	var a := right() if dir > 0 else left() - reach
+	return grid.has_breakable(a, top(), a + reach, py)
 
 
 ## Spingendo contro un muro già toccato la velocità non si accumula. Senza, vx sale per qualche
@@ -410,9 +475,29 @@ func _tick_air_one_arm(input: InputFrame, ax: int) -> void:
 	_stop_at_wall(ax)
 	if buf_jump > 0 and coyote > 0:
 		_jump()
+	else:
+		_arm_click_check(input)
 	if coyote > 0:
 		coyote -= 1
 	_tick_air_motion(input)
+
+
+## SALTO in aria col braccio bloccato, quando non porta a niente: la Spinta non c'è (prima del
+## riavvio) e il tasto non diventa un salto all'atterraggio, perché sotto i piedi non arriva un appoggio
+## entro i tick del salto tenuto in serbo. Scrive solo l'evento "braccio_a_vuoto", per la scintilla
+## spenta e il clic: lo stato non cambia.
+func _arm_click_check(input: InputFrame) -> void:
+	if not input.was_pressed(InputFrame.JUMP) or coyote > 0:
+		return
+	if vy >= 0:
+		var n := moves.jump_buffer
+		var reach := (vy * n + n * n * to_sub(moves.fall_gravity) / 2) / SUB
+		var t := SolidGrid.TILE
+		for r in range(py / t, (py + reach) / t + 1):
+			for c in range(left() / t, (right() - 1) / t + 1):
+				if grid.cell(c, r) != SolidGrid.Cell.EMPTY:
+					return
+	events.append("braccio_a_vuoto")
 
 
 ## Gravità, taglio del salto, spostamento e atterraggio.
@@ -430,6 +515,9 @@ func _tick_air_motion(input: InputFrame) -> void:
 	else:
 		g = to_sub(moves.fall_gravity)
 	vy = mini(vy + g, to_sub(moves.max_fall))
+	if glide_fall > 0.0 and held and vy >= 0:
+		gliding = true
+		vy = mini(vy, to_sub(glide_fall))
 	var wall := _move_x(vx)
 	var hit := _move_y(vy)
 	if hit < 0:
@@ -445,7 +533,7 @@ func _tick_air_motion(input: InputFrame) -> void:
 
 
 func _run(ax: int, top_speed: int, accel: int, decel: int, turn: int) -> void:
-	var target := ax * top_speed
+	var target := ax * top_speed * speed_pct / 100 * boost_pct / 100
 	if ax != 0 and vx != 0 and signi(vx) != ax:
 		vx = _approach(vx, target, turn)
 	elif ax != 0:
@@ -854,6 +942,8 @@ func _start_dash(dir: int) -> void:
 
 func _tick_dash(input: InputFrame) -> void:
 	dash_timer -= 1
+	# Di spalla: quello che lo scatto incontra in questo tick, se è Rompibile, si rompe e GIG passa.
+	_shoulder()
 	var wall := _move_x(vx)
 	if wall != 0:
 		state = State.AIR
@@ -907,6 +997,8 @@ func _update_anim() -> void:
 	if pose_override != &"" and anim.sheet.has_anim(pose_override):
 		anim.ensure(pose_override)
 		anim.advance()
+		return
+	if (jab_t > 0 or hurt_t > 0) and _combat_anim():
 		return
 	match state:
 		State.GROUND:
@@ -990,6 +1082,115 @@ func state_name() -> String:
 	return STATE_NAMES[state]
 
 
+# ------------------------------------------------------------------ il colpo solo e i colpi presi
+
+## Quanto dura il colpo e quando colpisce: dal 3° al 7° tick, poi GIG ritira il braccio.
+const JAB_TICKS := 14
+const JAB_ACTIVE := Vector2i(3, 7)
+## Fin dove arriva il colpo oltre il corpo, e la fascia d'altezza (dai piedi in su): arriva fino a terra,
+## così rompe anche la Colomba posata e il Segugio.
+const JAB_REACH := 32
+const JAB_BAND := Vector2i(0, 90)
+## La spinta indietro: quanto dura, il salto in su che la accompagna, l'invulnerabilità dopo.
+const HURT_TICKS := 16
+const HURT_HOP := 2.5
+const INV_TICKS := 60
+## Il rimbalzo sopra un drone rotto: come una Spinta corta.
+const BOUNCE_K := 0.8
+
+
+## Il rettangolo del colpo, solo nei tick in cui colpisce (altrimenti vuoto).
+func jab_box() -> Rect2i:
+	var age := JAB_TICKS - jab_t
+	if jab_t <= 0 or jab_hit or age < JAB_ACTIVE.x or age > JAB_ACTIVE.y:
+		return Rect2i()
+	var x0 := right() if facing > 0 else left() - JAB_REACH
+	return Rect2i(x0, py - JAB_BAND.y, JAB_REACH, JAB_BAND.y - JAB_BAND.x)
+
+
+## Il corpo, per i contatti.
+func body() -> Rect2i:
+	return Rect2i(left(), top(), moves.body_width, height)
+
+
+## Un colpo preso da `dir` (-1 da destra, 1 da sinistra): GIG vola indietro di `dist` px con un
+## piccolo salto, poi resta intoccabile per un secondo.
+func knock(dir: int, dist: int) -> void:
+	hurt_t = HURT_TICKS
+	inv_t = INV_TICKS + HURT_TICKS
+	knock_vx = dir * dist * SUB / HURT_TICKS
+	jab_t = 0
+	if state in [State.LEDGE_HANG, State.LEDGE_CLIMB, State.WALL_SLIDE, State.WALL_RUN, State.DASH, State.SLIDE, State.CROUCH]:
+		height = moves.body_height if _fits(moves.body_height) else height
+	state = State.AIR
+	coyote = 0
+	vy = -to_sub(HURT_HOP)
+	vx = 0
+	_can_cut = false
+	events.append("colpito")
+	if anim != null and anim.sheet.has_anim(&"hurt_high"):
+		anim.play(&"hurt_high")
+
+
+## Il rimbalzo dopo un salto in testa a un drone.
+func bounce() -> void:
+	state = State.AIR
+	coyote = 0
+	vy = -to_sub(moves.boost_speed * BOUNCE_K)
+	_can_cut = true
+	events.append("rimbalzo")
+
+
+## Il sigillo della Vedetta: GIG resta incollato per `presses` pressioni di tasti.
+func stick(presses: int) -> void:
+	stuck_left = presses
+	jab_t = 0
+	vx = 0
+	events.append("sigillo")
+
+
+## La parte del tick che riguarda colpi e sigillo: restituisce l'ingresso che la fisica deve vedere.
+func _combat_input(input: InputFrame) -> InputFrame:
+	inv_t = maxi(inv_t - 1, 0)
+	if jab_t > 0:
+		jab_t -= 1
+		if jab_t == 0:
+			jab_hit = false
+	if stuck_left > 0:
+		if input.pressed != 0:
+			stuck_left -= 1
+			events.append("strappo" if stuck_left > 0 else "staccato")
+		return InputFrame.new()
+	if hurt_t > 0:
+		hurt_t -= 1
+		_move_x(knock_vx)
+		return InputFrame.new()
+	if can_jab and not jab_block and jab_t == 0 and input.was_pressed(InputFrame.ATTACK) and state in [State.GROUND, State.AIR, State.CROUCH]:
+		jab_t = JAB_TICKS
+		jab_hit = false
+		events.append("jab")
+	return input
+
+
+## La posa del colpo: jab a terra (col braccio bloccato quello della destra), calcio in aria.
+func _combat_anim() -> bool:
+	if hurt_t > 0 and anim.sheet.has_anim(&"hurt_high"):
+		anim.ensure(&"hurt_high")
+		anim.advance()
+		return true
+	if jab_t <= 0:
+		return false
+	var want: StringName = &"air_kick" if state == State.AIR else &"jab1"
+	if not anim.sheet.has_anim(want):
+		want = &"jab2"
+	if not anim.sheet.has_anim(want):
+		return false
+	if anim.name != want or jab_t == JAB_TICKS:
+		anim.play(want)
+	anim.advance()
+	return true
+
+
 ## Impronta dello stato per i test e i replay.
 func state_hash() -> int:
 	var h := [px, py, rx, ry, vx, vy, facing, state, height, boosts_left, coyote, buf_jump,
@@ -999,4 +1200,12 @@ func state_hash() -> int:
 	# Solo col braccio bloccato, così le impronte dei replay di prima non cambiano.
 	if arm_locked:
 		h.append_array([arm_locked, strain])
+	# Lo stesso per la planata e la corsa rallentata, che ci sono solo coi power-up e le zone.
+	if glide_fall > 0.0 or gliding or speed_pct != 100:
+		h.append_array([glide_fall, gliding, speed_pct])
+	if boost_pct != 100:
+		h.append(boost_pct)
+	# E per i colpi, che ci sono solo coi droni.
+	if can_jab or jab_t > 0 or hurt_t > 0 or inv_t > 0 or stuck_left > 0:
+		h.append_array([jab_t, jab_hit, hurt_t, knock_vx, inv_t, stuck_left])
 	return hash(h)

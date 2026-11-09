@@ -9,6 +9,10 @@ const TAG_INVULN := 4
 const TAG_ARMOR := 8
 const TAG_HOLD := 16
 const TAG_AIR := 32
+## La luce del fotogramma, per gli aloni dei droni: in ronda, in avviso, spenta.
+const TAG_LIGHT_PATROL := 64
+const TAG_LIGHT_ALERT := 128
+const TAG_LIGHT_OFF := 256
 
 const TAG_NAMES: Dictionary[String, int] = {
 	"active": TAG_ACTIVE,
@@ -17,6 +21,9 @@ const TAG_NAMES: Dictionary[String, int] = {
 	"armor": TAG_ARMOR,
 	"hold": TAG_HOLD,
 	"air": TAG_AIR,
+	"ronda": TAG_LIGHT_PATROL,
+	"avviso": TAG_LIGHT_ALERT,
+	"spento": TAG_LIGHT_OFF,
 }
 
 var rect: Rect2i = Rect2i()

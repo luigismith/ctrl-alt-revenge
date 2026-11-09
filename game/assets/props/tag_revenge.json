@@ -1,0 +1,55 @@
+{
+ "id": "tag_revenge",
+ "format": 1,
+ "image": "tag_revenge.png",
+ "pixels_per_meter": 60,
+ "note": "La tag REVENGE di Totò a 11 anni (2087), la variante A scelta da Luigi: oggetto da raccogliere, non dipinto nella scena. 'accesa' prima, 'presa' dopo. L'ancora è in basso al centro, sotto le colature: la tag sta bassa, vicino al piano.",
+ "animations": {
+  "accesa": {
+   "loop": true,
+   "frames": [
+    {
+     "rect": [
+      1,
+      1,
+      51,
+      18
+     ],
+     "anchor": [
+      25,
+      17
+     ],
+     "ticks": 1,
+     "hurt": [],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    }
+   ]
+  },
+  "presa": {
+   "loop": true,
+   "frames": [
+    {
+     "rect": [
+      53,
+      1,
+      51,
+      18
+     ],
+     "anchor": [
+      25,
+      17
+     ],
+     "ticks": 1,
+     "hurt": [],
+     "hit": [],
+     "events": [],
+     "tags": [],
+     "dx": 0
+    }
+   ]
+  }
+ }
+}

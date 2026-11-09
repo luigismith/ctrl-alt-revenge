@@ -1,0 +1,21 @@
+{
+ "format": 1,
+ "level_width": 6960,
+ "cam_ref_y": 230,
+ "coordinate": "piani larghi del livello A, disegnati allo zoom della vista come il piano di gioco: la parallasse si conta dal bordo in alto a sinistra di quello che si vede del mondo (cam = x del bordo sinistro; dy = y del bordo alto - cam_ref_y). Le y vengono da ctrlaltrevenge-lab-condiviso/ambienti-ai/fondi_larghi (vista_a.py): cielo e lontano con l'orizzonte dove stava sul cielo di prima.",
+ "sfumatura": "Tre veli lungo A: rosa in A1-A3, scirocco in A4 (cielo e lontano 'chiude', medio e vicino 'caldo'), pioggia in A5-A6. Il velo dopo sta sopra e sfuma dentro; quello prima resta pieno sotto finché l'altro non è pieno. Il cielo e il lontano guardano a ovest, verso i parchi, le cupole e la torre di SIDERA, per tutto il cimitero (decisione 65): la fuga verso est è il livello B.",
+ "layers": [
+  {"name": "cielo_rosa", "image": "a_cielo_rosa.png", "scroll": 0.04, "scroll_y": 0.02, "y": -229, "z": -112, "x_to": 3780},
+  {"name": "cielo_chiude", "image": "a_cielo_chiude.png", "scroll": 0.04, "scroll_y": 0.02, "y": -229, "z": -111, "x_from": 2780, "fade_in": 1000, "x_to": 4680},
+  {"name": "cielo_pioggia", "image": "a_cielo_pioggia.png", "scroll": 0.04, "scroll_y": 0.02, "y": -229, "z": -110, "x_from": 3780, "fade_in": 900},
+  {"name": "lontano_rosa", "image": "a_lontano_rosa.png", "scroll": 0.1, "scroll_y": 0.06, "y": -69, "z": -108, "x_to": 3780},
+  {"name": "lontano_chiude", "image": "a_lontano_chiude.png", "scroll": 0.1, "scroll_y": 0.06, "y": -69, "z": -107, "x_from": 2780, "fade_in": 1000, "x_to": 4680},
+  {"name": "lontano_pioggia", "image": "a_lontano_pioggia.png", "scroll": 0.1, "scroll_y": 0.06, "y": -69, "z": -106, "x_from": 3780, "fade_in": 900},
+  {"name": "medio_rosa", "image": "a1_medio_rosa.png", "scroll": 0.3, "scroll_y": 0.12, "y": 56, "z": -96, "x_to": 2960},
+  {"name": "medio_caldo", "image": "a4_medio_largo_caldo.png", "origin_x": 2760, "scroll": 0.3, "scroll_y": 0.12, "y": 56, "z": -95, "x_from": 2840, "fade_in": 120, "x_to": 4680},
+  {"name": "medio_pioggia", "image": "a4_medio_largo.png", "origin_x": 2760, "scroll": 0.3, "scroll_y": 0.12, "y": 56, "z": -94, "x_from": 2980, "fade_in": 1700},
+  {"name": "vicino_rosa", "image": "a_vicino_rosa.png", "scroll": 0.6, "scroll_y": 0.3, "y": 9, "z": -88, "x_to": 3040},
+  {"name": "vicino_caldo", "image": "a_vicino_caldo.png", "scroll": 0.6, "scroll_y": 0.3, "y": 9, "z": -87, "x_from": 2840, "fade_in": 200, "x_to": 4680},
+  {"name": "vicino_bagnato", "image": "a_vicino_bagnato.png", "scroll": 0.6, "scroll_y": 0.3, "y": 9, "z": -86, "x_from": 4180, "fade_in": 500}
+ ]
+}

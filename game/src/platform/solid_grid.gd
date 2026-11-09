@@ -8,8 +8,8 @@ extends RefCounted
 ## - sottili: si attraversano da sotto e di lato, e reggono solo chi ci arriva sopra cadendo
 ##   (balconi, impalcature, tettoie). Con GIÙ + SALTO si scende.
 ##
-## Per ora la griglia si legge da una mappa di testo (vedi from_rows); i livelli veri la
-## leggeranno da un TileMapLayer disegnato nell'editor, con gli stessi tre tipi.
+## La griglia si legge da una mappa di testo (vedi from_rows) o da un livello dell'editor LDtk
+## (vedi LdtkMap e docs/ldtk.md), che porta anche le entità e i testi dei cartelli.
 
 const TILE := 20
 
@@ -21,6 +21,19 @@ var cells: PackedByteArray = PackedByteArray()
 ## Segni della mappa che non sono celle: lettera → posizioni in pixel del mondo (centro in
 ## basso della cella), per esempio il punto di partenza di GIG ("G").
 var marks: Dictionary[String, Array] = {}
+## Solo dai livelli LDtk: i testi dei cartelli (lettera → [titolo, riga]), le lettere dei cartelli
+## che fanno da ripartenza, da sinistra, e tutte le entità (vedi LdtkMap.entities).
+var signs: Dictionary = {}
+var checkpoints: Array[String] = []
+var entities: Array[Dictionary] = []
+## Solo dai livelli LDtk: dove porta l'Uscita (un altro livello dello stesso file o una scena) e le
+## arene disegnate come zone, da sinistra (vedi LdtkMap._marks).
+var next_level: String = ""
+var arenas: Array[Dictionary] = []
+## Solo dai livelli LDtk: le celle Rompibile ancora intere (indice → true), piene finché lo scatto non
+## le rompe (legenda §3), e quelle rotte, in ordine, per l'impronta.
+var breakable: Dictionary = {}
+var broken: PackedInt32Array = []
 
 
 func _init(w: int = 0, h: int = 0) -> void:
@@ -56,8 +69,11 @@ static func from_rows(rows: PackedStringArray) -> SolidGrid:
 	return g
 
 
-## Legge una mappa da file: le righe che iniziano con ";" sono commenti.
+## Legge una mappa da file: le righe che iniziano con ";" sono commenti. Un file .ldtk (con
+## "#Livello" in fondo per sceglierne uno) lo legge LdtkMap.
 static func load_file(path: String) -> SolidGrid:
+	if path.get_slice("#", 0).ends_with(".ldtk"):
+		return LdtkMap.read(path).grid
 	var text := FileAccess.get_file_as_string(path)
 	if text.is_empty():
 		push_error("Mappa non leggibile: %s" % path)
@@ -76,12 +92,55 @@ func set_cell(x: int, y: int, c: Cell) -> void:
 		cells[y * width + x] = c
 
 
-## Fuori dalla griglia ai lati e sotto è pieno (non si esce dalla stanza); sopra è vuoto.
+## Il rettangolo (in pixel, come rect_hits_solid) tocca una cella Rompibile ancora intera?
+func has_breakable(left: int, top: int, right: int, bottom: int) -> bool:
+	if breakable.is_empty() or right <= left or bottom <= top:
+		return false
+	for cy in range(floori(float(top) / TILE), floori(float(bottom - 1) / TILE) + 1):
+		for cx in range(floori(float(left) / TILE), floori(float(right - 1) / TILE) + 1):
+			if cx >= 0 and cy >= 0 and cx < width and cy < height and breakable.has(cy * width + cx):
+				return true
+	return false
+
+
+## Rompe le celle Rompibile che il rettangolo (in pixel, come rect_hits_solid) tocca, con tutte quelle
+## attaccate: una porta o una parete di tavole si rompe tutta insieme. Restituisce il riquadro in pixel
+## delle celle rotte, vuoto se non ha rotto niente.
+func break_in(left: int, top: int, right: int, bottom: int) -> Rect2i:
+	if breakable.is_empty() or right <= left or bottom <= top:
+		return Rect2i()
+	var todo: Array[int] = []
+	for cy in range(floori(float(top) / TILE), floori(float(bottom - 1) / TILE) + 1):
+		for cx in range(floori(float(left) / TILE), floori(float(right - 1) / TILE) + 1):
+			if cx >= 0 and cy >= 0 and cx < width and cy < height and breakable.has(cy * width + cx):
+				todo.append(cy * width + cx)
+	var out := Rect2i()
+	while not todo.is_empty():
+		var i: int = todo.pop_back()
+		if not breakable.has(i):
+			continue
+		breakable.erase(i)
+		broken.append(i)
+		cells[i] = Cell.EMPTY
+		var x := i % width
+		var y := i / width
+		var r := Rect2i(x * TILE, y * TILE, TILE, TILE)
+		out = r if not out.has_area() else out.merge(r)
+		for n: int in [i - 1, i + 1, i - width, i + width]:
+			if breakable.has(n) and (n / width == y or n % width == x):
+				todo.append(n)
+	return out
+
+
+## Fuori dalla griglia ai lati è pieno (non si esce dalla stanza) e sopra è vuoto. Sotto continua
+## l'ultima riga: dove è vuota la fossa non ha fondo e si cade fuori (vita persa); dove è piena si sta.
 func cell(x: int, y: int) -> int:
 	if y < 0:
 		return Cell.EMPTY
-	if x < 0 or x >= width or y >= height:
+	if x < 0 or x >= width:
 		return Cell.SOLID
+	if y >= height:
+		return Cell.EMPTY if cells[(height - 1) * width + x] == Cell.EMPTY else Cell.SOLID
 	return cells[y * width + x]
 
 

@@ -100,19 +100,7 @@ func load_json(path: String) -> bool:
 		if not (lv is Dictionary):
 			errors.append("piano non valido")
 			continue
-		var l := Layer.new()
-		l.name = str(lv.get("name", "piano"))
-		l.scroll = float(lv.get("scroll", 1.0))
-		l.scroll_y = float(lv.get("scroll_y", 0.0))
-		l.y = int(lv.get("y", 0))
-		l.repeat_x = int(lv.get("repeat_x", 0))
-		l.z = int(lv.get("z", 0))
-		l.x_from = int(lv.get("x_from", -FAR))
-		l.x_to = int(lv.get("x_to", FAR))
-		l.fade_in = maxi(0, int(lv.get("fade_in", 0)))
-		l.fade_out = maxi(0, int(lv.get("fade_out", 0)))
-		l.origin_x = int(lv.get("origin_x", 0))
-		l.texture = SpriteSheet.load_texture(dir.path_join(str(lv.get("image", ""))))
+		var l := parse_layer(lv, dir)
 		if l.texture == null:
 			errors.append("%s: immagine mancante" % l.name)
 			continue
@@ -127,6 +115,25 @@ func load_json(path: String) -> bool:
 		layers.append(l)
 	layers.sort_custom(func(a: Layer, b: Layer) -> bool: return a.z < b.z)
 	return errors.is_empty()
+
+
+## Un piano dalla sua voce del json (le immagini nella cartella `from_dir`); senza immagine la
+## texture resta null.
+static func parse_layer(lv: Dictionary, from_dir: String) -> Layer:
+	var l := Layer.new()
+	l.name = str(lv.get("name", "piano"))
+	l.scroll = float(lv.get("scroll", 1.0))
+	l.scroll_y = float(lv.get("scroll_y", 0.0))
+	l.y = int(lv.get("y", 0))
+	l.repeat_x = int(lv.get("repeat_x", 0))
+	l.z = int(lv.get("z", 0))
+	l.x_from = int(lv.get("x_from", -FAR))
+	l.x_to = int(lv.get("x_to", FAR))
+	l.fade_in = maxi(0, int(lv.get("fade_in", 0)))
+	l.fade_out = maxi(0, int(lv.get("fade_out", 0)))
+	l.origin_x = int(lv.get("origin_x", 0))
+	l.texture = SpriteSheet.load_texture(from_dir.path_join(str(lv.get("image", ""))))
+	return l
 
 
 func use_placeholder(rng_seed: int) -> void:

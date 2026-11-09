@@ -41,6 +41,10 @@ var record_path: String = ""
 ## pioggia, cartello né musica; gli ingressi e la telecamera li dà chi la ospita, e GIG KO
 ## rientra sempre, senza perdere vite.
 var embedded: bool = false
+## Ospitato da un tratto con le vite (il prologo): il KO costa una vita, e senza vite il CONTINUA?
+## lo apre l'ospite (wants_continue), che intanto tiene ferma l'arena.
+var embedded_lives: bool = false
+var wants_continue: bool = false
 ## Dati del livello passati da fuori (stesso formato del JSON); vuoto = LEVEL_JSON.
 var _given_data: Dictionary = {}
 
@@ -118,6 +122,7 @@ func configure(opts: Dictionary) -> void:
 	show_card = bool(opts.get("card", true))
 	record_path = str(opts.get("record", ""))
 	embedded = bool(opts.get("embedded", false))
+	embedded_lives = bool(opts.get("lives", false))
 	_given_data = opts.get("data", {})
 
 
@@ -581,6 +586,9 @@ func on_fighter_ko(f: Fighter, _attacker: Entity) -> void:
 ## Chiamata da GIG alla fine del lampeggio dopo il KO.
 func on_player_died() -> void:
 	if embedded:
+		if embedded_lives and Game.lose_life() <= 0 and not zone_cleared:
+			wants_continue = true
+			return
 		player.respawn()
 		Game.count(&"respawns")
 		return

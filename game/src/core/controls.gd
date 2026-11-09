@@ -11,6 +11,7 @@ const KEYS := {
 	"attack": [KEY_J, KEY_Z],
 	"jump": [KEY_K, KEY_X],
 	"dash": [KEY_L, KEY_C],
+	"vista": [KEY_V, KEY_I],
 	"pause": [KEY_ESCAPE, KEY_ENTER],
 	"menu_confirm": [KEY_ENTER, KEY_SPACE, KEY_J, KEY_Z],
 	"menu_back": [KEY_ESCAPE, KEY_BACKSPACE],
@@ -41,11 +42,13 @@ const PAD_AXES := {
 	"move_right": [JOY_AXIS_LEFT_X, 1.0],
 	"move_up": [JOY_AXIS_LEFT_Y, -1.0],
 	"move_down": [JOY_AXIS_LEFT_Y, 1.0],
+	# La Vista sul grilletto sinistro, tenuto.
+	"vista": [JOY_AXIS_TRIGGER_LEFT, 1.0],
 }
 
 ## Azioni di gioco nello stesso ordine dei bit di InputFrame.
 const GAME_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down", &"attack", &"jump",
-	&"dash"]
+	&"dash", &"vista"]
 
 
 func _ready() -> void:

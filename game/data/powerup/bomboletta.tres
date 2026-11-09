@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PowerUpDef" format=3]
+
+[ext_resource type="Script" path="res://src/platform/powerup_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"bomboletta"
+label = "BOMBOLETTA"
+color = Color(0.2510, 0.9098, 1.0000, 1)
+durata = 1
+amount = 3.0
+blind_s = 8.0
+stun_s = 2.0

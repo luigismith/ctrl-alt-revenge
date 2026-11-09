@@ -164,6 +164,32 @@
         ],
         "atteso": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev"
       }
+    },
+    {
+      "id": "ldtk",
+      "nome": "LDtk 1.5.3, l'editor dei livelli (installer NSIS per Windows, estratto senza installarlo)",
+      "versione": "1.5.3",
+      "licenza": "MIT",
+      "cartella": "tools/ldtk-1.5.3",
+      "nota": "Il pacchetto di Windows è solo l'installer: lo script ne estrae l'archivio interno con 7-Zip, senza eseguirlo. L'hash dell'installer è stato confrontato l'8 novembre 2026 con lo SHA-512 di latest.yml della release.",
+      "download": {
+        "url": "https://github.com/deepnight/ldtk/releases/download/v1.5.3/LDtk-1.5.3-installer.exe",
+        "file": "LDtk-1.5.3-installer.exe",
+        "byte": 167303856,
+        "algoritmo": "SHA256",
+        "hash": "61db0588c5d6a3f4de4c0e4ae0414f011b07f387dd019af4fa96f5fa7eb94822"
+      },
+      "formato": "nsis",
+      "archivio_interno": "$PLUGINSDIR/app-64.7z",
+      "estrattore": {
+        "nome": "7-Zip",
+        "winget": "7zip.7zip",
+        "pagina": "https://www.7-zip.org/"
+      },
+      "file_installati": {
+        "LDtk.exe": "cc3793b832390dfebbc7b8f2c7fa6cdd6dd4975540dd882ccba8c5215e32a123",
+        "resources/app.asar": "3ac29baf22512172670237efab7368e8f8f1b25a5f7d4f677b9db4db33673b7c"
+      }
     }
   ],
   "python": {

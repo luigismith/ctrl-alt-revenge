@@ -162,7 +162,7 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 | `game/` | Progetto Godot: scene, script, dati, asset, test e replay |
 | `tools/` | Pipeline per sprite e sfondi (dal 3D alla pixel art), effetti visivi, interfaccia e font, effetti sonori e musica, controlli sugli asset, il sito |
 | `site/` | Il sito: testi, modello, stile, script e media presi dal gioco |
-| `docs/` | Piano, specifica dello slice, media del README, guida per lavorare da più PC |
+| `docs/` | Piano, specifica dello slice, guida all'editor dei livelli ([`docs/ldtk.md`](docs/ldtk.md)), media del README, guida per lavorare da più PC |
 | `.github/workflows/` | La pubblicazione del sito e della demo |
 
 ## Crediti

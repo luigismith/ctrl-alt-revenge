@@ -69,7 +69,9 @@ func _draw() -> void:
 		_draw_continue()
 	if game_over_ticks >= 0:
 		draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0, 0, 0, minf(0.6, game_over_ticks / 40.0)))
-		_banner("msg_game_over", "GAME OVER", 1.0)
+		# Decisione 51: la frase con cui SIDERA blocca il braccio, al posto di GAME OVER. L'immagine
+		# «msg_abbonamento_scaduto» la fa la grafica; finché manca si scrive col font.
+		_banner("msg_abbonamento_scaduto", "ABBONAMENTO SCADUTO", 1.0)
 
 
 ## Cifra grande (striscia "big_digits" di game/assets/ui, a 1x come le scritte msg_*) centrata su

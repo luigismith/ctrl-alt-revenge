@@ -1,0 +1,13 @@
+{
+ "format": 1,
+ "level_width": 4560,
+ "cam_ref_y": 230,
+ "coordinate": "piani larghi del livello B, disegnati allo zoom della vista come il piano di gioco: la parallasse si conta dal bordo in alto a sinistra di quello che si vede del mondo (cam = x del bordo sinistro; dy = y del bordo alto - cam_ref_y). Le y vengono da ctrlaltrevenge-lab-condiviso/ambienti-ai/fondi_larghi (foglio_b_piani_larghi.png): cielo e lontano con l'orizzonte alla stessa riga (92), il medio dove stava b_medio.png, il vicino col marciapiede alla riga 540.",
+ "sfumatura": "Nessun velo: B è una sola sera, la fuga verso est dentro i Tamburi. Il vicino è l'isolato dietro le palazzine della scena, senza auto.",
+ "layers": [
+  {"name": "cielo", "image": "b_cielo.png", "scroll": 0.04, "scroll_y": 0.02, "y": -278, "z": -112},
+  {"name": "lontano", "image": "b_lontano.png", "scroll": 0.1, "scroll_y": 0.06, "y": 74, "z": -108},
+  {"name": "medio", "image": "b_medio_largo.png", "scroll": 0.3, "scroll_y": 0.12, "y": 22, "z": -96},
+  {"name": "vicino", "image": "b_vicino_largo.png", "scroll": 0.6, "scroll_y": 0.3, "y": -117, "z": -88}
+ ]
+}

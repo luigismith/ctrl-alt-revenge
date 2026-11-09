@@ -1,5 +1,8 @@
+; NON SI CAMBIA A MANO: il livello vero è prologo.ldtk (docs/ldtk.md), e questo si rifà da lì con
+; "python tools/ldtk/livelli_ldtk.py txt game/data/platform/prologo.ldtk game/data/platform/prologo.txt"
+; per gli script della grafica, che leggono ancora il testo. Il gioco legge il .ldtk.
 ; Prologo in grigio (tappa 2 del piano; scaletta: decisione 64): una riga per fila di celle da 20 px.
-; "#" pieno, "=" sottile, "." vuoto; le lettere minuscole sono i cartelli, con i testi in prologue.gd.
+; "#" pieno, "=" sottile, "." vuoto; le lettere minuscole sono i cartelli, con i testi nel .ldtk.
 ; "G" è la partenza (accanto alla tomba di Mimmo), "M" la lapide (SU: la vignetta), "X" il posto del
 ; riavvio nel garage, "Z" la fine sul tetto; "/" sono le celle della porta del garage, aperte finché
 ; GIG non entra. Il pavimento è alla riga 23 (y = 460), come nella stanza di prova, con due file di

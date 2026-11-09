@@ -1,0 +1,63 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "scena": {
+  "image": "a3_scena.png",
+  "x": 1680,
+  "y": 200,
+  "nota": "colonne 84-145, dalla riga 10 alla 39 (y 200-800)"
+ },
+ "emissione": {
+  "image": "a3_emis.png",
+  "x": 1680,
+  "y": 200
+ },
+ "luci": [
+  {
+   "nome": "lanterna_neogotica",
+   "x": 1894,
+   "y": 566,
+   "colore": "#ffc070",
+   "energia": 0.45,
+   "raggio": 90,
+   "altezza": 20,
+   "alone": {
+    "energia": 0.27,
+    "raggio": 117,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "lumini_a_credito",
+   "x": 2420,
+   "y": 652,
+   "colore": "#ffb03c",
+   "energia": 0.3,
+   "raggio": 60,
+   "altezza": 12,
+   "alone": {
+    "energia": 0.18,
+    "raggio": 78,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "recinzione_schermo",
+   "x": 2460,
+   "y": 540,
+   "colore": "#bfe8d4",
+   "energia": 0.4,
+   "raggio": 120,
+   "altezza": 30,
+   "alone": {
+    "energia": 0.24,
+    "raggio": 156,
+    "vuoto": 0.4
+   }
+  }
+ ],
+ "note": {
+  "cappelle": "le porte delle cappelle sono a 2 m: la neogotica è bassa (cornicione = presa a 2,3 m), quindi il rosone è un tondo sul parapetto",
+  "ricovero": "S1: la fessura sotto il cipresso (130, righe 31-33) è buio; il thermos del MiniBar è il Ristoro del gioco (134), non è disegnato",
+  "recinzione": "la recinzione-schermo (122-123) è liscia e senza cornice: niente prese"
+ }
+}

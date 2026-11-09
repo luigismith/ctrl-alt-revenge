@@ -1,0 +1,62 @@
+{
+ "livello": "Prologo_A_Cimitero",
+ "scena": {
+  "image": "a2_scena.png",
+  "x": 720,
+  "y": 200,
+  "nota": "colonne 36-83, dalla riga 10 alla 39 (y 200-800)"
+ },
+ "emissione": {
+  "image": "a2_emis.png",
+  "x": 720,
+  "y": 200
+ },
+ "luci": [
+  {
+   "nome": "transenna",
+   "x": 920,
+   "y": 632,
+   "colore": "#ffa050",
+   "energia": 0.18,
+   "raggio": 60,
+   "altezza": 10,
+   "alone": {
+    "energia": 0.11,
+    "raggio": 78,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "transenna",
+   "x": 1230,
+   "y": 632,
+   "colore": "#ffa050",
+   "energia": 0.18,
+   "raggio": 60,
+   "altezza": 10,
+   "alone": {
+    "energia": 0.11,
+    "raggio": 78,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "transenna",
+   "x": 1414,
+   "y": 632,
+   "colore": "#ffa050",
+   "energia": 0.18,
+   "raggio": 60,
+   "altezza": 10,
+   "alone": {
+    "energia": 0.11,
+    "raggio": 78,
+    "vuoto": 0.4
+   }
+  }
+ ],
+ "note": {
+  "trincee": "le trincee 46-49 e 62-67 hanno il fondo coi tubi della condotta; la tavola Sottile 62-64 è disegnata nella scena",
+  "transenne": "le transenne sono fondo, scure: le strisce LED sono nella emissione"
+ }
+}

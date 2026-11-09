@@ -98,7 +98,10 @@ void fragment() {
 
 ## Le pozze: una maschera grande come il pavimento (r: pozza, g: bordo di fango, b: asfalto, a: pavimento) e
 ## lo schermo specchiato sopra la linea del muro.
+## Retinatura e increspature vanno a pixel del gioco (`unit`, 1/480 × 1/270 dello schermo), anche quando
+## con la telecamera larga lo schermo si disegna a 3 o 4 pixel per pixel.
 const POZZE_SHADER := """shader_type canvas_item;
+uniform vec2 unit = vec2(0.00208333, 0.0037037);
 uniform sampler2D screen : hint_screen_texture, filter_nearest;
 uniform float line_y = 181.0;
 uniform float view_h = 270.0;
@@ -112,19 +115,19 @@ const float BAYER[16] = float[](0., 8., 2., 10., 12., 4., 14., 6., 3., 11., 1., 
 void fragment() {
 	vec4 m = texture(TEXTURE, UV);
 	if (m.a < 0.5) { discard; }
-	vec2 px = floor(SCREEN_UV / SCREEN_PIXEL_SIZE);
+	vec2 px = floor(SCREEN_UV / unit);
 	float d = clamp((px.y - line_y) / max(view_h - line_y, 1.0), 0.0, 1.0);
 	float wob = floor(sin(px.y * 0.85 + t * 0.21) * (0.6 + 1.6 * d) * (0.5 + m.r) + 0.5);
 	float sy = line_y - (px.y - line_y) * 1.15;
 	// Spezzato in verticale (5 campioni a 2 px, più lunghi lontano dal muro) e sfalsato a righe di 2 px: le
 	// insegne diventano strisce di luce, le scritte non si leggono.
 	float jit = floor(sin(floor(px.y * 0.5) * 2.3 + t * 0.05) * (1.0 + 2.0 * d) + 0.5);
-	float sx = SCREEN_UV.x + (wob + jit) * SCREEN_PIXEL_SIZE.x;
+	float sx = SCREEN_UV.x + (wob + jit) * unit.x;
 	float st = 2.0 + 2.0 * d;
 	vec3 c = vec3(0.0);
 	for (int i = -2; i <= 2; i++) {
 		float w = 1.0 - 0.25 * abs(float(i));
-		c += w * texture(screen, vec2(sx, (sy + float(i) * st + 0.5) * SCREEN_PIXEL_SIZE.y)).rgb;
+		c += w * texture(screen, vec2(sx, (sy + float(i) * st + 0.5) * unit.y)).rgb;
 	}
 	c /= 3.5;
 	float lum = dot(c, vec3(0.299, 0.587, 0.114));
@@ -140,6 +143,7 @@ void fragment() {
 
 ## Gli attori capovolti: pieni dove c'è la pozza, poco sull'asfalto, niente fuori dal pavimento.
 const ATTORI_SHADER := """shader_type canvas_item;
+uniform vec2 unit = vec2(0.00208333, 0.0037037);
 uniform sampler2D mask : filter_nearest;
 uniform vec2 mask_origin = vec2(0.0, 162.0);
 uniform vec2 mask_size = vec2(2400.0, 108.0);
@@ -151,7 +155,7 @@ void vertex() {
 	wpos = VERTEX;
 }
 void fragment() {
-	vec2 px = floor(FRAGCOORD.xy);
+	vec2 px = floor(SCREEN_UV / unit);
 	float wob = floor(sin(px.y * 0.85 + t * 0.21) * 0.9 + 0.5);
 	vec4 c = texture(TEXTURE, UV + vec2(wob * TEXTURE_PIXEL_SIZE.x, 0.0));
 	vec4 m = texture(mask, (floor(wpos) + 0.5 - mask_origin) / mask_size);

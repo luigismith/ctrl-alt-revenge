@@ -16,21 +16,66 @@ extends TestRoom
 ## alla fine della demo. `result`: {"ticks": il tick dell'arrivo, "prologue": true}.
 signal prologue_finished(result: Dictionary)
 
-const PROLOGUE_MAP := "res://data/platform/prologo.txt"
+## I livelli si disegnano in LDtk (docs/ldtk.md), con le celle, i cartelli e le loro scritte. Il prologo
+## nuovo ha due livelli nello stesso file: A, il cimitero fino alla torre, e B, la fuga per i Tamburi
+## fino al garage. Il prologo di prima, in un livello solo, resta per i test e per la grafica
+## (prologo.txt si rifà da lì con tools/ldtk/livelli_ldtk.py e serve agli script della grafica).
+const PROLOGUE_MAP := "res://data/platform/prologo_v2.ldtk"
+const PROLOGUE_V1 := "res://data/platform/prologo.ldtk"
 ## La grafica: per ora il cimitero (tools/ambienti/componi_prologo.py); la fuga e il garage in grigio.
+## Nel prologo nuovo la prima schermata di A è quella di prima, col pavimento ART_SHIFT_Y px più giù:
+## lì si usa la grafica di prima fino ad ART_CROP_X, il resto è greybox.
 const PROLOGUE_ART := "res://assets/env/prologo/layers.json"
-
-const PROLOGUE_SIGNS := {
-	"a": ["CORRI E SALTA", "il braccio sinistro è bloccato: niente acrobazie"],
-	"b": ["LE FOSSE", "prendi la rincorsa"],
-	"d": ["LA CAPPELLA", "con una mano sola: aggrappati e tieni SU"],
-	"e": ["IL PONTEGGIO CROLLATO", "GIÙ mentre corri: scivolata"],
-	"f": ["IL PIGNORAMENTO", "difenditi con la destra"],
-	"h": ["IL MURO DEL CIMITERO", "il cancello è chiuso: scavalca"],
-	"i": ["I TAMBURI", "corri al garage di tua madre"],
-	"j": ["IL GARAGE", "la porta si chiude dietro di te"],
-	"k": ["LA TASTIERA DEL PADRE", "premi SU davanti alla tastiera"],
-}
+const ART_SHIFT_Y := 220
+const ART_CROP_X := 520
+## Le tavole vestite di car-grafica, livello per livello, nell'ordine in cui si disegnano (la dopo sta
+## sopra la prima dove si toccano).
+## - A1-A3, il cimitero dall'ingresso alla galleria (colonne 0-145 di A, x 0-2920): le aiuole e la
+##   fontanella, le trincee della condotta con le transenne, le cappelle e il ricovero sotto il cipresso.
+##   A1 riusa le colonne 0-25 della scena di prima, che nel prologo nuovo non si disegna più.
+## - A4, la galleria del cimitero (colonne 144-229 di A): la scena, le colonne davanti e i pezzi a stati
+##   (la porticina intera o rotta, il cancello del deposito chiuso o aperto).
+## - A6, il cantiere davanti al muro di San Brunone (colonne 274-347): i lampeggianti, il quadro con la
+##   leva, i fari, il cancelletto, i LED dei pannelli ETERNA e le scintille sulla pozza.
+## - B1, la strada fuori dal cimitero (colonne 0-35 di B): il fioraio, il purificatore, la pensilina e
+##   il fianco della chiesa; le luci menta dell'ologramma, del purificatore e dello schermo.
+## - B2, le palazzine dei Tamburi (colonne 36-140 di B): il piano medio dietro, la bici del
+##   fruttivendolo col sigillo o libera, la serranda della cantina chiusa o aperta.
+## - B3, il forno e lo scavo (colonne 128-171 di B, sopra terra dalla 134): il sacchetto dei taralli, il
+##   fumo della canna fumaria e la porta della 168 chiusa dietro GIG.
+## - B4, il garage (colonne 172-227 di B, dalla cima alla terra): il lucernario, il banco e la stanza
+##   chiusa; lo scaffale del registro è vuoto, il registro sarà uno sprite a parte.
+const A1_ART := "res://assets/env/prologo/v2/a1/a1.json"
+const A2_ART := "res://assets/env/prologo/v2/a2/a2.json"
+const A3_ART := "res://assets/env/prologo/v2/a3/a3.json"
+const GALLERY_ART := "res://assets/env/prologo/v2/a4/a4.json"
+const A6_ART := "res://assets/env/prologo/v2/a6/a6.json"
+const B1_ART := "res://assets/env/prologo/v2/b1/b1.json"
+const B2_ART := "res://assets/env/prologo/v2/b2/b2.json"
+const B3_ART := "res://assets/env/prologo/v2/b3/b3.json"
+const B4_ART := "res://assets/env/prologo/v2/b4/b4.json"
+const LEVEL_ART: Array = [[A1_ART, A2_ART, A3_ART, GALLERY_ART, A6_ART], [B1_ART, B2_ART, B3_ART, B4_ART]]
+## I fondi larghi del livello (cielo, lontano, medio e vicino), disegnati allo zoom della vista: in A
+## tutto il cimitero coi tre veli, rosa, scirocco e pioggia; in B la sera dei Tamburi, col vicino che è
+## l'isolato dietro le palazzine della scena.
+const WIDE_ART: Array = ["res://assets/env/prologo/v2/a/a_larghi.json",
+	"res://assets/env/prologo/v2/b/b_larghi.json"]
+## I tempi degli stati che si muovono da soli, in tick: il lampeggio del cantiere, il respiro dei LED,
+## le scintille (a raffiche: SPARK_ON tick su SPARK_CYCLE, un fotogramma ogni SPARK_STEP) e il fumo.
+const BLINK_TICKS := 30
+const BREATH_TICKS := 240
+const SPARK_CYCLE := 100
+const SPARK_ON := 36
+const SPARK_STEP := 4
+const SMOKE_TICKS := 15
+## La telecamera tiene il pavimento a CAM_GROUND px dall'alto finché GIG non scende sotto (come la mappa
+## di prima, alta 500 px): così l'introduzione si scioglie nel gioco senza scatti.
+const CAM_GROUND := 230
+## Il passaggio da un livello all'altro: il nero entra, il livello cambia a metà, il nero esce.
+const SWITCH_TICKS := 40
+## Il garage del prologo di prima, rispetto alla porta (colonna 300, righe 18-22): il pilota lo usa
+## spostato dove sta la porta del livello.
+const V1_DOOR := Vector2i(300, 18)
 
 ## Le vignette: titolo e didascalia provvisoria (le tavole vere sono i murales).
 const VIGNETTES := {
@@ -75,13 +120,29 @@ const C_INK := Color8(240, 232, 210)
 ## La vecchia tastiera beige del padre, sul banco.
 const C_KEYBOARD := Color8(200, 190, 160)
 const C_KEYBOARD_LO := Color8(120, 112, 96)
-## Il dentro del garage (colonne 300-340, righe 10-22): lì non piove.
-const GARAGE_INSIDE := Rect2(300 * 20, 10 * 20, 41 * 20, 13 * 20)
+## Il dentro del garage, rispetto alla prima cella della porta (41 × 13 celle): lì non piove.
+const GARAGE_SIZE := Vector2i(41, 13)
+const C_GATE_ORANGE := Color8(196, 104, 40)
 
-## Ripartenza attuale: indice in CHECKPOINT_SIGNS (-1 = la tomba).
+## Il file dei livelli (i test usano quello di prima), i nomi dei suoi livelli e quello che si gioca.
+var map_file: String = PROLOGUE_MAP
+var level: int = 0
+var _levels: PackedStringArray = []
+## Tick che restano del passaggio al livello dopo (0 = nessun passaggio).
+var switch_t: int = 0
+## Ripartenza attuale: indice nelle ripartenze del livello (-1 = la partenza del livello).
 var checkpoint: int = -1
 var rebooted: bool = false
 var finished: bool = false
+## L'uscita sul tetto: passato il segno Z, GIG corre da solo per OUTRO_RUN tick e salta; poco prima
+## dell'apice, quando lo sprite passa al fotogramma OUTRO_ARC di jump_arc, il gioco si ferma e parte il
+## passaggio (MP13): la figura del murale è quella posa, così sprite e figura si sovrappongono esatti.
+## -1 = non ancora; outro_jump: ha già saltato. OUTRO_MAX è il limite, se il salto non arrivasse mai.
+const OUTRO_ARC := 3
+const OUTRO_RUN := 30
+const OUTRO_MAX := 120
+var outro_t: int = -1
+var outro_jump: bool = false
 ## Cosa viene dopo, scritto sotto «FINE DEL PROLOGO», una riga per voce: lo dà main.gd in NUOVA PARTITA,
 ## che prosegue nello slice. Vuoto: la riga di sempre, quando il prologo si gioca da solo dai CAPITOLI.
 var next_title: PackedStringArray = []
@@ -107,6 +168,11 @@ var door_t: int = -1
 ## Piove da quando arrivano gli Esattori (decisione 54).
 var raining: bool = false
 var _door_cells: Array[Vector2i] = []
+## I cancelli delle entità Cancello ({iid, cells, rect, colore, open}) e le leve ({iid, px, apre}).
+## Le leve tirate restano tirate nelle ripartenze dello stesso livello.
+var _gates2: Array[Dictionary] = []
+var _levers: Array[Dictionary] = []
+var pulled: PackedStringArray = []
 ## Il tempo (solo disegno): il cielo che si chiude, la pioggia, la luce sugli attori.
 var weather: Weather
 ## La luce cyan del riavvio: un lampo breve sul GIG del gioco, che si spegne in REBOOT_LIGHT tick.
@@ -118,18 +184,37 @@ var _reboot_light: PointLight2D
 var _reboot_light_t: int = 0
 ## I riflessi sul pavimento bagnato dell'arena (solo disegno).
 var _wet: WetFloor
+## Le tavole vestite del livello: i loro piani (un Backdrop per tavola, col suo cam_ref_y), i pezzi a
+## stati di tutte, per nome (porta_intera, cancello_chiuso, quadro_su, fumo_2...), e dove stanno i
+## cancelli disegnati (lì non si disegna la grata). Solo disegno.
+var _galleries: Array[Backdrop] = []
+## I fondi larghi del livello (WIDE_ART), se ci sono. Solo disegno.
+var _wide_art: Backdrop
+var _gallery_states: Dictionary = {}
+var _gallery_gates: Array[Rect2] = []
+## Le luci vive delle tavole (chiave "luci" dei json): PointLight2D sugli attori, come nel resto del
+## gioco; la luce sulla scena è già dipinta. Si spengono con le altre (F5, --no-lights).
+var _gallery_lights: Array[PointLight2D] = []
+var _gallery_light_base: Array = []
+var _light_tex: GradientTexture2D
+var _halo_tex: Dictionary = {}
+var _pool_tex: GradientTexture2D
+## La scena delle tavole prende anche gli aloni delle luci vive (gli attori no: hanno le loro).
+const LIGHT_MASK_SCENE := 4
 
 
 func _setup_stage() -> void:
-	map_path = PROLOGUE_MAP
-	env_path = PROLOGUE_ART
+	_levels = LdtkMap.level_names(map_file) if map_file.ends_with(".ldtk") else PackedStringArray()
+	level = maxi(_levels.find(Game.options.level_name), 0) if Game.options.level_name != "" else 0
+	map_path = _level_path(level)
+	_stage_art()
 	# Il pavimento dell'arena è la ghiaia del viale davanti al cancello, col cordolo e la terra rossa.
 	floor_colors = {"floor": Color8(124, 116, 109), "line": Color8(104, 97, 92), "top": Color8(150, 141, 132),
 		"kerb": Color8(96, 48, 38), "speck": Color8(158, 148, 138)}
-	signs = PROLOGUE_SIGNS
 	panels = {}
 	arena_id = PIGNORAMENTO
 	hud_title = "PROLOGO"
+	use_lives = true
 	arena_spawns = _pignoramento_spawns()
 
 
@@ -149,21 +234,580 @@ static func _pignoramento_spawns() -> Array:
 	return out
 
 
+## Il percorso del livello `i` del file (il file stesso, se ha un livello solo).
+func _level_path(i: int) -> String:
+	if _levels.size() <= 1:
+		return map_file
+	return map_file + "#" + _levels[clampi(i, 0, _levels.size() - 1)]
+
+
+## Il prologo nuovo ha più livelli nello stesso file; quello di prima uno solo.
+func _multi_level() -> bool:
+	return _levels.size() > 1
+
+
+## La grafica del livello: tutta nel prologo di prima, la prima schermata in A, niente in B.
+func _stage_art() -> void:
+	art_offset_y = 0
+	art_crop_x = 0
+	art_skip = []
+	art_scenes = true
+	env_path = PROLOGUE_ART
+	if _multi_level():
+		if level == 0:
+			art_offset_y = ART_SHIFT_Y
+			art_crop_x = ART_CROP_X
+			# Della grafica di prima resta solo la prima schermata col suo primo piano: cielo, medio e
+			# vicino sono i fondi larghi (WIDE_ART), che guardano a ovest per tutto il cimitero, e le
+			# palazzine, le auto e i panni stesi della fuga di prima non ci sono.
+			art_skip = ["cielo", "medio", "vicino", "cielo_fuga", "medio_fuga", "vicino_fuga", "davanti_fuga"]
+			# La scena di prima no: la prima schermata ora è A1, che ne riusa le colonne 0-25 così com'erano.
+			art_scenes = false
+		else:
+			env_path = ""
+
+
+## La grafica del livello e la vestizione nuova: in A la galleria, in B le palazzine.
+func _build_art() -> void:
+	for n in _art_extra + _art_view:
+		n.queue_free()
+	_art_extra.clear()
+	_art_view.clear()
+	_wide_art = null
+	for l in _gallery_lights:
+		l.queue_free()
+	_gallery_lights.clear()
+	_gallery_light_base.clear()
+	_galleries.clear()
+	_gallery_states.clear()
+	_gallery_gates.clear()
+	art_holes.clear()
+	art_open_from = -1
+	super._build_art()
+	if _multi_level() and level < WIDE_ART.size():
+		_build_wide_art(WIDE_ART[level])
+	if _multi_level() and level < LEVEL_ART.size():
+		for path: String in LEVEL_ART[level]:
+			_build_gallery(path)
+	_update_gallery()
+
+
+## I fondi larghi del livello: un Backdrop coi suoi veli, in un nodo dietro a tutto che segue lo zoom
+## della vista (_art_view).
+func _build_wide_art(path: String) -> void:
+	if path == "" or not FileAccess.file_exists(path):
+		return
+	var bd := Backdrop.new()
+	if not bd.load_json(path):
+		push_warning("Fondi larghi non validi (%s)" % "; ".join(bd.errors))
+		return
+	var node := Node2D.new()
+	node.name = "SfondoLargo"
+	add_child(node)
+	move_child(node, 0)
+	bd.build(node, node, 1)
+	_art_view.append(node)
+	_wide_art = bd
+
+
+## Un tratto vestito (la galleria del cimitero, le palazzine dei Tamburi): la scena e i pezzi a stati
+## nella stanza, dietro a quello che la stanza disegna (come la scena di prima); il piano medio dietro
+## e le colonne davanti in nodi loro, che non sfumano col taglio.
+func _build_gallery(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		return
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (data is Dictionary):
+		push_warning("Vestizione non leggibile: %s" % path)
+		return
+	var d: Dictionary = data
+	var dir := path.get_base_dir()
+	var sc: Variant = d.get("scena")
+	if not (sc is Dictionary):
+		return
+	# --b-grigio: in B niente scena né pezzi a stati, solo i piani; i blocchi restano grigi.
+	var grey := Game.options.grey_b and level >= 1
+	var scene_pos := Vector2(int(sc.get("x", 0)), int(sc.get("y", 0)))
+	var scene_w := 0.0
+	if grey:
+		var tex := SpriteSheet.load_texture(dir.path_join(str(sc.get("image", ""))))
+		scene_w = tex.get_width() if tex != null else 0.0
+	else:
+		var scene := _gallery_sprite(dir, sc)
+		if scene == null:
+			return
+		var hole := Rect2(scene.position, scene.texture.get_size())
+		art_holes.append(hole)
+		scene_w = hole.size.x
+		# Le luci dipinte della tavola (maxischermo, led, lampioni): sopra la scena, in additivo e fuori
+		# dalla tinta del tempo, così restano accese anche quando la scena si scurisce.
+		var em := _gallery_sprite(dir, d.get("emissione"))
+		if em != null:
+			_scene_art.erase(em)
+			var m := CanvasItemMaterial.new()
+			m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			m.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+			em.material = m
+	var lights: Variant = d.get("luci", [])
+	if lights is Array and not grey:
+		for lv: Variant in lights:
+			_gallery_light(lv)
+	var open_from := int(d.get("fondo_aperto_da", -1))
+	if open_from >= 0:
+		art_open_from = open_from if art_open_from < 0 else mini(art_open_from, open_from)
+	var states: Variant = d.get("stati", {})
+	if states is Dictionary and not grey:
+		for k: String in (states as Dictionary):
+			if _gallery_states.has(k):
+				push_warning("Vestizione: lo stato %s c'è già in un'altra tavola (%s)" % [k, path])
+				continue
+			var s := _gallery_sprite(dir, states[k])
+			if s != null:
+				_gallery_states[k] = s
+				if k.begins_with("cancell") or k.begins_with("serranda"):
+					_gallery_gates.append(_sprite_rect(s))
+	# I pezzi fermi alla scala di gioco (la moto del rider, il cartellone ETERNA): come la scena, sempre
+	# accesi.
+	var pieces: Variant = d.get("pezzi", {})
+	if pieces is Dictionary and not grey:
+		for k: String in (pieces as Dictionary):
+			_gallery_sprite(dir, pieces[k])
+	# I piani della grafica di prima che qui cambiano tratto o velocità (per esempio il cielo rosa che
+	# sfuma più a lungo): campi del json dei piani, per nome.
+	var fix: Variant = d.get("piani_di_prima", {})
+	if fix is Dictionary and backdrop != null:
+		for l: Backdrop.Layer in backdrop.layers:
+			if (fix as Dictionary).has(l.name):
+				_fix_layer(l, fix[l.name])
+	var bd := Backdrop.new()
+	bd.cam_ref_y = float(d.get("cam_ref_y", 450))
+	var specs: Array = []
+	for key: String in ["medio", "davanti"]:
+		specs.append([key, d.get(key)])
+	# Altri piani, così come sono scritti (senza i conti del medio).
+	var more: Variant = d.get("piani", [])
+	if more is Array:
+		for lv: Variant in more:
+			specs.append(["piano", lv])
+	for spec: Array in specs:
+		var key: String = spec[0]
+		var lv: Variant = spec[1]
+		if not (lv is Dictionary):
+			continue
+		var l := Backdrop.parse_layer(lv, dir)
+		if l.texture == null:
+			push_warning("Vestizione: manca %s" % lv.get("image", ""))
+			continue
+		if key == "medio":
+			# Il piano medio parte dall'inizio della scena; se è più stretto di quanto la telecamera ne
+			# scorre lungo la scena, si ripete.
+			if not (lv as Dictionary).has("origin_x"):
+				l.origin_x = int(scene_pos.x)
+			var need := View.W + ceili(scene_w * l.scroll)
+			if l.repeat_x <= 0 and l.texture.get_width() < need:
+				l.repeat_x = l.texture.get_width()
+		bd.layers.append(l)
+	if not bd.layers.is_empty():
+		_galleries.append(bd)
+		var back := Node2D.new()
+		back.name = "SfondoVestizione"
+		add_child(back)
+		move_child(back, 0)
+		var front := Node2D.new()
+		front.name = "PrimoPianoVestizione"
+		add_child(front)
+		_art_extra.append_array([back, front])
+		bd.build(back, front, 1)
+
+
+## Una luce viva della tavola, alla sua posizione del mondo: colore, energia, raggio e altezza (per
+## le normal map) dal json. Accende GIG e i droni. Con "alone" e "pozza" accende anche la scena, ma
+## solo intorno alla luce dipinta: l'alone è un anello attorno alla fonte, la pozza un anello schiacciato
+## sulla strada (alla y "y" della pozza); il centro resta quasi spento, così la luce già dipinta non
+## raddoppia. "ritmo": "tremola" (il forno) o "pulsa" (il maxischermo), solo disegno.
+func _gallery_light(spec: Variant) -> void:
+	if not (spec is Dictionary):
+		return
+	var d: Dictionary = spec
+	if _light_tex == null:
+		_light_tex = _radial_tex(128, 128, -1.0)
+		_pool_tex = _radial_tex(256, 48, 0.15)
+	var nm := str(d.get("nome", _gallery_lights.size()))
+	var col := Color.html(str(d.get("colore", "#ffffff")))
+	var pos := Vector2(float(d.get("x", 0)), float(d.get("y", 0)))
+	var rhythm := str(d.get("ritmo", ""))
+	var l := _gallery_point(nm, _light_tex, col, float(d.get("energia", 0.5)),
+			float(d.get("raggio", 100)) / 64.0, pos, Fighter.LIGHT_MASK_ACTORS, rhythm)
+	l.height = float(d.get("altezza", 30))
+	var halo: Variant = d.get("alone")
+	if halo is Dictionary:
+		var hole := snappedf(float(halo.get("vuoto", 0.15)), 0.05)
+		if not _halo_tex.has(hole):
+			_halo_tex[hole] = _radial_tex(128, 128, hole)
+		_gallery_point(nm + "_alone", _halo_tex[hole], col, float(halo.get("energia", 0.15)),
+				float(halo.get("raggio", 120)) / 64.0, pos, LIGHT_MASK_SCENE, rhythm)
+	var pool: Variant = d.get("pozza")
+	if pool is Dictionary:
+		_gallery_point(nm + "_pozza", _pool_tex, col, float(pool.get("energia", 0.15)),
+				float(pool.get("larghezza", 200)) / 128.0,
+				Vector2(float(pool.get("x", pos.x)), float(pool.get("y", pos.y))), LIGHT_MASK_SCENE, rhythm)
+
+
+func _gallery_point(nm: String, tex: Texture2D, col: Color, energy: float, sc: float, pos: Vector2,
+		mask: int, rhythm: String) -> PointLight2D:
+	var l := PointLight2D.new()
+	l.name = "Luce_" + nm
+	l.texture = tex
+	l.color = col
+	l.energy = energy
+	l.texture_scale = sc
+	l.range_item_cull_mask = mask
+	l.blend_mode = Light2D.BLEND_MODE_ADD
+	l.position = pos
+	l.enabled = lights_on and not Game.options.no_lights
+	_room_node.add_child(l)
+	_gallery_lights.append(l)
+	_gallery_light_base.append([energy, rhythm, float(_gallery_lights.size()) * 1.3])
+	return l
+
+
+## Il gradiente delle luci: pieno al centro (`hole` < 0), oppure ad anello: quasi spento fino alla
+## frazione `hole` del raggio (dove la luce è già dipinta), pieno poco più in là, poi a sfumare.
+static func _radial_tex(w: int, h: int, hole: float) -> GradientTexture2D:
+	var t := GradientTexture2D.new()
+	t.fill = GradientTexture2D.FILL_RADIAL
+	t.fill_from = Vector2(0.5, 0.5)
+	t.fill_to = Vector2(1.0, 0.5)
+	t.width = w
+	t.height = h
+	var g := Gradient.new()
+	if hole >= 0.0:
+		g.offsets = PackedFloat32Array([0.0, hole, minf(hole + 0.22, 0.9), 1.0])
+		g.colors = PackedColorArray([Color(1, 1, 1, 0.08), Color(1, 1, 1, 0.3), Color(1, 1, 1, 1),
+				Color(1, 1, 1, 0)])
+	else:
+		g.set_color(0, Color.WHITE)
+		g.set_color(1, Color(1, 1, 1, 0))
+	t.gradient = g
+	return t
+
+
+## Il respiro delle luci vive al tick `t` (solo disegno): il forno tremola, il maxischermo pulsa.
+static func light_rhythm(rhythm: String, t: int, phase: float) -> float:
+	match rhythm:
+		"tremola":
+			return 0.82 + 0.1 * sin(t * 0.31 + phase) + 0.08 * sin(t * 1.07 + phase * 2.0)
+		"pulsa":
+			return 0.8 + 0.2 * sin(t * TAU / 150.0 + phase)
+	return 1.0
+
+
+func _tick_gallery_lights() -> void:
+	for i in _gallery_lights.size():
+		var b: Array = _gallery_light_base[i]
+		if b[1] != "":
+			_gallery_lights[i].energy = b[0] * light_rhythm(b[1], tick, b[2])
+
+
+## Cambia i campi di un piano della grafica di prima (solo tratto, dissolvenze, origine e velocità).
+static func _fix_layer(l: Backdrop.Layer, f: Variant) -> void:
+	if not (f is Dictionary):
+		return
+	var fd: Dictionary = f
+	l.scroll = float(fd.get("scroll", l.scroll))
+	l.x_from = int(fd.get("x_from", l.x_from))
+	l.x_to = int(fd.get("x_to", l.x_to))
+	l.fade_in = maxi(0, int(fd.get("fade_in", l.fade_in)))
+	l.fade_out = maxi(0, int(fd.get("fade_out", l.fade_out)))
+	l.origin_x = int(fd.get("origin_x", l.origin_x))
+
+
+## Un pezzo della galleria nella stanza, alla sua posizione del mondo (null se manca l'immagine).
+func _gallery_sprite(dir: String, spec: Variant) -> Sprite2D:
+	if not (spec is Dictionary):
+		return null
+	var tex := SpriteSheet.load_texture(dir.path_join(str(spec.get("image", ""))))
+	if tex == null:
+		push_warning("Galleria: manca %s" % spec.get("image", ""))
+		return null
+	var s := Sprite2D.new()
+	s.name = "Galleria_" + str(spec["image"]).get_basename()
+	s.centered = false
+	s.texture = tex
+	s.position = Vector2(int(spec.get("x", 0)), int(spec.get("y", 0)))
+	s.show_behind_parent = true
+	s.light_mask = 1 | LIGHT_MASK_SCENE
+	_room_node.add_child(s)
+	_scene_art.append(s)
+	return s
+
+
+## Quello che prende la tinta del tempo: la scena (e la galleria), e le colonne davanti.
+func _graded_art() -> Array:
+	var out: Array = []
+	out.append_array(_scene_art)
+	for bd in _galleries:
+		for l in bd.layers:
+			out.append_array(l.sprites)
+	return out
+
+
+static func _sprite_rect(s: Sprite2D) -> Rect2:
+	return Rect2(s.position, s.texture.get_size())
+
+
+func _update_art() -> void:
+	super._update_art()
+	_update_gallery()
+
+
+## I piani seguono la telecamera. Gli stati (solo disegno, dalla logica che c'è già):
+## - la porticina è rotta quando al suo posto la mappa non è più piena;
+## - cancello, serranda e cancelletto sono aperti quando lo è il cancello del livello che gli sta sotto;
+## - la bici è libera quando il fruttivendolo che le sta accanto ha ringraziato;
+## - il quadro di cantiere va su quando la sua leva è tirata, e con lui si accendono i fari;
+## - i lampeggianti lampeggiano, i LED ETERNA respirano, le scintille crepitano a raffiche e il fumo
+##   gira, sempre;
+## - il sacchetto sparisce quando GIG prende i taralli che gli stanno sotto;
+## - la porta della 168 è chiusa quando si è chiusa dietro GIG.
+func _update_gallery() -> void:
+	var c := (_view_c - View.SIZE / 2.0).round()
+	for bd in _galleries:
+		bd.update(int(c.x), tick, c.y - bd.cam_ref_y)
+	# I fondi larghi contano la parallasse dall'angolo di quello che si vede del mondo.
+	if _wide_art != null:
+		var v := _visible_rect().position.round()
+		_wide_art.update(int(v.x), tick, v.y - _wide_art.cam_ref_y)
+	_tick_gallery_lights()
+	if _gallery_states.is_empty():
+		return
+	var broken := false
+	if _gallery_states.has("porta_intera"):
+		var p: Sprite2D = _gallery_states["porta_intera"]
+		var mid := Vector2i((p.position + p.texture.get_size() / 2.0) / SolidGrid.TILE)
+		broken = grid.cell(mid.x, mid.y) != SolidGrid.Cell.SOLID
+	var freed := false
+	if _gallery_states.has("bici_libera"):
+		var near := _sprite_rect(_gallery_states["bici_libera"]).grow(40)
+		for q in favors.persone:
+			if q.thanked and near.has_point(Vector2(q.px)):
+				freed = true
+	var lever_up := false
+	if _gallery_states.has("quadro_giu"):
+		var near := _sprite_rect(_gallery_states["quadro_giu"]).grow(8)
+		for l in _levers:
+			if String(l["iid"]) in pulled and near.has_point(Vector2(l["px"])):
+				lever_up = true
+	var bag_taken := false
+	if _gallery_states.has("sacchetto"):
+		var near := _sprite_rect(_gallery_states["sacchetto"]).grow(40)
+		for it in favors.ristori:
+			if it.taken and near.has_point(Vector2(it.home)):
+				bag_taken = true
+	var blink := (tick / BLINK_TICKS) % 2 == 0
+	var spark := tick % SPARK_CYCLE < SPARK_ON
+	var spark_f := (tick / SPARK_STEP) % 2
+	for k: String in _gallery_states:
+		var s: Sprite2D = _gallery_states[k]
+		var on := true
+		match k:
+			"porta_intera":
+				on = not broken
+			"porta_rotta":
+				on = broken
+			"cancello_chiuso", "cancelletto_chiuso":
+				on = not _gate_open_under(s)
+			"cancello_aperto", "cancelletto_aperto":
+				on = _gate_open_under(s)
+			# La botola della cantina la alza il fruttivendolo: aperta da quando l'anta è su.
+			"serranda_chiusa":
+				on = not _gate_open_under(s, true)
+			"serranda_aperta":
+				on = _gate_open_under(s, true)
+			"bici_sigillo":
+				on = not freed
+			"bici_libera":
+				on = freed
+			"quadro_giu", "fari_spenti":
+				on = not lever_up
+			"quadro_su", "fari_accesi":
+				on = lever_up
+			"lampeggianti_accesi":
+				on = blink
+			"lampeggianti_spenti":
+				on = not blink
+			"led_eterna":
+				s.modulate.a = 0.78 + 0.22 * (0.5 + 0.5 * sin(tick * TAU / BREATH_TICKS))
+			"scintille_1":
+				on = spark and spark_f == 0
+			"scintille_2":
+				on = spark and spark_f == 1
+			"fumo_1", "fumo_2", "fumo_3":
+				on = (tick / SMOKE_TICKS) % 3 == int(k.right(1)) - 1
+			"sacchetto":
+				on = not bag_taken
+			"porta_chiusa":
+				on = door_closed
+		s.visible = on
+
+
+## Il cancello del livello sotto un cancello disegnato è aperto. `by_hand`: e chi lo apre a mano (la
+## Persona del premio) l'ha già alzato.
+func _gate_open_under(s: Sprite2D, by_hand: bool = false) -> bool:
+	var r := _sprite_rect(s)
+	for g in _gates2:
+		if (g["rect"] as Rect2).intersects(r):
+			return g["open"] and (not by_hand or favors.lifted(String(g["iid"])))
+	return false
+
+
+## Una leva del livello dentro il quadro di cantiere disegnato.
+func _lever_drawn(at: Vector2i) -> bool:
+	return _gallery_states.has("quadro_giu") \
+		and _sprite_rect(_gallery_states["quadro_giu"]).grow(8).has_point(Vector2(at))
+
+
+## Un cancello del livello che ha un cancello disegnato sopra (lì niente grata).
+func _gate_drawn(r: Rect2) -> bool:
+	for q in _gallery_gates:
+		if q.intersects(r):
+			return true
+	return false
+
+
+## Lo stato disegnato della galleria (per i test): porta rotta, cancello aperto.
+func gallery_state() -> Dictionary:
+	var out := {}
+	for k: String in _gallery_states:
+		out[k] = (_gallery_states[k] as Sprite2D).visible
+	return out
+
+
 func _ready() -> void:
 	super._ready()
-	for p: Vector2i in grid.marks.get("/", []):
-		_door_cells.append(Vector2i(p.x / SolidGrid.TILE, p.y / SolidGrid.TILE - 1))
+	_read_level_things()
 	# Il tempo: la pioggia a strati (quello alla profondità di GIG dietro gli attori, subito dopo la
 	# stanza dei blocchi), il cielo e i piani del cimitero che si chiudono; nel garage non piove.
 	weather = Weather.new()
-	weather.setup(grid, [GARAGE_INSIDE], 1)
+	weather.setup(grid, _dry_rects(), 1)
 	weather.attach(self, _view, _room_node)
-	weather.grade_backdrop(backdrop, [_scene_art[0]] if not _scene_art.is_empty() else [])
+	weather.grade_backdrop(backdrop, _graded_art())
 	# Sopra il pavimento in profondità (z 1), sotto le ombre (60) e gli attori.
 	_wet = WetFloor.new()
 	_wet.z_index = 2
 	_view.add_child(_wet)
 	_reset()
+
+
+## La porta, i cancelli e le leve del livello, dalle sue entità.
+func _read_level_things() -> void:
+	_door_cells.clear()
+	for p: Vector2i in grid.marks.get("/", []):
+		_door_cells.append(Vector2i(p.x / SolidGrid.TILE, p.y / SolidGrid.TILE - 1))
+	_gates2.clear()
+	_levers.clear()
+	pulled.clear()
+	for e: Dictionary in grid.entities:
+		match String(e["tipo"]):
+			"Cancello":
+				var pos: Vector2i = e["pos"]
+				var size: Vector2i = e["size"]
+				var cells: Array[Vector2i] = []
+				for y in range(pos.y / SolidGrid.TILE, (pos.y + size.y) / SolidGrid.TILE):
+					for x in range(pos.x / SolidGrid.TILE, (pos.x + size.x) / SolidGrid.TILE):
+						cells.append(Vector2i(x, y))
+						_gate_cells[Vector2i(x, y)] = true
+				_gates2.append({"iid": e["iid"], "cells": cells, "rect": Rect2(pos, size),
+					"colore": str(e["campi"].get("colore", "grigio")), "open": false})
+			"Leva":
+				var apre: Array = e["campi"]["apre"] if e["campi"].get("apre") is Array else []
+				_levers.append({"iid": e["iid"], "px": e["px"], "apre": apre})
+	_apply_gates()
+
+
+## I cancelli chiusi sono pieni; si aprono quando una leva che li apre è tirata, o col premio di una Persona.
+func _apply_gates() -> void:
+	for g in _gates2:
+		g["open"] = false
+		for l in _levers:
+			if String(l["iid"]) in pulled and g["iid"] in l["apre"]:
+				g["open"] = true
+		# O una Persona che ringrazia (il fruttivendolo apre la serranda).
+		if favors.is_open(String(g["iid"])):
+			g["open"] = true
+		for c: Vector2i in g["cells"]:
+			grid.set_cell(c.x, c.y, SolidGrid.Cell.EMPTY if g["open"] else SolidGrid.Cell.SOLID)
+
+
+func _on_favor_opened() -> void:
+	_apply_gates()
+
+
+## Dove non piove: dentro il garage, se il livello ha la porta.
+func _dry_rects() -> Array:
+	if _door_cells.is_empty():
+		return []
+	var d := _door_cells[0]
+	return [Rect2(d.x * SolidGrid.TILE, (d.y - 8) * SolidGrid.TILE, GARAGE_SIZE.x * SolidGrid.TILE,
+		GARAGE_SIZE.y * SolidGrid.TILE)]
+
+
+## Il passaggio al livello `i` dello stesso file: la mappa, la grafica, la porta, i cancelli e il tempo
+## nuovi, e GIG alla partenza. Quello che si è fatto (Mimmo, il riavvio) resta.
+func _enter_level(i: int) -> void:
+	level = i
+	map_path = _level_path(i)
+	_stage_art()
+	_load_map()
+	_read_level_things()
+	weather.grid = grid
+	weather.dry.clear()
+	for r: Variant in _dry_rects():
+		weather.dry.append(r as Rect2)
+	weather.refresh_surfaces()
+	for n: Node in [_art_back, _art_front]:
+		if n != null:
+			n.queue_free()
+	_art_back = null
+	_art_front = null
+	for sp in _scene_art:
+		sp.queue_free()
+	_scene_art.clear()
+	backdrop = null
+	art_until_x = 0
+	tilt_squash = TILT_SQUASH
+	_build_art()
+	weather.grade_backdrop(backdrop, _graded_art())
+	checkpoint = -1
+	_reset()
+
+
+## Le ripartenze del livello, da sinistra: i cartelli LDtk con «ripartenza» (CHECKPOINT_SIGNS per una
+## mappa senza).
+func _cps() -> Array[String]:
+	return grid.checkpoints if not grid.checkpoints.is_empty() else CHECKPOINT_SIGNS
+
+
+## L'indice della ripartenza dell'arena: da lì in poi lo scontro è fatto e piove.
+func _arena_cp() -> int:
+	var cps := _cps()
+	var id := "f"
+	if not grid.arenas.is_empty() and str(grid.arenas[0].get("ripartenza", "")) != "":
+		id = str(grid.arenas[0]["ripartenza"])
+	var i := cps.find(id)
+	return i if i >= 0 else 1 << 30
+
+
+## La pioggia delle zone Meteo in `x`: -1 senza zone, 0 asciutto, 1 piove («inizia» come «forte»).
+func _meteo_at(x: int) -> int:
+	for e: Dictionary in grid.entities:
+		if e["tipo"] != "Meteo":
+			continue
+		var pos: Vector2i = e["pos"]
+		var size: Vector2i = e["size"]
+		if x >= pos.x and x < pos.x + size.x:
+			return 0 if str(e["campi"].get("pioggia", "no")) == "no" else 1
+	return -1
 
 
 func _reset() -> void:
@@ -172,35 +816,56 @@ func _reset() -> void:
 		return
 	var cp := checkpoint
 	super._reset()
+	var at := _checkpoint_pos(cp)
 	# Il cartello dell'arena si supera solo a scontro finito (l'arena si apre 40 px prima).
-	arena_done = cp >= CHECKPOINT_SIGNS.find("f")
-	raining = cp >= CHECKPOINT_SIGNS.find("f")
+	arena_done = cp >= _arena_cp()
+	raining = cp >= _arena_cp() or _meteo_at(at.x) == 1
+	switch_t = 0
 	if weather != null:
 		weather.set_rain(raining, true)
 	_reboot_fx_pending = false
 	vignette = ""
 	finished = false
+	outro_t = -1
+	outro_jump = false
+	squeeze_on = false
+	_squeeze_k = 0.0
 	end_t = 0
 	player.arm_locked = not rebooted
 	player.boosts_left = player.boosts_max()
-	_set_door(cp >= CHECKPOINT_SIGNS.find("j"))
+	# La porta è chiusa dopo il riavvio e per chi riparte già dentro il garage.
+	_set_door(rebooted or not _door_cells.is_empty() and cp >= 0 and at.x > (_door_cells[0].x + 2) * SolidGrid.TILE
+		or not _multi_level() and cp >= CHECKPOINT_SIGNS.find("j"))
 	door_t = DOOR_BREAK if rebooted else -1
 	if rebooted:
 		reboot_step = 4
 	elif reboot_step < 4:
 		reboot_step = 0
-	var at := _checkpoint_pos(cp)
 	player.place(at.x, at.y)
 	player.facing = 1
 	_cam = _cam_target()
 
 
+## Le spie: una per cartello di ripartenza, dove GIG riparte; accese quelle già superate. Dopo il
+## riavvio si riparte dal banco del garage e le spie del cimitero non servono più.
+func _checkpoint_lamps() -> Array:
+	var out: Array = []
+	if rebooted:
+		return out
+	var cps := _cps()
+	for i in cps.size():
+		if grid.marks.has(cps[i]):
+			out.append([_checkpoint_pos(i), i <= checkpoint])
+	return out
+
+
 func _checkpoint_pos(cp: int) -> Vector2i:
 	if rebooted and grid.marks.has("X"):
 		return grid.marks["X"][0]
-	if cp < 0 or not grid.marks.has(CHECKPOINT_SIGNS[cp]):
+	var cps := _cps()
+	if cp < 0 or cp >= cps.size() or not grid.marks.has(cps[cp]):
 		return _start
-	var p: Vector2i = grid.marks[CHECKPOINT_SIGNS[cp]][0]
+	var p: Vector2i = grid.marks[cps[cp]][0]
 	return Vector2i(p.x - 30, p.y)
 
 
@@ -213,6 +878,12 @@ func _set_door(closed: bool) -> void:
 # ------------------------------------------------------------------ tick
 
 func _stage_tick(frame: InputFrame) -> InputFrame:
+	if switch_t > 0:
+		switch_t -= 1
+		if switch_t == SWITCH_TICKS / 2:
+			_enter_level(level + 1)
+			switch_t = SWITCH_TICKS / 2
+		return InputFrame.new()
 	if finished:
 		end_t += 1
 		if end_t == END_HOLD or end_t > END_SKIP and end_t < END_HOLD and (
@@ -220,6 +891,13 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 			end_t = END_HOLD + 1
 			prologue_finished.emit({"ticks": end_tick, "prologue": true})
 		return InputFrame.new()
+	# L'uscita sul tetto: avanti tutta, poi il salto, tenuto fino all'apice.
+	if outro_t >= 0:
+		outro_t += 1
+		if not outro_jump and outro_t > OUTRO_RUN and player.state == PlatformPlayer.State.GROUND:
+			outro_jump = true
+			return InputFrame.new(InputFrame.RIGHT | InputFrame.JUMP, InputFrame.JUMP)
+		return InputFrame.new(InputFrame.RIGHT | (InputFrame.JUMP if outro_jump else 0), 0)
 	if vignette != "":
 		vignette_t += 1
 		var close := vignette_t >= VIGNETTE_MAX or vignette_t >= VIGNETTE_MIN and (
@@ -241,6 +919,13 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 		request_scene(INTRO, {"gig": scene_pose_player("")})
 		return InputFrame.new()
 	var on_ground := player.state == PlatformPlayer.State.GROUND
+	# Le leve: SU accanto, coi piedi a terra, apre i cancelli che comanda.
+	var lv := _near_lever()
+	if lv >= 0 and frame.was_pressed(InputFrame.UP):
+		pulled.append(String(_levers[lv]["iid"]))
+		_apply_gates()
+		_on_event("lever")
+		return InputFrame.new()
 	# La lapide di Mimmo: SU davanti apre il ricordo (il murale; la vignetta, se il copione non c'è).
 	if not seen_mimmo and on_ground and _near("M", USE_REACH) and frame.was_pressed(InputFrame.UP):
 		seen_mimmo = true
@@ -274,15 +959,22 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 
 
 func _stage_after_step() -> void:
-	if finished:
+	if finished or switch_t > 0:
+		return
+	if outro_t >= 0:
+		var up := player.vy > PlatformPlayer.to_sub(PlatformPlayer.ARC_VY[OUTRO_ARC - 1])
+		if outro_jump and player.state == PlatformPlayer.State.AIR and up or outro_t >= OUTRO_MAX:
+			_end_prologue()
 		return
 	var on_ground := player.state == PlatformPlayer.State.GROUND
 	# Ripartenze: il cartello superato coi piedi a terra.
 	var nxt := checkpoint + 1
-	if on_ground and nxt < CHECKPOINT_SIGNS.size() and grid.marks.has(CHECKPOINT_SIGNS[nxt]):
-		var p: Vector2i = grid.marks[CHECKPOINT_SIGNS[nxt]][0]
+	var cps := _cps()
+	if on_ground and nxt < cps.size() and grid.marks.has(cps[nxt]):
+		var p: Vector2i = grid.marks[cps[nxt]][0]
 		if player.px >= p.x and player.py == p.y:
 			checkpoint = nxt
+			_on_checkpoint()
 	# Entrato nel garage, la porta si chiude dietro GIG.
 	if not door_closed and not _door_cells.is_empty() and player.left() > (_door_cells[0].x + 2) * SolidGrid.TILE \
 			and player.py > (_door_cells[0].y - 6) * SolidGrid.TILE:
@@ -297,18 +989,35 @@ func _stage_after_step() -> void:
 			_on_event("door_break")
 			if _inside_garage():
 				_reset()
-	if not seen_rinforzi and on_ground and _on_wall_top():
+	# Le zone Meteo: dove piove comincia a piovere.
+	if not raining and _meteo_at(player.px) == 1:
+		raining = true
+	# I rinforzi al muro, nel prologo di prima (in quello nuovo la scena è da rifare sulla torre).
+	if not seen_rinforzi and on_ground and not _multi_level() and _on_wall_top():
 		seen_rinforzi = true
 		var poses := {"gig": scene_pose_player("h")}
 		player.facing = 1
 		request_scene(RINFORZI, poses)
 	if grid.marks.has("Z") and player.py <= grid.marks["Z"][0].y and player.px >= grid.marks["Z"][0].x - 40:
-		finished = true
-		end_t = 0
-		end_tick = tick
-		_on_event("prologue_end")
-		# Il passaggio al capitolo 1: il gioco fermo a metà salto, MP13 a spray, poi il cartello.
-		request_scene(PASSAGGIO, {"gig": scene_pose_player("")})
+		# L'uscita porta a un altro livello dello stesso file: il nero, poi il livello dopo.
+		if LdtkMap.next_path(map_path, grid) != "" and level + 1 < _levels.size():
+			switch_t = SWITCH_TICKS
+			_on_event("level_exit")
+			return
+		# L'ultimo livello: i comandi passano all'uscita (un secondo, fino all'apice del salto), e la
+		# telecamera si stringe su GIG verso l'aggancio a MP13.
+		outro_t = 0
+		squeeze_on = true
+
+
+## La fine del prologo, all'apice del salto dell'uscita.
+func _end_prologue() -> void:
+	finished = true
+	end_t = 0
+	end_tick = tick
+	_on_event("prologue_end")
+	# Il passaggio al capitolo 1: il gioco fermo a metà salto, MP13 a spray, poi il cartello.
+	request_scene(PASSAGGIO, {"gig": scene_pose_player("")})
 
 
 ## GIG è in piedi sulla cima del muro del cimitero, accanto al cancello chiuso.
@@ -383,6 +1092,17 @@ func _near(mark: String, reach: int) -> bool:
 	return absi(player.px - m.x) <= reach and player.py == m.y
 
 
+## La leva a portata di SU (coi piedi alla sua altezza) non ancora tirata, o -1.
+func _near_lever() -> int:
+	if player.state != PlatformPlayer.State.GROUND:
+		return -1
+	for i in _levers.size():
+		var p: Vector2i = _levers[i]["px"]
+		if String(_levers[i]["iid"]) not in pulled and absi(player.px - p.x) <= USE_REACH and player.py == p.y:
+			return i
+	return -1
+
+
 func _inside_garage() -> bool:
 	if _door_cells.is_empty():
 		return false
@@ -390,15 +1110,21 @@ func _inside_garage() -> bool:
 	return player.px > x0 and player.py > (_door_cells[0].y - 8) * SolidGrid.TILE
 
 
+## Prima del riavvio il braccio è morto: niente Vista e niente copie.
+func _arm_alive() -> bool:
+	return rebooted
+
+
 func _stage_hash() -> Array:
-	return [checkpoint, rebooted, finished, vignette, vignette_t, seen_mimmo, reboot_step, door_closed, door_t, raining]
+	return [checkpoint, rebooted, finished, vignette, vignette_t, seen_mimmo, reboot_step, door_closed, door_t, raining,
+		level, switch_t, ",".join(pulled), outro_t, outro_jump]
 
 
 ## I suoni del prologo, poi quelli della stanza.
 const PROLOGUE_SFX := {
 	"keyboard": [&"ui_confirm", -2.0], "reboot_key": [&"ui_move", 0.0], "reboot": [&"zap", 0.0],
 	"door_close": [&"bin_hit", -4.0], "door_bang": [&"body_thud", -3.0], "door_break": [&"bin_break", 0.0],
-	"prologue_end": [&"go_arrow", 0.0],
+	"prologue_end": [&"go_arrow", 0.0], "lever": [&"ui_confirm", -2.0], "level_exit": [&"go_arrow", -2.0],
 }
 
 
@@ -459,9 +1185,30 @@ func _update_reboot_light() -> void:
 
 func _set_lights(on: bool) -> void:
 	super._set_lights(on)
+	for l in _gallery_lights:
+		l.enabled = on
 	if weather != null:
 		weather.set_lights(on)
 	_update_reboot_light()
+
+
+## La telecamera: con GIG sul pavimento del livello o più in alto, il pavimento resta a CAM_GROUND px
+## dall'alto (non si guarda sotto terra); nelle fosse segue GIG come sempre.
+func _cam_target() -> Vector2:
+	var t := super._cam_target()
+	var gy := _ground_y()
+	if gy > 0 and player.py <= gy:
+		t.y = minf(t.y, float(gy - CAM_GROUND))
+	return t
+
+
+## Il pavimento del livello: il più basso fra i piedi dei cartelli (0 se non ce ne sono).
+func _ground_y() -> int:
+	var y := 0
+	for id: String in grid.signs:
+		if grid.marks.has(id):
+			y = maxi(y, grid.marks[id][0].y)
+	return y
 
 
 # ------------------------------------------------------------------ pilota automatico
@@ -472,10 +1219,12 @@ var _pilot_seq: int = -1
 
 
 func pilot_keys(t: int) -> int:
-	if finished:
+	if finished or switch_t > 0 or outro_t >= 0:
 		return 0
 	if vignette != "":
 		return InputFrame.JUMP if t % 2 == 0 else 0
+	if _near_lever() >= 0:
+		return InputFrame.UP if t % 2 == 0 else 0
 	if not seen_mimmo and _near("M", USE_REACH):
 		return InputFrame.UP if t % 2 == 0 else 0
 	if not seen_mimmo and grid.marks.has("M") and player.state == PlatformPlayer.State.GROUND and player.px > grid.marks["M"][0].x \
@@ -492,7 +1241,26 @@ func pilot_keys(t: int) -> int:
 		if absi(dx) <= 8:
 			return InputFrame.UP if t % 2 == 0 else 0
 		return -1 if dx > 0 and dx > 40 else (InputFrame.RIGHT if dx > 0 else InputFrame.LEFT)
-	return _pilot_garage()
+	var rk := _pilot_registro(t)
+	return rk if rk >= 0 else _pilot_garage()
+
+
+## Sullo scaffale, con una base ancora da leggere vicina: con la Vista accesa fino alla base, SU, e
+## fermo finché la copia finisce. -1 = niente da fare.
+func _pilot_registro(t: int) -> int:
+	if registri.busy():
+		return InputFrame.VISTA
+	var p := player
+	if p.state != PlatformPlayer.State.GROUND:
+		return -1
+	for b: Registri.Base in registri.basi:
+		if b.read or p.py != b.px.y or absi(b.px.x - p.px) > 160:
+			continue
+		var dx := b.px.x - p.px
+		if absi(dx) <= 10:
+			return InputFrame.VISTA | (InputFrame.UP if t % 2 == 0 else 0)
+		return InputFrame.VISTA | (InputFrame.RIGHT if dx > 0 else InputFrame.LEFT)
+	return -1
 
 
 ## Nel garage dopo il riavvio: sullo scaffale con la Spinta, poi su per il lucernario con la Spinta,
@@ -504,9 +1272,11 @@ var _pilot_air_x: int = 0
 func _pilot_garage() -> int:
 	var T := SolidGrid.TILE
 	var p := player
+	# Le misure sono quelle del garage di prima, spostate dove sta la porta.
+	var o := _door_cells[0] - V1_DOOR if not _door_cells.is_empty() else Vector2i.ZERO
 	if p.state == PlatformPlayer.State.LEDGE_HANG or p.state == PlatformPlayer.State.LEDGE_CLIMB:
 		return -1
-	if p.py <= 9 * T and p.state != PlatformPlayer.State.AIR:
+	if p.py <= (9 + o.y) * T and p.state != PlatformPlayer.State.AIR:
 		return InputFrame.RIGHT
 	if p.state == PlatformPlayer.State.AIR or _pilot_seq >= 0:
 		_pilot_seq += 1
@@ -517,12 +1287,12 @@ func _pilot_garage() -> int:
 		if p.state != PlatformPlayer.State.AIR and _pilot_seq > 3:
 			_pilot_seq = -1
 		# Con la testa nel lucernario: verso destra, al bordo, per aggrapparsi.
-		var tx := 400 * T if p.py < 15 * T else _pilot_air_x
+		var tx := (400 + o.x) * T if p.py < (15 + o.y) * T else _pilot_air_x
 		if absi(tx - p.px) > 6:
 			keys |= InputFrame.RIGHT if tx > p.px else InputFrame.LEFT
 		return keys
 	# Da terra e dallo scaffale si salta sotto il lucernario, con la Spinta.
-	var from := 320 * T
+	var from := (320 + o.x) * T
 	_pilot_boost = true
 	_pilot_air_x = from
 	var d := from - p.px
@@ -544,15 +1314,41 @@ func _draw_stage(v: Node2D) -> void:
 			_draw_use_spot(v, grid.marks["M"][0], _near("M", USE_REACH))
 		if door_closed and not rebooted and reboot_step == 0 and grid.marks.has("X"):
 			_draw_use_spot(v, grid.marks["X"][0], _near("X", USE_REACH))
+	# I cancelli chiusi, una grata del loro colore, e le leve ancora da tirare.
+	for g in _gates2:
+		if not g["open"] and not _gate_drawn(g["rect"]):
+			_draw_grate(v, g["rect"], C_GATE_ORANGE if g["colore"] == "arancio" else C_SOLID_TOP)
+	if vignette == "" and not finished:
+		var near := _near_lever()
+		for i in _levers.size():
+			var lp: Vector2i = _levers[i]["px"]
+			var done := String(_levers[i]["iid"]) in pulled
+			# Dove la tavola ha il quadro di cantiere, la leva è la sua: niente leva grigia.
+			if not _lever_drawn(lp):
+				v.draw_rect(Rect2(lp.x - 3, lp.y - 18, 6, 18), C_GATE_DARK)
+				v.draw_rect(Rect2(lp.x - (8 if done else -2), lp.y - 26, 6, 10), C_OK if done else C_LED_RED)
+			if not done:
+				_draw_use_spot(v, lp, near == i)
 	# La porta del garage, e gli Esattori che bussano.
 	if door_closed and not _door_cells.is_empty():
 		var c := _door_cells[0]
 		var r := Rect2(c.x * SolidGrid.TILE, c.y * SolidGrid.TILE, 2 * SolidGrid.TILE, _door_cells.size() / 2 * SolidGrid.TILE)
-		v.draw_rect(r, C_GATE_DARK)
-		for k in range(int(r.position.y) + 4, int(r.end.y), 8):
-			v.draw_rect(Rect2(r.position.x, k, r.size.x, 1), C_GATE)
+		# La porta grigia, dove la tavola non ha la sua (B3, porta_chiusa).
+		if not _gallery_states.has("porta_chiusa"):
+			v.draw_rect(r, C_GATE_DARK)
+			for k in range(int(r.position.y) + 4, int(r.end.y), 8):
+				v.draw_rect(Rect2(r.position.x, k, r.size.x, 1), C_GATE)
 		if door_t > 0 and door_t % DOOR_BANG > DOOR_BANG - 14:
 			UiFont.draw_text(v, Vector2(r.position.x - 24, r.position.y - 16), "BUM!", C_LED_RED, 1, 1)
+
+
+## Un cancello chiuso: il fondo scuro e le sbarre verticali del suo colore.
+func _draw_grate(v: Node2D, r: Rect2, c: Color) -> void:
+	v.draw_rect(r, C_GATE_DARK)
+	for k in range(int(r.position.x) + 3, int(r.end.x), 6):
+		v.draw_rect(Rect2(k, r.position.y, 2, r.size.y), c)
+	v.draw_rect(Rect2(r.position.x, r.position.y, r.size.x, 2), c)
+	v.draw_rect(Rect2(r.position.x, r.end.y - 2, r.size.x, 2), c)
 
 
 ## Il segno di un punto dove premere SU: un triangolo cyan che pulsa e ondeggia sopra la testa di
@@ -625,7 +1421,8 @@ func _tick_extras() -> void:
 func _draw_stage_hud(h: Control) -> void:
 	if arena_phase == ArenaPhase.NONE:
 		# L'ora, sotto il titolo (cronologia: il cimitero dalle 15.15, la fuga e il garage verso le 16).
-		var ora := "GIOVEDÌ SANTO · ORE 15.15" if checkpoint < CHECKPOINT_SIGNS.find("i") else "GIOVEDÌ SANTO · ORE 16.00"
+		var tardi := _cps().find("i")
+		var ora := "GIOVEDÌ SANTO · ORE 16.00" if tardi >= 0 and checkpoint >= tardi else "GIOVEDÌ SANTO · ORE 15.15"
 		UiFont.draw_text(h, Vector2(View.CX, 2), ora, C_DIM, 1, 1)
 	if reboot_step >= 1 and reboot_step <= 3 and vignette == "":
 		_draw_reboot_prompt(h)
@@ -633,6 +1430,10 @@ func _draw_stage_hud(h: Control) -> void:
 		UiFont.draw_text(h, Vector2(View.CX, 20), "GLI ESATTORI SFONDANO LA PORTA: ESCI DAL LUCERNARIO", C_LED_RED, 1, 1)
 	if vignette != "":
 		_draw_vignette(h)
+	# Il nero del passaggio fra i livelli.
+	if switch_t > 0:
+		var k := 1.0 - absf(float(switch_t) - SWITCH_TICKS / 2.0) / (SWITCH_TICKS / 2.0)
+		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, clampf(k * 1.4, 0.0, 1.0)))
 	# Il cartello dopo il murale del passaggio (compare mentre la scena esce e l'interfaccia torna).
 	if finished and (scene == null or not scene.holds_sim()):
 		h.draw_rect(Rect2(0, 0, View.W, View.H), Color(0, 0, 0, 0.6))

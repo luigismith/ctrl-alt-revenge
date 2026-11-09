@@ -13,9 +13,12 @@ const ATTACK := 16
 const JUMP := 32
 ## Lo scatto in aria dei tratti platform (aggiunto il 5 novembre 2026; i replay di prima non lo usano).
 const DASH := 64
+## La Vista, l'occhio destro di GIG: si tiene premuto (Luigi, 9 novembre 2026). Aggiunta dopo gli altri
+## tasti, così i replay di prima restano validi.
+const VISTA := 128
 
 ## Lettere usate nei file di replay, nello stesso ordine dei bit.
-const LETTERS := "LRUDAJS"
+const LETTERS := "LRUDAJSV"
 
 var held: int = 0
 var pressed: int = 0
