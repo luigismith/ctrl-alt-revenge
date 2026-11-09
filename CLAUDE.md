@@ -16,6 +16,10 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
 - **Domande:** una per volta, con 2-4 soluzioni proposte e la consigliata per prima (AskUserQuestion). Niente elenchi di domande aperte in fondo ai messaggi.
 - **Storia:** si scrive insieme. Claude propone, Luigi decide. Le decisioni vanno in `docs/lore/storia.md`, le scene approvate in `docs/lore/sceneggiatura.md`.
 - **Giudizi onesti** su grafica e gameplay, con voti rispetto a Streets of Rage 2 e i limiti detti chiaramente.
+- **Non dargli ragione per farlo contento.** Luigi, 8 novembre 2026, per tutto il progetto: «lo scopo è fare un buon gioco, non darmi ragione». Vale per la regia e per ogni sessione:
+  - prima di dire «hai ragione» si controllano i documenti (storia, cronologia, decisioni);
+  - se una sua idea è peggiore di un'altra, o va contro una decisione già presa, lo si dice chiaro e si spiega perché;
+  - un'idea nostra che lui accetta non diventa giusta per questo: se poi si scopre un problema, lo si dice.
 - **Il repo pubblico deve essere stupendo.** Luigi, 4 novembre 2026: "la repo su github deve essere STUPENDA". Vale per il gioco e per la vetrina:
   - README con immagini e GIF vere del gioco;
   - documenti in ordine;
@@ -48,6 +52,13 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
   - Ogni livello, sfondo, insegna, testo, oggetto e suono deve essere coerente con Taranto e i suoi luoghi veri, con la storia e con le sue epoche (le date sono nella cronologia). Deve esserlo anche con età, date, ore, meteo e luna di ogni scena.
   - I riferimenti sono `docs/lore/cronologia.md` e `docs/lore/ricerca-taranto.md`. Prima di disegnare o scrivere qualcosa di nuovo, controllali.
   - **Si deve capire che siamo nel futuro.** Luigi, 7 novembre 2026, guardando lo slice: «vedo delle ape car, delle fiat 500... ok che ce n'è qualcuna, ma non così tante... devono esserci elementi del futuro narrato». Taranto resta riconoscibile, ma ogni ambientazione deve mostrare il suo anno con gli elementi della storia e della cronologia: veicoli, insegne, schermi, ARIA+, droni, SIDERA. Le cose di oggi ci possono essere, ma poche e consumate. Lo slice fatto il 7 novembre resta com'è.
+  - **È una regola generale** (Luigi, 8 novembre 2026: «mi raccomando alle ambientazioni: TARANTO riconoscibile, ma nel FUTURO, i richiami al passato sono ok, ma limitati»). Vale per ogni ambientazione nuova o rifatta: sfondi, murales, livelli, oggetti, testi e suoni. Prima di consegnare, chi la fa dice cosa rende riconoscibile Taranto e cosa dice l'anno.
+
+- **La scala** (Luigi, 8 novembre 2026, dopo i furgoni più bassi di GIG):
+  - sul piano di gioco tutto è alla scala di GIG, 60 px per metro (3 celle): porte, serrande, pianterreni e veicoli. Si può esagerare fino al 15% in più, mai in meno;
+  - le palazzine intere stanno sui piani dietro, con parallasse e velo;
+  - dove i salti non tornano con le misure vere si aggiungono appoggi intermedi (tettoie, purificatori ARIA+, insegne, ponteggi), meglio se del futuro;
+  - ogni foglio di grafica mostra GIG accanto a una porta e a un veicolo, con le misure in metri.
 
 ## Storia privata
 
