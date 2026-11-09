@@ -59,7 +59,8 @@ const B3_ART := "res://assets/env/prologo/v2/b3/b3.json"
 const B4_ART := "res://assets/env/prologo/v2/b4/b4.json"
 const CANTINE_B_ART := "res://assets/env/prologo/v2/cantine/cantine.json"
 const CORTILE_B_ART := "res://assets/env/prologo/v2/cortile/cortile.json"
-const LEVEL_ART: Array = [[A1_ART, A2_ART, A3_ART, GALLERY_ART, A5_ART, A6_ART, CANTIERE_ART],
+const S1_ART := "res://assets/env/prologo/v2/s1/s1.json"
+const LEVEL_ART: Array = [[A1_ART, A2_ART, A3_ART, S1_ART, GALLERY_ART, A5_ART, A6_ART, CANTIERE_ART],
 	[B1_ART, B2_ART, B3_ART, CORTILE_B_ART, CANTINE_B_ART, B4_ART]]
 ## I fondi larghi del livello (cielo, lontano, medio e vicino), disegnati allo zoom della vista: in A
 ## tutto il cimitero coi tre veli, rosa, scirocco e pioggia; in B la sera dei Tamburi, col vicino che è
@@ -254,6 +255,10 @@ var _inside_art: Array[Sprite2D] = []
 var _door_light: Sprite2D = null
 ## Le luci che si vedono solo dentro (le lampadine delle cantine), con la loro energia piena.
 var _inside_lights: Array = []
+## I segreti senza stacco (il ricovero di S1): la facciata, la sua emissione e le sue luci sfumano da
+## sole quando i piedi di GIG sono in un interno che la facciata copre, con un k loro (1 piena, 0 sparita):
+## {"arte": [Sprite2D], "luci": [[PointLight2D, energia]], "rect": Rect2, "k": float}.
+var _secrets: Array[Dictionary] = []
 ## Le aperture nel tetto degli interni (il lucernario del garage, la grata delle cantine): colonne senza
 ## Pieno né cancelli sopra il bordo alto. Lì piove anche dentro. In quelle senza stacco dall'alto
 ## (_roof_fades, il lucernario) la copertura sfuma coi piedi di GIG mentre passa.
@@ -362,6 +367,7 @@ func _build_art() -> void:
 	_inside_art.clear()
 	_door_light = null
 	_inside_lights.clear()
+	_secrets.clear()
 	_arena_floor = {}
 	_seal_from = -100000
 	_seal_near = false
@@ -408,7 +414,7 @@ func _build_gallery(path: String) -> void:
 	var dir := path.get_base_dir()
 	# Una tavola senza scena (la soglia del cantiere) ha solo pezzi, stati e luci.
 	var sc: Variant = d.get("scena")
-	if not (sc is Dictionary) and not (d.get("pezzi") is Dictionary):
+	if not (sc is Dictionary) and not (d.get("pezzi") is Dictionary) and not (d.get("segreto") is Dictionary):
 		return
 	var has_scene := sc is Dictionary
 	# --b-grigio: in B niente scena né pezzi a stati, solo i piani; i blocchi restano grigi.
@@ -467,6 +473,8 @@ func _build_gallery(path: String) -> void:
 	if open_from >= 0:
 		art_open_from = open_from if art_open_from < 0 else mini(art_open_from, open_from)
 	var cover: Node2D = null if grey else _build_cover(dir, d)
+	if not grey and d.get("segreto") is Dictionary:
+		_build_secret(dir, d["segreto"])
 	var states: Variant = d.get("stati", {})
 	if states is Dictionary and not grey:
 		for k: String in (states as Dictionary):
@@ -755,6 +763,34 @@ func _build_cover(dir: String, d: Dictionary) -> Node2D:
 	return node
 
 
+## Un segreto senza stacco (chiave "segreto": "facciata", "emissione" in additivo, "luci"): sta in un
+## nodo della stanza sopra GIG, le persone e i droni (z 6), come la copertura, ma sfuma con un k suo.
+func _build_secret(dir: String, d: Dictionary) -> void:
+	var node := Node2D.new()
+	node.name = "Segreto"
+	node.z_index = 6
+	_room_node.add_child(node)
+	_cover_nodes.append(node)
+	var face := _gallery_sprite(dir, d.get("facciata"), node)
+	if face == null:
+		return
+	face.light_mask = 1
+	var sc: Dictionary = {"arte": [face], "luci": [], "rect": _sprite_rect(face), "k": 1.0}
+	var glow := _gallery_sprite(dir, d.get("emissione"), node)
+	if glow != null:
+		_scene_art.erase(glow)
+		glow.material = _additive()
+		sc["arte"].append(glow)
+	var lights: Variant = d.get("luci", [])
+	if lights is Array:
+		for lv: Variant in lights:
+			var from := _gallery_lights.size()
+			_gallery_light(lv)
+			for i in range(from, _gallery_lights.size()):
+				sc["luci"].append([_gallery_lights[i], _gallery_light_base[i][0]])
+	_secrets.append(sc)
+
+
 static func _additive() -> CanvasItemMaterial:
 	var m := CanvasItemMaterial.new()
 	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
@@ -808,6 +844,14 @@ func _update_gallery() -> void:
 	for pair: Array in _inside_lights:
 		(pair[0] as PointLight2D).visible = _cover_k < 1.0
 		(pair[0] as PointLight2D).energy = float(pair[1]) * (1.0 - _cover_k)
+	for sc: Dictionary in _secrets:
+		var k: float = sc["k"]
+		for a: Sprite2D in sc["arte"]:
+			a.modulate.a = k
+			a.visible = k > 0.0
+		for pair: Array in sc["luci"]:
+			(pair[0] as PointLight2D).visible = k > 0.0
+			(pair[0] as PointLight2D).energy = float(pair[1]) * k
 	if _door_light != null:
 		_door_light.modulate.a = 1.0 - _cover_k
 		_door_light.visible = _cover_k < 1.0 and not door_closed
@@ -1680,6 +1724,11 @@ func _tick_interiors(force_snap: bool = false) -> void:
 				target = 0.0
 	_cover_k = target if snap else move_toward(_cover_k, target, 1.0 / CUT_TICKS)
 	_sync_dry()
+	# I segreti senza stacco: la facciata sfuma in 0,3 s quando i piedi sono nell'interno che copre.
+	for sc: Dictionary in _secrets:
+		var in_secret := raw >= 0 and (_interiors[raw]["rect"] as Rect2).intersects(sc["rect"])
+		var to := 0.0 if in_secret else 1.0
+		sc["k"] = to if snap else move_toward(sc["k"], to, 1.0 / CUT_TICKS)
 	# Dal lucernario non c'è stacco: la copertura segue i piedi, piena 40 px sopra il bordo alto, sparita
 	# sul bordo.
 	if _cut_t == 0:
@@ -1942,8 +1991,10 @@ func _draw_grate(v: Node2D, r: Rect2, c: Color) -> void:
 
 
 ## Il segno di un punto dove premere SU: un triangolo cyan che pulsa e ondeggia sopra la testa di
-## GIG, con SU sopra quando si è vicini (solo disegno).
+## GIG, con SU sopra quando si è vicini (solo disegno; niente, con --senza-hud).
 func _draw_use_spot(v: Node2D, at: Vector2i, near: bool) -> void:
+	if Game.options.no_hud:
+		return
 	var f := Engine.get_physics_frames()
 	var bob := roundf(sin(f * 0.12) * 2.0)
 	var c := C_CYAN

@@ -441,6 +441,8 @@ func _ready() -> void:
 	signs_node.draw.connect(func() -> void: _draw_signs(signs_node))
 	_view.add_child(signs_node)
 	_signs_node = signs_node
+	# --senza-hud: le riprese sono senza parole, anche senza cartelli e fumetti.
+	signs_node.visible = not Game.options.no_hud
 	var layer := CanvasLayer.new()
 	layer.layer = 10
 	add_child(layer)
@@ -2033,7 +2035,7 @@ func _draw_panel(v: Node2D, id: String, gt: Dictionary) -> void:
 	var cx := r.get_center().x
 	v.draw_rect(Rect2(cx - 6, y0 + h, 12, 3), C_CASE_LO)
 	v.draw_rect(Rect2(cx - 4, y0 + h + 1, 8, 1), C_CYAN if hacking else C_CYAN.darkened(0.6))
-	if hack_panel == "" and not open and panel_in_reach() == id:
+	if hack_panel == "" and not open and panel_in_reach() == id and not Game.options.no_hud:
 		UiFont.draw_text(v, Vector2(cx, y0 - 12), "SU", C_CYAN, 1, 1)
 
 
@@ -2245,7 +2247,8 @@ func _draw_fx(n: Node2D) -> void:
 		favors.draw(n, tick, _visible_rect(), player)
 		drones.draw(n, tick, _visible_rect(), _fx_glow)
 		drones.draw_reach(n, tick, player, favors.wanted_drones())
-		favors.draw_bubbles(n, _visible_rect(), player)
+		if not Game.options.no_hud:
+			favors.draw_bubbles(n, _visible_rect(), player)
 	_draw_arm_glow()
 	for s: Array in _sparks:
 		var a := float(s[4]) / float(s[5])

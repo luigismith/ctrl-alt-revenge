@@ -222,7 +222,8 @@ func draw_overlay(v: CanvasItem, view: Rect2, k: float, frame: int, arm: Vector2
 			# Il lampo, piccolo come quello della Spinta.
 			var fc := Color(0.85, 1.0, 1.0, 1.0 - absf(copy_t - FLASH_AT) / 4.0)
 			v.draw_circle(Vector2(b.px.x, y + 1), 6.0 - absf(copy_t - FLASH_AT), fc)
-	if text_t > 0 and text_at >= 0 and text_at < basi.size():
+	# --senza-hud: le riprese sono senza scritte.
+	if text_t > 0 and text_at >= 0 and text_at < basi.size() and not Game.options.no_hud:
 		var b := basi[text_at]
 		var c := C_CYAN
 		c.a = clampf(text_t / 30.0, 0.0, 1.0)

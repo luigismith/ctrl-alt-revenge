@@ -27,8 +27,8 @@ extends RefCounted
 ##   --camera-stretta       nei tratti platform la vista resta quella di sempre, 480 × 270 (la telecamera
 ##                          larga è normale dall'8 novembre 2026; vedi TestRoom.wide_cam)
 ##   --camera-larga         la telecamera larga (è già normale: resta per i comandi di prima)
-##   --senza-hud            senza l'interfaccia (barre, scritte, VAI), anche nelle arene: serve alle
-##                          riprese con Movie Maker per il teaser e il sito
+##   --senza-hud            senza l'interfaccia (barre, scritte, VAI, cartelli e fumetti), anche nelle
+##                          arene: serve alle riprese con Movie Maker per il teaser e il sito
 
 var autostart: bool = false
 var room: bool = false

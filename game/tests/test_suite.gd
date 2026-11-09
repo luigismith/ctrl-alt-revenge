@@ -3883,6 +3883,43 @@ func _test_prologue_interiors() -> void:
 		"Interni: fuori la vista si ferma all'arco, entrando lo stacco a gradini porta dentro i limiti, dal tetto si esce, un passo indietro riavvolge",
 		"fuori %s %s; nero %s; dentro %s %s; tetto %s (spinta %s); indietro %s" % [out_ok, out_s, dark, in_ok, in_s,
 			roof_ok, room._view_push, back_ok])
+	# S1, il ricovero del custode: niente stacco, la facciata (con l'emissione e la luce della targa) sfuma
+	# in 0,3 s quando GIG entra dalla breccia, con un k suo (la copertura di A4 resta piena), e torna fuori
+	# e sul tetto.
+	var s1: Dictionary = room._secrets[0] if room._secrets.size() == 1 else {}
+	var s1_k := func() -> float: return float(s1.get("k", -1.0))
+	var s1_mount := not s1.is_empty() and (s1["arte"][0] as Sprite2D).position == Vector2(2580, 570) \
+		and (s1["arte"] as Array).size() == 2 and (s1["luci"] as Array).size() == 1 \
+		and str((s1["luci"][0][0] as PointLight2D).name) == "Luce_targa_eterna" \
+		and ((s1["arte"][0] as Sprite2D).get_parent() as Node2D).z_index == 6
+	room.player.place(2560, 680)
+	room._reset_interiors()
+	for i in 4:
+		room._follow_camera()
+	var s1_out: float = s1_k.call()
+	room.player.place(2680, 680)
+	for i in Prologue.CUT_TICKS / 2:
+		room._follow_camera()
+	var s1_mid: float = s1_k.call()
+	for i in Prologue.CUT_TICKS / 2:
+		room._follow_camera()
+	room._update_gallery()
+	var s1_in: float = s1_k.call()
+	var s1_hidden := not s1.is_empty() and not (s1["arte"][0] as Sprite2D).visible \
+		and not (s1["luci"][0][0] as PointLight2D).visible
+	var s1_nocut := room._cut_t == 0 and room._cover_k == 1.0
+	room.player.place(2680, 540)
+	for i in Prologue.CUT_TICKS:
+		room._follow_camera()
+	room._update_gallery()
+	var s1_roof: float = s1_k.call()
+	var s1_lit := not s1.is_empty() and (s1["arte"][0] as Sprite2D).visible \
+		and is_equal_approx((s1["luci"][0][0] as PointLight2D).energy, 0.12)
+	check(s1_mount and s1_out == 1.0 and is_equal_approx(s1_mid, 0.5) and s1_in == 0.0 and s1_hidden and s1_nocut
+			and s1_roof == 1.0 and s1_lit,
+		"Prologo v2: in S1 la facciata del ricovero sfuma senza stacco quando GIG entra, e torna fuori",
+		"montata %s, fuori %.2f, a metà %.2f, dentro %.2f (nascosta %s, niente stacco %s), sul tetto %.2f (accesa %s)" % [
+			s1_mount, s1_out, s1_mid, s1_in, s1_hidden, s1_nocut, s1_roof, s1_lit])
 	# Un salto dal vano che sfiora il soffitto (piedi 5 px sopra il bordo) non fa uno stacco; con la vista
 	# larga, dentro la galleria lo zoom torna stretto nel nero e fuori torna largo.
 	room.wide_cam = true
