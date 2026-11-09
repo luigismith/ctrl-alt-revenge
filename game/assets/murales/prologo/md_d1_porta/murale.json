@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_d1_porta",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "i colpi alla porta, vignetta MD-D1 (dettaglio, senza battute): SUONO di tre colpi; a ogni colpo la camera dà una scossa e la polvere rossa scende dal telaio. La camera scende piano dalla saracinesca alla fessura con le ombre degli stivali.",
+  "zoom_da": 1.08,
+  "centro_da": [
+   270,
+   120
+  ],
+  "zoom_a": 1.18,
+  "centro_a": [
+   300,
+   210
+  ]
+ },
+ "colori": 88,
+ "fonte": "ChatGPT (OpenAI), dal testo e dal nostro murale MD-T1; ridotto in pixel art dai nostri script"
+}

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cis5h5d303mgx"
-path="res://.godot/imported/murale_emis.png-81cd911044f51113b289b1ab47f519d0.ctex"
+uid="uid://b4lkii27yf3qn"
+path="res://.godot/imported/murale_emis.png-6bc03c0b5f4c9eed4bd9b3316668e54f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/murales/prologo/md_r1_muro/murale_emis.png"
-dest_files=["res://.godot/imported/murale_emis.png-81cd911044f51113b289b1ab47f519d0.ctex"]
+source_file="res://assets/murales/prologo/md_d1_porta/murale_emis.png"
+dest_files=["res://.godot/imported/murale_emis.png-6bc03c0b5f4c9eed4bd9b3316668e54f.ctex"]
 
 [params]
 

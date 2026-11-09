@@ -54,13 +54,25 @@ const C_INK := Color8(240, 232, 210)
 const C_TEXT := Color8(236, 232, 220)
 const C_PANEL := Color8(18, 16, 24)
 const C_HINT := Color8(150, 146, 140)
+## I pensieri di Totò (decisione 97): gli attori con "pensiero": true non parlano, pensano. Il testo sta
+## in sovrimpressione in basso al centro, senza banda né nome, in corsivo e con un'ombra; entra ed esce
+## in dissolvenza, intero, e comincia coi tre puntini. Si va avanti a pressione, come con le battute.
+const THOUGHT_IN := 18
+const THOUGHT_OUT := 14
+const THOUGHT_W := 360
+## Il corsivo: le righe si spostano di un pixel ogni quattro, verso destra salendo.
+const THOUGHT_SLANT := 0.25
+const THOUGHT_DOTS := "…"
 
-## Lo sfondo del primo piano a tutto schermo: lo schermo sfocato, un po' spento e scuro.
+## Lo sfondo del primo piano a tutto schermo: lo schermo sfocato, un po' spento e scuro. Il passo è in
+## pixel del gioco (`unit`, 1/480 × 1/270 dello schermo), non della finestra: con la telecamera larga lo
+## schermo si disegna a 3 o 4 pixel per pixel e la sfocatura deve restare larga uguale.
 const BLUR_SHADER := """shader_type canvas_item;
 uniform sampler2D screen : hint_screen_texture, filter_linear;
 uniform float amount = 0.0;
+uniform vec2 unit = vec2(0.00208333, 0.0037037);
 void fragment() {
-	vec2 px = SCREEN_PIXEL_SIZE * 1.6;
+	vec2 px = unit * 1.6;
 	vec3 c = vec3(0.0);
 	float w = 0.0;
 	for (int y = -3; y <= 3; y++) {
@@ -137,6 +149,10 @@ var _fx: Node2D
 ## I murales aperti (SceneMural), dal più vecchio: uno nuovo si dipinge sopra quello di prima.
 var _mural_layer: CanvasLayer
 var _murals: Array[SceneMural] = []
+## Il murale agganciato che aspetta la telecamera del gioco, prima di dipingersi.
+var _hook_wait: SceneMural
+## La telecamera del gioco che va a combaciare con la figura agganciata, se il passo non dice "aggancio_tick".
+const HOOK_TICKS := 36
 ## Il nero (il passo «nero»): sopra il gioco e sotto i murales.
 var _black: ColorRect
 var _black_a: float = 0.0
@@ -161,7 +177,7 @@ func start(scene: SceneData, room: TestRoom, poses: Dictionary, auto_lines: bool
 	for actor: String in data.actors:
 		_add_puppet(actor, data.actors[actor], poses.get(actor, {}))
 	_cam_c = host.scene_camera_center() - _origin - _offset
-	_cam_z = 1.0
+	_cam_z = host.scene_camera_zoom()
 	if sound:
 		_music_prev = Music.current_track()
 		if data.music != "" and Music.has_track(StringName(data.music)):
@@ -196,6 +212,7 @@ func _build_layers() -> void:
 		_blur_shader.code = BLUR_SHADER
 	_blur_mat = ShaderMaterial.new()
 	_blur_mat.shader = _blur_shader
+	_blur_mat.set_shader_parameter(&"unit", Vector2.ONE / View.SIZE)
 	_blur.material = _blur_mat
 	_blur.visible = false
 	_blur_layer.add_child(_blur)
@@ -443,9 +460,15 @@ func _start_line(st: Dictionary) -> void:
 	var who := str(st["chi"])
 	var a: Dictionary = data.actors.get(who, {})
 	var text := SceneLines.text(data.lines_file, data.id, str(st["id"]))
-	_line = {"who": who, "name": str(a.get("nome", who.to_upper())), "color": Color.html(str(a.get("colore", "#ece8dc"))),
-		"lines": _wrap(text, View.W - 2 * TEXT_X), "chars": text.length(), "shown": 0.0, "t": 0, "hold": 0}
-	_start_voice(str(st["id"]))
+	var thought := bool(a.get("pensiero", false))
+	if thought:
+		text = thought_text(text)
+	_line = {"who": who, "name": "" if thought else str(a.get("nome", who.to_upper())),
+		"color": Color.html(str(a.get("colore", "#ece8dc"))), "lines": _wrap(text, THOUGHT_W if thought else View.W - 2 * TEXT_X),
+		"chars": text.length(), "shown": float(text.length()) if thought else 0.0, "t": 0, "hold": 0,
+		"thought": thought, "fade": 0.0, "out": -1}
+	if not thought:
+		_start_voice(str(st["id"]))
 	if st.has("anim") and puppets.has(who):
 		(puppets[who] as ScenePuppet).play(StringName(str(st["anim"])))
 	var cu := _closeup_name(who, st)
@@ -499,9 +522,26 @@ func _mouth_open(who: String) -> bool:
 	return float(_line["shown"]) < int(_line["chars"]) and (t / 5) % 2 == 0
 
 
+## Il testo di un pensiero: coi tre puntini davanti, se non li ha già.
+static func thought_text(text: String) -> String:
+	text = text.strip_edges()
+	if text.begins_with("…") or text.begins_with("..."):
+		return text
+	return UiFont.safe_text(THOUGHT_DOTS, true) + text
+
+
 func _tick_line() -> void:
 	if _line.is_empty():
 		return
+	if bool(_line["thought"]):
+		var out := int(_line["out"])
+		if out >= 0:
+			_line["out"] = out + 1
+			_line["fade"] = 1.0 - float(out + 1) / THOUGHT_OUT
+			if out + 1 >= THOUGHT_OUT:
+				_end_line()
+			return
+		_line["fade"] = minf(1.0, float(int(_line["t"]) + 1) / THOUGHT_IN)
 	if not _voice.is_empty():
 		_voice["k"] = int(_voice["k"]) + 1
 	_line["t"] = int(_line["t"]) + 1
@@ -520,7 +560,10 @@ func _tick_line() -> void:
 		if auto_done and not _voice.is_empty():
 			auto_done = int(_voice["k"]) >= int(_voice["ticks"]) + AUTO_HOLD / 2
 		if pressed or auto_done:
-			_end_line()
+			if bool(_line["thought"]):
+				_line["out"] = 0
+			else:
+				_end_line()
 
 
 func _advance_pressed() -> bool:
@@ -690,9 +733,12 @@ func _draw_fx() -> void:
 ## Il passo «murale»: ne apre uno (a spray sopra il gioco o sopra il murale di prima) o, con "chiudi",
 ## toglie l'ultimo con lo spray all'indietro, o con "sciogli" lo scioglie nel gioco.
 func _start_mural(st: Dictionary, wait: bool) -> void:
+	var who := str(st.get("aggancio", ""))
 	if bool(st.get("sciogli", false)):
 		if _murals.is_empty():
 			return
+		if who != "" and not _murals[-1].hook(who):
+			push_warning("scena %s: il murale non ha la figura \"%s\" da agganciare" % [data.id, who])
 		_melt_murals(int(st.get("rivela_tick", st.get("tick", SceneMural.MELT_TICKS))))
 		if wait:
 			_wait = func() -> bool: return _murals.is_empty()
@@ -714,10 +760,47 @@ func _start_mural(st: Dictionary, wait: bool) -> void:
 		if m.get_child_count() == 0:
 			m.free()
 			return
-	_mural_layer.add_child(m)
-	_murals.append(m)
+	if who != "" and puppets.has(who) and m.hook(who):
+		# Prima la telecamera del gioco va dove lo sprite combacia con la figura, poi lo spray.
+		_hook_camera(m, puppets[who], maxi(1, int(st.get("aggancio_tick", HOOK_TICKS))), int(st.get("aggancio_zoom", 0)))
+		_hook_wait = m
+	else:
+		if who != "":
+			push_warning("scena %s: il murale non ha la figura \"%s\" da agganciare" % [data.id, who])
+		_mural_layer.add_child(m)
+		_murals.append(m)
 	if wait:
-		_wait = func() -> bool: return not is_instance_valid(m) or m.is_revealed() or m.closing
+		_wait = func() -> bool: return not is_instance_valid(m) or _murals.has(m) and (m.is_revealed() or m.closing)
+
+
+## L'aggancio, aprendo: la telecamera del gioco si muove in `n` tick fin dove lo sprite di `p` combacia
+## (piedi e altezza) con la figura agganciata del murale `m`, nell'inquadratura d'apertura del murale.
+## Lo zoom del gioco è intero (`zoom`, o se è 0 il più vicino a quello del murale), se il murale lo
+## permette: è quello del murale che si adatta allo sprite. La grandezza si accorda sulla media
+## (geometrica) di larghezza e altezza, perché la posa dipinta non è mai proprio quella dello sprite.
+func _hook_camera(m: SceneMural, p: ScenePuppet, n: int, zoom: int = 0) -> void:
+	var fr := m.figure_rect(m.hooked)
+	var sr := p.body_rect()
+	sr.position += _offset
+	# La grandezza si accorda sull'altezza del corpo: la figura è disegnata sulla stessa posa dello sprite
+	# (in MP13 il fotogramma 3 di jump_arc, dove il prologo si ferma), quindi anche la larghezza torna.
+	var ratio := fr.size.y / maxf(1.0, sr.size.y)
+	var zg := clampf(float(zoom) if zoom > 0 else roundf(m.z0 * ratio), 1.0, 6.0)
+	var z0 := maxf(zg / ratio, m.cover_zoom())
+	zg = z0 * ratio
+	var c0 := m.clamp_center(m.c0, z0)
+	var half := View.SIZE / 2.0
+	var feet_f := Vector2(fr.get_center().x, fr.end.y)
+	var feet_s := Vector2(sr.get_center().x, sr.end.y)
+	# Il centro del gioco perché i piedi dello sprite cadano su quelli della figura, dentro i bordi;
+	# se i bordi lo spostano, si sposta il murale.
+	var world := feet_s - (half + (feet_f - c0) * z0 - half) / zg
+	world = _view_center(world - _origin - _offset, zg)
+	c0 = feet_f - (feet_s - world) * zg / z0
+	m.set_opening(c0, z0)
+	_follow = {}
+	_move = {"st": {"centro": [world.x - _origin.x - _offset.x, world.y - _origin.y - _offset.y], "zoom": zg},
+		"c0": _cam_c, "z0": _cam_z, "n": n, "k": 0}
 
 
 ## Tutti i murales si sciolgono nel gioco in `n` tick; se quello in cima dice dove sta la telecamera del
@@ -732,7 +815,9 @@ func _melt_murals(n: int) -> void:
 		_move = {}
 		_follow = {}
 		_cam_z = 1.0
-		_cam_c = (cam as Vector2) + View.SIZE / 2.0 - _origin - _offset
+		# La telecamera del murale è quella della grafica: nel prologo nuovo il mondo sta più in basso.
+		var dy := float(host.art_offset_y) if host != null else 0.0
+		_cam_c = (cam as Vector2) + Vector2(0, dy) + View.SIZE / 2.0 - _origin - _offset
 		_apply_camera()
 
 
@@ -758,8 +843,17 @@ func _tick_black() -> void:
 
 
 func _tick_murals() -> void:
+	if _hook_wait != null and _move.is_empty():
+		_mural_layer.add_child(_hook_wait)
+		_murals.append(_hook_wait)
+		_hook_wait = null
 	for m: SceneMural in _murals:
 		m.tick()
+		# L'aggancio: lo sprite sfuma mentre la figura compare (e torna mentre lei se ne va), così le due
+		# pose non si vedono insieme.
+		var ha := m.hook_alpha()
+		if ha >= 0.0 and puppets.has(m.hooked):
+			(puppets[m.hooked] as ScenePuppet).modulate.a = 1.0 - ha
 	# Quelli chiusi se ne vanno, e anche quelli coperti per intero da uno nuovo già dipinto.
 	var top_full := -1
 	for i in _murals.size():
@@ -819,6 +913,9 @@ func _begin_outro() -> void:
 		p.sync()
 	_line = {}
 	_hide_closeup()
+	if _hook_wait != null:
+		_hook_wait.free()
+		_hook_wait = null
 	# Un murale ancora aperto si chiude a spray mentre si torna al gioco.
 	for m: SceneMural in _murals:
 		m.close(OUTRO)
@@ -917,7 +1014,9 @@ func _draw_ui() -> void:
 	for c: Dictionary in [_cu_old, _cu]:
 		if not c.is_empty():
 			_draw_closeup(c)
-	if not _line.is_empty() and h >= BAR_H - 1:
+	if not _line.is_empty() and bool(_line["thought"]):
+		_draw_thought()
+	elif not _line.is_empty() and h >= BAR_H - 1:
 		_draw_line_text()
 
 
@@ -977,6 +1076,29 @@ func _draw_line_text() -> void:
 		UiFont.draw_text(_ui, Vector2(TEXT_X, y0 + 3 + i * 12), part, C_TEXT, 1, 0, Color(0, 0, 0, 0), UiFont.SHADOW, true)
 	# A battuta scritta, un segno che lampeggia: si va avanti a pressione.
 	if not auto and float(_line["shown"]) >= int(_line["chars"]) and (t / 20) % 2 == 0:
+		var ax := View.W - TEXT_X
+		var ay := View.H - 9.0
+		_ui.draw_colored_polygon(PackedVector2Array([Vector2(ax - 6, ay - 3), Vector2(ax, ay - 3), Vector2(ax - 3, ay)]), C_HINT)
+
+
+## Il pensiero: in basso al centro, in corsivo e in dissolvenza, con un'ombra e senza banda.
+func _draw_thought() -> void:
+	var a := _ease(float(_line["fade"]))
+	var col: Color = _line["color"]
+	col.a = a
+	var shadow := UiFont.SHADOW
+	shadow.a = a
+	var lines: PackedStringArray = _line["lines"]
+	var n := mini(lines.size(), 2)
+	for i in n:
+		var base := View.H - 10.0 - (n - 1 - i) * UiFont.line_height()
+		# La riga di base resta ferma e la parte alta si sposta a destra: il corsivo.
+		_ui.draw_set_transform_matrix(Transform2D(Vector2(1, 0), Vector2(-THOUGHT_SLANT, 1), Vector2(0, base)))
+		var w := UiFont.text_width(lines[i], 1, true)
+		var x := roundf((View.W - w) / 2.0)
+		UiFont.draw_text(_ui, Vector2(x, -10), lines[i], col, 1, 0, Color(0, 0, 0, 0), shadow, true)
+	_ui.draw_set_transform_matrix(Transform2D.IDENTITY)
+	if not auto and int(_line["out"]) < 0 and a >= 1.0 and (t / 20) % 2 == 0:
 		var ax := View.W - TEXT_X
 		var ay := View.H - 9.0
 		_ui.draw_colored_polygon(PackedVector2Array([Vector2(ax - 6, ay - 3), Vector2(ax, ay - 3), Vector2(ax - 3, ay)]), C_HINT)

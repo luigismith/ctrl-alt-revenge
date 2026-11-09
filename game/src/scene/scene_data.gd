@@ -55,8 +55,12 @@ const STEPS := {
 	# la fine dello spray. "scritte" [{"id", "zona": [x, y, w, h]}] stacca dalla vignetta le scritte già
 	# dipinte, da spruzzare poi col passo "scritta". "centro" [x, y] e "zoom" tengono il murale fermo su
 	# un'inquadratura (per esempio stretto sulla tastiera di MP11).
+	# "aggancio": l'attore che nel murale è una figura col suo "nome": aprendo, la telecamera del gioco va
+	# in "aggancio_tick" dove lo sprite combacia con la figura, che compare per prima, e lo spray parte da
+	# lei; sciogliendo, il murale se ne va dai bordi verso la figura, che sfuma per ultima nello sprite.
+	# "aggancio_zoom" fissa lo zoom (intero) del gioco all'aggancio: è il murale che si adatta.
 	"murale": ["id", "capitolo", "da", "a", "centro", "zoom", "tick", "rivela", "rivela_tick", "luci", "chiudi",
-		"sciogli", "scritte", "aspetta"],
+		"sciogli", "scritte", "aspetta", "aggancio", "aggancio_tick", "aggancio_zoom"],
 	# Una scritta sul murale in cima (l'ultimo aperto che ce l'ha): "id" come nelle "scritte" del murale o
 	# del passo "murale", "logo" per il logo di "riusa"; in "tick" (se no qualche tick per lettera),
 	# "modo" "spray" (con le colature) o "scrivi" (netta, lettera per lettera).

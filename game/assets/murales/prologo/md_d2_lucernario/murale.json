@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_d2_lucernario",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "i colpi alla porta, vignetta MD-D2 (dal basso): la Vista accende di cyan il bordo del lucernario (l'emissivo pulsa), la pioggia scorre sul vetro. Battuta di TERE: «Catà. Sopra.» GIG guarda in su. La camera sale dal volto al lucernario. Il motore aggiunge la pioggia sopra il vetro.",
+  "zoom_da": 1.12,
+  "centro_da": [
+   240,
+   190
+  ],
+  "zoom_a": 1.12,
+  "centro_a": [
+   300,
+   100
+  ]
+ },
+ "colori": 93,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di GIG e dal nostro murale MD-T1; ridotto in pixel art dai nostri script"
+}

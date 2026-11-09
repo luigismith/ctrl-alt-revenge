@@ -37,14 +37,14 @@
   {
    "nome": "gig",
    "file": "figura_gig.png",
-   "x": 196,
-   "y": 62,
+   "x": 200,
+   "y": 66,
    "misura": [
-    90,
-    135
+    89,
+    128
    ],
    "profondita": 1.0,
-   "nota": "GIG in salto sopra il lucernario aperto; il braccio sinistro (a destra nel quadro) cyber, con gli anelli; la scia cyan dell'ugello (l'unico cyan del prologo) la disegna murale.py: la base v2 è la v1 senza il getto"
+   "nota": "GIG in salto sopra il lucernario aperto, nella posa del fotogramma 3 di jump_arc (NinjaJump_Start f7: render del rig con la camera degli sprite, yaw 30 e pitch 12, ridipinto da ChatGPT nello stile dei murales con la stessa sagoma), col cappuccio grigio abbassato sul collo: è lo stesso fotogramma dello sprite al taglio. Alta 96 = 90 px dello sprite x 512/480, così a zoom 2 del murale combacia con lo sprite ingrandito 2x nel gioco. La scia cyan dell'ugello la disegna murale.py"
   },
   {
    "nome": "toto",

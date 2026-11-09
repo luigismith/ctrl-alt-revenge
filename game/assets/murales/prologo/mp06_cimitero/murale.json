@@ -21,11 +21,11 @@
   ]
  },
  "camera": {
-  "nota": "ferma: 480x270 esatti, combacia pixel per pixel con lo schermo del prologo a cam_x 0 e cam_y 230 (la dissolvenza di MP08); il primo istante può partire da zoom 2 su GIG e allargare",
+  "nota": "ferma: 480x270 esatti, combacia pixel per pixel con lo schermo del prologo a cam (35, 230 della vignetta); il primo istante può partire da zoom 2 su GIG e allargare",
   "zoom_da": 2,
   "centro_da": [
-   240,
-   190
+   200,
+   170
   ],
   "zoom_a": 1,
   "centro_a": [
@@ -37,28 +37,40 @@
   {
    "nome": "perdoni",
    "file": "figura_perdoni.png",
-   "x": 330,
+   "x": 307,
    "y": 115,
    "misura": [
     18,
     24
    ],
-   "profondita": 0.4,
-   "nota": "la posta di perdoni di MP05, dietro il muro di cinta (si vedono cappucci e mozzette sopra il muro, y 127): scorre lenta da x 255 a x 380, sopra di lei solo il fondo"
+   "profondita": 1.0,
+   "nota": "la posta di perdoni di MP05, dietro il muro di cinta (si vedono cappucci e mozzette sopra il muro, y 127), dietro il tronco del pino. Ferma con la vignetta (profondità 1): con la camera di MP06, che sale di 35 px, la parallasse la faceva salire sopra il muro"
+  },
+  {
+   "nome": "alberi",
+   "file": "figura_alberi.png",
+   "x": 228,
+   "y": 106,
+   "misura": [
+    140,
+    23
+   ],
+   "profondita": 1.0,
+   "nota": "il tronco del pino e i cipressi davanti alla posta dei perdoni"
   },
   {
    "nome": "gig",
    "file": "figura_gig.png",
-   "x": 203,
-   "y": 137,
+   "x": 166,
+   "y": 118,
    "misura": [
-    70,
-    132
+    60,
+    118
    ],
    "profondita": 1.0,
-   "nota": "GIG di spalle, fermo; il braccio sinistro (a sinistra nel quadro) spento e inerte. Nella dissolvenza di MP08 sfuma nello sprite"
+   "nota": "GIG di tre quarti verso destra, nella posa dello sprite (decisione di Luigi), col braccio spento lungo il fianco e la borsa; dallo sprite della cattura mp06_rif_gioco_35_gig.png (bbox x 171-228, y 119-232). Nella dissolvenza di MP08 sfuma nello sprite"
   }
  ],
- "colori": 97,
+ "colori": 95,
  "fonte": "ChatGPT (OpenAI), dal nostro sfondo del prologo; ridotto in pixel art dai nostri script"
 }

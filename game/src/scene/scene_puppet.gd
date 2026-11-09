@@ -153,6 +153,22 @@ func sync() -> void:
 	_mark_node.queue_redraw()
 
 
+## Il riquadro dei pixel pieni del fotogramma di adesso, nello spazio del contenitore.
+func body_rect() -> Rect2:
+	var f := anim.frame()
+	var u := Rect2i(Vector2i.ZERO, f.rect.size)
+	var img := sheet.texture.get_image() if sheet.texture != null else null
+	if img != null:
+		u = img.get_region(f.rect).get_used_rect()
+	var x0 := u.position.x - f.anchor.x
+	var x1 := u.end.x - f.anchor.x
+	if facing < 0:
+		var tmp := x0
+		x0 = -x1
+		x1 = -tmp
+	return Rect2(roundf(px) + x0, roundf(py) + u.position.y - f.anchor.y, x1 - x0, u.size.y)
+
+
 ## Un punto del fotogramma ("fist_r", "head"...), nello spazio del contenitore; `fallback` se manca.
 func point(name: String, fallback: Vector2 = Vector2(0, -70)) -> Vector2:
 	var f := anim.frame()

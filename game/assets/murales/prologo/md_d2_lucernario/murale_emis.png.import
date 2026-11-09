@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bs4bchm10tjqd"
-path="res://.godot/imported/murale.png-3c2aaa34953c7a72d55ad5e21796e331.ctex"
+uid="uid://cc71e7vt8f8v3"
+path="res://.godot/imported/murale_emis.png-e8c62bcba57bc5c4537681674314773c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/murales/prologo/md_r2_rider/murale.png"
-dest_files=["res://.godot/imported/murale.png-3c2aaa34953c7a72d55ad5e21796e331.ctex"]
+source_file="res://assets/murales/prologo/md_d2_lucernario/murale_emis.png"
+dest_files=["res://.godot/imported/murale_emis.png-e8c62bcba57bc5c4537681674314773c.ctex"]
 
 [params]
 

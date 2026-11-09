@@ -1,21 +1,19 @@
 {
  "formato": 1,
  "id": "passaggio_1",
- "nota": "La fine del prologo: fuori dal lucernario il gioco si ferma a metà salto, la camera si stringe su GIG, il murale dei tetti si dipinge a spray sul fermo e sale verso il titolo del capitolo 1, che si spruzza sul muro; una didascalia, poi lo spray all'indietro e il cartello della fine. Le battute stanno nel file privato. Regia proposta da Claude il 7 novembre 2026, da rivedere in gioco.",
+ "nota": "La fine del prologo: fuori dal lucernario GIG corre e salta da solo, il gioco si ferma all'apice e la camera si stringe su di lui fin dove combacia con la figura del murale dei tetti; la figura compare sopra lo sprite e il murale si dipinge a spray intorno a lei e sale verso il titolo del capitolo 1, che si spruzza sul muro; una didascalia, poi lo spray all'indietro e il cartello della fine. Le battute stanno nel file privato. Regia proposta da Claude il 7 novembre 2026, da rivedere in gioco.",
  "spazio": "stanza",
  "rif": "",
  "battute": "prologo",
  "musica": "",
  "attori": {
   "gig": {"tipo": "gig", "foglio": "gig", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
-  "narratore": {"fuori_campo": true, "nome": "", "colore": "#ece8dc"}
+  "narratore": {"fuori_campo": true, "pensiero": true, "nome": "", "colore": "#ff9a5a"}
  },
  "passi": [
   {"fai": "bande", "entra": false, "tick": 18, "aspetta": false},
-  {"fai": "camera", "su": "gig", "alto": 40, "zoom": 2, "tick": 30},
-  {"fai": "attendi", "tick": 10},
 
-  {"fai": "murale", "id": "prologo/mp13_tetti", "rivela_tick": 90, "tick": 360,
+  {"fai": "murale", "id": "prologo/mp13_tetti", "aggancio": "gig", "aggancio_zoom": 2, "rivela_tick": 90, "tick": 360,
    "scritte": [{"id": "titolo_1", "zona": [135, 18, 245, 26]}]},
   {"fai": "scritta", "id": "titolo_1", "tick": 120},
   {"fai": "attendi", "tick": 40},

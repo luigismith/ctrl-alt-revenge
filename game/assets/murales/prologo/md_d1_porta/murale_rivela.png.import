@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bsxskoyg4xi7j"
-path="res://.godot/imported/murale_rivela.png-f91a2dd322a06f4a921fe1affef4b99f.ctex"
+uid="uid://fongkh6nghyv"
+path="res://.godot/imported/murale_rivela.png-0720acca14d9b4a4b09fbd30e428b9ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/murales/prologo/md_r1_muro/murale_rivela.png"
-dest_files=["res://.godot/imported/murale_rivela.png-f91a2dd322a06f4a921fe1affef4b99f.ctex"]
+source_file="res://assets/murales/prologo/md_d1_porta/murale_rivela.png"
+dest_files=["res://.godot/imported/murale_rivela.png-0720acca14d9b4a4b09fbd30e428b9ab.ctex"]
 
 [params]
 

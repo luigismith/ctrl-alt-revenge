@@ -8,8 +8,8 @@
  "musica": "",
  "attori": {
   "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
-  "narratore": {"fuori_campo": true, "nome": "", "colore": "#ece8dc"},
-  "toto": {"fuori_campo": true, "nome": "TOTÒ", "colore": "#ff9a5a"}
+  "narratore": {"fuori_campo": true, "pensiero": true, "nome": "", "colore": "#ff9a5a"},
+  "toto": {"fuori_campo": true, "pensiero": true, "nome": "TOTÒ", "colore": "#ff9a5a"}
  },
  "passi": [
   {"fai": "bande", "entra": false, "tick": 1, "aspetta": false},
@@ -51,6 +51,6 @@
   {"fai": "scritta", "id": "logo", "tick": 180},
   {"fai": "attendi", "tick": 70},
   {"fai": "nero", "entra": false, "tick": 1},
-  {"fai": "murale", "sciogli": true, "rivela_tick": 90}
+  {"fai": "murale", "sciogli": true, "aggancio": "gig", "rivela_tick": 90}
  ]
 }

@@ -27,6 +27,11 @@ extends Node2D
 ## si torna indietro: l'ultimo pixel dipinto è il primo che sparisce. Sciogliendo (MP08 nel prologo) se
 ## ne va invece dal centro del "passaggio" verso i bordi, a puntini e scurendosi, senza vernice fresca:
 ## sotto c'è il gioco che combacia. È solo disegno: la simulazione è ferma come nel resto della scena.
+##
+## L'aggancio (hook, il passo con "aggancio": l'attore) lega il murale a una sua figura che è anche nel
+## gioco: aprendo, la figura compare per prima sopra lo sprite, nell'inquadratura dove combacia con lui
+## (la calcola il lettore), e lo spray si allarga da lei; sciogliendo, il murale se ne va dai bordi verso
+## la figura, che sfuma per ultima nello sprite.
 
 const DIR_DEFAULT := "res://assets/murales"
 ## La cartella dei murales; il test la cambia per un murale finto in user://.
@@ -44,6 +49,12 @@ const PULSE_DEPTH := 0.35
 ## Lo scioglimento, se il passo non lo dice, e il suo fronte (più largo: si sfa a puntini).
 const MELT_TICKS := 90
 const MELT_EDGE := 0.3
+## Con l'aggancio: quanto conta la distanza dalla figura nell'ordine dello spray (il resto è l'ordine di
+## murale_rivela.png); in quanti tick la figura agganciata compare sopra lo sprite, e in che parte della
+## chiusura (o dello scioglimento) se ne va.
+const HOOK_MIX := 0.6
+const HOOK_FADE_TICKS := 16
+const HOOK_FADE := 0.15
 ## Le scritte: tick per lettera, se il passo non dice "tick"; le colature: quante lettere ne hanno una
 ## (su 100), quanto lunghe al massimo e quanti tick per pixel.
 const WRITE_TICKS_PER_GLYPH := 5
@@ -66,6 +77,9 @@ uniform float glow = 1.0;
 uniform float seed = 0.0;
 uniform bool melt = false;
 uniform vec2 melt_center = vec2(256.0, 144.0);
+uniform bool melt_inward = false;
+uniform vec2 focus = vec2(0.0);
+uniform float focus_mix = 0.0;
 uniform float fresh = 0.18;
 
 float hash(vec2 p) {
@@ -75,10 +89,17 @@ float hash(vec2 p) {
 void fragment() {
 	vec2 px = floor(UV * size);
 	float r = has_reveal ? texture(reveal_tex, UV).r : hash(px * 0.37 + 5.0);
+	if (focus_mix > 0.0) {
+		// con l'aggancio lo spray si allarga dalla figura
+		float ff = length(max(focus, size - focus));
+		r = mix(r, length(px - focus) / ff, focus_mix);
+	}
 	if (melt) {
-		// sciogliendo: prima il centro, per ultimi i bordi, col fronte frastagliato
+		// sciogliendo: prima il centro, per ultimi i bordi (o, verso la figura, il contrario), col fronte
+		// frastagliato
 		float far = length(max(melt_center, size - melt_center));
-		r = 0.82 * (1.0 - length(px - melt_center) / far) + 0.18 * hash(px * 0.53 + 11.0);
+		float d = length(px - melt_center) / far;
+		r = 0.82 * (melt_inward ? d : 1.0 - d) + 0.18 * hash(px * 0.53 + 11.0);
 	}
 	// davanti al fronte dello spray il pixel c'è a caso, tanto più quanto è vicino
 	float k = (progress - r) / edge;
@@ -131,6 +152,8 @@ var writings: Dictionary = {}
 var _sprite: Sprite2D
 var _mat: ShaderMaterial
 var _figures: Array = []   # [{"sprite", "pos" (nel murale), "depth", "name", "tex", "blink", "talk"}]
+## La figura agganciata (il suo nome), o "".
+var hooked: String = ""
 ## Chi parla adesso (nome → bocca aperta): lo dà il lettore, per le figure con la variante "talk".
 var mouth: Callable
 
@@ -355,13 +378,17 @@ func close(n: int = -1) -> void:
 	closing = true
 
 
-## Si scioglie nel gioco in `n` tick: dal centro del "passaggio" (o dell'inquadratura) verso i bordi.
+## Si scioglie nel gioco in `n` tick: dal centro del "passaggio" (o dell'inquadratura) verso i bordi;
+## con la figura agganciata, dai bordi verso di lei.
 func melt(n: int = MELT_TICKS) -> void:
 	if closing or _mat == null:
 		return
 	var ps: Dictionary = info.get("passaggio", {}) if info.get("passaggio", {}) is Dictionary else {}
 	_mat.set_shader_parameter(&"melt", true)
-	_mat.set_shader_parameter(&"melt_center", _vec(ps.get("centro", null), view()[0]))
+	var fr := figure_rect(hooked)
+	_mat.set_shader_parameter(&"melt_inward", fr.has_area())
+	_mat.set_shader_parameter(&"focus_mix", 0.0)
+	_mat.set_shader_parameter(&"melt_center", fr.get_center() if fr.has_area() else _vec(ps.get("centro", null), view()[0]))
 	_mat.set_shader_parameter(&"edge", MELT_EDGE)
 	melting = true
 	close(n)
@@ -375,6 +402,96 @@ func handoff_camera() -> Variant:
 	if cam is Dictionary and (cam as Dictionary).has("x") and (cam as Dictionary).has("y"):
 		return Vector2(float(cam["x"]), float(cam["y"]))
 	return null
+
+
+## Il riquadro del corpo della figura `who` (per "nome"), in pixel del murale; vuoto se non c'è.
+func figure_rect(who: String) -> Rect2:
+	if who == "":
+		return Rect2()
+	for f: Dictionary in _figures:
+		if str(f["name"]) == who:
+			if not f.has("used"):
+				var img := (f["tex"] as Texture2D).get_image()
+				f["used"] = body_box(img) if img != null else Rect2(Vector2.ZERO, (f["tex"] as Texture2D).get_size())
+			var u: Rect2 = f["used"]
+			return Rect2(Vector2(f["pos"]) + u.position, u.size)
+	return Rect2()
+
+
+## Il corpo di una figura: le righe e le colonne piene (almeno BODY_MIN pixel) più lunghe di fila, così
+## gocce, scie e schizzi staccati (le gocce cyan sotto GIG in MP13) non contano per l'aggancio.
+const BODY_MIN := 2
+static func body_box(img: Image) -> Rect2:
+	var w := img.get_width()
+	var h := img.get_height()
+	var rows := PackedInt32Array()
+	rows.resize(h)
+	var cols := PackedInt32Array()
+	cols.resize(w)
+	for y in h:
+		for x in w:
+			if img.get_pixel(x, y).a > 0.0:
+				rows[y] += 1
+				cols[x] += 1
+	var ry := _longest_run(rows)
+	var rx := _longest_run(cols)
+	if ry.y <= 0 or rx.y <= 0:
+		return Rect2(img.get_used_rect())
+	return Rect2(rx.x, ry.x, rx.y, ry.y)
+
+
+## La fila più lunga di valori >= BODY_MIN: (inizio, lunghezza).
+static func _longest_run(v: PackedInt32Array) -> Vector2i:
+	var best := Vector2i(0, 0)
+	var start := -1
+	for i in v.size() + 1:
+		var full := i < v.size() and v[i] >= BODY_MIN
+		if full and start < 0:
+			start = i
+		elif not full and start >= 0:
+			if i - start > best.y:
+				best = Vector2i(start, i - start)
+			start = -1
+	return best
+
+
+## Aggancia la figura `who` (vedi in cima); falso se il murale non ce l'ha.
+func hook(who: String) -> bool:
+	var fr := figure_rect(who)
+	if not fr.has_area() or _mat == null:
+		return false
+	hooked = who
+	_mat.set_shader_parameter(&"focus", fr.get_center())
+	_mat.set_shader_parameter(&"focus_mix", HOOK_MIX)
+	_apply()
+	return true
+
+
+## L'inquadratura d'apertura (centro e zoom, in pixel del murale), al posto di quella del murale.json;
+## lo scorrimento poi va da lì a quella d'arrivo.
+func set_opening(c: Vector2, z: float) -> void:
+	c0 = c
+	z0 = z
+	_apply()
+
+
+## Quanto si vede la figura agganciata (0-1), o -1 se non c'è aggancio.
+func hook_alpha() -> float:
+	for f: Dictionary in _figures:
+		if hooked != "" and str(f["name"]) == hooked:
+			return (f["sprite"] as Sprite2D).modulate.a
+	return -1.0
+
+
+## Lo zoom più piccolo con cui il murale copre lo schermo.
+func cover_zoom() -> float:
+	return maxf(View.SIZE.x / size.x, View.SIZE.y / size.y)
+
+
+## Il centro `c` spostato quanto basta perché a zoom `z` il murale copra lo schermo.
+func clamp_center(c: Vector2, z: float) -> Vector2:
+	var h := View.SIZE / (2.0 * z)
+	return Vector2(clampf(c.x, h.x, maxf(h.x, size.x - h.x)), clampf(c.y, h.y, maxf(h.y, size.y - h.y)))
 
 
 func has_writing(id: String) -> bool:
@@ -440,8 +557,13 @@ func _apply() -> void:
 	if pulse:
 		g = 1.0 - PULSE_DEPTH * 0.5 * (1.0 - cos(TAU * t / PULSE_TICKS))
 	_mat.set_shader_parameter(&"glow", g)
-	# Le figure: la parallasse rispetto all'inquadratura iniziale, e compaiono a fine spray.
+	# Le figure: la parallasse rispetto all'inquadratura iniziale, e compaiono a fine spray. Quella
+	# agganciata compare per prima e, sciogliendo, se ne va per ultima; sciogliendo verso di lei, le altre
+	# se ne vanno col fronte, dove stanno.
 	var fa := clampf((a - 0.6) / 0.4, 0.0, 1.0)
+	var fr := figure_rect(hooked)
+	var fc := fr.get_center()
+	var far := Vector2(maxf(fc.x, size.x - fc.x), maxf(fc.y, size.y - fc.y)).length()
 	for f: Dictionary in _figures:
 		var s: Sprite2D = f["sprite"]
 		var depth: float = f["depth"]
@@ -449,6 +571,12 @@ func _apply() -> void:
 		s.scale = Vector2(z, z)
 		s.position = (half + (p - c0) * z - (c - c0) * z * depth).round()
 		s.modulate.a = fa
+		if fr.has_area():
+			if str(f["name"]) == hooked:
+				s.modulate.a = clampf(a / HOOK_FADE if closing else float(reveal_k) / HOOK_FADE_TICKS, 0.0, 1.0)
+			elif melting:
+				var rf := 0.82 * (p + (f["tex"] as Texture2D).get_size() / 2.0).distance_to(fc) / far
+				s.modulate.a = clampf((a * (1.0 + MELT_EDGE) - rf) / MELT_EDGE, 0.0, 1.0)
 		s.texture = _figure_frame(f)
 	# Le scritte: dipinte sul muro (si muovono con la vignetta), e se ne vanno con lei.
 	for w: Dictionary in writings.values():

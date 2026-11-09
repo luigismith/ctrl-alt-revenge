@@ -37,7 +37,8 @@ La configurazione:
     "inchiostro": "#1e1028",                       facoltativo: il colore dei contorni
     "luci": {"soglia": 0.80, "rosa": true, "rosa_tinta": [330, 18], "zone": [[x, y, w, h], ...]},
     "scritte": [{"testo": "REVENGE", "x": 40, "y": 30, "font": "5x7", "scala": 2, "colore": "#e8463a",
-                 "contorno": "#1e1028", "colature": 3, "luce": false},
+                 "contorno": "#1e1028", "colature": 3, "luce": false, "pendenza": 0.2},   pendenza: px in giù
+                                                   per px a destra, per i cartelloni in prospettiva (facoltativa)
                 {"testo": "RIGA 1", "x": 24, "y": 176, "strato": "registro_1"}],   con "strato": a parte, la fa
                                                    comparire il motore (scritta_<strato>.png, elencata nel json)
     "pupilla": {"centro": [x, y], "raggio": r},    facoltativo: dove il motore mette il logo ARIA+ nell'occhio
@@ -46,9 +47,15 @@ La configurazione:
                 "colori": 24, "profondita": 1.0, "visibile": true,
                 "finestra": [x0, y0, x1, y1]}],            facoltativo: la figura si vede solo dentro quel riquadro
                                                    della vignetta (un vano, una finestra); "taglia_y" taglia solo sotto
+                "tavolozza_da": "sprite.png", "tavolozza_dist": 0.14,   facoltativi: la figura prende i colori
+                                                   di quel PNG (lo sprite del gioco su trasparente), perché sfumi
+                                                   nello sprite senza cambiare tinta
                 "volto": {"blink": [[x, y, w, h, "#colore"], ...], "talk": [...]}}],   facoltativo, per i primi
                                                    piani che parlano: palpebre chiuse e bocca aperta, pennellate nostre
                                                    in pixel della figura col contorno -> figura_<nome>_blink.png, _talk
+    "davanti": [{"nome": "alberi", "dopo": "perdoni", "righe": [y0, y1], "finestre": [[x0, x1], ...]}],
+                                                   facoltativo: alberi o pali della vignetta che stanno davanti a
+                                                   una figura che scorre; escono come figura ferma subito dopo "dopo"
     "fonte": "ChatGPT (OpenAI), da nostri render e schizzi; ridotto in pixel art dai nostri script"
   }
 Le figure (dipinte su verde #00FF00) escono come strati a parte, figura_<nome>.png, con la posizione nel json:
@@ -189,8 +196,18 @@ def scritta(img: np.ndarray, emis: np.ndarray, s: dict, rng: np.random.Generator
             L = int(rng.integers(2, 8))
             F[pad + h:pad + h + L, x] = True
             F[pad + h + L, x] = True
+    p = float(s.get("pendenza", 0))
+    lo = 0
+    if p:
+        # un cartellone in prospettiva: ogni colonna scende di p px per px verso destra, a gradini di pixel
+        dy = np.round(p * (np.arange(F.shape[1]) - pad)).astype(int)
+        lo = min(0, int(dy.min()))
+        G = np.zeros((F.shape[0] + int(dy.max()) - lo, F.shape[1]), bool)
+        for x in range(F.shape[1]):
+            G[dy[x] - lo:dy[x] - lo + F.shape[0], x] = F[:, x]
+        F = G
     O = ndimage.binary_dilation(F, np.ones((3, 3), bool)) & ~F
-    x0, y0 = int(s["x"]) - pad, int(s["y"]) - pad
+    x0, y0 = int(s["x"]) - pad, int(s["y"]) - pad + lo   # lo: il gradino in su della pendenza
     H, W = img.shape[:2]
     for mask, col in ((O, s.get("contorno", "#1e1028")), (F, s.get("colore", "#f3e2b8"))):
         if col is None:
@@ -216,7 +233,8 @@ def ritinta(im: Image.Image, regole: list) -> Image.Image:
     """Sposta le tinte che non vanno (per esempio il cyan, vietato nel prologo) prima della riduzione.
     Ogni regola: {"da": [h0, h1] gradi OKLab, "a": h, "croma": fattore, "chiaro": delta L,
     "zona": [x0, y0, x1, y1] in pixel della base, prima del ritaglio (facoltativa),
-    "scuro": L, con la zona: tocca solo la macchia più grande della zona più scura di L (facoltativo), "chiudi": px}."""
+    "scuro": L, con la zona: tocca solo la macchia più grande della zona più scura di L (facoltativo), "chiudi": px,
+    "luce_min": L, tocca solo i pixel più chiari di L (facoltativo)}."""
     lab = px.to_oklab(np.asarray(im).astype(np.float64) / 255)
     L, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
     h = np.degrees(np.arctan2(b, a)) % 360
@@ -225,6 +243,8 @@ def ritinta(im: Image.Image, regole: list) -> Image.Image:
         h0, h1 = r["da"]
         m = ((h >= h0) & (h <= h1)) if h0 <= h1 else ((h >= h0) | (h <= h1))
         m &= c > float(r.get("croma_min", 0.02))
+        if r.get("luce_min"):
+            m &= L > float(r["luce_min"])   # solo i toni chiari (il bianco del purificatore, non il muro dietro)
         if r.get("zona"):
             x0, y0, x1, y1 = r["zona"]
             z = np.zeros_like(m)
@@ -386,6 +406,32 @@ def figura(cp: Path, fc: dict, ink, seed: int, pal_sfondo: np.ndarray | None = N
         if k in fc:
             info[k] = fc[k]
     return out, info
+
+
+def davanti(img: np.ndarray, dc: dict) -> tuple[np.ndarray, dict]:
+    """Un pezzo della vignetta che sta davanti a una figura che scorre (il tronco del pino davanti ai perdoni di
+    MP06): per ogni riga fra "righe" [y0, y1] e in ogni finestra [x0, x1] si prende dal primo all'ultimo pixel
+    che non è fondo chiaro (scuro, verde o rosso bruno). Esce come figura ferma con la vignetta (profondità 1)."""
+    rgb = img[..., :3].astype(np.int32)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    lum = (r * 3 + g * 6 + b) // 10
+    pieno = (lum < int(dc.get("soglia", 110))) | ((g > r) & (g >= b)) | ((r > g + 20) & (r > b + 20) & (lum < 140))
+    m = np.zeros(lum.shape, bool)
+    y0, y1 = dc["righe"]
+    for x0, x1 in dc["finestre"]:
+        for y in range(y0, y1 + 1):
+            xs = np.flatnonzero(pieno[y, x0:x1 + 1])
+            if len(xs):
+                m[y, x0 + xs[0]:x0 + xs[-1] + 1] = True
+    ys, xs = np.nonzero(m)
+    bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+    f = np.zeros((by1 - by0, bx1 - bx0, 4), np.uint8)
+    f[..., :3] = img[by0:by1, bx0:bx1, :3]
+    f[..., 3] = np.where(m[by0:by1, bx0:bx1], 255, 0)
+    info = {"nome": dc["nome"], "file": f"figura_{dc['nome']}.png", "x": int(bx0), "y": int(by0),
+            "misura": [int(bx1 - bx0), int(by1 - by0)], "profondita": 1.0,
+            "nota": dc.get("nota", "pezzo della vignetta che copre la figura di prima")}
+    return f, info
 
 
 def volto(f: np.ndarray, vc: dict) -> dict:
@@ -614,6 +660,11 @@ def main() -> None:
         over(comp, st, 0, 0)
     for fc in cfg.get("figure", []):
         pal_bg = np.unique(img[..., :3][img[..., 3] > 0], axis=0) if fc.get("tavolozza_sfondo") else None
+        if fc.get("tavolozza_da"):
+            # "tavolozza_da": i colori di un PNG (lo sprite del gioco su trasparente), perché la figura sfumi nello
+            # sprite senza cambiare tinta; vale come tavolozza_sfondo, con la sua soglia tavolozza_dist
+            tp = np.asarray(Image.open(cp.parent / fc["tavolozza_da"]).convert("RGBA"))
+            pal_bg = np.unique(tp[..., :3][tp[..., 3] > 0], axis=0)
         f, info = figura(cp, fc, ink, seed, pal_bg)
         if fc.get("volto"):
             vv = volto(f, fc["volto"])
@@ -625,6 +676,11 @@ def main() -> None:
         figs.append((f, info))
         if info.get("visibile", True):
             over(comp, f, info["x"], info["y"])
+    for dc in cfg.get("davanti", []):
+        f, info = davanti(img, dc)
+        nomi = [i["nome"] for _, i in figs]
+        figs.insert(nomi.index(dc["dopo"]) + 1 if dc.get("dopo") in nomi else len(figs), (f, info))
+        over(comp, f, info["x"], info["y"])
     riv = rivela(comp, seed, ink)
 
     Image.fromarray(img).save(out / "murale.png")

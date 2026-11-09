@@ -8,7 +8,7 @@
  "musica": "",
  "attori": {
   "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
-  "narratore": {"fuori_campo": true, "nome": "", "colore": "#ece8dc"}
+  "narratore": {"fuori_campo": true, "pensiero": true, "nome": "", "colore": "#ff9a5a"}
  },
  "passi": [
   {"fai": "camera", "su": "gig", "alto": 60, "zoom": 2, "tick": 60},

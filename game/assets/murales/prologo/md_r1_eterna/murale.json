@@ -1,0 +1,38 @@
+{
+ "nota": "vignetta dei murales di Totò (tools/murales/murale.py): murale.png opaco, murale_emis.png da sommare (luci che pulsano), murale_rivela.png = ordine dello spray (0 subito, 255 per ultimo)",
+ "id": "md_r1_eterna",
+ "capitolo": "prologo",
+ "misura": [
+  512,
+  288
+ ],
+ "schermo": [
+  480,
+  270
+ ],
+ "scorri": {
+  "da": [
+   16,
+   9
+  ],
+  "a": [
+   16,
+   9
+  ]
+ },
+ "camera": {
+  "nota": "rinforzi, vignetta MD-R1: parte stretta su GIG fradicio in cima al ponteggio, col braccio che pende, e si allarga piano a scoprire il cartellone di ETERNA alle sue spalle. Nessuna battuta. Poi stacco su MD-R2.",
+  "zoom_da": 1.3,
+  "centro_da": [
+   300,
+   120
+  ],
+  "zoom_a": 1,
+  "centro_a": [
+   256,
+   144
+  ]
+ },
+ "colori": 95,
+ "fonte": "ChatGPT (OpenAI), dal nostro render 3D di GIG; ridotto in pixel art dai nostri script"
+}
