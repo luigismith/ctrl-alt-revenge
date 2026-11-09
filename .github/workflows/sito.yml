@@ -3,7 +3,8 @@
 # Godot 4.7.2 (preset "Web" di game/export_presets.cfg, senza thread: GitHub Pages non manda le
 # intestazioni COOP/COEP) con lo stesso script che si usa in locale, tools/site/export_web.sh.
 # La musica non è nel repo: si scarica dagli allegati della release "musica-demo". Se la release
-# manca, la demo esce muta, senza errori.
+# manca, la demo esce muta, senza errori. Anche il teaser del sito, che ha la musica, sta lì; senza
+# di lui invece il lavoro si ferma, perché la pagina lo cita.
 #
 # GitHub Pages è attivo con la sorgente "GitHub Actions", e l'ambiente github-pages ammette solo il
 # ramo master. Si costruisce e si pubblica dai push su master (il prototipo Pygame di prima è nel
@@ -69,6 +70,21 @@ jobs:
           set -euo pipefail
           python3 --version
           python3 -I tools/site/build.py --out _site
+
+      # Il teaser ha la musica, quindi non è nel repo: è un allegato della release "musica-demo" e il
+      # nome sta in site/content/dati.json ("teaser"). La pagina lo cita: se manca, non si pubblica.
+      - name: Scarica il teaser
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          nome=$(python3 -I -c 'import json; print(json.load(open("site/content/dati.json", encoding="utf-8"))["teaser"]["video"])')
+          if ! gh release download musica-demo -R "$GITHUB_REPOSITORY" -D _site/media -p "$nome"; then
+            echo "::error::Nella release musica-demo manca $nome: il sito lo cita, quindi non si pubblica."
+            exit 1
+          fi
+          test -s "_site/media/$nome"
+          ls -la "_site/media/$nome"
 
       # Nella cache c'è solo il necessario (circa 170 MB): l'eseguibile per Linux e i due modelli
       # web senza thread, non tutti i 1,3 GB dei modelli d'esportazione.

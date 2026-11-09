@@ -25,6 +25,7 @@
   {"id": "storia", "testo": "Storia"},
   {"id": "mondo", "testo": "Il mondo"},
   {"id": "personaggi", "testo": "Personaggi"},
+ {"id": "teaser", "testo": "Teaser"},
   {"id": "gioco", "testo": "Il gioco"},
   {"id": "tecnica", "testo": "Grafica"},
   {"id": "tappe", "testo": "Tappe"}
@@ -131,6 +132,15 @@
    "testo": "Droni bianchi con il logo ARIA+: misurano l’aria e spruzzano profumo di pulito.",
    "nota": "Non le abbiamo ancora disegnate."
   }
+ },
+ "teaser": {
+  "titolo": "Il teaser",
+  "intro": "Trentotto secondi di Taranto, 2087: la città sotto la Linea, il braccio pignorato e la vendetta di GIG, fra i murales di Totò e il gioco vero. L'uscita è prevista per l'autunno 2027.",
+  "video": "Teaser di CTRL+ALT REVENGE, 38 secondi, con la musica",
+  "guarda": "Guarda il teaser",
+  "onesta": "Le scene di gioco vengono dal prologo che stiamo facendo adesso: livelli e grafica possono ancora cambiare. La demo qui sotto è ancora quella del 7 novembre 2026.",
+  "peso": "Il video pesa circa 8 MB e si scarica solo quando lo avvii.",
+  "musica": "Musica creata con Suno (piano Pro) il 9 novembre 2026."
  },
  "gioco": {
   "titolo": "Come si gioca",
@@ -320,7 +330,7 @@
     {"nome": "Python 3.14", "cosa": "con NumPy (BSD-3-Clause), Pillow (MIT-CMU) e SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
    ]
   },
-  "musica": "Musica: i brani della demo li ha creati Luigi Massari con Suno (piano Pro). Non sono nel repository: la demo web li prende dagli allegati di una release del progetto."
+  "musica": "Musica: i brani della demo li ha creati Luigi Massari con Suno (piano Pro), e così la musica del teaser, il 9 novembre 2026. Non sono nel repository: il sito e la demo web li prendono dagli allegati di una release del progetto."
  },
  "piede": {
   "finzione": "CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati. Ogni somiglianza con persone o aziende reali è casuale. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.",

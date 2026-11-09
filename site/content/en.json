@@ -25,6 +25,7 @@
   {"id": "storia", "testo": "Story"},
   {"id": "mondo", "testo": "The world"},
   {"id": "personaggi", "testo": "Characters"},
+ {"id": "teaser", "testo": "Teaser"},
   {"id": "gioco", "testo": "Gameplay"},
   {"id": "tecnica", "testo": "Art"},
   {"id": "tappe", "testo": "Roadmap"}
@@ -131,6 +132,15 @@
    "testo": "White drones bearing the ARIA+ logo: they measure the air and spray a fresh, clean scent.",
    "nota": "We haven’t drawn them yet."
   }
+ },
+ "teaser": {
+  "titolo": "The teaser",
+  "intro": "Thirty-eight seconds of Taranto, 2087: the city under the Line, the repossessed arm and GIG’s revenge, told through Totò’s murals and real gameplay. Coming in autumn 2027.",
+  "video": "CTRL+ALT REVENGE teaser, 38 seconds, with music",
+  "guarda": "Watch the teaser",
+  "onesta": "The gameplay comes from the prologue we are making right now: levels and art can still change. The demo below is still the one from 7 November 2026.",
+  "peso": "The video is about 8 MB and only downloads when you play it.",
+  "musica": "Music made with Suno (Pro plan) on 9 November 2026."
  },
  "gioco": {
   "titolo": "How it plays",
@@ -320,7 +330,7 @@
     {"nome": "Python 3.14", "cosa": "with NumPy (BSD-3-Clause), Pillow (MIT-CMU) and SciPy (BSD-3-Clause).", "licenza": "PSF License", "url": "https://www.python.org"}
    ]
   },
-  "musica": "Music: the demo tracks were made by Luigi Massari with Suno (Pro plan). They aren’t in the repository: the web demo fetches them from a project release."
+  "musica": "Music: the demo tracks were made by Luigi Massari with Suno (Pro plan), and so was the teaser’s music, on 9 November 2026. They aren’t in the repository: the site and the web demo fetch them from a project release."
  },
  "piede": {
   "finzione": "CTRL+ALT REVENGE is a work of fiction, set in a Taranto of 2087 imagined from the real city. SIDERA, ARIA+, MANODOPERA and all the characters are invented. Any resemblance to real people or companies is coincidental. The city’s places and rituals are real, and we portray them with respect.",

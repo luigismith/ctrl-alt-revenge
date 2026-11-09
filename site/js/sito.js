@@ -10,6 +10,7 @@
 	  e CAR Pixel va a multipli di 12 pixel del dispositivo (i conti di base li fa scala.js, qui si rifanno);
 	- la nube rossa sopra i tetti e la polvere del maestrale, retinate con la matrice di Bayer, a semi fissi;
 	- il video del gioco, che sfuma a scacchi nella notte e parte solo quando si vede (e non con «Risparmio dati»);
+	- il teaser, che non scarica niente prima del clic e parte con la musica dal pulsante d'oro;
 	- i cartelloni della storia, dipinti a spruzzo su un muro: su schermi larghi la telecamera scorre lungo il muro;
 	- i tre tasti del riavvio, la strada in cui GIG cammina, gli sprite veri con i loro tempi;
 	- i tasti dei comandi che si accendono, la luce provata con la normal map di GIG, il CONTINUA? della 404.
@@ -930,6 +931,26 @@
 		arteNube.chiave = '';
 		if (luce.pronta) luce.chiave = '';
 		richiedi();
+	}
+
+	/* ------------------------------------------------------------ teaser */
+	// Senza JavaScript restano i controlli del browser. Qui, finché non parte, c'è solo il pulsante d'oro
+	// (sul telefono non si vedono due ▶); dal primo play tornano i controlli. Il clic è un gesto, quindi
+	// l'audio parte; se il browser rifiuta lo stesso, si torna ai suoi controlli.
+	const teaser = $('.teaser__video');
+	const via = $('.teaser__via');
+	if (teaser && via) {
+		teaser.controls = false;
+		via.hidden = false;
+		const avvia = () => {
+			teaser.controls = true;
+			via.hidden = true;
+			const p = teaser.play();
+			if (p) p.catch(() => { teaser.controls = true; });
+			teaser.focus({ preventScroll: true });
+		};
+		via.addEventListener('click', avvia);
+		teaser.addEventListener('play', () => { teaser.controls = true; via.hidden = true; });
 	}
 
 	/* ------------------------------------------------------------ avvio */

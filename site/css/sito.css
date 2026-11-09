@@ -954,6 +954,29 @@ html[data-movimento="si"] .tere.parla span { animation: tere 0.5s steps(4) infin
 }
 .schermata figcaption { color: var(--crema-2); font-size: 1rem; }
 
+/* Il teaser: il video con la musica, sopra la demo. Il pulsante d'oro c'è solo con JavaScript, che toglie i
+   controlli finché non si preme; senza, restano i controlli del browser. */
+.teaser { padding: 96px 0 56px; }
+.teaser__schermo { width: min(var(--largo), 1152px); margin: 32px auto 0; display: grid; gap: 14px; }
+.teaser__quadro { position: relative; }
+.teaser__video {
+	display: block; width: 100%; height: auto; aspect-ratio: 16 / 9;
+	background: var(--notte);
+	box-shadow: 0 0 0 var(--pi) var(--inchiostro), 0 0 0 calc(var(--pi) * 2) var(--muro-2), 0 0 60px rgb(255 61 140 / 0.12);
+}
+.teaser__via {
+	position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%);
+	box-shadow: 0 0 0 var(--pi) var(--inchiostro), 0 0 24px rgb(255 226 122 / 0.45);
+}
+.teaser__via:active { transform: translate(-50%, var(--pi)); }
+.teaser__via[hidden] { display: none; }
+.teaser__note { display: grid; gap: 4px; color: var(--crema-2); font-size: 1rem; max-width: 72ch; }
+@media (max-width: 599px) {
+	.teaser { padding-top: 72px; }
+	.teaser__schermo { width: 100%; }
+	.teaser__note { padding: 0 var(--margine); }
+}
+
 .demo {
 	width: var(--largo); margin: 64px auto 0;
 	display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px 64px; align-items: start;

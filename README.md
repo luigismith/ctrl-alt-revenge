@@ -14,6 +14,11 @@
 </p>
 
 <p align="center">
+  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><img src="site/media/teaser-poster.png" width="480" height="270" alt="Il teaser: Taranto nel 2087 al tramonto, fra la Linea sopraelevata, le cupole, le gru del porto e il maxischermo di ARIA+, con il logo del gioco."></a><br>
+  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><strong>Guarda il teaser</strong></a> (38 secondi, senza parole) · uscita prevista: autunno 2027
+</p>
+
+<p align="center">
   <img src="docs/media/demo.gif" width="480" height="270" alt="Il gioco in azione, davanti al kebab: jab, jab, gancio cyber e calcio sul punk, che alla fine va giù.">
 </p>
 
@@ -153,7 +158,7 @@ python -I tools/site/media.py              # rifà video, GIF, schermate e sprit
 bash tools/site/export_web.sh              # esporta la demo web (Godot 4.7.2, senza thread; con la musica se CAR_MUSIC_DIR indica i brani)
 ```
 
-Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/sito.yml), a ogni push su `master` che tocca il sito o il gioco: costruisce il sito, scarica la musica della demo dalla release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo), esporta la demo in `gioca/` e pubblica su GitHub Pages. Niente CDN, niente cookie, niente tracciamenti.
+Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/sito.yml), a ogni push su `master` che tocca il sito o il gioco: costruisce il sito, scarica la musica della demo e il video del teaser dalla release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo), esporta la demo in `gioca/` e pubblica su GitHub Pages. Niente CDN, niente cookie, niente tracciamenti.
 
 ## Struttura
 
@@ -171,7 +176,7 @@ Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/
 
 - **Progetto e direzione:** Luigi Massari.
 - **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
-- **Musica della demo:** Luigi Massari, con Suno (piano Pro).
+- **Musica della demo e del teaser:** Luigi Massari, con Suno (piano Pro).
 - **Font CAR Pixel, effetti e interfaccia:** disegnati da script per CTRL+ALT REVENGE.
 - **Motore:** [Godot Engine](https://godotengine.org).
 
@@ -195,6 +200,6 @@ CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 i
 
 [`REUSE.toml`](REUSE.toml) dice quale licenza vale per ogni file. Per chiedere un permesso: [GitHub issues](https://github.com/luigismith/ctrl-alt-revenge/issues).
 
-**Musica.** I brani della demo li ha creati Luigi Massari con Suno (piano Pro). Non sono in questo repository e le licenze qui sopra non valgono per loro: la demo web li prende dagli allegati della release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo).
+**Musica e teaser.** I brani della demo e la musica del teaser li ha creati Luigi Massari con Suno (piano Pro). Non sono in questo repository, come il video del teaser, e le licenze qui sopra non valgono per loro: il sito e la demo web li prendono dagli allegati della release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo).
 
 **Contributi.** Leggi [`CONTRIBUTING.md`](CONTRIBUTING.md).
