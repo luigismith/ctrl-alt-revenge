@@ -2069,6 +2069,16 @@ func _draw_stage_hud(h: Control) -> void:
 		_draw_reboot_prompt(h)
 	if door_t > 0:
 		UiFont.draw_text(h, Vector2(View.CX, 20), "GLI ESATTORI SFONDANO LA PORTA: ESCI DAL LUCERNARIO", C_LED_RED, 1, 1)
+	_draw_prologue_fades(h)
+
+
+## Con --senza-hud resta solo questo: il buio della caduta, le vignette, i neri e il cartello finale.
+func _draw_stage_fades(h: Control) -> void:
+	super(h)
+	_draw_prologue_fades(h)
+
+
+func _draw_prologue_fades(h: Control) -> void:
 	if vignette != "":
 		_draw_vignette(h)
 	# Il nero del passaggio fra i livelli.

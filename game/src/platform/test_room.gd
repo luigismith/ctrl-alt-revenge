@@ -453,7 +453,9 @@ func _ready() -> void:
 	layer.add_child(_hud)
 	_overlay = LevelOverlay.new()
 	layer.add_child(_overlay)
-	layer.visible = not Game.options.no_hud
+	# Con --senza-hud il livello resta acceso per i neri e le vignette (vedi _draw_hud); spariscono
+	# le barre, le scritte e i cartelli del livello.
+	_overlay.visible = not Game.options.no_hud
 	show_boxes = Game.options.debug_boxes
 	if input.mode == PlayerInput.Mode.REPLAY and input.replay.start.has("x"):
 		_start.x = int(input.replay.start["x"])
@@ -600,6 +602,13 @@ func _draw_stage(_v: Node2D) -> void:
 
 func _draw_stage_hud(_h: Control) -> void:
 	pass
+
+
+## I neri e i cartelli che fanno parte del racconto, non dell'interfaccia: restano anche con
+## --senza-hud. Qui il buio della caduta; le stanze aggiungono i loro.
+func _draw_stage_fades(h: Control) -> void:
+	if use_lives:
+		_draw_fall_dark(h)
 
 
 func _reset() -> void:
@@ -996,7 +1005,13 @@ func _draw_checkpoint_lamps(n: Node2D) -> void:
 
 
 func _draw_lives_hud(h: Control) -> void:
-	# Il buio della caduta, a gradini come le altre dissolvenze, e la luce che torna alla ripartenza.
+	_draw_fall_dark(h)
+	if checkpoint_tag > CHECKPOINT_TAG - 30 or (checkpoint_tag > 0 and (checkpoint_tag / 10) % 2 == 0):
+		UiFont.draw_text(h, Vector2(View.CX, 18), "RIPARTENZA", C_CYAN, 1, 1)
+
+
+## Il buio della caduta, a gradini come le altre dissolvenze, e la luce che torna alla ripartenza.
+func _draw_fall_dark(h: Control) -> void:
 	var dark := 0.0
 	if fall_t >= 0:
 		dark = clampf(float(fall_t) / FALL_FADE, 0.0, 1.0)
@@ -1004,8 +1019,6 @@ func _draw_lives_hud(h: Control) -> void:
 		dark = float(respawn_blink - (RESPAWN_BLINK - RESPAWN_FADE)) / RESPAWN_FADE
 	if dark > 0.0:
 		h.draw_rect(Rect2(Vector2.ZERO, View.SIZE), Color(0, 0, 0, ceilf(dark * 4.0) / 4.0))
-	if checkpoint_tag > CHECKPOINT_TAG - 30 or (checkpoint_tag > 0 and (checkpoint_tag / 10) % 2 == 0):
-		UiFont.draw_text(h, Vector2(View.CX, 18), "RIPARTENZA", C_CYAN, 1, 1)
 
 
 func _exit_tree() -> void:
@@ -1448,6 +1461,9 @@ func _draw_floor() -> void:
 
 func _draw_hud() -> void:
 	var h := _hud
+	if Game.options.no_hud:
+		_draw_stage_fades(h)
+		return
 	if arena_phase != ArenaPhase.NONE:
 		# Nell'arena c'è l'interfaccia dello slice, con la vita di GIG e del nemico.
 		_draw_stage_hud(h)
