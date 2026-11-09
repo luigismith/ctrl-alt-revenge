@@ -1679,6 +1679,7 @@
   "slide": {
    "src": "Slide_Start",
    "anchor": "root",
+   "ground": "feet",
    "frames": [
     {
      "f": 2,
