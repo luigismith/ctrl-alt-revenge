@@ -24,7 +24,10 @@ Che cosa fa:
    destinazione, script in linea che la CSP non ammette, lettere che il font CAR Pixel non ha.
 
 La demo web non la fa questo script: la esporta tools/site/export_web.sh e il workflow
-.github/workflows/sito.yml la mette in gioca/, che qui resta libera.
+.github/workflows/sito.yml la mette in gioca/, che qui resta libera. Anche il video del teaser
+(dati.json, "teaser") non passa di qui: ha la musica, quindi sta negli allegati della release
+"musica-demo" e lo scarica il workflow in media/. Qui il controllo lo lascia mancare; per provarlo in
+locale si copia a mano nella cartella media/ del sito costruito.
 
 Il modello è HTML con poche regole:
     {{ t.eroe.motto }}            testo, con i caratteri speciali protetti
@@ -453,7 +456,8 @@ class _Raccogli(HTMLParser):
             self.testo.append(data)
 
 
-def controlla_pagina(out: Path, file: Path, url_sito: str) -> list[str]:
+def controlla_pagina(out: Path, file: Path, url_sito: str, dalla_release: frozenset[str] = frozenset()) -> list[str]:
+    """dalla_release: i file del sito (percorsi relativi) che arrivano dopo, dagli allegati della release."""
     errori = []
     sorgente = file.read_text(encoding="utf-8")
     r = _Raccogli()
@@ -504,6 +508,8 @@ def controlla_pagina(out: Path, file: Path, url_sito: str) -> list[str]:
                 continue
             if rel == RISERVATA or rel.startswith(RISERVATA + "/"):
                 continue                                  # la demo la mette il workflow
+            if rel in dalla_release:
+                continue                                  # il teaser lo scarica il workflow dalla release
             esiste = (dest / "index.html").exists() if dest.is_dir() else dest.exists()
             if not esiste:
                 errori.append(f"{nome}: {u} non esiste")
@@ -663,8 +669,9 @@ def costruisci(out: Path, url: str | None) -> None:
         + "\n".join(voci) + "\n</urlset>\n", encoding="utf-8")
 
     errori = []
+    dalla_release = frozenset({"media/" + dati["teaser"]["video"]})
     for f in list(pagine.values()) + [out / "404.html"]:
-        errori += controlla_pagina(out, f, url_sito)
+        errori += controlla_pagina(out, f, url_sito, dalla_release)
     errori += controlla_css(out)
     if errori:
         raise Errore("Il sito non passa i controlli:\n  " + "\n  ".join(errori))

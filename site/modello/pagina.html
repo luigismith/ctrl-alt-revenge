@@ -364,6 +364,29 @@
 			</div>
 		</section>
 
+		<!-- IL TEASER: il video con la musica. Non scarica niente finché non si preme ▶ (preload="none") e
+		     l'audio parte col play. Il file non è nel repository: lo scarica il workflow dalla release. -->
+		<section class="teaser" id="teaser" aria-labelledby="teaser-t">
+			<div class="sezione__testa">
+				<h2 class="neon" id="teaser-t">{{ t.teaser.titolo | pixel }}</h2>
+				<p class="sotto sotto--largo">{{ t.teaser.intro | html }}</p>
+			</div>
+			<figure class="teaser__schermo">
+				<div class="teaser__quadro">
+					<video class="teaser__video" controls playsinline preload="none"
+						width="{{ d.teaser.larghezza }}" height="{{ d.teaser.altezza }}"
+						poster="{{ pagina.radice }}media/{{ d.teaser.poster }}" aria-label="{{ t.teaser.video }}">
+						<source src="{{ pagina.radice }}media/{{ d.teaser.video }}" type="video/mp4">
+					</video>
+					<button type="button" class="bottone bottone--oro teaser__via" hidden><span aria-hidden="true">▶ </span>{{ t.teaser.guarda | pixel }}</button>
+				</div>
+				<figcaption class="teaser__note">
+					<span>{{ t.teaser.onesta }}</span>
+					<span>{{ t.teaser.peso }} {{ t.teaser.musica }}</span>
+				</figcaption>
+			</figure>
+		</section>
+
 		<!-- IL GIOCO: i pilastri, con quello che c'è già nello slice e quello che è ancora in sviluppo -->
 		<section class="gioco" id="gioco" aria-labelledby="gioco-t">
 			<div class="sezione__testa">
