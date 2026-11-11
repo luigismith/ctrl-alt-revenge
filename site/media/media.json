@@ -8,7 +8,7 @@
   "tick_fine": 3841,
   "hash": "66e84c1924f2646fe34361f182b66d0dd3c51126bbdce390554cc1d90ea9fb07",
   "fotogrammi": 3850,
-  "impronta_grafica": "69d96c3784390d0b715d174084ea3d00bf289765427c2e390d5fcaa2fd2bd8ae"
+  "impronta_grafica": "e5268062d2eedd0cb410b9fc1be481ac8ac0215ebb2cfd715a2dc9852acdba36"
  },
  "controllo": {
   "zone": [
@@ -138,8 +138,8 @@
     270
    ],
    "alt": {
-    "it": "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
-    "en": "In the slice: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."
+    "it": "Nel capitolo 2: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
+    "en": "In chapter 2: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."
    }
   },
   {
@@ -155,8 +155,8 @@
     270
    ],
    "alt": {
-    "it": "Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
-    "en": "In the slice: GIG leaps over a live power cable sparking in a puddle."
+    "it": "Nel capitolo 2: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
+    "en": "In chapter 2: GIG leaps over a live power cable sparking in a puddle."
    }
   },
   {
@@ -172,8 +172,8 @@
     270
    ],
    "alt": {
-    "it": "Nello slice, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
-    "en": "In the slice, in the arena: GIG's kick sends the punk crashing into the brute."
+    "it": "Nel capitolo 2, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
+    "en": "In chapter 2, in the arena: GIG's kick sends the punk crashing into the brute."
    }
   },
   {
@@ -189,8 +189,8 @@
     270
    ],
    "alt": {
-    "it": "Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
-    "en": "In the slice: GIG holds the brute in a grab and drives a knee into him."
+    "it": "Nel capitolo 2: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
+    "en": "In chapter 2: GIG holds the brute in a grab and drives a knee into him."
    }
   }
  ],
@@ -452,35 +452,35 @@
  "file": [
   {
    "file": "site/media/eroe-2x.webm",
-   "byte": 1210939
+   "byte": 1230593
   },
   {
    "file": "site/media/eroe.webm",
-   "byte": 2479125
+   "byte": 2496263
   },
   {
    "file": "site/media/eroe.mp4",
-   "byte": 2643834
+   "byte": 2662062
   },
   {
    "file": "site/media/eroe-poster.png",
-   "byte": 194592
+   "byte": 196735
   },
   {
    "file": "site/media/schermate/combo.png",
-   "byte": 79319
+   "byte": 80254
   },
   {
    "file": "site/media/schermate/cavo.png",
-   "byte": 80910
+   "byte": 81500
   },
   {
    "file": "site/media/schermate/arena.png",
-   "byte": 104600
+   "byte": 104747
   },
   {
    "file": "site/media/schermate/presa.png",
-   "byte": 103807
+   "byte": 104860
   },
   {
    "file": "site/media/ui/ritratto-gig.png",
@@ -600,7 +600,7 @@
   },
   {
    "file": "site/media/sprite/gig.png",
-   "byte": 27603
+   "byte": 34877
   },
   {
    "file": "site/media/sprite/gig.json",
@@ -608,15 +608,15 @@
   },
   {
    "file": "site/media/sprite/gig-normali.png",
-   "byte": 128512
+   "byte": 137502
   },
   {
    "file": "site/media/sprite/gig-spento.png",
-   "byte": 27605
+   "byte": 34913
   },
   {
    "file": "site/media/sprite/punk.png",
-   "byte": 25432
+   "byte": 31020
   },
   {
    "file": "site/media/sprite/punk.json",
@@ -624,7 +624,7 @@
   },
   {
    "file": "site/media/sprite/bruto.png",
-   "byte": 29371
+   "byte": 36462
   },
   {
    "file": "site/media/sprite/bruto.json",
@@ -632,12 +632,12 @@
   },
   {
    "file": "site/media/social.png",
-   "byte": 131867
+   "byte": 133634
   },
   {
    "file": "docs/media/demo.gif",
-   "byte": 1645914
+   "byte": 1717960
   }
  ],
- "totale_byte": 9302269
+ "totale_byte": 9472221
 }

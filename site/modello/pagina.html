@@ -88,7 +88,7 @@
 			<div class="eroe__griglia">
 				<div class="eroe__testa">
 					<h1 class="eroe__logo" id="titolo">
-						<img class="px" src="{{ pagina.radice }}media/logo/logo-1x.png" width="248" height="89" alt="CTRL+ALT REVENGE!">
+						<img class="px" src="{{ pagina.radice }}media/logo/logo-1x.png" width="{{ m.logo.0.larghezza }}" height="{{ m.logo.0.altezza }}" alt="CTRL+ALT REVENGE!">
 					</h1>
 					<div class="eroe__azioni">
 						<p class="eroe__motto">{{ t.eroe.motto | pixel }}</p>
@@ -394,13 +394,15 @@
 				<p class="sotto sotto--largo">{{ t.gioco.intro | html }}</p>
 			</div>
 			<ol class="pilastri">
-				{% for p in t.gioco.pilastri %}<li class="pilastro{% if p.schermate %} pilastro--largo{% endif %}{% if p.largo %} pilastro--largo{% endif %}{% if not p.slice %} pilastro--carta{% endif %}">
+				{% for p in t.gioco.pilastri %}<li class="pilastro{% if p.schermate %} pilastro--largo{% endif %}{% if p.largo %} pilastro--largo{% endif %}{% if p.slice %}{% else %}{% if p.sviluppo %}{% else %} pilastro--carta{% endif %}{% endif %}">
 					<div class="pilastro__testo">
-						<div class="pilastro__testa"><h3>{{ p.titolo | pixel }}</h3>{% if not p.slice %}<span class="chip chip--carta">{{ t.gioco.etichetta_carta | pixel }}</span>{% endif %}</div>
+						<div class="pilastro__testa"><h3>{{ p.titolo | pixel }}</h3>{% if p.slice %}{% else %}{% if p.sviluppo %}{% else %}<span class="chip chip--carta">{{ t.gioco.etichetta_carta | pixel }}</span>{% endif %}{% endif %}</div>
 						{% if p.slice %}<ul class="stato-mosse">
 							<li class="chip-riga"><span class="chip chip--slice">{{ t.gioco.etichetta_slice | pixel }}</span><span class="chip-riga__testo">{{ p.slice }}</span></li>
 							{% if p.sviluppo %}<li class="chip-riga"><span class="chip chip--sviluppo">{{ t.gioco.etichetta_sviluppo | pixel }}</span><span class="chip-riga__testo">{{ p.sviluppo }}</span></li>{% endif %}
-						</ul>{% endif %}
+						</ul>{% else %}{% if p.sviluppo %}<ul class="stato-mosse">
+							<li class="chip-riga"><span class="chip chip--sviluppo">{{ t.gioco.etichetta_sviluppo | pixel }}</span><span class="chip-riga__testo">{{ p.sviluppo }}</span></li>
+						</ul>{% endif %}{% endif %}
 						<details class="pieghevole" open><summary>{{ t.ui.leggi }}<span class="sr">: {{ p.titolo }}</span></summary><p>{{ p.testo | html }}</p></details>
 					</div>
 					{% if p.schermate %}<div class="schermate">
@@ -426,7 +428,7 @@
 					<h4 id="comandi-t">{{ t.gioco.comandi.titolo | pixel }}</h4>
 					<dl>
 						{% for c in t.gioco.comandi.righe %}<dt>{{ c.azione | pixel }}</dt>
-						<dd>{% for g in c.gruppi %}{% if not loop.first %} <span class="o">{{ t.gioco.comandi.o }}</span> {% endif %}<span class="tasti">{% for k in g %}<kbd data-tasto="{{ k.codice }}">{% if k.nome %}<span aria-hidden="true">{{ k.testo | pixel }}</span><span class="sr">{{ k.nome }}</span>{% else %}{{ k.testo | pixel }}{% endif %}</kbd>{% endfor %}</span>{% endfor %}</dd>
+						<dd>{% for g in c.gruppi %}{% if not loop.first %} <span class="o">{{ t.gioco.comandi.o }}</span> {% endif %}<span class="tasti">{% for k in g %}<kbd data-tasto="{{ k.codice }}">{% if k.nome %}<span aria-hidden="true">{{ k.testo | pixel }}</span><span class="sr">{{ k.nome }}</span>{% else %}{{ k.testo | pixel }}{% endif %}</kbd>{% endfor %}</span>{% endfor %}{% if c.pad %}<span class="pad"><span class="pad__e">PAD</span> {{ c.pad }}</span>{% endif %}</dd>
 						{% endfor %}
 					</dl>
 					<p class="comandi__nota">{{ t.gioco.comandi.nota }}</p>

@@ -4,18 +4,16 @@
  "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/master",
  "godot": "4.7.2",
  "teaser": {
-  "nota": "Il video ha la musica, quindi non è nel repository: è l'allegato teaser.mp4 della release musica-demo e il workflow del sito lo scarica in media/. Il poster invece è qui, in site/media/.",
+  "nota": "È il trailer: la chiave e i nomi dei file sono rimasti 'teaser'. Il video ha la musica, quindi non è nel repository: è l'allegato teaser.mp4 della release musica-demo e il workflow del sito lo scarica in media/. Il poster invece è qui, in site/media/.",
   "video": "teaser.mp4",
   "poster": "teaser-poster.png",
   "larghezza": 960,
   "altezza": 540
  },
  "numeri": {
-  "capitoli": 13,
-  "demo_mb": 21
+  "capitoli": 13
  },
  "link": {
-  "github": "https://github.com/luigismith/ctrl-alt-revenge",
   "github_codice": "https://github.com/luigismith/ctrl-alt-revenge/tree/master",
   "github_terze_parti": "https://github.com/luigismith/ctrl-alt-revenge/blob/master/THIRD-PARTY-NOTICES.md",
   "github_reuse": "https://github.com/luigismith/ctrl-alt-revenge/blob/master/REUSE.toml",

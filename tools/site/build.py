@@ -69,22 +69,36 @@ LINGUE = ("it", "en")
 RISERVATA = "gioca"          # cartella della demo web, la riempie il workflow
 
 # ------------------------------------------------------------------ parole vietate
-# Spoiler, nomi veri, il genere sbagliato e altre cose che il sito non deve dire (brief del sito,
-# regole di rispetto di docs/lore/storia.md e decisioni del 4 novembre 2026). Si cercano nel testo
-# e negli attributi delle pagine finite, URL esclusi. ChatGPT si può nominare dal 6 novembre 2026:
-# le basi delle ambientazioni del prologo fatte con Gemini e con ChatGPT si dichiarano nei crediti.
-VIETATE_SENSIBILI = [  # maiuscole e minuscole contano: sono nomi
-    "Dario", "Altamura", "Caporale", "Cosimo", "Warden", "Custode", "Custodi", "TUTORE", "Teresa", "EFESTO", "Leonida", "Vito",
-    "Riva", "Jindal", "Flacks", "Mittal", "ArcelorMittal", "Federacciai", "Iacovone", "Mostro",
-    "ARIA VERA",
-]
+# Parole che il sito non deve dire. Nel repo pubblico restano solo quelle neutre (il genere sbagliato);
+# le altre, che dicono cose che il repo non deve dire, stanno in docs/lore/parole-vietate.json (privato,
+# ignorato da git) o, nel workflow, nel secret CAR_PAROLE_VIETATE (lo stesso JSON). Si cercano nel testo
+# e negli attributi delle pagine finite, URL esclusi. Senza lista privata la build avvisa e non fallisce.
+PAROLE_PRIVATE = Path(__file__).resolve().parents[2] / "docs" / "lore" / "parole-vietate.json"
+VIETATE_SENSIBILI: list[str] = []  # maiuscole e minuscole contano: sono nomi (le aggiunge la lista privata)
 VIETATE = [  # maiuscole e minuscole non contano
     r"picchia\s*duro", "picchiaduro", "brawler", r"beat[\s\-']*'?em[\s\-']*up", r"16[\s\-]?bit",
-    "ilva", "acciaierie", "sonnambul", "finta bonifica", "inganno", "cantiere segreto", "fisioterapia",
-    r"modalit[àa] turno", r"aggiornamento 3\.0", "delfin", "dolphin", "2107", "2062", "2064", "2065",
-    "2067", "riaccension", "altiforni ricostruiti", "agosto 2026", "safety stoat",
-    "sleepwalk", "città dei veleni", "città morta",
 ]
+CONTROLLO_PRIVATO = False  # vero se la lista privata è stata caricata
+
+
+def carica_parole_private() -> bool:
+    """Aggiunge alle liste quelle private (file o variabile d'ambiente). Dice se c'erano."""
+    global CONTROLLO_PRIVATO
+    testo = ""
+    if PAROLE_PRIVATE.is_file():
+        testo = PAROLE_PRIVATE.read_text(encoding="utf-8")
+    elif os.environ.get("CAR_PAROLE_VIETATE", "").strip():
+        testo = os.environ["CAR_PAROLE_VIETATE"]
+    if not testo:
+        print("ATTENZIONE: manca la lista privata delle parole vietate (docs/lore/parole-vietate.json o "
+              "CAR_PAROLE_VIETATE): il controllo degli spoiler NON è stato fatto.")
+        return False
+    dati = json.loads(testo)
+    VIETATE_SENSIBILI.extend(str(w) for w in dati.get("sensibili", []))
+    VIETATE.extend(str(w) for w in dati.get("vietate", []))
+    CONTROLLO_PRIVATO = True
+    return True
+
 
 # Tag e attributi ammessi nei testi (filtro | html).
 TAG_AMMESSI = {"b", "strong", "i", "em", "span", "a", "kbd", "br", "small", "q", "abbr", "cite", "sup"}
@@ -684,6 +698,7 @@ def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    carica_parole_private()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default=str(ROOT / "_site"), help="cartella di uscita (predefinita: _site)")
     ap.add_argument("--url", default=None, help="indirizzo del sito, se diverso da quello di dati.json")

@@ -143,17 +143,17 @@ GIF_SCALA = 2
 # il cartellone di Pasqua dei tetti.
 SCHERMATE = [
     ("combo", 662, (200, 32, 480, 270),   # senza l'HUD: l'insegna KEBAB e il calcio sul punk
-     "Nello slice: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
-     "In the slice: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."),
+     "Nel capitolo 2: combo sul punk davanti all'insegna KEBAB, il gancio cyber e poi il calcio finale.",
+     "In chapter 2: a combo on the punk under the KEBAB sign, the cyber hook and then the finishing kick."),
     ("cavo", 1658, (150, 50, 480, 270),
-     "Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
-     "In the slice: GIG leaps over a live power cable sparking in a puddle."),
+     "Nel capitolo 2: GIG salta il cavo elettrico che scintilla nella pozzanghera.",
+     "In chapter 2: GIG leaps over a live power cable sparking in a puddle."),
     ("arena", 2750, (20, 75, 480, 270),
-     "Nello slice, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
-     "In the slice, in the arena: GIG's kick sends the punk crashing into the brute."),
+     "Nel capitolo 2, nell'arena: il calcio di GIG manda il punk addosso al bruto.",
+     "In chapter 2, in the arena: GIG's kick sends the punk crashing into the brute."),
     ("presa", 3004, (20, 75, 480, 270),
-     "Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
-     "In the slice: GIG holds the brute in a grab and drives a knee into him."),
+     "Nel capitolo 2: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.",
+     "In chapter 2: GIG holds the brute in a grab and drives a knee into him."),
 ]
 
 # Anteprima social 1280x640: il fotogramma a 3x (1440x810) spostato a sinistra di 160 px (la rissa è a

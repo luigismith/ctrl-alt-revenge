@@ -66,6 +66,9 @@ jobs:
       # Prima il sito, che è veloce: se un testo ha una parola vietata, un collegamento rotto o una
       # risorsa esterna, il lavoro si ferma qui, prima di scaricare Godot. Solo la libreria standard.
       - name: Costruisce il sito
+        env:
+          # La lista privata delle parole vietate (JSON): non sta nel repo pubblico. Senza, la build avvisa.
+          CAR_PAROLE_VIETATE: ${{ secrets.CAR_PAROLE_VIETATE }}
         run: |
           set -euo pipefail
           python3 --version

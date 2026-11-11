@@ -51,7 +51,7 @@
 			var affiancata = vw > 1000;
 			var destra = S.fpMedio * 1.3 * 2 + S.fpUi * 1.3 + 52 + 28;
 			var testa = function (nl) {
-				var logo = (89 * nl) / dpr;
+				var logo = (80 * nl) / dpr;
 				return affiancata ? Math.max(logo, destra) : logo + 14 + destra;
 			};
 			var piega = 0.9;
@@ -61,7 +61,7 @@
 			piega = 0.6;
 			if ((480 * (nw + 1)) / dpr <= Math.min(vw - 2 * margine, 2400) && sta(nw + 1, 1)) nw++;
 			// il logo si sceglie con la stessa tolleranza, così su uno schermo più alto non diventa più piccolo
-			var nl = Math.min(n(248, affiancata ? vw * 0.45 : vw - 2 * margine), nw);
+			var nl = Math.min(n(199, affiancata ? vw * 0.45 : vw - 2 * margine), nw);
 			while (nl > 1 && !sta(nw, nl)) nl--;
 			S.nw = nw;
 			S.nl = Math.max(1, nl);
@@ -71,7 +71,7 @@
 			var k = n(480, vw);
 			var taglio = (480 - (vw * dpr) / (k + 1)) / 2;
 			S.nw = taglio <= 5 ? k + 1 : k;
-			S.nl = n(248, vw - 2 * margine);
+			S.nl = n(199, vw - 2 * margine);
 		}
 		S.nc = vw >= 1200 ? vicino(3) : vicino(2);
 		S.ns = vw >= 1600 ? vicino(3) : largo ? vicino(2) : vicino(1.34);

@@ -107,7 +107,7 @@ a:hover { color: #fff7dc; }
 }
 /* Il logo nella barra solo dove sta a un pixel del dispositivo per pixel del gioco (schermi da 2x in su):
    altrimenti il nome, in CAR Pixel. */
-.barra-alta__logo { display: none; width: calc(248 * var(--pl-testa)); height: calc(89 * var(--pl-testa)); image-rendering: pixelated; }
+.barra-alta__logo { display: none; width: calc(199 * var(--pl-testa)); height: calc(80 * var(--pl-testa)); image-rendering: pixelated; }
 html.densa .barra-alta__logo { display: block; }
 html.densa .barra-alta__testo { display: none; }
 .barra-alta__livello { color: var(--arancio); font-size: var(--fp-piccolo); line-height: 1; }
@@ -140,7 +140,7 @@ main.di-lato { grid-template-columns: auto minmax(260px, 340px); align-items: st
 }
 #status.esce { opacity: 0; pointer-events: none; }
 #status > * { margin: 0; }
-.logo { display: block; width: calc(248 * var(--pl)); height: calc(89 * var(--pl)); image-rendering: pixelated; }
+.logo { display: block; width: calc(199 * var(--pl)); height: calc(80 * var(--pl)); image-rendering: pixelated; }
 .livello { color: var(--arancio); font: 400 var(--fp-piccolo) / 1 "CAR Pixel", monospace; }
 .carica {
 	width: 220px; max-width: 80%; height: 12px; box-sizing: content-box;
@@ -184,6 +184,9 @@ main.di-lato .pannello { width: auto; }
 .comandi dt { font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--crema); }
 .comandi dd { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .comandi .o { color: var(--crema-scura); padding: 0 4px; }
+.comandi .pad { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; color: var(--crema-scura); font-size: 0.85em; }
+.comandi .pad__e { font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--oro-scuro); padding-right: 4px; }
+.comandi .padt { display: inline-block; padding: 1px 7px; border: 2px solid var(--crema-scura); border-radius: 999px; color: var(--crema); font-weight: 700; line-height: 1.3; }
 kbd {
 	display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px; box-sizing: border-box;
 	font: 400 var(--fp-ui) / 1 "CAR Pixel", monospace; color: var(--inchiostro);
@@ -206,9 +209,9 @@ kbd.premuto { background: var(--oro); border-color: var(--oro-scuro); transform:
 		<header class="barra-alta">
 			<a class="indietro" id="indietro" href="../"><span aria-hidden="true">◀</span> <span lang="it">Torna al sito</span><span lang="en">Back to the site</span></a>
 			<h1 class="barra-alta__titolo">
-				<img class="barra-alta__logo" src="logo.png" width="248" height="89" alt="CTRL+ALT REVENGE!">
+				<img class="barra-alta__logo" src="logo.png" width="199" height="80" alt="CTRL+ALT REVENGE!">
 				<span class="barra-alta__testo">CTRL+ALT REVENGE!</span>
-				<span class="barra-alta__livello"><span lang="it">DEMO · SOTTO LA LINEA</span><span lang="en">DEMO · SOTTO LA LINEA</span></span>
+				<span class="barra-alta__livello"><span lang="it">DEMO · PROLOGO E IL WIND DAY</span><span lang="en">DEMO · PROLOGUE AND THE WIND DAY</span></span>
 			</h1>
 			<button type="button" class="bottone" id="schermo-intero"><span lang="it">Schermo intero</span><span lang="en">Full screen</span></button>
 		</header>
@@ -224,8 +227,8 @@ kbd.premuto { background: var(--oro); border-color: var(--oro-scuro); transform:
 					<p lang="en">The demo needs JavaScript to run.</p>
 				</noscript>
 				<div id="status">
-					<img class="logo" src="logo.png" width="248" height="89" alt="">
-					<p class="livello"><span lang="it">DEMO · LIVELLO 1 · SOTTO LA LINEA</span><span lang="en">DEMO · LEVEL 1 · SOTTO LA LINEA</span></p>
+					<img class="logo" src="logo.png" width="199" height="80" alt="">
+					<p class="livello"><span lang="it">DEMO · PROLOGO E IL WIND DAY</span><span lang="en">DEMO · PROLOGUE AND THE WIND DAY</span></p>
 					<div class="carica attesa" id="status-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-labelledby="status-text"><span></span></div>
 					<p class="stato" id="status-text"><span lang="it">CARICAMENTO…</span><span lang="en">LOADING…</span></p>
 					<div class="cancello" id="cancello" hidden>
@@ -245,19 +248,23 @@ kbd.premuto { background: var(--oro); border-color: var(--oro-scuro); transform:
 					<h2 id="comandi-t"><span lang="it">Comandi</span><span lang="en">Controls</span></h2>
 					<dl class="comandi">
 						<dt><span lang="it">MUOVI</span><span lang="en">MOVE</span></dt>
-						<dd><span aria-hidden="true"><kbd data-tasto="ArrowLeft">◀</kbd><kbd data-tasto="ArrowUp">▲</kbd><kbd data-tasto="ArrowDown">▼</kbd><kbd data-tasto="ArrowRight">▶</kbd></span><span class="sr" lang="it">frecce</span><span class="sr" lang="en">arrow keys</span> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyW">W</kbd><kbd data-tasto="KeyA">A</kbd><kbd data-tasto="KeyS">S</kbd><kbd data-tasto="KeyD">D</kbd></dd>
+						<dd><span aria-hidden="true"><kbd data-tasto="ArrowLeft">◀</kbd><kbd data-tasto="ArrowUp">▲</kbd><kbd data-tasto="ArrowDown">▼</kbd><kbd data-tasto="ArrowRight">▶</kbd></span><span class="sr" lang="it">frecce</span><span class="sr" lang="en">arrow keys</span> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyW">W</kbd><kbd data-tasto="KeyA">A</kbd><kbd data-tasto="KeyS">S</kbd><kbd data-tasto="KeyD">D</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt"><span lang="it">croce</span><span lang="en">D-pad</span></b> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <b class="padt"><span lang="it">levetta sinistra</span><span lang="en">left stick</span></b></span></dd>
 						<dt><span lang="it">ATTACCO</span><span lang="en">ATTACK</span></dt>
-						<dd><kbd data-tasto="KeyZ">Z</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyJ">J</kbd></dd>
+						<dd><kbd data-tasto="KeyZ">Z</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyJ">J</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt">X</b> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <b class="padt">Y</b></span></dd>
 						<dt><span lang="it">SALTO</span><span lang="en">JUMP</span></dt>
-						<dd><kbd data-tasto="KeyX">X</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyK">K</kbd></dd>
+						<dd><kbd data-tasto="KeyX">X</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyK">K</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt">A</b> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <b class="padt">B</b></span></dd>
+						<dt><span lang="it">SCATTO</span><span lang="en">DASH</span></dt>
+						<dd><kbd data-tasto="KeyC">C</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyL">L</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt">R1 / RB</b> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <b class="padt">L1 / LB</b></span></dd>
+						<dt><span lang="it">VISTA</span><span lang="en">VIEW</span></dt>
+						<dd><kbd data-tasto="KeyV">V</kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="KeyI">I</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt">L2 / LT</b> <span class="pad__nota" lang="it">(tenuto)</span><span class="pad__nota" lang="en">(hold)</span></span></dd>
 						<dt><span lang="it">PAUSA</span><span lang="en">PAUSE</span></dt>
-						<dd><kbd data-tasto="Enter"><span lang="it">INVIO</span><span lang="en">ENTER</span></kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="Escape">ESC</kbd></dd>
+						<dd><kbd data-tasto="Enter"><span lang="it">INVIO</span><span lang="en">ENTER</span></kbd> <span class="o" lang="it">o</span><span class="o" lang="en">or</span> <kbd data-tasto="Escape">ESC</kbd><span class="pad"><span class="pad__e">PAD</span> <b class="padt">START</b></span></dd>
 					</dl>
 				</div>
-				<p class="nota" lang="it">Va bene anche un controller. <strong>Clicca sul gioco</strong> se non risponde ai tasti; con <kbd>Tab</kbd> esci dal gioco e torni alla pagina.</p>
-				<p class="nota" lang="en">A gamepad works too. <strong>Click the game</strong> if it doesn’t respond to the keys; <kbd>Tab</kbd> takes you out of the game and back to the page.</p>
-				<p class="nota" lang="it"><strong>È lo slice tecnico del 2026:</strong> grafica, testi e livelli cambieranno, e la strada è ancora provvisoria. È senza musica, perché i brani non sono pubblici, e nel browser i suoni arrivano tutti dal centro: il pan stereo c’è solo nella versione per computer.</p>
-				<p class="nota" lang="en"><strong>This is the 2026 technical slice:</strong> the art, the text and the levels will change, and the street is still a placeholder. The game’s own text is in Italian. It has no music, because the tracks aren’t public, and in the browser all sounds come from the centre: stereo panning is only in the desktop version.</p>
+				<p class="nota" lang="it">Col controller, premi un tasto per farlo riconoscere dal browser. <strong>Clicca sul gioco</strong> se non risponde ai tasti; con <kbd>Tab</kbd> esci dal gioco e torni alla pagina.</p>
+				<p class="nota" lang="en">With a gamepad, press any button so the browser picks it up. <strong>Click the game</strong> if it doesn’t respond to the keys; <kbd>Tab</kbd> takes you out of the game and back to the page.</p>
+				<p class="nota" lang="it"><strong>È la demo tecnica del 2026:</strong> grafica, testi e livelli cambieranno. Nel browser i suoni arrivano tutti dal centro: il pan stereo c’è solo nella versione per computer.</p>
+				<p class="nota" lang="en"><strong>This is the 2026 technical demo:</strong> the art, the text and the levels will change. The game’s own text is in Italian. In the browser all sounds come from the centre: stereo panning is only in the desktop version.</p>
 				<p class="nota"><span lang="it">Motore: Godot Engine (MIT).</span><span lang="en">Engine: Godot Engine (MIT).</span></p>
 				<p class="azioni"><a class="bottone" id="indietro-3" href="../"><span aria-hidden="true">◀</span> <span lang="it">Torna al sito</span><span lang="en">Back to the site</span></a></p>
 			</section>
@@ -321,7 +328,7 @@ const GODOT_URL = '$GODOT_URL';
 		cornice.style.setProperty('--px', px + 'px');
 		// il logo della schermata di caricamento: un pixel CSS per pixel del gioco, se ci sta, sempre intero
 		const spazio = chiedi ? Math.min(window.innerWidth - 32, 640) - 32 : (480 * n) / dpr - 32;
-		const k = Math.max(1, Math.min(Math.round(dpr), Math.floor((spazio * dpr) / 248)));
+		const k = Math.max(1, Math.min(Math.round(dpr), Math.floor((spazio * dpr) / 199)));
 		doc.style.setProperty('--pl', k / dpr + 'px');
 		doc.classList.remove('misura');
 	}

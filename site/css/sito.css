@@ -407,7 +407,7 @@ html.js .hud--stretto .hud__nav a { padding: 12px 0; }
 }
 .eroe__logo { grid-area: logo; }
 .eroe__logo img {
-	width: calc(248 * var(--pl)); height: calc(89 * var(--pl));
+	width: calc(199 * var(--pl)); height: calc(80 * var(--pl));
 	filter: drop-shadow(0 0 calc(var(--pl) * 3) rgb(240 106 30 / 0.55)) drop-shadow(0 0 calc(var(--pl) * 14) rgb(192 74 20 / 0.45));
 }
 .eroe__azioni {
@@ -994,6 +994,8 @@ html[data-movimento="si"] .tere.parla span { animation: tere 0.5s steps(4) infin
 .comandi dd { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .tasti { display: inline-flex; gap: 4px; }
 .comandi .o { color: var(--crema-2); padding: 0 4px; font-size: 1rem; }
+.comandi .pad { flex-basis: 100%; color: var(--crema-2); font-size: 0.9rem; }
+.comandi .pad__e { font: 700 var(--fp-ui) / 1 var(--pixel-font); color: var(--oro-3); padding-right: 6px; }
 .comandi kbd.premuto { background: var(--oro); border-color: var(--oro-3); transform: translateY(var(--pi)); box-shadow: 0 0 12px rgb(255 226 122 / 0.6); }
 .comandi__nota { margin-top: 16px; color: var(--crema-2); font-size: 1rem; max-width: 36ch; }
 @media (max-width: 999px) {
@@ -1128,7 +1130,7 @@ html:not(.js) .piede__fine { max-width: 100%; height: auto; }
 /* ------------------------------------------------------------------ 404: CONTINUA? */
 .pagina-404 { display: grid; min-height: 100vh; place-items: center; background: linear-gradient(var(--notte-fonda), var(--notte) 60%, var(--viola)); }
 .continua { display: grid; justify-items: center; gap: 26px; padding: 48px 20px; text-align: center; }
-.continua__logo img { width: calc(248 * var(--pz, var(--pl))); height: calc(89 * var(--pz, var(--pl))); }
+.continua__logo img { width: calc(199 * var(--pz, var(--pl))); height: calc(80 * var(--pz, var(--pl))); }
 .continua__titolo { --pi: var(--pz, calc(var(--ni) * var(--u) * 1px)); display: flex; align-items: center; gap: calc(var(--pi) * 8); }
 .continua__scritta { width: calc(197 * var(--pi)); height: calc(31 * var(--pi)); }
 .continua__cifra {
