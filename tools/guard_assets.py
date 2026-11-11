@@ -45,6 +45,31 @@ def git(*args: str) -> bytes:
     return subprocess.run(["git", *args], cwd=ROOT, check=True, capture_output=True).stdout
 
 
+## Windows non accetta più di ~32 000 caratteri nella riga di comando: i nomi dei file in stage vanno a blocchi.
+ARGS_MAX_CHARS = 12000
+
+
+def chunks(names: list[str], limit: int = ARGS_MAX_CHARS) -> list[list[str]]:
+    """I nomi divisi in blocchi la cui lunghezza totale (con gli spazi) resta sotto `limit`."""
+    out: list[list[str]] = []
+    cur: list[str] = []
+    size = 0
+    for n in names:
+        if cur and size + len(n) + 1 > limit:
+            out.append(cur)
+            cur, size = [], 0
+        cur.append(n)
+        size += len(n) + 1
+    if cur:
+        out.append(cur)
+    return out
+
+
+def ls_files_staged(names: list[str]) -> bytes:
+    """`git ls-files -s -z` dei nomi dati, un blocco alla volta."""
+    return b"".join(git("--literal-pathspecs", "ls-files", "-s", "-z", "--", *blk) for blk in chunks(names))
+
+
 def sniff(head: bytes) -> str | None:
     if head[:4] == b"RIFF" and head[8:12] == b"WAVE":
         return "WAV"
@@ -69,7 +94,7 @@ def entries(staged: bool) -> list[tuple[str, str | None]]:
         names = [n for n in names if n]
         if not names:
             return []
-        raw = git("ls-files", "-s", "-z", "--", *[n.decode() for n in names])
+        raw = ls_files_staged([n.decode("utf-8", "surrogateescape") for n in names])
     else:
         raw = git("ls-files", "-s", "-z")
     out: list[tuple[str, str | None]] = []
