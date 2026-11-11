@@ -1,0 +1,79 @@
+{
+	"format": 1,
+	"nota": "Di quanti pixel si alza ogni fotogramma perché la suola tocchi la collisione (positivo = più in alto; negativo = più in basso del render). Si applica all'ancora e ai punti; hurt e hit restano dove sono. 'base' vale per le animazioni che non sono elencate; un'animazione ha un numero solo o uno per fotogramma; 'come' copia la voce di un altro foglio. Misure dell'11 novembre 2026: suola più bassa per le andature, piede piantato per i colpi in cui la punta del piede dietro buca il suolo; appeso e in salita sullo spigolo 0, perché lì contano le mani. Corsa a volo leggero: i fotogrammi in appoggio hanno la suola sul suolo, i due di volo (4 e 8) i piedi staccati di 7 e 6 px, scelti perché la testa resti su una linea morbida (oscillazione da 10 a 5 px).",
+	"fogli": {
+		"gig": {
+			"base": 3,
+			"anim": {
+				"land": [3, 4],
+				"walk": [1, 2, 1, 1, 4, 5, 4, 3],
+				"run": [1, 2, -3, -2, 2, 7, -1, -3],
+				"crouch": 2,
+				"crouch_walk": [4, 2, 1, -1, 3, 3, 1, 2],
+				"hook": [3, 3, 3, 4, 4, 3, 3],
+				"kick": [9, 8, 7, 6, 5, 6, 8, 5],
+				"knee": [3, 3, 5, 3],
+				"throw": [3, 3, 4, 4],
+				"knock_down": [2, 7, 9],
+				"getup": [12, 9, 9, 10, 10, 6, 5],
+				"ledge_hang": 0,
+				"ledge_climb": 0
+			}
+		},
+		"gig_spento": {"come": "gig"},
+		"esattore": {
+			"base": 4,
+			"anim": {
+				"idle": 5,
+				"walk": [3, 2, 2, 1, 7, 6, 6, 4],
+				"punch": [4, 4, 4, 4, 6, 6, 5, 5, 4],
+				"knock_down": 5,
+				"getup": [5, 5, 5, 5, 5, 5, 7],
+				"block": 5,
+				"charge_wind": 5,
+				"charge_run": 5,
+				"dizzy": 5
+			}
+		},
+		"thug_bruiser": {"come": "esattore"},
+		"rider": {
+			"base": 4,
+			"anim": {
+				"idle": 5,
+				"walk": [3, 2, 2, 1, 5, 5, 4, 3],
+				"haymaker": [5, 6, 6, 5, 5, 5, 4, 5],
+				"knock_down": 5,
+				"getup": 5,
+				"grabbed": 3,
+				"kneed": [3, 2, 3]
+			}
+		},
+		"thug_punk": {
+			"base": 4,
+			"anim": {
+				"idle": 5,
+				"walk": [3, 3, 2, 2, 6, 5, 4, 3],
+				"jab": [4, 4, 5, 5, 5, 5, 5],
+				"haymaker": [5, 6, 6, 6, 6, 6, 4, 6],
+				"knock_down": [5, 5, 8],
+				"getup": [10, 7, 8, 10, 9, 5, 6]
+			}
+		},
+		"messo": {
+			"base": 4,
+			"anim": {
+				"walk": [3, 2, 2, 1, 6, 5, 4, 4]
+			}
+		},
+		"signora": {"base": 3},
+		"signora_dopo": {"base": 3},
+		"fruttivendolo": {"base": 4},
+		"perdono": {
+			"base": 4,
+			"anim": {
+				"idle": [4, 3],
+				"scansa": [4, 2, 2, 2, 2]
+			}
+		}
+	}
+}

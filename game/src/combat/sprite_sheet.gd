@@ -88,6 +88,9 @@ var warnings: PackedStringArray = []
 var _retimed: Dictionary = {}
 
 static var _cache: Dictionary = {}
+## Quanto alzare i fotogrammi perché le suole tocchino la collisione: vedi _apply_soles.
+const SOLES_JSON := "res://data/sprites/suole.json"
+static var _soles: Variant = null
 ## Percorsi dei file di cui si sono già segnalati gli avvisi.
 static var _warned: Dictionary = {}
 
@@ -189,7 +192,69 @@ static func load_json(path: String) -> SpriteSheet:
 			s.animations[StringName(str(anim_name))] = clip
 	for missing in s.missing_required():
 		s.warnings.append("manca l'animazione richiesta %s" % missing)
+	if s.source == Source.REAL:
+		s._apply_soles()
 	return s
+
+
+## La tabella delle suole (data/sprites/suole.json), letta una volta.
+static func soles_table() -> Dictionary:
+	if _soles == null:
+		_soles = {}
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(SOLES_JSON)) \
+				if FileAccess.file_exists(SOLES_JSON) else null
+		if data is Dictionary and (data as Dictionary).get("fogli") is Dictionary:
+			_soles = data["fogli"]
+		elif OS.is_debug_build():
+			push_warning("Tabella delle suole non leggibile: %s" % SOLES_JSON)
+	return _soles
+
+
+## La voce del foglio nella tabella delle suole, seguendo "come"; {} se non c'è.
+static func soles_entry(sheet_id: StringName) -> Dictionary:
+	var table := soles_table()
+	var e: Variant = table.get(String(sheet_id), null)
+	for _i in 4:
+		if e is Dictionary and (e as Dictionary).has("come"):
+			e = table.get(str(e["come"]), null)
+	return e if e is Dictionary else {}
+
+
+## Alza ogni fotogramma di quanto dice la tabella delle suole, così i piedi disegnati toccano la
+## collisione. Si spostano l'ancora e i punti (mani, piedi, testa: servono a disegnare); hurt, hit,
+## dx/dy e victim restano come sono, quindi la logica e i replay non cambiano.
+func _apply_soles() -> void:
+	var e := soles_entry(id)
+	if e.is_empty():
+		return
+	var base := int(e.get("base", 0))
+	var per_anim: Dictionary = e.get("anim", {}) if e.get("anim", {}) is Dictionary else {}
+	for anim_name: StringName in animations:
+		var frames := animations[anim_name].frames
+		var v: Variant = per_anim.get(String(anim_name), base)
+		var lifts: Array[int] = []
+		if v is Array:
+			if (v as Array).size() == frames.size():
+				for x: Variant in v:
+					lifts.append(int(x))
+			else:
+				warnings.append("suole: %s ha %d valori per %d fotogrammi" % [anim_name, (v as Array).size(), frames.size()])
+		for i in frames.size():
+			var lift: int = lifts[i] if not lifts.is_empty() else (base if v is Array else int(v))
+			if lift == 0:
+				continue
+			var f := frames[i]
+			f.lift = lift
+			f.anchor.y += lift
+			for k: String in f.points:
+				f.points[k] = f.points[k] - Vector2i(0, lift)
+	# Un foglio che copia la voce di un altro ("come") può non avere tutte le sue animazioni.
+	var own: Variant = soles_table().get(String(id), null)
+	if own is Dictionary and (own as Dictionary).has("come"):
+		return
+	for anim_name: Variant in per_anim:
+		if not animations.has(StringName(str(anim_name))):
+			warnings.append("suole: animazione %s non nel foglio" % anim_name)
 
 
 func _parse_clip(anim_name: String, v: Variant) -> AnimClip:

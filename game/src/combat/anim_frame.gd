@@ -42,6 +42,9 @@ var victim_behind: bool = false
 var points: Dictionary[String, Vector2i] = {}
 ## Spostamento verticale in px all'inizio del fotogramma (root motion, positivo = in alto), opzionale.
 var dy: int = 0
+## Di quanti px si è alzato il disegno perché la suola tocchi la collisione (data/sprites/suole.json):
+## l'ancora e i punti lo comprendono già, hurt e hit no. Solo per i controlli.
+var lift: int = 0
 
 
 func has_tag(tag: int) -> bool:
@@ -62,6 +65,7 @@ func copy() -> AnimFrame:
 	f.victim_behind = victim_behind
 	f.points = points.duplicate()
 	f.dy = dy
+	f.lift = lift
 	return f
 
 

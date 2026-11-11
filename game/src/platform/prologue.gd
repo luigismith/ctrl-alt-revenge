@@ -1573,8 +1573,10 @@ func _on_scene_handoff(_id: String) -> void:
 
 ## Il prologo nuovo decide la musica da sé, dal tratto (MUSIC). All'ingresso dall'introduzione resta il
 ## tema del titolo, che la scena spegne sul murale del cimitero.
+## TestRoom._ready la chiama prima di creare GIG (con --start-x, senza introduzione): allora il brano lo
+## sceglie il primo tick, che sa dov'è GIG.
 func _start_music() -> void:
-	if not play_intro:
+	if not play_intro and player != null:
 		_music_update()
 
 
