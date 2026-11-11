@@ -134,7 +134,7 @@ func tick() -> void:
 	for e in anim.take_events():
 		if e == "step" and sound:
 			_step_parity = not _step_parity
-			Sfx.play_at(&"step_a" if _step_parity else &"step_b", px, 0.05, -4.0)
+			Sfx.step(px, _step_parity, -4.0)
 	sync()
 
 

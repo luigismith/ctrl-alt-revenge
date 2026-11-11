@@ -7,6 +7,9 @@ extends Node
 ##     (al massimo un avviso una volta sola, mai un errore).
 ##   Sfx.play_at(sfx_name, world_x, pitch_jitter = 0.05, volume_db = 0.0)
 ##     come play(), con un leggero pan stereo in base alla posizione sullo schermo.
+##   Sfx.step(world_x, left, volume_db = 0.0)
+##     un passo sulla superficie di adesso (Sfx.surface): &"" = step_a/step_b dello slice, oppure
+##     &"pietra", &"bagnato", &"interno" (step_<superficie>_a/_b). La superficie la sceglie il livello.
 ## Il pitch casuale usa un generatore suo: non tocca il determinismo del gameplay.
 ##
 ## Come funziona:
@@ -44,6 +47,8 @@ var _mix_db: Dictionary = {}      # StringName -> float
 var _last_tick: Dictionary = {}   # StringName -> tick di fisica dell'ultima partenza
 var _warned := false
 var _rng := RandomNumberGenerator.new()
+## La superficie dei passi (vedi step()): la imposta il prologo dal tratto, "" altrove.
+var surface: StringName = &""
 
 
 func _ready() -> void:
@@ -77,6 +82,13 @@ func play(sfx_name: StringName, pitch_jitter: float = 0.05, volume_db: float = 0
 
 func play_at(sfx_name: StringName, world_x: float, pitch_jitter: float = 0.05, volume_db: float = 0.0) -> void:
 	_play(sfx_name, _pan_slot(world_x), pitch_jitter, volume_db)
+
+
+func step(world_x: float, left: bool, volume_db: float = 0.0) -> void:
+	var n: StringName = &"step_a" if left else &"step_b"
+	if surface != &"":
+		n = StringName("step_%s_%s" % [surface, "a" if left else "b"])
+	_play(n, _pan_slot(world_x), 0.05, volume_db)
 
 
 # Alla chiusura i player si fermano, ma l'AudioServer cancella i playback solo nei cicli di mix

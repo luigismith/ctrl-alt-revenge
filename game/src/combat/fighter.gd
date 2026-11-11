@@ -350,7 +350,7 @@ func _on_anim_event(e: String) -> void:
 		_step_parity = not _step_parity
 		if level != null and level.sound_enabled:
 			# I passi dei nemici più bassi di quelli di GIG, per non coprire i colpi.
-			Sfx.play_at(&"step_a" if _step_parity else &"step_b", px, 0.05, 0.0 if team == Team.PLAYER else -6.0)
+			Sfx.step(px, _step_parity, 0.0 if team == Team.PLAYER else -6.0)
 
 
 ## Effetto chiesto da un fotogramma: polvere ai piedi, il resto sulla hitbox (o all'altezza del petto).

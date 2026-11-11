@@ -357,6 +357,7 @@ func _ready() -> void:
 	# La musica del livello, se il laboratorio ha i brani (non tocca la simulazione).
 	if sound:
 		Music.duck(false)
+		ambience.duck(false)
 		_start_music()
 	_view = Node2D.new()
 	_view.draw.connect(_draw_back)
@@ -703,6 +704,7 @@ func _sim_tick() -> void:
 	player.step(frame)
 	for e in player.events:
 		_on_event(e)
+	_step_sounds()
 	for e in hack_events:
 		_on_event(e)
 	_stage_after_step()
@@ -717,6 +719,7 @@ func _sim_tick() -> void:
 			drones.alert_pending = true
 	if not hazards.is_empty() and _hazards_tick():
 		return
+	_vedetta_hum()
 	if not drones.is_empty() and _drones_tick():
 		return
 	if not favors.is_empty():
@@ -925,6 +928,7 @@ func _lives_tick(frame: InputFrame) -> bool:
 					_overlay.game_over_ticks = 0
 				if sound:
 					Music.stop(1.0)
+					ambience.stop(1.0)
 			if _overlay != null:
 				_overlay.continue_count = continue_left
 		return true
@@ -961,6 +965,7 @@ func _open_continue() -> void:
 		_overlay.continue_count = continue_left
 	if sound:
 		Music.duck(true)
+		ambience.duck(true)
 
 
 func _continue_run() -> void:
@@ -978,6 +983,7 @@ func _continue_run() -> void:
 	if sound:
 		Sfx.play_at(&"ui_confirm", player.px)
 		Music.duck(false)
+		ambience.duck(false)
 
 
 ## Superata una ripartenza (la chiama il tratto): la spia si accende e compare RIPARTENZA.
@@ -1030,6 +1036,10 @@ func _draw_fall_dark(h: Control) -> void:
 func _exit_tree() -> void:
 	_save_recording()
 	_drop_wide_cam()
+	# Gli ambienti e la superficie dei passi sono del livello: uscendo tornano a zero.
+	Sfx.surface = &""
+	if sound:
+		ambience.stop(1.0)
 
 
 func _save_recording() -> void:
@@ -1787,6 +1797,61 @@ func _on_scene_handoff(_id: String) -> void:
 
 ## Il «Music» che la stanza usa: i test ne mettono uno finto.
 var music: Object = Music
+## L'«Ambience» (gli ambienti in loop) che la stanza usa: i test ne mettono uno finto.
+var ambience: Object = Ambience
+## Il turno delle varianti di ogni suono (sfx_variant): fuori dalla simulazione.
+var _sfx_turns: Dictionary = {}
+## Il ronzio di ogni Vedetta in volo: iid -> AudioStreamPlayer2D.
+var _hum: Dictionary = {}
+const HUM_STREAM := "res://assets/sfx/vedetta_loop.wav"
+## Il ronzio si sente fino a 480 px (due schermi), smorzato con la distanza; il pan a metà.
+const HUM_DISTANCE := 480.0
+const HUM_ATTENUATION := 1.5
+const HUM_PANNING := 0.5
+
+
+## I passi di GIG: gli eventi "step" della corsa (fotogrammi 2 e 6), coi piedi a terra, sulla superficie
+## di Sfx.surface. L'animazione è della simulazione, ma leggerne gli eventi non la cambia.
+func _step_sounds() -> void:
+	if player.anim == null:
+		return
+	for e in player.anim.take_events():
+		if e == "step" and sound and player.state == PlatformPlayer.State.GROUND:
+			_step_left = not _step_left
+			Sfx.step(player.px, _step_left)
+
+
+var _step_left := false
+
+
+## Il ronzio delle Vedette: un loop per ogni Vedetta in volo, dove sta; tace quando si rompe o quando il
+## livello cambia. Fuori dalla simulazione.
+func _vedetta_hum() -> void:
+	var seen := {}
+	if sound and _view != null:
+		for d: Drones.Drone in drones.drones:
+			if d.tipo != "vedetta" or d.broken:
+				continue
+			seen[d.iid] = true
+			var p: AudioStreamPlayer2D = _hum.get(d.iid)
+			if p == null:
+				p = AudioStreamPlayer2D.new()
+				p.stream = load(HUM_STREAM) as AudioStream
+				p.bus = &"SFX"
+				p.max_distance = HUM_DISTANCE
+				p.attenuation = HUM_ATTENUATION
+				p.panning_strength = HUM_PANNING
+				_view.add_child(p)
+				_hum[d.iid] = p
+			p.position = Vector2(d.px(), d.py() - d.size.y / 2.0)
+			if not p.playing and p.stream != null:
+				p.play()
+	for iid: String in _hum.keys():
+		if not seen.has(iid):
+			var p: AudioStreamPlayer2D = _hum[iid]
+			p.stop()
+			p.queue_free()
+			_hum.erase(iid)
 
 
 ## La musica di fondo all'ingresso nella stanza: lo slice e la stanza di prova hanno `stage1`; il prologo
@@ -2207,19 +2272,20 @@ func _on_event(e: String) -> void:
 			_say_in_game(Registri.LINE_TERE, "TERE")
 
 
-## I suoni degli eventi: salto, atterraggio, hacking e cancelli, power-up e zone tossiche. La tosse e il
-## clic del braccio a vuoto (ui_move) sono segnaposto finché car-musica non li fa.
+## I suoni degli eventi: salto, atterraggio, hacking e cancelli, power-up e zone tossiche. Un nome è un
+## file di assets/sfx; un Array di nomi sono le varianti, che si alternano a turno (EVENT_TURNS).
+## I suoni di car-musica dell'11 novembre hanno il livello in mix.json: qui 0 dB.
 const EVENT_SFX := {
-	"powerup": [&"pickup", 0.0], "powerup_fine": [&"ui_move", -4.0], "tosse": [&"body_thud", -12.0], "ko_energia": [&"ko", -2.0],
+	"powerup": [&"pickup", 0.0], "powerup_fine": [&"ui_move", -4.0], "tosse": [[&"tosse_a", &"tosse_b", &"tosse_c"], 0.0], "ko_energia": [&"ko", -2.0],
 	"jump": [&"jump", 0.0], "spinta": [&"whoosh_light", -2.0], "scatto": [&"whoosh_heavy", -2.0],
 	"land": [&"land", 0.0], "hack_start": [&"hack", 0.0], "hack_done": [&"zap", 0.0],
-	"hack_cut": [&"ui_move", -4.0], "gate_close": [&"bin_hit", -8.0],
+	"hack_cut": [&"hack_cut", 0.0], "gate_close": [[&"cancello_a", &"cancello_b"], 0.0],
 	"jab": [&"whoosh_light", -4.0], "colpito": [&"hit_medium", -2.0], "rimbalzo": [&"jump", -2.0],
-	"sigillo": [&"block", 0.0], "strappo": [&"grab", -8.0], "staccato": [&"throw", -4.0],
-	"rompe": [&"bin_break", 0.0], "braccio_a_vuoto": [&"ui_move", -6.0],
-	# La base del registro: il clic della culla, il ronzio che sale, il bip di SIDERA che diventa cyan
-	# (segnaposto finché car-musica non li fa).
-	"registro_clic": [&"grab", -4.0], "registro_ronzio": [&"hack", -6.0], "registro_lampo": [&"zap", -4.0],
+	"sigillo": [[&"sigillo_a", &"sigillo_b"], 0.0], "strappo": [&"grab", -8.0], "staccato": [&"throw", -4.0],
+	"rompe": [&"bin_break", 0.0], "braccio_a_vuoto": [[&"braccio_a_vuoto_a", &"braccio_a_vuoto_b"], 0.0],
+	# La base del registro: il clic della culla, il ronzio che sale, il bip di SIDERA che diventa cyan.
+	"registro_clic": [&"registro_clic", 0.0], "registro_ronzio": [&"registro_ronzio", 0.0],
+	"registro_lampo": [&"registro_lampo", 0.0],
 	"registro_copiato": [&"glint", -2.0],
 }
 ## Le scintille spente del braccio bloccato: un grigio appena azzurro.
@@ -2236,7 +2302,7 @@ const PROC_SFX := {"spintone": [&"body_thud", -6.0]}
 
 const DRONE_SFX := {
 	"drone_rotto": [&"bin_break", -2.0], "corazza": [&"block", -6.0], "colomba_lente": [&"glint", -6.0],
-	"spruzzo": [&"whoosh_light", -8.0], "accecato": [&"zap", -10.0], "faro_rosso": [&"ui_move", -6.0],
+	"spruzzo": [&"whoosh_light", -8.0], "accecato": [&"zap", -10.0], "faro_rosso": [&"vedetta_faro", 0.0],
 	"sirena": [&"go_arrow", -4.0], "sigillo_sparato": [&"throw", -6.0], "sigillo_muro": [&"bin_hit", -10.0],
 	"pignorato": [&"hit_light", -4.0], "abbaio": [&"hit_heavy", -6.0], "scatto_segugio": [&"whoosh_heavy", -4.0],
 	"morso": [&"hit_heavy", -2.0], "non_identificabile": [&"glint", -4.0],
@@ -2250,7 +2316,18 @@ func _event_sound(e: String) -> void:
 	var x := player.px
 	if e == "gate_close" or e == "hack_done":
 		x = _cam.x + View.W / 2.0
-	Sfx.play_at(s[0], x, 0.05, s[1])
+	Sfx.play_at(sfx_variant(e, s[0]), x, 0.05, s[1])
+
+
+## Il nome da suonare: `names` è un nome solo o un Array di varianti, prese a turno per `key`. Il turno
+## sta fuori dalla simulazione (non entra nell'hash dei replay).
+func sfx_variant(key: String, names: Variant) -> StringName:
+	if not names is Array:
+		return names
+	var list: Array = names
+	var n: int = _sfx_turns.get(key, 0)
+	_sfx_turns[key] = n + 1
+	return list[n % list.size()]
 
 
 func _spark(x: float, y: float, sx: float, sy: float, life: int, color: Color, burst: bool = false) -> void:

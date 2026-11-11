@@ -82,6 +82,7 @@ func quit_clean(code: int = 0) -> void:
 	_quitting = true
 	Sfx.silence()
 	Music.silence()
+	Ambience.silence()
 	for i in 10:
 		await get_tree().process_frame
 	get_tree().quit(code)

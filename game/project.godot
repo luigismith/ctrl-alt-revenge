@@ -22,6 +22,7 @@ Controls="*res://src/core/controls.gd"
 Game="*res://src/core/game.gd"
 Sfx="*res://src/audio/sfx.gd"
 Music="*res://src/audio/music_director.gd"
+Ambience="*res://src/audio/ambience.gd"
 AttackDirector="*res://src/combat/attack_director.gd"
 
 [debug]

@@ -24,6 +24,7 @@
   {"fai": "murale", "id": "prologo/mp11_garage", "centro": [418, 200], "zoom": 3, "tick": 150},
   {"fai": "attendi", "tick": 40},
 
+  {"fai": "suono", "nome": "riavvio_ronzio", "vol": 0},
   {"fai": "murale", "chiudi": true, "rivela_tick": 70}
  ]
 }

@@ -1,4 +1,7 @@
 # Audio ammesso nel repo pubblico (pattern fnmatch sul percorso).
 # Ogni voce deve avere anche la licenza in REUSE.toml.
-# Effetti sonori montati da tools/audio/sfx_pack.py da suoni CC0 e CC BY 4.0 (LicenseRef-CAR-Assets; fonti in THIRD-PARTY-NOTICES.md):
+# Effetti sonori (LicenseRef-CAR-Assets; fonti in THIRD-PARTY-NOTICES.md): montati da tools/audio/sfx_pack.py da suoni CC0 e CC BY 4.0,
+# oppure sintetizzati senza campioni di terzi da tools/audio/amb_gen.py (passi per superficie) e tools/audio/eventi_gen.py (eventi del prologo):
 game/assets/sfx/*.wav
+# Ambienti in loop (OGG q4), sintetizzati da tools/audio/amb_gen.py, LicenseRef-CAR-Assets:
+game/assets/sfx/amb/*.ogg

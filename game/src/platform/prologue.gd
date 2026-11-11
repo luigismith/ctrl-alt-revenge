@@ -163,6 +163,25 @@ const MUSIC_B4_X := 3360
 ## ha il suo momento.
 const MUSIC_RIAVVIO_TICKS := 300
 
+## Gli ambienti in loop di ogni luogo (car-musica, `effetti-nel-gioco.md` §2): gli strati, ognuno coi
+## suoi dB in più o in meno, e la superficie dei passi di GIG. Cambiare un ambiente è cambiare un valore.
+## Il livello degli strati è nei file; il bus AMB li tiene sotto la musica (ambience.gd).
+const AMBIENCE := {
+	"cimitero": {"strati": {"amb_cimitero": 0.0}, "passi": "pietra"},           # A1-A4, asciutto
+	"prime_gocce": {"strati": {"amb_cimitero": 0.0, "amb_pioggia_prime": 0.0}, "passi": "bagnato"},
+	"ricovero": {"strati": {"amb_cantine": -6.0}, "passi": "interno"},          # S1
+	"pioggia_rider": {"strati": {"amb_pioggia_piena": 0.0, "rider_passi_loop": 0.0}, "passi": "bagnato"},
+	"pioggia": {"strati": {"amb_pioggia_piena": 0.0}, "passi": "bagnato"},      # davanti al garage, il tetto
+	"cantine": {"strati": {"amb_cantine": 0.0}, "passi": "interno"},
+	"garage": {"strati": {"amb_garage": 0.0}, "passi": "interno"},
+}
+## Dove non c'è musica gli ambienti salgono un poco: sono l'unica cosa che si sente.
+const AMB_SENZA_MUSICA_DB := 4.0
+const AMB_FADE := 1.5
+## Il tuono lontano dopo CANC (sceneggiatura, «Il terzo tasto»: «Poi un tuono, lontano»), al tick della
+## vignetta del naso.
+const TUONO_T := 45
+
 const C_VIGNETTE := Color8(18, 16, 24)
 const C_INK := Color8(240, 232, 210)
 ## La vecchia tastiera beige del padre, sul banco.
@@ -215,6 +234,8 @@ var door_closed: bool = false
 var _music_key: String = ""
 ## Tick che restano del brano del risveglio (MUSIC_RIAVVIO_TICKS dalla scarica del riavvio).
 var _music_riavvio: int = 0
+## L'ambiente che suona adesso (AMBIENCE, più "+" se senza musica); "" = da applicare.
+var _amb_key: String = ""
 ## Tick che mancano prima che gli Esattori sfondino la porta (-1 = non bussano).
 var door_t: int = -1
 ## Piove da quando arrivano gli Esattori (decisione 54).
@@ -223,6 +244,8 @@ var _door_cells: Array[Vector2i] = []
 ## I cancelli delle entità Cancello ({iid, cells, rect, colore, open}) e le leve ({iid, px, apre}).
 ## Le leve tirate restano tirate nelle ripartenze dello stesso livello.
 var _gates2: Array[Dictionary] = []
+## Le serrande alzate a mano già su (_gate_sounds), per iid.
+var _gates_up: Dictionary = {}
 var _levers: Array[Dictionary] = []
 var pulled: PackedStringArray = []
 ## Il tempo (solo disegno): il cielo che si chiude, la pioggia, la luce sugli attori.
@@ -1070,6 +1093,7 @@ func _read_level_things() -> void:
 	for p: Vector2i in grid.marks.get("/", []):
 		_door_cells.append(Vector2i(p.x / SolidGrid.TILE, p.y / SolidGrid.TILE - 1))
 	_gates2.clear()
+	_gates_up.clear()
 	_levers.clear()
 	pulled.clear()
 	_interiors.clear()
@@ -1134,6 +1158,23 @@ func _apply_gates() -> void:
 
 func _on_favor_opened() -> void:
 	_apply_gates()
+
+
+## La serranda che una Persona alza a mano (il fruttivendolo, la cantina) suona quando si disegna aperta,
+## non al «grazie». Un cancello visto per la prima volta non suona (ripartenze, cambio di livello).
+## Fuori dalla simulazione.
+## Dà i cancelli che si sono alzati adesso (per i test), anche senza suono.
+func _gate_sounds() -> Array[String]:
+	var went: Array[String] = []
+	for g in _gates2:
+		var iid := String(g["iid"])
+		var up: bool = g["open"] and favors.is_open(iid) and favors.lifted(iid)
+		if up and _gates_up.has(iid) and not _gates_up[iid] and not (g["cells"] as Array).is_empty():
+			went.append(iid)
+			if sound:
+				Sfx.play_at(&"serranda", (g["cells"][0] as Vector2i).x * SolidGrid.TILE, 0.0)
+		_gates_up[iid] = up
+	return went
 
 
 ## Dove non piove: negli interni del livello, e dentro il garage se il livello ha la porta; non sotto le
@@ -1293,6 +1334,7 @@ func _reset() -> void:
 	# Alla ripartenza la musica si decide da capo dal tratto in cui si riparte.
 	_music_key = ""
 	_music_riavvio = 0
+	_amb_key = ""
 	if grid == null or _door_cells.is_empty() and grid.marks.has("/"):
 		super._reset()
 		return
@@ -1394,6 +1436,8 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 		return InputFrame.new(InputFrame.RIGHT | (InputFrame.JUMP if outro_jump else 0), 0)
 	if vignette != "":
 		vignette_t += 1
+		if vignette == "naso" and vignette_t == TUONO_T and sound:
+			Sfx.play(&"tuono_lontano_a", 0.02)
 		var close := vignette_t >= VIGNETTE_MAX or vignette_t >= VIGNETTE_MIN and (
 			frame.was_pressed(InputFrame.JUMP) or frame.was_pressed(InputFrame.ATTACK))
 		if close:
@@ -1453,6 +1497,7 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 
 
 func _stage_after_step() -> void:
+	_gate_sounds()
 	_music_update()
 	if finished or switch_t > 0:
 		return
@@ -1628,6 +1673,7 @@ func _music_update() -> void:
 		return
 	_music_riavvio = maxi(_music_riavvio - 1, 0)
 	_music_apply()
+	_ambience_apply()
 
 
 ## Suona il brano del tratto di adesso, se non è già quello.
@@ -1650,10 +1696,58 @@ func _music_apply() -> void:
 ## suo brano si ferma invece di restare acceso sul gioco).
 func scene_music_end(_prev: StringName) -> void:
 	_music_key = ""
+	_amb_key = ""
 	# La scena del ricordo del 2064 finisce sulla scarica del riavvio: da lì suona `riavvio`.
 	if _reboot_fx_pending:
 		_music_riavvio = MUSIC_RIAVVIO_TICKS
 	_music_apply()
+	_ambience_apply()
+
+
+## L'ambiente del luogo (AMBIENCE): "" = niente (il prologo di prima, il passaggio al capitolo 1).
+## Legge solo lo stato, come _music_tratto.
+func _amb_luogo() -> String:
+	var tratto := _music_tratto()
+	match tratto:
+		"vecchio", "passaggio":
+			return ""
+		"S1":
+			return "ricovero"
+		"A1", "A2_A5", "arena":
+			return "prime_gocce" if raining else "cimitero"
+		"A6", "B1", "B2", "B3":
+			return "pioggia_rider"
+		"B2_cantine":
+			return "cantine"
+		"B4_porta", "naso", "riavvio":
+			return "garage"
+	# B4 a porta aperta e i colpi alla porta: dentro il garage, o fuori sotto la pioggia (il tetto).
+	return "garage" if _inside_garage() else "pioggia"
+
+
+## Gli strati dell'ambiente, coi dB in più dove la musica tace: {nome: dB}.
+func _amb_for(luogo: String, with_music: bool) -> Dictionary:
+	var out := {}
+	var row: Dictionary = AMBIENCE.get(luogo, {})
+	var layers: Dictionary = row.get("strati", {})
+	for k: String in layers:
+		out[StringName(k)] = float(layers[k]) + (0.0 if with_music else AMB_SENZA_MUSICA_DB)
+	return out
+
+
+## Se il luogo è cambiato, cambiano gli strati in loop e la superficie dei passi.
+func _ambience_apply() -> void:
+	if not sound and ambience == Ambience:
+		return
+	var luogo := _amb_luogo()
+	var with_music: bool = _music_for(_music_tratto())["brano"] != &""
+	var key := luogo + ("" if with_music else "+")
+	if key == _amb_key:
+		return
+	_amb_key = key
+	var row: Dictionary = AMBIENCE.get(luogo, {})
+	Sfx.surface = StringName(str(row.get("passi", "")))
+	ambience.play(_amb_for(luogo, with_music), AMB_FADE)
 
 
 ## La pioggia si vede: fuori dalle scene sempre, quando piove; in una scena da quando il cielo si
@@ -1703,17 +1797,30 @@ func _stage_hash() -> Array:
 
 
 ## I suoni del prologo, poi quelli della stanza.
+## I suoni di car-musica dell'11 novembre hanno il livello in mix.json: qui 0 dB. Un Array di nomi sono
+## varianti a turno (sfx_variant). I tasti del riavvio e gli ultimi colpi alla porta li sceglie
+## _event_sound.
 const PROLOGUE_SFX := {
-	"keyboard": [&"ui_confirm", -2.0], "reboot_key": [&"ui_move", 0.0], "reboot": [&"zap", 0.0],
-	"door_close": [&"bin_hit", -4.0], "door_bang": [&"body_thud", -3.0], "door_break": [&"bin_break", 0.0],
+	"keyboard": [&"spinotto", 0.0], "reboot_key": [&"tasto_ctrl", 0.0], "reboot": [&"riavvio_scarica", 0.0],
+	"door_close": [&"bin_hit", -4.0], "door_bang": [[&"porta_colpo_a", &"porta_colpo_b"], 0.0],
+	"door_break": [&"porta_sfondata", 0.0],
 	"prologue_end": [&"go_arrow", 0.0], "lever": [&"ui_confirm", -2.0], "level_exit": [&"go_arrow", -2.0],
 }
+## I tasti del riavvio, dal passo a cui si arriva premendoli: CTRL, ALT, CANC.
+const REBOOT_KEY_SFX := {2: &"tasto_ctrl", 3: &"tasto_alt", 4: &"tasto_canc"}
+## Gli ultimi colpi prima che la porta ceda (door_t sotto questi tick) sono i più forti.
+const DOOR_BANG_LAST := 120
 
 
 func _event_sound(e: String) -> void:
 	if sound and PROLOGUE_SFX.has(e):
 		var s: Array = PROLOGUE_SFX[e]
-		Sfx.play_at(s[0], player.px, 0.05, s[1])
+		var n := sfx_variant(e, s[0])
+		if e == "reboot_key":
+			n = REBOOT_KEY_SFX.get(reboot_step, n)
+		elif e == "door_bang" and door_t <= DOOR_BANG_LAST:
+			n = &"porta_colpo_c"
+		Sfx.play_at(n, player.px, 0.05, s[1])
 		return
 	super._event_sound(e)
 

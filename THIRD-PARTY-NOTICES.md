@@ -11,11 +11,13 @@ Ogni voce indica la fonte, la licenza e il credito. Chi aggiunge un pack o un fo
 
 Gli effetti sonori in `game/assets/sfx/` li monta `tools/audio/sfx_pack.py` da suoni già pronti: taglio, intonazione, filtri, strati sovrapposti, saturazione e livelli. I file di partenza non sono in questo repository: restano nel laboratorio (`sources/sfx/`).
 
+Gli altri suoni sono sintetizzati da codice nostro, senza campioni di terzi, e non hanno fonti da citare: gli ambienti in loop (`game/assets/sfx/amb/`) e i passi per superficie (`step_pietra_*`, `step_bagnato_*`, `step_interno_*`) da `tools/audio/amb_gen.py`; gli eventi del prologo (porte, tuono, riavvio, registro, tasti, Vedetta, rider, laser, sigillo, serranda, cancello, tosse, braccio a vuoto) da `tools/audio/eventi_gen.py`.
+
 - **Kenney**: Impact Sounds, Interface Sounds, RPG Audio e Sci-Fi Sounds.
   - Licenza CC0 1.0; il credito "Kenney" è gradito ma non obbligatorio.
   - https://kenney.nl/assets/impact-sounds, https://kenney.nl/assets/interface-sounds, https://kenney.nl/assets/rpg-audio, https://kenney.nl/assets/sci-fi-sounds
 - **Freesound**, suoni singoli CC0 1.0 (la pagina di ognuno è `https://freesound.org/s/<ID>/`): 389590 (whoosh_light), 475135 (whoosh_heavy), 507466 (throw), 667271 (grab), 504626 (body_fall), 540272 (land), 545238 (glint), 512471 (zap), 498434 (bin_break), 816237 (pickup).
-- **rubberduck, "100 CC0 SFX #2"** (OpenGameArt): i passi bagnati.
+- **rubberduck, "100 CC0 SFX #2"** (OpenGameArt): i passi di base (`step_a`, `step_b`).
   - Licenza CC0 1.0.
   - https://opengameart.org/content/100-cc0-sfx-2
 - **AntumDeluge, "Thwack Sounds"** (OpenGameArt): la parata.

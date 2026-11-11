@@ -82,6 +82,11 @@ func run(tree_root: Node) -> bool:
 	_test_scene_voices()
 	_test_line_queue()
 	_test_prologue_music()
+	_test_prologue_music_start_x()
+	_test_sfx_names()
+	_test_prologue_ambience()
+	_test_sfx_variant()
+	_test_sprite_soles()
 	_test_scene_thoughts()
 	_test_scene_mural()
 	_test_scene_writing()
@@ -3172,6 +3177,174 @@ class FakeMusic extends RefCounted:
 		return cur
 
 
+## Un Ambience finto: ricorda gli strati chiesti.
+class FakeAmbience extends RefCounted:
+	var cur: Dictionary = {}
+	var log: Array = []
+
+	func play(layers: Dictionary, _fade_s: float = 1.5) -> void:
+		cur = layers.duplicate()
+		log.append(cur)
+
+	func stop(fade_s: float = 1.5) -> void:
+		play({}, fade_s)
+
+	func duck(_on: bool) -> void:
+		pass
+
+
+## Ogni suono nominato dalle tabelle esiste: i WAV su disco e in mix.json, gli strati degli ambienti con
+## Ambience.has_layer (OGG in assets/sfx/amb, o il loop WAV).
+func _test_sfx_names() -> void:
+	var mix: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/sfx/mix.json"))["gain_db"]
+	var names: Array = []
+	for table: Dictionary in [TestRoom.EVENT_SFX, TestRoom.DRONE_SFX, Prologue.PROLOGUE_SFX]:
+		for k: String in table:
+			var n: Variant = table[k][0]
+			names.append_array(n if n is Array else [n])
+	names.append_array(Prologue.REBOOT_KEY_SFX.values())
+	names.append_array([&"porta_colpo_c", &"tuono_lontano_a", &"serranda", &"riavvio_ronzio"])
+	for luogo: String in Prologue.AMBIENCE:
+		var surf := str(Prologue.AMBIENCE[luogo]["passi"])
+		names.append_array([StringName("step_%s_a" % surf), StringName("step_%s_b" % surf)])
+	var bad := []
+	for n: StringName in names:
+		if not ResourceLoader.exists("res://assets/sfx/%s.wav" % n) or not mix.has(String(n)):
+			bad.append(n)
+	if not ResourceLoader.exists(TestRoom.HUM_STREAM):
+		bad.append(TestRoom.HUM_STREAM)
+	for luogo: String in Prologue.AMBIENCE:
+		for layer: String in Prologue.AMBIENCE[luogo]["strati"]:
+			if not Ambience.has_layer(StringName(layer)):
+				bad.append(layer)
+	check(bad.is_empty() and names.size() > 40, "Effetti: ogni suono e ogni ambiente delle tabelle ha il suo file",
+		"mancano %s" % str(bad))
+
+
+## Gli ambienti del prologo (Prologue.AMBIENCE): gli strati cambiano col luogo, salgono dove la musica
+## tace, la superficie dei passi segue; lo stesso luogo non li richiede due volte.
+func _test_prologue_ambience() -> void:
+	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	room.music = FakeMusic.new()
+	var fake := FakeAmbience.new()
+	room.ambience = fake
+	var got := {}
+	var surf := {}
+	var at := func(tag: String) -> void:
+		room._ambience_apply()
+		got[tag] = fake.cur.duplicate()
+		surf[tag] = Sfx.surface
+	room.player.place(200, 680)
+	at.call("A1")
+	var calls := fake.log.size()
+	room._ambience_apply()
+	var same_once := fake.log.size() == calls
+	room.raining = true
+	at.call("A1_pioggia")
+	room.raining = false
+	room.player.place(2680, 670)
+	at.call("S1")
+	room.player.place(5600, 680)
+	at.call("A6")
+	room._enter_level(1)
+	room.player.place(300, 680)
+	at.call("B1")
+	room.player.place(1500, 800)
+	at.call("cantine")
+	room.player.place(3500, 680)
+	room._set_door(true)
+	at.call("porta")
+	var want := {
+		"A1": {&"amb_cimitero": 0.0},
+		"A1_pioggia": {&"amb_cimitero": 0.0, &"amb_pioggia_prime": 0.0},
+		"S1": {&"amb_cantine": -2.0},
+		"A6": {&"amb_pioggia_piena": 4.0, &"rider_passi_loop": 4.0},
+		"B1": {&"amb_pioggia_piena": 0.0, &"rider_passi_loop": 0.0},
+		"cantine": {&"amb_cantine": 4.0},
+		"porta": {&"amb_garage": 4.0},
+	}
+	var want_surf := {"A1": &"pietra", "A1_pioggia": &"bagnato", "S1": &"interno", "A6": &"bagnato",
+		"B1": &"bagnato", "cantine": &"interno", "porta": &"interno"}
+	var bad := []
+	for k: String in want:
+		if str(got.get(k)) != str(want[k]) or surf.get(k) != want_surf[k]:
+			bad.append("%s: %s %s" % [k, got.get(k), surf.get(k)])
+	check(bad.is_empty() and same_once, "Effetti: gli ambienti del prologo cambiano col luogo, +4 dB senza musica, passi giusti",
+		"%s, una volta sola %s" % [str(bad), same_once])
+	Sfx.surface = &""
+	room.free()
+
+
+## Le varianti a turno (TestRoom.sfx_variant): a, b, a; un nome solo resta quello.
+func _test_sfx_variant() -> void:
+	var room := TestRoom.new()
+	var seq := [room.sfx_variant("x", [&"a", &"b"]), room.sfx_variant("x", [&"a", &"b"]),
+		room.sfx_variant("x", [&"a", &"b"]), room.sfx_variant("y", [&"a", &"b"]), room.sfx_variant("z", &"solo")]
+	check(seq == [&"a", &"b", &"a", &"a", &"solo"], "Effetti: le varianti dei suoni si alternano", str(seq))
+	room.free()
+
+
+## Il prologo nuovo lanciato con --start-x e la musica accesa: TestRoom._ready chiama _start_music prima
+## di creare GIG, e Prologue._music_tratto leggeva player.px su null. Ora il brano lo sceglie il primo tick.
+func _test_prologue_music_start_x() -> void:
+	Game.reset_run()
+	Game.registri.clear()
+	SpriteSheet.clear_cache()
+	var old_x := Game.options.start_x
+	var old_y := Game.options.start_y
+	Game.options.start_x = 1500.0
+	Game.options.start_y = -1.0
+	var room := Prologue.new()
+	room.map_file = Prologue.PROLOGUE_MAP
+	var pilot := RoomPilot.new()
+	room.configure({"input": PlayerInput.from_provider(pilot.decide, pilot), "pilot": pilot, "sound": true})
+	var fake := FakeMusic.new()
+	room.music = fake
+	root.add_child(room)
+	room.set_physics_process(false)
+	var ready_ok := room.player != null and room.player.px == 1500
+	room._sim_tick()
+	check(ready_ok and room._music_key == "A2_A5" and fake.cur == &"lumini",
+		"Musica: il prologo nuovo parte da --start-x senza errori e suona il brano del tratto (A2-A5 a x 1500)",
+		"player %s, tratto %s, brano %s" % [room.player != null, room._music_key, fake.cur])
+	Game.options.start_x = old_x
+	Game.options.start_y = old_y
+	room.free()
+
+
+## Le suole (data/sprites/suole.json): ogni foglio della tabella esiste e ha i valori giusti per le sue
+## animazioni; l'ancora e i punti si alzano, hurt e hit no (la logica non cambia); appeso, niente.
+func _test_sprite_soles() -> void:
+	SpriteSheet.clear_cache()
+	var table := SpriteSheet.soles_table()
+	var bad := []
+	for sid: String in table:
+		var s := SpriteSheet.get_sheet(StringName(sid))
+		if s.source != SpriteSheet.Source.REAL:
+			bad.append("%s non è un foglio vero" % sid)
+		for w in s.warnings:
+			if w.begins_with("suole:"):
+				bad.append("%s %s" % [sid, w])
+	check(not table.is_empty() and bad.is_empty(), "Suole: la tabella copre fogli veri, con un valore per fotogramma", str(bad))
+	var gig := SpriteSheet.get_sheet(&"gig")
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(gig.json_path))
+	var raw_idle: Dictionary = raw["animations"]["idle"]["frames"][0]
+	var raw_run: Dictionary = raw["animations"]["run"]["frames"][2]
+	var idle := gig.clip(&"idle").frames[0]
+	var run := gig.clip(&"run").frames[2]
+	var hang := gig.clip(&"ledge_hang").frames[0]
+	var raw_hang: Dictionary = raw["animations"]["ledge_hang"]["frames"][0]
+	var hurt0: Array = raw_idle["hurt"][0]
+	check(idle.lift == 3 and idle.anchor.y == int(raw_idle["anchor"][1]) + 3
+		and idle.hurt[0] == Rect2i(hurt0[0], hurt0[1], hurt0[2], hurt0[3])
+		and idle.points["head"].y == int(raw_idle["points"]["head"][1]) - 3
+		and run.lift == -3 and run.anchor.y == int(raw_run["anchor"][1]) - 3
+		and hang.lift == 0 and hang.anchor.y == int(raw_hang["anchor"][1]),
+		"Suole: GIG fermo si alza di 3 px (ancora e punti, non le hurtbox), la corsa per fotogramma, appeso resta",
+		"idle %d/%s, run %d, hang %d" % [idle.lift, idle.anchor, run.lift, hang.lift])
+	SpriteSheet.clear_cache()
+
+
 ## La musica del prologo nuovo (Prologue._music_for): per ogni tratto il brano della tabella, il tratto
 ## giusto dallo stato, la ripartenza in A1 senza `stage1`, e la fine del ricordo di Mimmo che ferma `lumini`.
 func _test_prologue_music() -> void:
@@ -4534,6 +4707,10 @@ func _test_prologue_v2() -> void:
 			and b0.get("serranda_chiusa", false) and not b0.get("serranda_aperta", true),
 		"Prologo v2: in B la bici ha il sigillo e la serranda è chiusa", str(b0))
 	# Il fruttivendolo ringrazia (la sua Vedetta è rotta): apre la serranda e la bici è libera.
+	# La serranda suona quando si alza davvero (_gate_sounds), non al «grazie»; la prima volta che un
+	# cancello si vede non suona.
+	var gs_first := room._gate_sounds()
+	var gs_again := room._gate_sounds()
 	var fr: Favors.Person = null
 	for q in room.favors.persone:
 		if q.ringrazia.begins_with("fruttivendolo"):
@@ -4544,6 +4721,7 @@ func _test_prologue_v2() -> void:
 			room.favors.opened.append(str(pr))
 	room._apply_gates()
 	room._update_gallery()
+	var gs_thanks := room._gate_sounds()
 	var b_thanks := room.gallery_state()
 	# La botola la alza lui: si vede aperta dal fotogramma della posa in cui l'anta è sopra la testa.
 	var lift := -1
@@ -4554,11 +4732,24 @@ func _test_prologue_v2() -> void:
 			lift += fs.clip(&"botola").frames[i].ticks
 		fr.thanked_t = lift - 1
 		room._update_gallery()
+	var gs_half := room._gate_sounds()
 	var b_half := room.gallery_state()
 	if fr != null:
 		fr.thanked_t = lift
 	room._update_gallery()
+	var gs_up := room._gate_sounds()
+	var gs_after := room._gate_sounds()
 	var b1 := room.gallery_state()
+	var gs_iid := ""
+	if fr != null:
+		for g: Dictionary in room._gates2:
+			if String(g["iid"]) in fr.premio:
+				gs_iid = String(g["iid"])
+	check(gs_iid != "" and gs_first.is_empty() and gs_again.is_empty() and gs_thanks.is_empty()
+			and gs_half.is_empty() and gs_up == [gs_iid] and gs_after.is_empty(),
+		"Prologo v2: la serranda suona una volta sola, quando il fruttivendolo la alza",
+		"prima %s %s, grazie %s, a metà %s, alzata %s, dopo %s" % [gs_first, gs_again, gs_thanks, gs_half,
+			gs_up, gs_after])
 	check(fr != null and b1.get("bici_libera", false) and not b1.get("bici_sigillo", true)
 			and b1.get("serranda_aperta", false) and not b1.get("serranda_chiusa", true)
 			and b_thanks.get("serranda_chiusa", false) and b_half.get("serranda_chiusa", false) and lift > 0,

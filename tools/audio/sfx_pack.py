@@ -18,6 +18,9 @@ gli stessi livelli di loudness di sfx_gen.
   python -I tools/audio/sfx_pack.py                 # monta in tools/audio/out/sfx_pack/ e controlla
   python -I tools/audio/sfx_pack.py --install       # e copia in game/assets/sfx/
 
+In game/assets/sfx/mix.json --install aggiorna solo le righe di questo pacchetto: quelle di amb_gen.py
+e di eventi_gen.py restano. I guadagni in MIX_FISSO vincono sulla formula.
+
 I file .wav.import già presenti nel gioco non si toccano (tengono il loro uid); per i suoni nuovi
 si scrive quello standard (PCM 16 bit, niente loop).
 """
@@ -70,6 +73,9 @@ FONTI_SFX = {
 # Nomi: quelli di sfx_gen più i due nuovi della stanza di prova.
 NAMES = G.NAMES + ["block", "hack"]
 MIX_TARGET = dict(G.MIX_TARGET, block=-11.5, hack=-15.0)
+# Guadagni fissi, che vincono sulla formula. 11 novembre 2026: il limitatore del Master lavorava di
+# continuo (true peak -0,3 dBFS nel video degli effetti del prologo); land, a ogni atterraggio, era il primo.
+MIX_FISSO = {"land": -6.0, "jump": -6.0}
 # Suoni a cui si dà lo schiocco: saturazione morbida (drive) dopo il missaggio degli strati.
 DRIVE = {"hit_light": 2.2, "hit_medium": 2.6, "hit_heavy": 4.5, "hit_kick": 4.0, "knee": 4.0, "ko": 3.5,
          "body_thud": 3.0, "body_fall": 2.0, "block": 4.0, "bin_hit": 2.5}
@@ -201,12 +207,31 @@ def check(name: str, x: np.ndarray) -> list[str]:
     return errs
 
 
+def merged_mix(out: Path) -> str:
+    """mix.json del gioco con le righe di questo pacchetto aggiornate: le righe degli altri script
+    (amb_gen, eventi_gen) restano dove sono, con i loro valori."""
+    ours = json.loads((out / "mix.json").read_text(encoding="utf-8"))
+    path = GAME_SFX / "mix.json"
+    if not path.exists():
+        return json.dumps(ours, indent=1, ensure_ascii=False) + "\n"
+    text = path.read_text(encoding="utf-8")
+    doc = json.loads(text)
+    if json.dumps(doc, indent=1, ensure_ascii=False) + "\n" != text:
+        raise RuntimeError("mix.json non è nel formato atteso: riscriverlo cambierebbe altre righe")
+    doc["gain_db"].update(ours["gain_db"])
+    return json.dumps(doc, indent=1, ensure_ascii=False) + "\n"
+
+
 def install(out: Path) -> None:
-    """Copia WAV e mix.json; l'import solo per i suoni che nel gioco non ci sono ancora."""
+    """Copia i WAV e unisce le righe in mix.json; l'import solo per i suoni che nel gioco non ci sono ancora."""
     GAME_SFX.mkdir(parents=True, exist_ok=True)
     moves = []
+    mix_text = merged_mix(out)
+    t = GAME_SFX / "mix.json.tmp_install"
+    t.write_text(mix_text, encoding="utf-8", newline="\n")
+    moves.append((t, GAME_SFX / "mix.json"))
     for p in sorted(out.iterdir()):
-        if p.suffix == ".wav" or p.name == "mix.json" or (p.name.endswith(".wav.import") and not (GAME_SFX / p.name).exists()):
+        if p.suffix == ".wav" or (p.name.endswith(".wav.import") and not (GAME_SFX / p.name).exists()):
             t = GAME_SFX / (p.name + ".tmp_install")
             t.write_bytes(p.read_bytes())
             moves.append((t, GAME_SFX / p.name))
@@ -234,7 +259,7 @@ def main() -> int:
         if errs:
             problems.append(f"{name}: " + "; ".join(errs))
         fl = G.fast_loudness(x)
-        mix[name] = min(0.0, round((MIX_TARGET[name] - fl) * 2) / 2)
+        mix[name] = MIX_FISSO.get(name, min(0.0, round((MIX_TARGET[name] - fl) * 2) / 2))
         print(f"{name:13s} {len(x) / SR * 1000:5.0f} {fl:6.1f} {al.spectral_centroid(x, SR):6.0f} {mix[name]:5.1f}")
         al.write_wav16(a.out / f"{name}.wav", x, SR)
         (a.out / f"{name}.wav.import").write_text(G.IMPORT_TEMPLATE, encoding="utf-8", newline="\n")

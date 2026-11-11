@@ -209,7 +209,7 @@ Il trailer è un’eccezione: lì i murales e due scene d’arena sono animati c
 - [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro del nostro render da cui è ridipinta la strada del capitolo 2).
 - [Mesh2Motion](https://github.com/Mesh2Motion/mesh2motion-app): le animazioni del calcio circolare di GIG.
 - [Kenney](https://kenney.nl/assets/city-kit-roads): City Kit Roads 2.2, il cassonetto dello stesso render.
-- Suoni CC0 di [Kenney](https://kenney.nl) (Impact, Interface, RPG e Sci-Fi Sounds), di [Freesound](https://freesound.org) e di rubberduck e AntumDeluge (OpenGameArt): da lì sono montati e ritoccati gli effetti sonori.
+- Suoni CC0 di [Kenney](https://kenney.nl) (Impact, Interface, RPG e Sci-Fi Sounds), di [Freesound](https://freesound.org) e di rubberduck e AntumDeluge (OpenGameArt): da lì sono montati e ritoccati i colpi, i salti e l'interfaccia. Ambienti, passi per superficie ed eventi del prologo sono invece sintetizzati dai nostri script, senza campioni di terzi.
 - [DavidW, «Punch SFX»](https://opengameart.org/content/punch-sfx), CC BY 4.0, modificato: uno strato dei colpi pesanti e del KO. Qui il credito è obbligatorio.
 
 **Strumenti liberi e gratuiti:** Godot Engine 4.7.2 (MIT), Blender 4.5 LTS (GPL-3.0-or-later), LDtk 1.5.3 (MIT, l’editor dei livelli), FFmpeg 9.0 (GPL-3.0, per audio, catture e video), Python 3.14 con NumPy, Pillow e SciPy.
