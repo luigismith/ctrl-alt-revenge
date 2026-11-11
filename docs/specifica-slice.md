@@ -2,9 +2,11 @@
 
 Versione 3 · 4 novembre 2026, aggiornata dopo le correzioni dei verificatori: descrive i file e le regole come sono davvero nello slice. È il contratto comune tra chi produce grafica, suoni e codice dello slice. Se qualcosa qui è sbagliato o impossibile, si corregge prima questo file e poi il resto.
 
+> **Nota, 11 novembre 2026.** Questa specifica vale solo per lo slice e per il suo combattimento. Nel gioco di oggi lo slice è il capitolo 2, "Il Wind Day": "Sotto la Linea" è il nome di prima, rimasto nei file. Il motore platform, il prologo, i livelli LDtk, i filmati a murale e le voci sono nati dopo e qui non ci sono: vedi `docs/ldtk.md`, `docs/piano.md` e il README.
+
 ## 1. Obiettivo e decisioni
 
-Uno slice giocabile del livello 1, "Sotto la Linea": un tratto di strada notturna sotto la ferrovia sopraelevata e un'arena finale. Contiene GIG, due tipi di Thug (il punk e il bruto), combattimento con peso, interfaccia, effetti sonori e un brano in loop.
+Uno slice giocabile, "Sotto la Linea" (nel gioco di oggi è la strada del capitolo 2, "Il Wind Day"): un tratto di strada notturna sotto la ferrovia sopraelevata e un'arena finale. Contiene GIG, due tipi di Thug (il punk e il bruto), combattimento con peso, interfaccia, effetti sonori e un brano in loop.
 
 Decisioni di Luigi del 3 novembre 2026:
 
@@ -16,7 +18,7 @@ Decisioni di Luigi del 3 novembre 2026:
   - dal 4 novembre, su richiesta di Luigi, la mano destra è nuda, con una fascia blu sottile al polso: sulla locandina c'erano le fasce da boxe.
 
   In più ha il braccio sinistro cibernetico (metallo scuro con anelli cyan luminosi) e un occhio cyan che brilla: quello rivolto alla telecamera.
-- **Genere**: picchiaduro a scorrimento con profondità, nello stile di Streets of Rage, con elementi platform leggeri: salto sopra un ostacolo pericoloso.
+- **Genere** (superato il 4 novembre 2026: vedi sotto): picchiaduro a scorrimento con profondità, nello stile di Streets of Rage, con elementi platform leggeri: salto sopra un ostacolo pericoloso.
 
 Direzione di Luigi del 4 novembre 2026, che vale per il gioco completo:
 
@@ -29,7 +31,7 @@ Direzione di Luigi del 4 novembre 2026, che vale per il gioco completo:
   Luigi: "non è più un picchiaduro".
 - **Storia:** introduzione e intermezzi a fumetto a schermo intero, in pixel art: i murales di Totò. La storia è privata e sta fuori dal repo pubblico.
 - **Grafica, dopo la prova del cel shading.** La prova è nel laboratorio, in `prove-cel-shading`: tre giudici ciechi, voto medio 6,1 contro 5,5 della v7.
-  - **Sprite:** cel a 2 toni, con un terzo tono solo dove serve ai volumi.
+  - **Sprite:** cel a 2 toni, con un terzo tono solo dove serve ai volumi (dall'8 novembre 2026 i toni sono 4: vedi §4).
   - **Sfondi:** a 3 toni, senza retino.
   - **Luci:** restano quelle morbide di oggi, con un tetto ai toni chiari e il contorno scuro escluso dalla luce.
   - **Quando:** si integra insieme alla figura nuova di GIG, da ex pugile a V, in una sola rigenerazione.
@@ -81,7 +83,7 @@ Scelte tecniche già fissate:
 
 È il contratto tra grafica e codice. Ogni personaggio ha una cartella `game/assets/sprites/<id>/` con questi file:
 
-- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine; al massimo 30 colori. Dal 4 novembre 2026 gli sprite sono in cel shading (blocco `pixel_cfg.cel` dei JSON in `tools/sprites/chars/`): due toni per materiale, ombra e luce, più un terzo tono solo dove serve ai volumi (tono medio su giacca e pelle, e sui pantaloni di GIG; luce piena sui pantaloni dei nemici; riflesso sul metallo del braccio cyber). GIG ha 26 colori, punk e bruto 20.
+- `<id>.png`: atlante RGBA con i fotogrammi impacchettati, senza spazio sprecato oltre 1 px di margine; al massimo 48 colori. Gli sprite sono in cel shading (blocco `pixel_cfg.cel` dei JSON in `tools/sprites/chars/`): dall'8 novembre 2026 pelle, stoffa e stivali hanno 4 toni. GIG ha 44 colori, il punk 43, il bruto 40.
 - `<id>_n.png` (opzionale, campo `normal_image` del JSON): atlante delle normali per le luci dinamiche, stesso impacchettamento e stessa misura di `<id>.png`. RGB = 0,5 + 0,5 × normale (x verso destra, y verso l'alto, z verso chi guarda: la convenzione delle `CanvasTexture` di Godot 4), alfa uguale a quella dell'atlante dei colori. Sul contorno la normale punta verso l'esterno (luce di taglio). La produce la pipeline dal G-buffer, a costo zero; nel cel le normali sono lisciate dentro ogni parte del corpo, quindi la luce segue i volumi grandi.
 - `<id>.json`, con questa struttura:
 
@@ -148,7 +150,7 @@ Scelte tecniche già fissate:
 - **Ordine di `thrown`** nei nemici: 0 rilasciato, 1 in volo (`hold`, `air`), 2 afferrato, 3 sollevato. Dopo il rilascio si vedono solo 0 e 1; il 2 e il 3 compaiono solo durante la presa, tramite `victim`.
 - **Proiezione all'indietro** (attacco più la direzione opposta): GIG si gira quando la clip arriva al fotogramma 1, con la vittima sollevata sopra la testa, così la vittima atterra dall'altra parte senza salti.
 
-**Animazioni in più (prova delle mosse platform):** l'atlante di GIG contiene anche `double_jump`, `ledge_hang`, `ledge_climb`, `slide`, `crouch`, `crouch_walk`, `wall_slide`, `wall_run` e `air_dash` (camminata accovacciata e mosse sui muri, aggiunte il 5 novembre 2026). Il gioco dello slice non le usa: le usa la stanza di prova. Il validatore le segnala come avvisi, non come errori.
+**Animazioni in più (prova delle mosse platform):** l'atlante di GIG contiene anche `double_jump`, `ledge_hang`, `ledge_climb`, `slide`, `crouch`, `crouch_walk`, `wall_slide`, `wall_run` e `air_dash` (camminata accovacciata e mosse sui muri, aggiunte il 5 novembre 2026). Il gioco dello slice non le usa: le usano la stanza di prova e il prologo. Il validatore le segnala come avvisi, non come errori.
 
 **Animazioni richieste**, con nomi esatti:
 
@@ -241,7 +243,7 @@ Mondo largo 2400 px, cioè 5 schermate. La telecamera segue GIG su posizioni int
 
 | x | Contenuto |
 |---|---|
-| 0-480 | Partenza; cartello "1 · SOTTO LA LINEA" (immagine dell'interfaccia, non dello sfondo) |
+| 0-480 | Partenza; cartello "2 · IL WIND DAY" (`stage_card_2`: immagine dell'interfaccia, non dello sfondo) |
 | 720-1200 | Ondata 1, con la telecamera bloccata: un punk |
 | 1313 | Bidone dell'immondizia da rompere; dentro c'è una mela (+30 di vita) |
 | 1538-1588 | Ostacolo da saltare: cavo dell'alta tensione strappato in una pozzanghera; scintille animate, 10 di danno e atterramento |
@@ -315,8 +317,8 @@ Campi in più di `fx.json`:
 Effetti in più: `rain_streak` (quattro gocce lunghe 7, 10, 13 e 16 px, pendenza 0,25), `rain_splash` (schizzo a terra), `rain_sheet` (tessera di pioggia 128×128, facoltativa, non usata) e `ko_flash` (lampo del KO finale di un'ondata). Dal 7 novembre 2026 nello slice e nel titolo non piove: c'è il Wind Day (`game/src/fx/wind_day.gd`), con la polvere su tre piani, le raffiche ogni 4-8 s, la tinta rossa e le pozze. È solo disegno, con un generatore suo: replay e hash non lo vedono.
 
 **Interfaccia** in `game/assets/ui/`, descritta da `ui.json` (una chiave per elemento, con `image` e `size`):
-- `logo` e `subtitle`: il logo "CTRL+ALT REVENGE!" con riempimento crema e bordo rosso scuro, come la locandina, e la scritta "PICCHIA DURO A SCORRIMENTO";
-- scritte grandi già disegnate, da usare a 1x centrate su coordinate intere: `stage_card_2` ("2 · IL WIND DAY"; la vecchia `stage_card_1`, "1 · SOTTO LA LINEA", la usa solo il catalogo delle immagini del sito), `msg_zone_clear`, `msg_pause`, `msg_continue`, `msg_game_over`, `msg_demo_end`;
+- `logo` e `subtitle`: il logo "CTRL+ALT REVENGE!" (`tools/fxui/logo.py`, 199×80: i tasti CTRL e ALT, REVENGE! a spray, con contorno, rilievo e colature) e, sotto, l'etichetta "TARANTO · 2087" fra due trattini (155×13);
+- scritte grandi già disegnate, da usare a 1x centrate su coordinate intere: `stage_card_2` ("2 · IL WIND DAY"; la vecchia `stage_card_1`, "1 · SOTTO LA LINEA", la usa solo il catalogo delle immagini del sito), `msg_zone_clear`, `msg_pause`, `msg_continue`, `msg_abbonamento_scaduto` ("ABBONAMENTO SCADUTO", 228×55: la fine partita, al posto di GAME OVER), `msg_game_over` (non più usato nel gioco), `msg_demo_end`;
 - `go_arrow`: striscia di 3 fotogrammi da 56×24, 8 tick ciascuno, in ciclo;
 - `big_digits`: le cifre 0-9 grandi nello stile delle scritte `msg_*`, striscia di 10 fotogrammi da 23×31 (il fotogramma k è la cifra k), per il conto alla rovescia di CONTINUA?. Tutte le scritte stanno a 1x: niente testo del font a scala 2;
 - `portrait_frame` (e `portrait_frame_enemy`): cornice 34×34 con il foro 32×32 in (1, 1); si disegna `portrait_back`, poi il ritratto in (x + 1, y + 1), poi la cornice;
@@ -375,21 +377,28 @@ Formato di `music.json` (lo scrive `tools/audio/prepare_music.py`):
 ```
 game/                 progetto Godot
   project.godot
-  export_presets.cfg  preset "Windows Desktop" (vedi sotto)
+  export_presets.cfg  preset "Windows Desktop" e "Web" (vedi sotto)
   default_bus_layout.tres  bus Master, Music e SFX (§7)
   scenes/             scene .tscn (minime: i nodi si costruiscono soprattutto da codice)
   src/core/           Game, Controls, flusso delle schermate, opzioni della riga di comando
   src/combat/         Fighter, FrameAnim, CombatSystem, AttackDirector, AttackData
   src/actors/         GIG, Thug (IA)
-  src/stage/          livello, telecamera, parallasse, ondate, oggetti di scena, effetti, ombre (il Wind Day sta in src/fx/)
+  src/stage/          livello, telecamera, parallasse, ondate, oggetti di scena, effetti, ombre
+  src/platform/       motore platform, prologo, lettura dei livelli LDtk
+  src/scene/          filmati a murale, battute, voci
+  src/fx/             meteo, Wind Day, bagliori
   src/ui/             HUD, titolo, pausa, game over, fine demo, crediti
   src/audio/          Music, Sfx
   src/debug/          sovrapposizione hitbox, replay, pilota automatico
   data/attacks/       AttackData .tres
   data/fighters/      FighterData .tres (vita, velocità, IA)
   data/levels/        sotto_la_linea.json (ondate, partenza, oggetti di scena)
+  data/platform/      livelli LDtk del prologo, mappe di testo, mosse platform di GIG
+  data/scene/         regia dei filmati (le battute sono private e stanno fuori dal repo)
+  data/powerup/       power-up .tres
+  data/tossiche/      zone tossiche .tres
   data/credits.txt    testo dei crediti
-  assets/             sprites/, env/, props/, fx/, ui/, sfx/, fonts/, third_party/
+  assets/             sprites/, env/, props/, fx/, ui/, sfx/, fonts/, murales/
   tests/              run_tests.gd, test_suite.gd, replays/*.json, galleria per Movie Maker
 tools/
   blender/            script bpy delle pipeline (GPL-3.0-or-later)
@@ -397,12 +406,20 @@ tools/
   env/                pipeline degli sfondi e degli oggetti (MIT): python -I tools/env/build_all.py --install
   fxui/               effetti, interfaccia e font (MIT): python -I tools/fxui/build_all.py --godot --install
   audio/              effetti sonori, preparazione della musica, prove dell'audio
+  ambienti/           dalle basi dipinte alla pixel art degli ambienti
+  murales/            i murales dei filmati
+  voci/               le voci delle battute
+  ldtk/               il progetto LDtk dalla legenda e la mappa di testo
+  setup/              elenco degli strumenti e script del laboratorio
+  site/               il sito e la demo web
+  hooks/              l'hook pre-commit, che lancia guard_assets.py
   run_godot.sh        lancia Godot con timeout, log e controllo degli errori
   guard_assets.py     blocca audio e file pesanti non ammessi (--all: file tracciati e nuovi non ignorati)
-docs/                 questa specifica e i riferimenti estetici
+  verifica.sh         il controllo unico: import, test, guardia degli asset, sito
+docs/                 piano, mondo, questa specifica, le guide e le immagini del README
 ```
 
-**Esportazione.** Il codice legge con `FileAccess` file che non sono risorse: i JSON degli asset e dei livelli, `data/credits.txt`, `assets/sfx/mix.json`. Il preset in `game/export_presets.cfg` li include (`include_filter = "*.json, *.txt, THIRD-PARTY-NOTICES.md"`) ed esclude `tests/`. Prima di esportare:
+**Esportazione.** Il codice legge con `FileAccess` file che non sono risorse: i JSON degli asset e dei livelli, i livelli `.ldtk`, `data/credits.txt`, `assets/sfx/mix.json`. I due preset di `game/export_presets.cfg` li includono (`include_filter = "*.json, *.txt, *.ldtk, THIRD-PARTY-NOTICES.md"`) ed escludono `tests/`; il preset Web esclude anche `assets_private/`. Prima di esportare:
 - copiare `THIRD-PARTY-NOTICES.md` della radice in `game/` (la schermata dei crediti lo legge da `res://`; durante lo sviluppo lo trova nella radice del repository);
 - mettere la musica e il suo `music.json` in `game/assets_private/music/` (ignorata da git) oppure in `music/` accanto all'eseguibile;
 - servono i modelli d'esportazione di Godot 4.7.2, che nel laboratorio non ci sono ancora.

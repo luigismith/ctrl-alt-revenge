@@ -4,9 +4,13 @@ Demo: il prologo e il capitolo 2, Il Wind Day
 Luigi Massari
 
 # CODICE, GRAFICA ED EFFETTI SONORI
-Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney nel render da cui è ridipinta la strada dello slice.
-Le ambientazioni del prologo e dello slice partono da basi dipinte generate con l'app Gemini di Google e con ChatGPT di OpenAI, e ridisegnate in pixel art dagli script.
+Prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0: modelli e animazioni Quaternius e Mesh2Motion, oggetti Quaternius e Kenney nel render da cui è ridipinta la strada del capitolo 2.
+Le ambientazioni del prologo e del capitolo 2 partono da basi dipinte generate con l'app Gemini di Google e con ChatGPT di OpenAI, e ridisegnate in pixel art dagli script.
+I murales dei filmati e il fondale del titolo partono da basi generate con ChatGPT, da testo, dai nostri render 3D e dalle nostre basi; gli script li portano in pixel art e, nel gioco, animano i murales. Nel trailer i murales e due scene d'arena sono animati con HeyGen.
 I primi piani dei filmati partono da volti generati con ChatGPT a partire dai nostri render 3D; palpebre e bocca le animano gli script.
+
+# VOCI
+Voci sintetiche progettate in italiano con HeyGen. Nessuna è clonata da una persona vera. Non sono nel repository del gioco.
 
 # SUONI
 Montati e ritoccati da suoni CC0 di Kenney (Impact, Interface, RPG e Sci-Fi Sounds), di Freesound e di rubberduck e AntumDeluge (OpenGameArt).

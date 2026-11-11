@@ -22,7 +22,7 @@ Ogni PNG è una striscia orizzontale di `count` fotogrammi grandi `frame`; ogni 
 | `glint` | 25×25 | 6 × 2 | centro | lampo che annuncia l'haymaker (12 tick, dal tick 20 dell'avvio) |
 | `dust_land` | 64×24 | 6 × 3 | punto a terra | atterraggio e corpo che cade: due nuvole ai lati |
 | `dust_skid` | 32×20 | 5 × 3 | il piede | sbuffo che va verso −x per chi guarda a destra (`flip`) |
-| `ombra` | 48×12 | 3 varianti | centro | 0 grande 46×10, 1 media 36×8, 2 piccola 24×6; semitrasparente |
+| `ombra` | 60×15 | 3 varianti | centro | 0 grande 58×12, 1 media 44×10, 2 piccola 30×8; semitrasparente |
 | `rain_streak` | 6×16 | 4 varianti | testa | gocce di 7, 10, 13, 16 px; cadono 4 px in giù per 1 px a sinistra |
 | `rain_splash` | 12×8 | 4 × 3 | impatto | schizzo a terra |
 | `rain_sheet` | 128×128 | 1 | — | facoltativo: tessera di pioggia ripetibile da far scorrere |

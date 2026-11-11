@@ -14,19 +14,21 @@ La musica non entra mai nel repo: sta in `~/ctrlaltrevenge-lab/music/`.
 
 ## Effetti sonori
 
+Dal 5 novembre 2026 i suoni del gioco li monta `sfx_pack.py` da suoni già pronti, CC0 e CC BY 4.0. I file di partenza stanno nel laboratorio, in `~/ctrlaltrevenge-lab/sources/sfx/`; le fonti sono in `FONTI.md` e in `THIRD-PARTY-NOTICES.md`.
+
 ```
-$PY -I tools/audio/sfx_gen.py --sheet      # genera in tools/audio/out/sfx/, controlla, disegna le tavole
-$PY -I tools/audio/sfx_gen.py --install    # poi copia in game/assets/sfx/
+$PY -I tools/audio/sfx_pack.py             # monta in tools/audio/out/sfx_pack/ e controlla
+$PY -I tools/audio/sfx_pack.py --install   # poi copia in game/assets/sfx/
 ```
 
 Cosa produce:
-- 25 WAV mono, 16 bit, 44,1 kHz, con picco a -1 dBFS, senza componente continua e con dissolvenze di pochi ms;
-- i `.wav.import`, per importarli in PCM e senza loop;
+- 27 WAV mono, 16 bit, 44,1 kHz, con picco a -1 dBFS, senza componente continua e con dissolvenze di pochi ms;
+- i `.wav.import`, per importarli in PCM e senza loop. `--install` copia solo quelli dei suoni nuovi: gli altri nel gioco ci sono già e non si toccano;
 - `mix.json`, con il guadagno di ogni suono. Lo legge l'autoload `Sfx`.
 
-Ogni suono ha un seme fisso: rigenerare dà gli stessi file, bit per bit.
+Lo script si ferma se un suono ha picco, componente continua, estremi o durata fuori norma.
 
-Le tavole `out/sfx/tavola_sfx.png` e `tavola_sfx_zoom.png` mostrano forme d'onda e spettrogrammi. Lo script si ferma se un suono ha picco, componente continua, estremi, coda o durata fuori norma, o se due suoni sono troppo simili.
+**`sfx_gen.py` non si lancia più con `--install`.** È il generatore di prima: i suoi suoni sintetizzati sono stati scartati il 5 novembre 2026, e `--install` li rimetterebbe in `game/assets/sfx/` al posto di quelli veri. Lo script resta perché `sfx_pack.py` ne prende nomi, livelli e finitura. Senza opzioni, o con `--sheet`, scrive solo in `tools/audio/out/sfx/` e non tocca il gioco: `--sheet` disegna anche le tavole `tavola_sfx.png` e `tavola_sfx_zoom.png`, con forme d'onda e spettrogrammi.
 
 ## Brani di Suno
 

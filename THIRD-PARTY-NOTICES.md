@@ -33,11 +33,11 @@ I file di queste sorgenti non sono in questo repository: restano nel laboratorio
 - **Quaternius**: Universal Base Characters, Universal Animation Library 1 e 2 (versione Standard).
   - Licenza CC0 1.0, credito facoltativo.
   - https://quaternius.com
-  - Gli sprite di GIG, del punk e del bruto derivano da questi modelli e animazioni (dalla Universal Animation Library anche le mosse platform di prova: ClimbUp_1m, Slide, Crouch).
+  - Gli sprite dei personaggi (GIG, il punk e il bruto, il rider, il messo, l'esattore e i passanti del prologo) derivano da questi modelli e animazioni (dalla Universal Animation Library anche le mosse platform: ClimbUp_1m, Slide, Crouch).
 - **Mesh2Motion** (animazioni: il calcio circolare di GIG).
   - Licenza CC0 1.0.
   - https://github.com/Mesh2Motion/mesh2motion-app
-- **Quaternius Downtown City MegaKit (Standard)**: il condizionatore a muro del nostro render da cui è ridipinta la strada dello slice.
+- **Quaternius Downtown City MegaKit (Standard)**: il condizionatore a muro del nostro render da cui è ridipinta la strada del capitolo 2.
   - Licenza CC0 1.0, credito facoltativo.
   - https://quaternius.com/packs/downtowncitymegakit.html
 - **Kenney City Kit Roads 2.2**: il cassonetto dello stesso render.
@@ -48,19 +48,21 @@ I file di queste sorgenti non sono in questo repository: restano nel laboratorio
 Il resto è nostro:
 - le mosse scritte a mano (presa, ginocchiate, proiezione, gancio cyber, calcio volante, reazioni ai colpi) e le pose delle vittime, in `tools/blender/char_poses.py`, e le pose chiave della pipeline v7 (guardia, jab, gancio, colpo subito, doppio salto, appeso alla sporgenza) in `tools/blender/char_anim.py`;
 - gli stivali, il codino con la molla, i timbri del viso, le normal map e le luci dinamiche (`tools/blender/char_boots.py`, `tools/sprites/pix_v7.py`, `game/src/stage/level.gd`);
-- gli sfondi oltre ai pezzi citati (edifici, insegne, caratteri pixel delle scritte, travata, piloni) e gli oggetti di scena, geometria e disegno procedurale di `tools/env/` e `tools/blender/env_gbuffer.py`.
+- gli oggetti di scena 3D e i caratteri pixel delle scritte, geometria e disegno procedurale di `tools/env/` e `tools/blender/env_gbuffer.py`;
+- il pavimento e il cavo del capitolo 2, disegnati da `tools/ambienti/patina_floor.py` e `tools/ambienti/cavo_rivolo.py`.
 
 Non sono usati Mixamo, Reallusion, CraftPix, Oonquil, Shapeforms, Sonniss, i file grezzi Rokoko né altro materiale che non si può ridistribuire.
 
 ## Basi generate con l'AI (fuori dal repository)
 
-Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi e il garage, in `game/assets/env/prologo/`) e la strada dello slice «Sotto la Linea» (`game/assets/env/sotto_la_linea/`: tutti i piani tranne il pavimento) partono da sfondi dipinti e fogli di oggetti generati con l'intelligenza artificiale. Gli script di `tools/ambienti/` li portano alla scala, alle palette e ai blocchi del gioco. Gli originali e i prompt non sono in questo repository.
+Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi e il garage, in `game/assets/env/prologo/`) e la strada del capitolo 2, «Il Wind Day» (`game/assets/env/sotto_la_linea/`: tutti i piani tranne il pavimento), partono da sfondi dipinti e fogli di oggetti generati con l'intelligenza artificiale. Gli script di `tools/ambienti/` li portano alla scala, alle palette e ai blocchi del gioco; quelli delle tavole del prologo di oggi (`game/assets/env/prologo/v2/`) sono ancora nella cartella di lavoro, fuori dal repository. Gli originali e i prompt non sono in questo repository.
 
 - **App Gemini di Google** (gemini.google.com), dal 6 novembre 2026. Google dichiara di non rivendicare la proprietà dei contenuti generati.
 - **ChatGPT di OpenAI** (chatgpt.com), dal 6 novembre 2026. I termini di OpenAI cedono all'utente i diritti sull'output e ne ammettono l'uso commerciale.
-- Per le ambientazioni del prologo i prompt sono di solo testo. Per la strada dello slice, dal 7 novembre 2026, a ChatGPT abbiamo caricato soltanto i nostri render, i nostri schizzi e le nostre basi del prologo. Nessuna foto né immagine di altri è stata caricata: le foto di Taranto e Street View sono servite soltanto a scrivere i prompt.
+- Per le prime ambientazioni del prologo i prompt sono di solo testo. Per la strada del capitolo 2, dal 7 novembre 2026, e per le tavole del prologo di oggi, dall'8 novembre 2026, a ChatGPT abbiamo caricato soltanto i nostri render, i nostri schizzi e le nostre basi. Nessuna foto né immagine di altri è stata caricata: le foto di Taranto e Street View sono servite soltanto a scrivere i prompt.
 - **I primi piani dei filmati** (`game/assets/ui/closeups/`) partono da volti in stile murales generati con ChatGPT, a cui abbiamo caricato soltanto i nostri render 3D dei personaggi. `tools/sprites/closeup_ai.py` li porta in pixel art, e palpebre e bocca le animano i nostri script.
-- **I murales dei filmati** (`game/assets/murales/`), dal 7 novembre 2026, partono da basi di ChatGPT. Per gli sfondi abbiamo usato prompt di solo testo; per le figure abbiamo caricato soltanto i nostri render 3D dei personaggi e le nostre basi. `tools/murales/` le porta in pixel art; le scritte e i tag li disegna il nostro carattere pixel.
+- **I murales dei filmati** (`game/assets/murales/`), dal 7 novembre 2026, partono da basi di ChatGPT. Per gli sfondi abbiamo usato prompt di solo testo; per le figure abbiamo caricato soltanto i nostri render 3D dei personaggi e le nostre basi. `tools/murales/` le porta in pixel art; le scritte e i tag li disegna il nostro carattere pixel. Nel gioco i murales li animano i nostri script.
+- **Il fondale della schermata del titolo** (`game/assets/ui/titolo/`), dal 7 novembre 2026, parte da una base di ChatGPT a cui abbiamo caricato soltanto una nostra base. `tools/ambienti/titolo.py` la porta in pixel art; GIG viene dal nostro render 3D (`tools/sprites/titolo_gig.py`) e i panni stesi li disegna il codice.
 - Personaggi, nemici e oggetti animati del gioco non vengono da qui: nascono dalla pipeline da 3D a pixel.
 - Le immagini generate con l'AI potrebbero non essere proteggibili col diritto d'autore. Prima di vendere il gioco si ricontrollano i termini dei due servizi.
 
@@ -72,16 +74,20 @@ Le ambientazioni del prologo (il cimitero di San Brunone, la fuga per i Tamburi 
 
 Sono nostri, senza materiale di terze parti: i font **CAR Pixel** (regolare e grassetto), gli effetti visivi e l'interfaccia, disegnati da script in `tools/fxui/`.
 
-## Voci sintetiche (fuori dal repository)
+## Voci sintetiche e trailer (fuori dal repository)
 
-Le voci dei filmati, cioè SIDERA e le sue macchine, il messo e Tere, si preparano in locale con gli script di `tools/voci/`. I file audio non stanno in questo repository.
+Le voci dei personaggi, nei filmati e nelle battute del prologo, sono sintetiche: voci progettate in italiano con HeyGen, da una descrizione scritta, non clonate da persone vere. Gli script di `tools/voci/` le portano al formato del gioco. I file audio non stanno in questo repository: la demo web li prende dagli allegati della release `musica-demo`.
 
-- **Qwen3-TTS**, del team Qwen di Alibaba, sotto licenza Apache-2.0. Genera le voci (https://github.com/Qwen/Qwen3-TTS).
-- **Whisper base**, di OpenAI, sotto licenza MIT. Trascrive le prese di ogni battuta: tiene quella che dice meglio il testo e dà i tempi delle parole per la bocca dei personaggi.
+- **HeyGen** (heygen.com), dall'11 novembre 2026, con un abbonamento a pagamento. Dai suoi termini, letti quel giorno: l'output è di chi lo genera e l'uso commerciale non è vietato; HeyGen si tiene una licenza sui contenuti generati.
+- **Il trailer** monta i nostri murales e due scene d'arena del gioco, animati con HeyGen (image_to_video) a partire da nostre immagini. Le altre clip sono gioco vero, ritoccato nel colore. Nel gioco di oggi i murales li animano i nostri script. Il video non sta in questo repository.
+- **Whisper base**, di OpenAI, sotto licenza MIT. Trascrive ogni battuta: controlla che dica il testo e dà i tempi delle parole per la bocca dei personaggi. Non finisce nel gioco.
+- Prima di vendere il gioco c'è da chiarire per iscritto con HeyGen l'uso commerciale di audio e video in un gioco e a chi è intestato l'abbonamento.
 
-## Musica segnaposto (fuori dal repository)
+## Musica (fuori dal repository)
 
-Finché non arrivano i brani definitivi, le build locali usano musica CC0. Questi file non sono in questo repository.
+I brani della demo e la musica del trailer li ha creati Luigi Massari con **Suno** (piano Pro, novembre 2026). Non stanno in questo repository: sono fra gli allegati della release `musica-demo`. Prima di vendere il gioco si ricontrollano i termini di Suno per i brani fatti con il piano a pagamento.
+
+Un laboratorio nuovo, senza i brani, parte con musica CC0. Nemmeno questi file sono in questo repository.
 
 - **Safety Stoat Studios, "Free VGMs"** (musica per Mega Drive, di Zachary Rubenstein): "I Wondered What I Could Do With It", "Title" (Sharp in Head) e il finale di "My Father's Eyes".
   - Licenza CC0 1.0, credito facoltativo.

@@ -19,8 +19,9 @@ privata del progetto.
   - l'àncora che porta un pezzo del disegno su un riquadro del piano;
   - le tinte;
   - le schermate di prova composte come nel gioco.
-- `componi_prologo.py`: compone tutto il prologo e lo scrive in `game/assets/env/prologo/`, con il
-  suo `layers.json`. Il cimitero di San Brunone sta qui, la fuga in `fuga.py`.
+- `componi_prologo.py`: compone il prologo di prima (`prologo.ldtk`) e lo scrive in
+  `game/assets/env/prologo/`, con il suo `layers.json`. Il cimitero di San Brunone sta qui, la fuga
+  in `fuga.py`.
   - **I piani dello sfondo,** con la parallasse. Nel cimitero: il cielo con la torre e le cupole,
     tre file di cappelle, le lapidi vicine. Nella fuga: il cielo di pioggia sul Mar Piccolo, le
     palazzine dei Tamburi, il marciapiede di là con le auto.
@@ -39,16 +40,24 @@ privata del progetto.
 - `fuga.py`: la fuga per i Tamburi e il garage della madre di GIG, in sezione. La parete di fondo
   del garage è un dipinto più piccolo della stanza: se ne prendono due pezzi alla scala giusta e il
   resto dell'intonaco si dipinge con i suoi colori.
+- `componi_slice.py`, `patina_floor.py`, `cavo_rivolo.py`: la strada dello slice (vedi
+  `tools/env/README.md`).
+- `schermi_torre.py`: i maxischermi della torre di SIDERA.
+- `titolo.py`: la schermata del titolo.
 
-Per rifarli:
+Le scene del prologo che il gioco carica oggi (`prologo_v2.ldtk`) stanno in
+`game/assets/env/prologo/v2/` e non nascono da questi script: sono tavole in scala fatte nel
+laboratorio da basi di ChatGPT, e gli script che le montano non sono nel repo.
+
+Per rifare il prologo di prima:
 
     python -I tools/ambienti/componi_prologo.py --basi <cartella delle basi> --anteprima <cartella>
 
 La cartella delle basi, se non la si dice, è `tools/out/ambienti/basi`, che git ignora.
 
 Con `--anteprima` escono anche alcune schermate con GIG, composte come nel gioco; con `--uscita` i
-piani si scrivono in un'altra cartella, per una prova, invece che nel gioco. Se si cambiano i
-blocchi del prologo in `game/data/platform/prologo.txt`, si rifà anche la grafica.
+piani si scrivono in un'altra cartella, per una prova, invece che nel gioco. Se cambiano i blocchi
+di `prologo.ldtk`, si rifanno `prologo.txt` (vedi `docs/ldtk.md`) e la grafica.
 
 ## Come si appoggiano le cose
 

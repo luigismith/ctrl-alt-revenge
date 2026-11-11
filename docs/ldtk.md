@@ -17,9 +17,9 @@ I tipi sono quelli della legenda della sessione mappe. Il progetto ha quattro li
 | `Collisioni` | le piastrelle: Pieno, Sottile, Vuoto (la fossa senza fondo, dove si perde una vita) e gli altri tipi della legenda |
 | `Greybox` | i colori del greybox, che LDtk disegna da solo dalle Collisioni |
 | `Entita` | partenze, ripartenze, cartelli (con titolo e riga d'aiuto), scene, nemici, leve, persone, oggetti, power-up... |
-| `Zone` | i rettangoli: arene, zone tossiche, segreti, telecamera, meteo |
+| `Zone` | i rettangoli: arene, interni, zone tossiche, segreti, telecamera, meteo |
 
-Il gioco oggi usa le celle Pieno, Sottile e Vuoto, le partenze, i cartelli con le loro ripartenze, la scena di Mimmo, la porta del garage, l'arena, le leve con i loro cancelli, le zone Meteo, le zone Tossica, i PowerUp e l'uscita. L'arena è la sua zona: la telecamera si ferma sul lato sinistro del rettangolo, il fondo è il pavimento, e lo scontro parte quando GIG è entrato di 130 px. Nella Tossica i campi numerici cambiano i valori del tipo solo se sono maggiori di zero: lasciati a 0 valgono quelli del tipo (`game/data/tossiche/`). Per una zona sempre accesa si mette `attiva_s` uguale a `ciclo_s`. Un PowerUp senza «ricompare» non torna alle ripartenze, solo a partita nuova. Gli altri tipi si possono già disegnare, ma il gioco non li fa ancora. Le piastrelle che non conosce le gioca come la cella più vicina (per esempio Bagnato come Pieno) e lo segnala.
+Il gioco oggi usa le celle Pieno, Sottile, Vuoto e Rompibile (la rompe lo scatto), le partenze, i cartelli con le loro ripartenze, le scene, le porte, le arene, le leve con i cancelli, i nemici (fuori dalle arene solo i droni), ristori, oggetti, persone, battute, firme, registri, processioni, le zone Interno, Telecamera, Meteo e Tossica, i PowerUp e l'uscita. L'arena è la sua zona: la telecamera si ferma sul lato sinistro del rettangolo, il fondo è il pavimento, e lo scontro parte quando GIG è entrato di 130 px. Nella Tossica i campi numerici cambiano i valori del tipo solo se sono maggiori di zero: lasciati a 0 valgono quelli del tipo (`game/data/tossiche/`). Per una zona sempre accesa si mette `attiva_s` uguale a `ciclo_s`. Un PowerUp senza «ricompare» non torna alle ripartenze, solo a partita nuova. Gli altri tipi si possono già disegnare, ma il gioco non li fa ancora. Le piastrelle che non conosce le gioca come la cella più vicina (per esempio Bagnato come Pieno) e lo segnala.
 
 ## Più livelli in un file
 
@@ -38,7 +38,7 @@ Il gioco controlla ogni livello con le regole della legenda, e i test le provano
 
 ## La mappa di testo
 
-`game/data/platform/prologo.txt` è la stessa mappa in lettere (`#` pieno, `=` sottile, `.` vuoto). La leggono ancora gli script della grafica (`tools/ambienti/`). Non si cambia a mano: dopo ogni modifica in LDtk si rifà dal `.ldtk`, dalla radice del repo:
+`game/data/platform/prologo.txt` è la mappa in lettere (`#` pieno, `=` sottile, `.` vuoto) di `prologo.ldtk`, il prologo di prima. La leggono i test e `tools/ambienti/componi_prologo.py`. Non si cambia a mano: se cambia `prologo.ldtk` si rifà così, dalla radice del repo (per `prologo_v2.ldtk` non serve):
 
 ```
 python tools/ldtk/livelli_ldtk.py txt game/data/platform/prologo.ldtk game/data/platform/prologo.txt

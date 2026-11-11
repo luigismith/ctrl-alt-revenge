@@ -26,7 +26,8 @@ Ogni JSON dà i riquadri di occhi (`eyes`) e bocca (`mouth`) e i loro colori (`l
 | `msg_zone_clear` | `msg_zone_clear.png` | 276×31 | "ZONA LIBERATA" |
 | `msg_pause` | `msg_pause.png` | 115×31 | "PAUSA" |
 | `msg_continue` | `msg_continue.png` | 197×31 | "CONTINUA?" |
-| `msg_game_over` | `msg_game_over.png` | 202×31 | "GAME OVER" (facoltativo) |
+| `msg_game_over` | `msg_game_over.png` | 202×31 | "GAME OVER" (non più usato nel gioco) |
+| `msg_abbonamento_scaduto` | `msg_abbonamento_scaduto.png` | 228×55 | "ABBONAMENTO SCADUTO": la fine partita, al posto di GAME OVER |
 | `msg_demo_end` | `msg_demo_end.png` | 307×31 | "FINE DELLA DEMO" |
 | `big_digits` | `big_digits.png` | 10 fotogrammi da 23×31 | cifre 0-9 in oro nello stile delle scritte `msg_*`; il fotogramma k è la cifra k (conto alla rovescia di CONTINUA?, a 1x) |
 | `go_arrow` | `go_arrow.png` | 3 fotogrammi da 56×24 | "VAI ▶": 0 acceso, 1 triangolo avanti di 3 px, 2 spento; 8 tick ciascuno, in ciclo |

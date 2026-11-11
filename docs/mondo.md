@@ -78,7 +78,7 @@ Tutto succede fra il pomeriggio del Giovedì Santo e l'alba del Venerdì Santo, 
   - **il noleggiato,** con un braccio MANODOPERA a noleggio, che si può hackerare;
   - **il messo,** con la giacca a vento di SIDERA e il tablet: legge l'atto di pignoramento, marca il braccio con un laser e chiama i rinforzi.
 - **Le Colombe.** Droni bianchi con il logo ARIA+, che misurano l'aria e spruzzano profumo di pulito. Dicono sempre che l'aria è ottima. Si chiamano così per la colomba di legno che la tradizione attribuisce ad Archita, l'ingegnere-filosofo della Taranto greca.
-- **I Custodi.** I robot della sicurezza di SIDERA, fatti di braccia MANODOPERA montate su un busto. Si aggiornano: ogni volta tornano con una versione nuova, e prima di combattere leggono ad alta voce le note di rilascio.
+- **I Custodi.** I robot della sicurezza di SIDERA, fatti di braccia MANODOPERA montate su un busto.
 
 ## I luoghi
 

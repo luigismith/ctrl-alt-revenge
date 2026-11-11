@@ -14,8 +14,12 @@
 </p>
 
 <p align="center">
-  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><img src="site/media/teaser-poster.png" width="480" height="270" alt="Il teaser: Taranto nel 2087 al tramonto, fra la Linea sopraelevata, le cupole, le gru del porto e il maxischermo di ARIA+, con il logo del gioco."></a><br>
-  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><strong>Guarda il teaser</strong></a> (38 secondi, senza parole) · uscita prevista: autunno 2027
+  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><img src="site/media/teaser-poster.png" width="480" height="270" alt="Il trailer: GIG sotto la pioggia, in piedi davanti al cartellone di SIDERA, con il logo del gioco nel cielo."></a><br>
+  <a href="https://luigismith.github.io/ctrl-alt-revenge/#teaser"><strong>Guarda il trailer</strong></a> (38 secondi, senza parole) · uscita prevista: autunno 2027
+</p>
+
+<p align="center">
+  <img src="docs/media/schermate/prologo-2x.png" width="480" height="270" alt="Nel prologo: GIG salta sul tetto di una cappella del cimitero, fra le tombe e i cipressi, con le cupole sullo sfondo.">
 </p>
 
 <p align="center">
@@ -25,12 +29,12 @@
 > **Taranto, 2087. Il braccio è in abbonamento. La vendetta no.**
 
 <p align="center">
-  <img src="docs/media/schermate/arena-2x.png" width="460" height="195" alt="Nello slice, nell’arena: il calcio di GIG manda il punk addosso al bruto.">
-  <img src="docs/media/schermate/presa-2x.png" width="460" height="195" alt="Nello slice: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.">
+  <img src="docs/media/schermate/arena-2x.png" width="460" height="195" alt="Nel capitolo 2, nell’arena: il calcio di GIG manda il punk addosso al bruto.">
+  <img src="docs/media/schermate/presa-2x.png" width="460" height="195" alt="Nel capitolo 2: GIG tiene il bruto per la presa e lo colpisce con una ginocchiata.">
 </p>
 <p align="center">
-  <img src="docs/media/schermate/cavo-2x.png" width="330" height="220" alt="Nello slice: GIG salta il cavo elettrico che scintilla nella pozzanghera.">
-  <img src="docs/media/schermate/combo-2x.png" width="280" height="238" alt="Nello slice: combo sul punk davanti all’insegna KEBAB, il gancio cyber e poi il calcio finale.">
+  <img src="docs/media/schermate/cavo-2x.png" width="330" height="220" alt="Nel capitolo 2: GIG salta il cavo elettrico che scintilla nella pozzanghera.">
+  <img src="docs/media/schermate/combo-2x.png" width="280" height="238" alt="Nel capitolo 2: combo sul punk davanti all’insegna KEBAB, il gancio cyber e poi il calcio finale.">
 </p>
 
 ## La storia
@@ -43,6 +47,8 @@ Giovedì Santo, ore 15. Mentre i perdoni escono dal Carmine, due Esattori raggiu
 
 Tutto succede fra il Giovedì e il Venerdì Santo, 17–18 aprile 2087: la notte dei perdoni e dell’Addolorata, la più antica della città. Nel 2087 a Taranto è cambiato quasi tutto, tranne questo.
 
+Il mondo e i personaggi, senza anticipazioni, sono in [`docs/mondo.md`](docs/mondo.md).
+
 ## Il gioco
 
 - **Platform e botte, nella stessa notte.** Si corre e si salta in 2D laterale; quando arrivano gli Esattori la telecamera si inclina, il pavimento si allarga e si combatte in profondità. A scontro finito compare VAI e si torna a saltare.
@@ -52,7 +58,7 @@ Tutto succede fra il Giovedì e il Venerdì Santo, 17–18 aprile 2087: la notte
 - **La Vista e i segreti.** Muri finti, piattaforme invisibili, registri delle braccia nascosti, le firme di Totò da collezionare.
 - **Taranto da giocare.** Luoghi veri, e il cibo della città come recupero: taralli, il caffè del MiniBar di Ignazio, il panzerotto e, rara, la scarcella di Pasqua. Checkpoint frequenti e niente GAME OVER; per chi vuole il brivido, la modalità arcade con il CONTINUA?
 
-Nello slice di oggi ci sono la corsa, il salto, il cavo da saltare, le combo, le prese, le proiezioni, il calcio volante e l’arena; il resto è in sviluppo. Il sito dice pilastro per pilastro che cosa c’è già e che cosa no.
+Nella demo di oggi ci sono il prologo e il capitolo 2, «Il Wind Day». Nel prologo si corre, si salta, ci si aggrappa alle sporgenze e si scivola, con le vite e le ripartenze; ci sono il primo scontro con gli Esattori, a braccio bloccato, i filmati a murale con le voci e, dopo il riavvio del braccio, il doppio salto e il primo registro da trovare. Nel capitolo 2 ci sono il cavo da saltare, le combo, le prese, le proiezioni, il calcio volante e l’arena. Il resto è in sviluppo: il sito dice pilastro per pilastro che cosa c’è già e che cosa no.
 
 **Retro, con la tecnologia di oggi.** La pixel art è lo stile, non un limite d’epoca: 480×270 pixel ingranditi a multipli interi (×4 su uno schermo 1080p), luci dinamiche con le normal map, particelle, hitstop e rallentatore sull’ultimo KO. Le scene a fumetto sono i murales di Totò.
 
@@ -65,17 +71,20 @@ In sviluppo, novembre 2026. Il gioco si sta rifacendo da zero in Godot 4.7.2, pr
 | La storia, dall’inizio alla fine, con gli intermezzi a fumetto | fatta |
 | Le basi del gameplay: platform e arene, mosse, combattimento, puzzle di hacking, recuperi, segreti | fatte |
 | Una ricerca su Taranto con le fonti, e una cronologia che tiene coerenti luoghi, date, ore, meteo e luna | fatta |
-| Lo slice verticale «Sotto la Linea», giocabile dal titolo alla fine della demo | fatto |
+| Lo slice verticale, oggi il capitolo 2, «Il Wind Day», giocabile nella demo | fatto |
 | La stanza di prova per tarare le mosse: corsa, salto, Spinta, piattaforme sottili, sporgenze, scivolata, salto a muro, scatto e corsa sui muri, con i primi Esattori e il primo hacking | fatta |
-| Il prologo, dal cimitero di San Brunone al garage della madre, con GIG che combatte col braccio morto | in corso |
-| Il capitolo 1, «I tetti dei Tamburi» | poi |
-| La prova di stile dei murales e la colonna sonora (i primi due brani sono già nella demo) | in parallelo |
+| Il trailer di 38 secondi, sul sito | fatto |
+| Il prologo, rifatto con l’editor LDtk: dal cimitero di San Brunone al garage della madre, con GIG che combatte col braccio morto, i filmati a murale e le voci (è nella demo, ancora da rifinire) | in corso |
+| Il capitolo 1, «I tetti dei Tamburi» (per ora dal prologo si passa al capitolo 2) | poi |
+| I murales degli altri capitoli e la colonna sonora | in parallelo |
 
-Lo slice è una prova tecnica: la sua strada è ancora generica, e la rifaremo perché racconti i Tamburi la sera del Giovedì Santo del 2087. Nessuna data di uscita, per ora: tappe, stime in ore e cosa blocca cosa sono nel [piano](docs/piano.md). La specifica dello slice è in [`docs/specifica-slice.md`](docs/specifica-slice.md).
+Il prologo si gioca già, ma non è finito: mancano alcuni fondali lontani, una seconda passata su due tratti e lo sprite definitivo di un drone. Il capitolo 2 è nato come slice, una prova tecnica. Dal 7 novembre 2026 la sua strada racconta i Tamburi la sera del Giovedì Santo del 2087, un Wind Day: la nube rossa, il vento e la polvere del minerale, le palazzine col bucato arrossato, la Linea e i cartelloni di SIDERA e di ARIA+. La sua specifica è in [`docs/specifica-slice.md`](docs/specifica-slice.md).
+
+L’uscita è prevista per l’autunno 2027: tappe, stime in ore e cosa blocca cosa sono nel [piano](docs/piano.md).
 
 ## Come provarlo
 
-**Nel browser:** [luigismith.github.io/ctrl-alt-revenge/gioca](https://luigismith.github.io/ctrl-alt-revenge/gioca/), da computer, con la tastiera o con un controller. C’è anche la musica: il tema del titolo, «Sotto la Linea» con la batteria che entra nelle arene e il jingle di ZONA LIBERATA.
+**Nel browser:** [luigismith.github.io/ctrl-alt-revenge/gioca](https://luigismith.github.io/ctrl-alt-revenge/gioca/), da computer, con la tastiera o con un controller. NUOVA PARTITA comincia dal prologo e prosegue col capitolo 2, «Il Wind Day»; da CAPITOLI si sceglie da dove partire. C’è anche la musica: il tema del titolo, il brano «Sotto la Linea» con la batteria che entra nelle arene, il jingle di ZONA LIBERATA e i brani delle scene. Nel prologo i personaggi hanno anche la voce.
 
 **Dal codice:** serve [Godot 4.7.2](https://godotengine.org/download/archive/4.7.2-stable/), nella versione standard e non .NET. Dalla cartella del repository:
 
@@ -92,18 +101,20 @@ Argomenti utili, da scrivere dopo `--`:
 
 | Argomento | Effetto |
 |---|---|
-| `--autostart` | salta il titolo e parte dal livello |
+| `--autostart` | salta il titolo e parte dal capitolo 2, «Il Wind Day» |
 | `--stanza` | parte dalla stanza di prova in grigio (anche dal titolo: STANZA DI PROVA) |
 | `--autopilot stanza` | GIG percorre da solo la stanza di prova |
 | `--prologo` | parte dal prologo (anche dal titolo: NUOVA PARTITA, o CAPITOLI → PROLOGO) |
-| `--replay res://tests/replays/demo.json` | riproduce la dimostrazione di circa 67 s (GIG gioca da solo) |
-| `--start-x 1150` | fa partire GIG da quel punto del livello (qui: prima del cavo) |
+| `--replay res://tests/replays/demo.json` | riproduce la dimostrazione del capitolo 2, poco più di un minuto (GIG gioca da solo) |
+| `--start-x 1450` | fa partire GIG da quel punto del livello (qui, nel capitolo 2: poco prima del cavo) |
 | `--debug-boxes` | mostra hitbox e hurtbox, come F1 |
 | `--no-lights` | parte con le luci dinamiche spente, come F5 |
 
-Per esempio `godot --path game -- --autostart`. Gli altri argomenti sono descritti in [`game/tests/README.md`](game/tests/README.md).
+Per esempio `godot --path game -- --autostart`. L’elenco completo (`--nuova-partita`, `--livello`, `--senza-hud`…) è in testa a [`game/src/core/session_options.gd`](game/src/core/session_options.gd).
 
 La musica non è in questo repository (vedi sotto). Il gioco la cerca in `game/assets_private/music/`, in `music/` accanto all’eseguibile e, solo durante lo sviluppo (non nelle build esportate), in `%USERPROFILE%\ctrlaltrevenge-lab\music\`; senza musica funziona lo stesso, solo che è muto.
+
+Nemmeno le battute e le voci dei personaggi sono nel repository, perché la storia è privata: dal codice le scene girano lo stesso, con un segnaposto al posto del testo e senza voci. La demo web ha quelle del prologo.
 
 ## Comandi
 
@@ -113,18 +124,21 @@ La musica non è in questo repository (vedi sotto). Il gioco la cerca in `game/a
 | Correre | due tocchi rapidi verso destra o sinistra | due tocchi rapidi verso destra o sinistra |
 | Attacco | J oppure Z | X oppure Y (Quadrato o Triangolo) |
 | Salto | K oppure X | A oppure B (Croce o Cerchio) |
-| Scatto (stanza di prova) | L oppure C | un dorsale (L1 o R1) |
+| Scatto | L oppure C | un dorsale (L1 o R1) |
+| Vista (tenendo premuto) | V oppure I | grilletto sinistro (L2) |
 | Pausa | Esc oppure Invio | Start (Options) |
 | Confermare nei menu | Invio, Spazio, J oppure Z | A oppure Start |
 | Tornare indietro nei menu | Esc oppure Backspace | B |
 
-Le mosse dello slice:
+Scatto e Vista servono nei tratti platform, a braccio riavviato.
+
+Le mosse del capitolo 2, «Il Wind Day»:
 - **Combo**: premendo attacco, jab, jab, gancio cyber e calcio finale si concatenano solo se il colpo precedente va a segno; a vuoto GIG ripete il primo jab.
 - **Calcio volante**: attacco durante il salto.
 - **Presa**: si cammina contro un nemico vicino, nella sua stessa corsia. Dalla presa, attacco dà una ginocchiata (al massimo due); il terzo attacco, oppure attacco più la direzione opposta, lo proietta. Il corpo proiettato atterra gli altri nemici.
 - **Ostacolo**: il cavo nella pozzanghera si salta; toccarlo fa 10 di danno e atterra.
 
-Nella stanza di prova, che c'è solo nelle versioni per PC:
+Le mosse del platform, nel prologo e nella stanza di prova (questa c’è solo nelle versioni per PC). Nel prologo, finché il braccio è bloccato, ci sono solo le piattaforme sottili, le sporgenze e la scivolata; dopo il riavvio arrivano le altre:
 - **Spinta**: il doppio salto, cioè salto premuto di nuovo in aria; il braccio scarica verso il basso.
 - **Piattaforme sottili**: si sale da sotto; giù più salto per scendere.
 - **Sporgenze**: cadendo verso un muro GIG si aggrappa; su, salto o la direzione del muro per salire, giù per lasciarsi.
@@ -132,6 +146,7 @@ Nella stanza di prova, che c'è solo nelle versioni per PC:
 - **Salto a muro**: cadendo contro un muro GIG pianta il braccio e frena; salto lo stacca in diagonale. Fra due muri vicini si risale.
 - **Scatto**: in aria, il tasto dello scatto spinge GIG in avanti di 3 blocchi, dritto; uno per salto.
 - **Corsa sul muro**: di corsa contro un muro, salto: GIG sale qualche passo in verticale; in cima, salto di nuovo è la Spinta.
+- **Vista**: tenendo premuto il tasto, l’occhio cyan di GIG fa vedere quello che è nascosto; accanto a un registro, su per copiarlo.
 - **R** (Select sul gamepad) ricomincia dall'inizio, **Esc** (Start) torna al titolo; in basso ci sono velocità, altezza dell'ultimo salto e tick in aria, per tarare il movimento.
 
 Avviando il gioco con Godot, come sopra, è una build di debug e funzionano anche F1 (hitbox e hurtbox), F2 (rallentatore), F3 (fermo immagine), F4 (avanza di un fotogramma durante il fermo immagine) e F5 (accende e spegne le luci dinamiche sui personaggi). Nelle build esportate per i giocatori, e nella demo web, questi tasti non fanno nulla.
@@ -144,9 +159,11 @@ REQUIRE_DONE=1 tools/run_godot.sh 300 --headless -s res://tests/run_tests.gd
 REQUIRE_DONE=1 tools/run_godot.sh 120 --headless -s "$(cygpath -w "$PWD/tools/audio/godot_tests/test_audio.gd")"
 ```
 
+I comandi sono scritti per Git Bash su Windows, con Godot nel laboratorio. Se Godot è altrove, metti `GODOT=/percorso/di/godot` davanti ai comandi; su Mac e Linux, nel terzo, togli `cygpath -w` e lascia solo il percorso. `tools/verifica.sh` fa in un colpo l’import, i test del gioco, la guardia degli asset e la build del sito: è lo stesso controllo che gira su GitHub con [`test.yml`](.github/workflows/test.yml), a ogni push su `sviluppo` e `master`.
+
 Il gioco gira a tick fissi, senza tempo reale: i test costruiscono un livello e lo fanno avanzare un tick alla volta, e i replay (solo gli ingressi, tick per tick) si rigiocano due volte per controllare che lo stato finale abbia lo stesso hash. L’ultima riga dell’output è `DONE` solo se tutti i test passano. Gruppi, replay e controllo visivo con Movie Maker sono descritti in [`game/tests/README.md`](game/tests/README.md).
 
-Prima di ogni commit gira `tools/guard_assets.py`, tramite l’hook in `tools/hooks`.
+Prima di ogni commit gira `tools/guard_assets.py`, tramite l’hook in `tools/hooks`, che si attiva una volta per ogni clone con `git config core.hooksPath tools/hooks`.
 
 ## Il sito
 
@@ -158,36 +175,46 @@ python -I tools/site/media.py              # rifà video, GIF, schermate e sprit
 bash tools/site/export_web.sh              # esporta la demo web (Godot 4.7.2, senza thread; con la musica se CAR_MUSIC_DIR indica i brani)
 ```
 
-Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/sito.yml), a ogni push su `master` che tocca il sito o il gioco: costruisce il sito, scarica la musica della demo e il video del teaser dalla release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo), esporta la demo in `gioca/` e pubblica su GitHub Pages. Niente CDN, niente cookie, niente tracciamenti.
+Su GitHub fa tutto il workflow [`.github/workflows/sito.yml`](.github/workflows/sito.yml), a ogni push su `master` che tocca il sito o il gioco: fa girare i test, costruisce il sito, scarica dalla release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo) la musica, le battute e le voci della demo e il video del trailer, esporta la demo in `gioca/` e pubblica su GitHub Pages. Niente CDN, niente cookie, niente tracciamenti.
 
 ## Struttura
 
 | Cartella | Contenuto |
 |---|---|
 | `game/` | Progetto Godot: scene, script, dati, asset, test e replay |
-| `tools/` | Pipeline per sprite e sfondi (dal 3D alla pixel art), effetti visivi, interfaccia e font, effetti sonori e musica, controlli sugli asset, il sito |
+| `tools/` | Pipeline per sprite e sfondi (dal 3D alla pixel art), murales, effetti visivi, interfaccia e font, effetti sonori, musica e voci, livelli LDtk, controlli sugli asset, preparazione del laboratorio, il sito |
 | `site/` | Il sito: testi, modello, stile, script e media presi dal gioco |
-| `docs/` | Piano, specifica dello slice, guida all'editor dei livelli ([`docs/ldtk.md`](docs/ldtk.md)), media del README, guida per lavorare da più PC |
-| `.github/workflows/` | La pubblicazione del sito e della demo |
+| `docs/` | Piano, guida al mondo ([`docs/mondo.md`](docs/mondo.md)), specifica dello slice, guida all’editor dei livelli ([`docs/ldtk.md`](docs/ldtk.md)), media del README, guida per lavorare da più PC |
+| `.github/workflows/` | I test a ogni push; la pubblicazione del sito e della demo |
 
 ## Crediti
 
 **CTRL+ALT REVENGE!** · © 2026 Luigi Massari
 
 - **Progetto e direzione:** Luigi Massari.
-- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e, per le ambientazioni e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
-- **Musica della demo e del teaser:** Luigi Massari, con Suno (piano Pro).
+- **Codice, grafica ed effetti sonori:** prodotti con agenti di intelligenza artificiale per Luigi Massari, partendo da sorgenti CC0 e CC BY e, per le ambientazioni, i murales, il titolo e i primi piani dei filmati, da basi generate con Gemini e ChatGPT.
+- **Voci dei personaggi:** sintetiche, progettate in italiano con HeyGen. Nessuna è clonata da una persona vera.
+- **Musica della demo e del trailer:** Luigi Massari, con Suno (piano Pro).
+- **Trailer:** murales nostri e due scene d’arena del gioco, animati con HeyGen a partire da nostre immagini; le altre clip sono gioco vero, ritoccato nel colore. Nel gioco di oggi i murales li animano i nostri script.
 - **Font CAR Pixel, effetti e interfaccia:** disegnati da script per CTRL+ALT REVENGE.
 - **Motore:** [Godot Engine](https://godotengine.org).
 
-La grafica la fanno script deterministici, con semi fissi, che si possono rileggere tutti nel repository; gli script li scrivono agenti AI per Luigi Massari. Niente ritocchi a mano. Personaggi, nemici e oggetti animati nascono dalla pipeline 3D. Le immagini generate da un’intelligenza artificiale sono soltanto basi. Quelle delle ambientazioni del prologo sono sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI, da prompt di solo testo, che gli script di `tools/ambienti/` portano alla pixel art del gioco. I piani della strada dello slice «Sotto la Linea» li ha dipinti ChatGPT sopra i nostri render, i nostri schizzi e le basi del prologo; il pavimento e il cavo sono disegnati dal codice, e le insegne le scrive il nostro carattere pixel. I volti dei primi piani dei filmati li fa ChatGPT partendo dai nostri render 3D; `tools/sprites/closeup_ai.py` li riduce, e palpebre e bocca le animano i nostri script. Gli originali non sono nel repository.
+La grafica la fanno script deterministici, con semi fissi, quasi tutti nel repository: quelli delle tavole del prologo sono ancora nella nostra cartella di lavoro. Gli script li scrivono agenti AI per Luigi Massari. I ritocchi a mano sono l’eccezione: due file della strada del capitolo 2 (vedi [`tools/env/README.md`](tools/env/README.md)). Personaggi, nemici e oggetti animati nascono dalla pipeline 3D.
 
-**Sorgenti CC0** (il credito non è obbligatorio, lo diamo lo stesso):
-- [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro del nostro render da cui è ridipinta la strada dello slice).
+Nel gioco le immagini generate da un’intelligenza artificiale sono soltanto basi, e gli originali non sono nel repository. Quelle delle ambientazioni del prologo sono sfondi dipinti e fogli di oggetti fatti con l’app Gemini di Google e con ChatGPT di OpenAI: le prime da prompt di solo testo, dall’8 novembre 2026 anche partendo dalle nostre basi e dai nostri render, mai da immagini di altri. Gli script di `tools/ambienti/` e quelli delle tavole le portano alla pixel art del gioco. I piani della strada del capitolo 2, «Il Wind Day», li ha dipinti ChatGPT sopra i nostri render, i nostri schizzi e le basi del prologo; il pavimento e il cavo sono disegnati dal codice, e le insegne le scrive il nostro carattere pixel. Anche i murales dei filmati, e il poster del trailer che ne riprende uno, partono da basi di ChatGPT: per gli sfondi da prompt di solo testo, per le figure dai nostri render 3D e dalle nostre basi. `tools/murales/` li porta in pixel art; scritte e tag li disegna il nostro carattere pixel. Il fondale del titolo l’ha dipinto ChatGPT partendo soltanto da una nostra base; `tools/ambienti/titolo.py` lo porta in pixel art. I volti dei primi piani dei filmati li fa ChatGPT partendo dai nostri render 3D; `tools/sprites/closeup_ai.py` li riduce. Nel gioco di oggi murales e primi piani li animano i nostri script: luci, palpebre e bocca.
+
+Il trailer è un’eccezione: lì i murales e due scene d’arena sono animati con HeyGen, che genera il video a partire dalle nostre immagini; le altre clip sono gioco vero, ritoccato nel colore. Per questo il trailer è più ricco del gioco di oggi. Le voci dei personaggi sono sintetiche, progettate in italiano con HeyGen: nessuna è clonata da una persona vera. La musica è fatta con Suno.
+
+**Sorgenti libere** (quasi tutte CC0: il credito non è obbligatorio, lo diamo lo stesso):
+- [Quaternius](https://quaternius.com): Universal Base Characters, Universal Animation Library e Universal Animation Library 2 (i modelli e le animazioni da cui nascono GIG, il punk e il bruto), Downtown City MegaKit (il condizionatore a muro del nostro render da cui è ridipinta la strada del capitolo 2).
 - [Mesh2Motion](https://github.com/Mesh2Motion/mesh2motion-app): le animazioni del calcio circolare di GIG.
 - [Kenney](https://kenney.nl/assets/city-kit-roads): City Kit Roads 2.2, il cassonetto dello stesso render.
+- Suoni CC0 di [Kenney](https://kenney.nl) (Impact, Interface, RPG e Sci-Fi Sounds), di [Freesound](https://freesound.org) e di rubberduck e AntumDeluge (OpenGameArt): da lì sono montati e ritoccati gli effetti sonori.
+- [DavidW, «Punch SFX»](https://opengameart.org/content/punch-sfx), CC BY 4.0, modificato: uno strato dei colpi pesanti e del KO. Qui il credito è obbligatorio.
 
-**Strumenti, tutti gratuiti e open source:** Godot Engine 4.7.2 (MIT), Blender 4.5 LTS (GPL-3.0-or-later), FFmpeg 9.0 (GPL-3.0, solo per catture e video), Python 3.14 con NumPy, Pillow e SciPy.
+**Strumenti liberi e gratuiti:** Godot Engine 4.7.2 (MIT), Blender 4.5 LTS (GPL-3.0-or-later), LDtk 1.5.3 (MIT, l’editor dei livelli), FFmpeg 9.0 (GPL-3.0, per audio, catture e video), Python 3.14 con NumPy, Pillow e SciPy.
+
+**Servizi AI, alcuni con un abbonamento a pagamento:** Gemini, ChatGPT, Suno e HeyGen, per le basi delle immagini, la musica, le voci e il trailer, come detto sopra.
 
 CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 immaginata a partire da quella vera. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati. I luoghi e i riti della città sono veri, e li raccontiamo con rispetto.
 
@@ -200,6 +227,6 @@ CTRL+ALT REVENGE è un’opera di fantasia, ambientata in una Taranto del 2087 i
 
 [`REUSE.toml`](REUSE.toml) dice quale licenza vale per ogni file. Per chiedere un permesso: [GitHub issues](https://github.com/luigismith/ctrl-alt-revenge/issues).
 
-**Musica e teaser.** I brani della demo e la musica del teaser li ha creati Luigi Massari con Suno (piano Pro). Non sono in questo repository, come il video del teaser, e le licenze qui sopra non valgono per loro: il sito e la demo web li prendono dagli allegati della release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo).
+**Musica, voci e trailer.** I brani della demo e la musica del trailer li ha creati Luigi Massari con Suno (piano Pro); le voci dei personaggi sono sintetiche, progettate in italiano con HeyGen. Brani, voci e video del trailer non sono in questo repository, e le licenze qui sopra non valgono per loro: il sito e la demo web li prendono dagli allegati della release [`musica-demo`](https://github.com/luigismith/ctrl-alt-revenge/releases/tag/musica-demo), dove stanno anche le battute del prologo.
 
 **Contributi.** Leggi [`CONTRIBUTING.md`](CONTRIBUTING.md).

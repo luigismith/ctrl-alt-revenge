@@ -14,6 +14,8 @@ SPDX-License-Identifier = "MIT"
 #    dal repo: Quaternius Universal Base Characters e Universal Animation Library 1-2 (versione Standard) e
 #    Mesh2Motion (vedi THIRD-PARTY-NOTICES.md e tools/sprites/FONTI.md). Il CC0 non chiede annotazioni qui.
 #    I font CAR Pixel sono disegnati da noi (tools/fxui): sono grafica del gioco, non codice.
+#    I livelli (game/data/levels e le mappe di game/data/platform) e i copioni delle scene (game/data/scene)
+#    sono level design e storia: asset anche loro, non codice.
 [[annotations]]
 path = [
   "docs/lore/**",
@@ -26,6 +28,9 @@ path = [
   "game/assets/fonts/**",
   "game/assets/sfx/**",
   "game/data/levels/**",
+  "game/data/platform/*.ldtk",
+  "game/data/platform/*.txt",
+  "game/data/scene/**",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Luigi Massari"

@@ -1,6 +1,10 @@
 # Voci: le battute parlate, con Qwen3-TTS in locale
 
-Le voci si fanno sul PC, senza servizi in rete: **progetta e clona**.
+> **Nota, 11 novembre 2026.** Le voci del gioco di oggi, le 22 battute del prologo, non vengono più da Qwen3-TTS: sono voci progettate in italiano con HeyGen. Di questa cartella hanno usato solo la fase `finali` (trattamento, filtro TV, tempi delle parole, `.ogg` e `manifest.json`), con `--uscita` verso una cartella a parte. Il resto della pagina descrive la strada in locale di prima, che resta per le prove.
+>
+> **Attenzione:** sul prologo `voci.py finali` senza `--uscita` scrive in `$T\voci\prologo` e rimette le voci di Qwen3-TTS al posto di quelle di oggi.
+
+Con Qwen3-TTS le voci si fanno sul PC, senza servizi in rete: **progetta e clona**.
 1. VoiceDesign 1.7B crea da una descrizione la voce di riferimento di ogni personaggio.
 2. Base 0.6B la clona su ogni battuta, con più semi fissi.
 3. Whisper base ascolta ogni presa e sceglie quella con meno lettere sbagliate.
@@ -81,6 +85,7 @@ Il server ascolta solo su `127.0.0.1`. La pagina viene da `tools/voci/scelta/ind
 ## Licenze
 
 - Il codice di questa cartella è MIT, come gli altri strumenti.
-- [Qwen3-TTS](https://github.com/Qwen/Qwen3-TTS) (i modelli `Qwen3-TTS-12Hz-1.7B-VoiceDesign` e `Qwen3-TTS-12Hz-0.6B-Base` e il pacchetto `qwen-tts`): Apache-2.0, del team Qwen di Alibaba. Permette l'uso commerciale; per vendere il gioco basta citarlo nei crediti e tenere l'avviso della licenza.
+- HeyGen, con cui sono fatte le voci del gioco di oggi: è un servizio in abbonamento, non un programma di questa cartella. Crediti e condizioni, anche per vendere il gioco, stanno in `THIRD-PARTY-NOTICES.md`.
+- [Qwen3-TTS](https://github.com/Qwen/Qwen3-TTS) (i modelli `Qwen3-TTS-12Hz-1.7B-VoiceDesign` e `Qwen3-TTS-12Hz-0.6B-Base` e il pacchetto `qwen-tts`), la strada di prima: Apache-2.0, del team Qwen di Alibaba. Permette l'uso commerciale; per vendere un gioco con quelle voci basta citarlo nei crediti e tenere l'avviso della licenza.
 - [Whisper base](https://huggingface.co/openai/whisper-base): MIT, © OpenAI. Serve solo a controllare le prese, non finisce nel gioco.
 - Le voci non vengono da persone vere: sono progettate da una descrizione scritta. L'audio prodotto segue le licenze degli asset del gioco.

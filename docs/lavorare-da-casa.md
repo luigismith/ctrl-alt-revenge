@@ -14,7 +14,7 @@ CTRL+ALT REVENGE si sviluppa su due PC: quello di **lavoro** e quello di **casa*
 
 Il **OneDrive di lavoro** è quello con l'account dell'azienda: in Esplora file la sua cartella si chiama "OneDrive -" seguito dal nome dell'azienda, in PowerShell è `$env:OneDriveCommercial`.
 
-`%USERPROFILE%` è la cartella del tuo utente Windows, per esempio `C:\Users\Admin`: sui due PC può essere diversa. Gli script la trovano da soli.
+`%USERPROFILE%` è la cartella del tuo utente Windows, per esempio `C:\Users\<tuo utente>`: sui due PC può essere diversa. Gli script la trovano da soli.
 
 La cartella condivisa è **privata**: non va mai nel repo e non si condivide con nessuno (niente link di OneDrive). Dentro c'è un `LEGGIMI.md` con l'elenco di cosa contiene.
 
@@ -97,13 +97,13 @@ winget install --id astral-sh.uv -e
    - Sul PC dove arrivi: aspetta la stessa cosa prima di aprire il progetto.
 3. **A fine giornata, copia di sicurezza su GitHub.**
    - Il modo semplice: chiedi a Claude "fai il commit e il push su GitHub, anche della storia".
-   - **Il repo pubblico.** Il ramo di lavoro è `master` (il vecchio prototipo Pygame è nel ramo `legacy-pygame`). A mano, nella cartella del repo:
+   - **Il repo pubblico.** Il ramo di lavoro è `sviluppo`. `master` è quello pubblicato: ogni push su `master` ricostruisce e pubblica il sito e riesporta la demo, quindi ci si arriva solo quando si decide di pubblicare (il vecchio prototipo Pygame è nel ramo `legacy-pygame`). A mano, nella cartella del repo:
 
      | Comando | A cosa serve |
      |---|---|
      | `git status` | mostra cosa è cambiato |
-     | `git push origin master` | manda su GitHub i commit fatti |
-     | `git pull --ff-only origin master` | prende da GitHub le novità fatte altrove (per esempio da Claude sul web) |
+     | `git push origin sviluppo` | manda su GitHub i commit fatti |
+     | `git pull --ff-only origin sviluppo` | prende da GitHub le novità fatte altrove (per esempio da Claude sul web) |
      
    - **La storia.** `docs\lore\` è un repo git a parte, collegato al repo privato `ctrl-alt-revenge-storia`. A mano, sempre dalla cartella del repo, ma prima un controllo: `git -C docs\lore rev-parse --show-toplevel` deve finire con `docs/lore`. Se finisce con `ctrlaltrevenge`, il repo della storia su questo PC non c'è: non andare avanti, perché i comandi qui sotto agirebbero sul repo pubblico, e chiedi a Claude.
 
@@ -124,7 +124,7 @@ winget install --id astral-sh.uv -e
      Copia nella cartella condivisa solo i file nuovi o più recenti e non cancella niente. Con `-Prova` mostra cosa copierebbe, senza copiare. Con `-Forza` ricopia anche i file che sembrano uguali, ma non sostituisce mai un file della cartella condivisa con uno più vecchio.
    - Sull'altro PC rilancia `prepara_laboratorio.ps1`: copia solo le novità.
    - Se cambi la stessa nota sui due PC senza passare dalla cartella condivisa, al giro dopo vince la versione più recente; l'altra, nel laboratorio, finisce in `backup\`.
-5. **Nel repo non vanno mai** musica, brani di Suno, modelli CC0 di partenza, note private, la storia completa o immagini fatte con l'AI. Prima di ogni commit un controllo automatico (`tools/guard_assets.py`) blocca l'audio e i file grandi, ma non può riconoscere tutto.
+5. **Nel repo non vanno mai** musica, brani di Suno, modelli CC0 di partenza, note private, la storia completa, le locandine e gli originali delle immagini generate con l'AI (basi e prompt stanno nella cartella privata condivisa: nel repo entra solo la pixel art che ne deriva, dichiarata in `THIRD-PARTY-NOTICES.md`). Prima di ogni commit un controllo automatico (`tools/guard_assets.py`) blocca l'audio e i file grandi, ma non può riconoscere tutto.
 
 ## 4. La musica (Suno)
 

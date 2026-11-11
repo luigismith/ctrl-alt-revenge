@@ -11,7 +11,7 @@ piatte a due o tre toni, sfumature a spray, qualche colatura, colori saturi e un
 | Vignetta | 512×288, in 16:9 come lo schermo (480×270) più 32×18 px di margine per scorrerci sopra |
 | Panoramica | fino a 960×288, per le carrellate |
 | Dettaglio | zoom intero 2x della telecamera delle scene, così i pixel restano quadrati |
-| Colori | 48 per vignetta, niente retinatura, contorno `#1e1028` |
+| Colori | circa 96 per vignetta nel prologo (da 82 a 97, contati nel campo `colori` di `murale.json`); senza `colori` nella configurazione, `murale.py` ne usa 48. Niente retinatura, contorno `#1e1028` |
 
 Per ogni vignetta escono in `game/assets/murales/<capitolo>/<id>/`:
 

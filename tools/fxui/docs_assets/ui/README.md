@@ -4,6 +4,17 @@ Tutto è generato da `tools/fxui/make_ui.py`, alla risoluzione del gioco (480×2
 
 La cartella `portraits/` non nasce da qui: i ritratti 32×32 li fa la pipeline dei personaggi.
 
+## Primi piani delle scene (`closeups/`)
+
+I primi piani 96×96 dei filmati nel motore: GIG prima del riavvio (`gig_spento_sx`), il messo (`messo_dx`) e il rider (`rider_dx`). Neanche questi nascono da `make_ui.py`:
+
+- **Il volto** in stile murales è generato con **ChatGPT di OpenAI**, ridipingendo il nostro render 3D del personaggio (decisione 68 della storia). Il JSON accanto lo dice nel campo `fonte`.
+- **La riduzione in pixel art** la fa `tools/sprites/closeup_ai.py`: allinea il volto al render, ne fa la tavolozza e la aggancia ai colori del personaggio. Le impostazioni stanno nella voce `ai` del primo piano, in `tools/sprites/chars/<personaggio>.json`.
+- **Palpebre chiuse (`_blink`) e bocca aperta (`_talk`)** le disegna lo stesso script sui pixel della base: niente di animato viene dall'AI.
+- **Gli originali e i prompt** non sono nel repository.
+
+Ogni JSON dà i riquadri di occhi (`eyes`) e bocca (`mouth`) e i loro colori (`lid`, `mouth_dark`).
+
 ## Elementi
 
 | Chiave in `ui.json` | File | Misure | Note |
@@ -15,7 +26,8 @@ La cartella `portraits/` non nasce da qui: i ritratti 32×32 li fa la pipeline d
 | `msg_zone_clear` | `msg_zone_clear.png` | 276×31 | "ZONA LIBERATA" |
 | `msg_pause` | `msg_pause.png` | 115×31 | "PAUSA" |
 | `msg_continue` | `msg_continue.png` | 197×31 | "CONTINUA?" |
-| `msg_game_over` | `msg_game_over.png` | 202×31 | "GAME OVER" (facoltativo) |
+| `msg_game_over` | `msg_game_over.png` | 202×31 | "GAME OVER" (non più usato nel gioco) |
+| `msg_abbonamento_scaduto` | `msg_abbonamento_scaduto.png` | 228×55 | "ABBONAMENTO SCADUTO": la fine partita, al posto di GAME OVER |
 | `msg_demo_end` | `msg_demo_end.png` | 307×31 | "FINE DELLA DEMO" |
 | `big_digits` | `big_digits.png` | 10 fotogrammi da 23×31 | cifre 0-9 in oro nello stile delle scritte `msg_*`; il fotogramma k è la cifra k (conto alla rovescia di CONTINUA?, a 1x) |
 | `go_arrow` | `go_arrow.png` | 3 fotogrammi da 56×24 | "VAI ▶": 0 acceso, 1 triangolo avanti di 3 px, 2 spento; 8 tick ciascuno, in ciclo |
