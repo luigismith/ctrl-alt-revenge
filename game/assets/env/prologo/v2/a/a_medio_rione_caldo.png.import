@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwjdawiolxvew"
-path="res://.godot/imported/a_vicino_bagnato.png-887bd49cf84f08e3bb55659c26de60d3.ctex"
+uid="uid://35nvk272trm3"
+path="res://.godot/imported/a_medio_rione_caldo.png-494c27a617f60f738410a8d132d5553b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/env/prologo/v2/a/a_vicino_bagnato.png"
-dest_files=["res://.godot/imported/a_vicino_bagnato.png-887bd49cf84f08e3bb55659c26de60d3.ctex"]
+source_file="res://assets/env/prologo/v2/a/a_medio_rione_caldo.png"
+dest_files=["res://.godot/imported/a_medio_rione_caldo.png-494c27a617f60f738410a8d132d5553b.ctex"]
 
 [params]
 

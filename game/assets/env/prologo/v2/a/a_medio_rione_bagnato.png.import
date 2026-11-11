@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gtjs3ekxvtd6"
-path="res://.godot/imported/a4_medio_largo.png-57f81974071764db2af68c3b6d9e0eb6.ctex"
+uid="uid://pxtrqsorbi32"
+path="res://.godot/imported/a_medio_rione_bagnato.png-74a10666c20af3c1d122e8bb30319c78.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/env/prologo/v2/a/a4_medio_largo.png"
-dest_files=["res://.godot/imported/a4_medio_largo.png-57f81974071764db2af68c3b6d9e0eb6.ctex"]
+source_file="res://assets/env/prologo/v2/a/a_medio_rione_bagnato.png"
+dest_files=["res://.godot/imported/a_medio_rione_bagnato.png-74a10666c20af3c1d122e8bb30319c78.ctex"]
 
 [params]
 

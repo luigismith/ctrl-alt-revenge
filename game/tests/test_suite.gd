@@ -4226,7 +4226,7 @@ func _test_prologue_v2() -> void:
 	for l: Backdrop.Layer in a4_layers:
 		if l.z >= 1000:
 			cols = l
-	check(room.art_holes.size() == 6 and room.art_holes[3] == Rect2(2760, 200, 1960, 520) and room._art_extra.size() == 4
+	check(room.art_holes.size() == 7 and room.art_holes[3] == Rect2(2760, 200, 1960, 520) and room._art_extra.size() == 4
 		and cols != null
 		and Backdrop.alpha(cols, 2700) == 0.0 and Backdrop.alpha(cols, 3300) == 1.0 and Backdrop.alpha(cols, 3950) == 0.0,
 		"Prologo v2: la galleria A4 è montata, con le colonne davanti nel loro tratto", "buchi %s" % [room.art_holes])
@@ -4240,11 +4240,22 @@ func _test_prologue_v2() -> void:
 	var billboard := false
 	for sp: Sprite2D in room._scene_art:
 		billboard = billboard or sp.name.contains("cartellone")
-	check(room.art_holes.size() == 6 and room.art_holes[4] == Rect2(4600, 402, 880, 398)
-		and room.art_holes[5] == Rect2(5480, 200, 1480, 600) and not billboard
+	check(room.art_holes.size() == 7 and room.art_holes[4] == Rect2(4600, 402, 880, 398)
+		and room.art_holes[6] == Rect2(5480, 200, 1480, 600) and not billboard
 		and a6_front != null and Backdrop.alpha(a6_front, 5400) == 0.0 and Backdrop.alpha(a6_front, 6200) == 1.0,
 		"Prologo v2: la tavola A6 è montata, senza il cartellone provvisorio di A4", "buchi %s, cartellone %s" % [
 			room.art_holes, billboard])
+	# La terra sotto il pavimento di A4 (un pezzo con "copre"): fa da tavola, e la stanza non ci disegna
+	# sopra le sue celle piene grigie (il rettangolo all'uscita del deposito). Le celle sono piene davvero.
+	var tl := SolidGrid.TILE
+	var under_a4 := [Vector2i(4580, 740), Vector2i(4580, 780), Vector2i(2920, 720), Vector2i(3600, 760)]
+	var covered := room.art_holes.size() > 5 and room.art_holes[5] == Rect2(2920, 720, 1680, 80)
+	for c: Vector2i in under_a4:
+		covered = covered and room.grid.cell(c.x / tl, c.y / tl) == SolidGrid.Cell.SOLID
+		covered = covered and room._in_art(Rect2(c.x, c.y, tl, tl))
+	check(covered,
+		"Prologo v2: la terra sotto A4 copre le celle piene, niente grigio all'uscita del deposito",
+		"buchi %s" % [room.art_holes])
 	# A5, il piazzale del pignoramento: il chiavistello sopra la sua leva, il sigillo SIDERA che tremola
 	# quando GIG gli arriva davanti, il pavimento dipinto dell'arena; poi la soglia del cantiere, col palo
 	# davanti a GIG.
@@ -4282,7 +4293,7 @@ func _test_prologue_v2() -> void:
 	for n in room._room_node.get_children():
 		if n is Sprite2D and str(n.name) in ["Galleria_a1_emis", "Galleria_a2_emis", "Galleria_a3_emis"]:
 			a_emis += 1
-	check(room.art_holes.size() == 6 and room.art_holes.slice(0, 3) == [Rect2(0, 200, 720, 600),
+	check(room.art_holes.size() == 7 and room.art_holes.slice(0, 3) == [Rect2(0, 200, 720, 600),
 			Rect2(720, 200, 960, 600), Rect2(1680, 200, 1240, 600)] and not old_scene and a_emis == 3,
 		"Prologo v2: in A le tavole A1-A3 coprono da 0 a 2920, al posto della scena di prima",
 		"buchi %s, scena di prima %s, emissioni %d" % [room.art_holes, old_scene, a_emis])
@@ -4295,23 +4306,28 @@ func _test_prologue_v2() -> void:
 	if room._wide_art != null:
 		for l: Backdrop.Layer in room._wide_art.layers:
 			wide[l.name] = l
-	check(wide.size() == 12 and room._art_view.size() == 1 and old_names == ["davanti"],
+	check(wide.size() == 16 and room._art_view.size() == 1 and old_names == ["davanti"],
 		"Prologo v2: in A i fondi sono i piani larghi, al posto del cielo, del medio e del vicino di prima",
 		"larghi %s, di prima %s" % [wide.keys(), old_names])
 	# I tre veli: rosa fino ad A3, scirocco in A4, pioggia da A5. Il velo dopo sfuma sopra quello prima,
 	# che resta pieno sotto: a ogni telecamera ogni piano ha almeno un velo pieno (niente trasparenze).
+	# Dove il soggetto cambia (da 2900 a 3120 le cappelle lasciano il posto al rione e alla ferrovia) i due
+	# piani si scambiano in dissolvenza incrociata: lì basta che le alfa del gruppo sommino almeno 1.
 	var ramp := func(n: String, xs: Array) -> Array:
 		return xs.map(func(x: int) -> float: return snappedf(Backdrop.alpha(wide[n], x), 0.01) if wide.has(n) else -1.0)
 	var sky := [ramp.call("cielo_rosa", [2780, 3780, 3800]), ramp.call("cielo_chiude", [2780, 3280, 3780, 4680, 4700]),
 		ramp.call("cielo_pioggia", [3780, 4230, 4680, 6240])]
 	var holes: Array = []
-	if wide.size() == 12:
+	if wide.size() == 16:
 		for g: String in ["cielo", "lontano", "medio", "vicino"]:
 			for x in range(0, 6241, 20):
 				var full := false
+				var sum := 0.0
 				for l: Backdrop.Layer in room._wide_art.layers:
-					full = full or (l.name.begins_with(g + "_") and Backdrop.alpha(l, x) >= 1.0)
-				if not full:
+					if l.name.begins_with(g + "_"):
+						full = full or Backdrop.alpha(l, x) >= 1.0
+						sum += Backdrop.alpha(l, x)
+				if not full and sum < 0.99:
 					holes.append("%s@%d" % [g, x])
 	check(sky == [[1.0, 1.0, 0.0], [0.0, 0.5, 1.0, 1.0, 0.0], [0.0, 0.5, 1.0, 1.0]] and holes.is_empty(),
 		"Prologo v2: lungo A i fondi passano dal rosa allo scirocco alla pioggia, senza buchi", "cielo %s, buchi %s" % [
@@ -4330,7 +4346,7 @@ func _test_prologue_v2() -> void:
 				var bottom := l.y - roundi((top - room._wide_art.cam_ref_y) * l.scroll_y) + l.texture.get_height()
 				if bottom < 405:
 					short.append("%s fondo %d a cima %d" % [n, bottom, top])
-	check(wide.size() == 12 and short.is_empty(), "Prologo v2: i fondi larghi di A coprono la vista larga ovunque",
+	check(wide.size() == 16 and short.is_empty(), "Prologo v2: i fondi larghi di A coprono la vista larga ovunque",
 		str(short))
 	check(g0.get("porta_intera") == true and g0.get("porta_rotta") == false and g0.get("cancello_chiuso") == true
 		and g0.get("cancello_aperto") == false,

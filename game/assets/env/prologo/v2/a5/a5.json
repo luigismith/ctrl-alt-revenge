@@ -9,7 +9,7 @@
  },
  "emissione": {
   "image": "a5_emis.png",
-  "x": 4889,
+  "x": 4898,
   "y": 484
  },
  "stati": {
@@ -83,8 +83,8 @@
   },
   {
    "nome": "aria_purificatore",
-   "x": 4907,
-   "y": 570,
+   "x": 4921,
+   "y": 591,
    "colore": "#86d9a6",
    "energia": 0.08,
    "raggio": 30,
@@ -95,6 +95,16 @@
   "chiavistello": "la leva del livello a (4640,680): stato chiavistello_chiuso, poi chiavistello_tirato quando si tira; il rettangolo dello stato tocca il punto della leva, come quadro_giu in A6",
   "sigillo": "alterna sigillo_1 e sigillo_2 ogni 1,2 s; quando GIG ci passa davanti ronza e tremola 3 volte; non si apre",
   "basamenti": "le cornici a y 640 coincidono con le colonne piene 262 e 268 (x 5240-5260 e 5360-5380)",
-  "moto": "la moto del rider resta il pezzo di A4 a (4665,610)"
+  "moto": "la moto del rider resta il pezzo di A4 a (4665,610)",
+  "v2": "11 novembre 2026: muro nuovo (tufo, lesene, bacheca funebre, ARIA+ sulla scritta, condotto, drone) e stallo del carro sul piazzale; collisione, stati e posizioni come la v1"
+ },
+ "pezzi": {
+  "terra_sotto_a4": {
+   "image": "a5_terra_sotto.png",
+   "x": 2920,
+   "y": 720,
+   "copre": true,
+   "nota": "11 novembre 2026: chiude il vuoto sotto il pavimento fra A3 (fino a x 2920) e A5 (da x 4600), sotto il fondo della scena di A4 (y 720), fino a y 800 come A5. È la stessa terra scura di A5."
+  }
  }
 }

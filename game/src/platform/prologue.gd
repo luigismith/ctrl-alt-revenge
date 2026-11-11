@@ -537,6 +537,10 @@ func _build_gallery(path: String) -> void:
 		for k: String in (pieces as Dictionary):
 			if not k.begins_with("davanti"):
 				var pc := _gallery_sprite(dir, pieces[k])
+				# "copre": un pezzo pieno che fa da tavola (la terra sotto il pavimento di A4): la stanza
+				# non ci disegna sopra le sue celle grigie (art_holes).
+				if pc != null and bool((pieces[k] as Dictionary).get("copre", false)):
+					art_holes.append(_sprite_rect(pc))
 				# "sotto": sotto gli stati di un'altra tavola (il telaio della botola, sotto le serrande).
 				var under: Variant = (pieces[k] as Dictionary).get("sotto", [])
 				if pc != null and under is Array:
