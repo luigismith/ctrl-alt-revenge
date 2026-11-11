@@ -8,7 +8,8 @@
                                              # non ignorati (quelli che un "git add" prenderebbe)
 
 Blocca:
-  * tutto ciò che sta in assets_private/ tranne manifest.json e README.md
+  * tutto ciò che sta in una cartella assets_private/ (quella vera è game/assets_private/: musica,
+    voci e manifest con le battute)
   * la storia privata: docs/lore/ (repo privato) e le battute delle scene (game/data/battute/, che
     tools/site/export_web.sh copia solo nella build web), anche in altre cartelle "battute/"
   * la cache di importazione di Godot (.godot/), che contiene copie convertite dell'audio
@@ -16,6 +17,7 @@ Blocca:
     .m4a .wma) e l'audio importato da Godot (.oggvorbisstr .mp3str .sample)
   * l'audio riconosciuto dal contenuto (RIFF/WAVE, OggS, fLaC, FORM/AIFF, ID3, MPEG),
     qualunque sia il nome del file
+  * i video con una traccia audio (MP4, MOV, WebM, MKV): la musica non si ridistribuisce nemmeno lì dentro
   * qualsiasi file oltre 20 MB
 Eccezione: i percorsi che corrispondono ai pattern di tools/public_audio_allowlist.txt
 (per esempio gli effetti sonori nostri o CC0; ognuno serve anche in REUSE.toml).
@@ -31,7 +33,9 @@ ROOT = Path(__file__).resolve().parent.parent
 ALLOWLIST = ROOT / "tools" / "public_audio_allowlist.txt"
 AUDIO_EXT = {".wav", ".ogg", ".oga", ".opus", ".mp3", ".flac", ".aif", ".aiff", ".aifc",
              ".m4a", ".wma", ".oggvorbisstr", ".mp3str", ".sample"}
-PRIVATE_OK = {"assets_private/manifest.json", "assets_private/README.md"}
+## I video si leggono per intero: la traccia audio sta in un contenitore, non nei primi byte.
+VIDEO_EXT = {".mp4", ".m4v", ".mov", ".webm", ".mkv"}
+VIDEO_AUDIO = (b"soun", b"mp4a", b"A_OPUS", b"A_VORBIS", b"A_AAC")
 MAX_BYTES = 20 * 1024 * 1024
 ## La storia privata: sta nel repo privato e, per le battute, solo nella build web (decisione 68).
 PRIVATE_STORY = ("docs/lore/", "game/data/battute/")
@@ -80,6 +84,15 @@ def entries(staged: bool) -> list[tuple[str, str | None]]:
     return out
 
 
+def video_has_audio(blob: str | None, path: str) -> bool:
+    """Un contenitore video (MP4, MOV, WebM, MKV) con una traccia audio."""
+    if blob is None:
+        data = (ROOT / path).read_bytes()
+    else:
+        data = git("cat-file", "blob", blob)
+    return any(m in data for m in VIDEO_AUDIO)
+
+
 def head_of(blob: str | None, path: str) -> tuple[int, bytes]:
     """Dimensione e primi 16 byte: dal blob dell'indice o, per i file nuovi, dal disco."""
     if blob is None:
@@ -107,14 +120,16 @@ def main() -> int:
         if any(fnmatch.fnmatchcase(path, pat) for pat in allow):
             continue
         reason = None
-        if path.startswith("assets_private/") and path not in PRIVATE_OK:
-            reason = "asset privato (si possono committare solo manifest.json e README.md)"
+        if "/assets_private/" in "/" + path:
+            reason = "asset privato (musica, voci e manifest con le battute: restano fuori dal repo)"
         elif path.startswith(PRIVATE_STORY) or (path.endswith(".json") and "/battute/" in "/" + path):
             reason = "storia privata (battute e lore stanno nel repo privato, non in quello pubblico)"
         elif path.startswith(".godot/") or "/.godot/" in path:
             reason = "cache di importazione di Godot"
         elif Path(path).suffix.lower() in AUDIO_EXT:
             reason = "estensione di file audio"
+        elif Path(path).suffix.lower() in VIDEO_EXT and video_has_audio(blob, path):
+            reason = "video con una traccia audio"
         else:
             size, head = head_of(blob, path)
             kind = sniff(head)

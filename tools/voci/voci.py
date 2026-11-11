@@ -18,6 +18,11 @@ Uso (Python isolato, con il Python di <laboratorio>\\tts\\venv-qwen3; vedi LEGGI
 Di default le battute sono docs/lore/battute/<capitolo>.json, la regia delle voci docs/lore/voci/voci.json
 (tutte e due private, fuori da git) e il laboratorio è %CAR_LAB%\\tts, altrimenti %USERPROFILE%\\ctrlaltrevenge-lab\\tts.
 Niente download: i modelli stanno in <lab>\\modelli. L'audio contiene le battute: resta nel laboratorio.
+
+Nota (11 novembre 2026): le voci FINALI del prologo non vengono da qui. Dall'11 novembre sono tutte di
+HeyGen (voci progettate, piano Creator; decisione 111): questo script resta il metodo con Qwen3-TTS, usato
+per le prove e per le voci non ancora rifatte con HeyGen. Il controllo delle prese con Whisper vale per
+tutte e due.
 """
 import argparse
 import hashlib
@@ -425,6 +430,7 @@ def fase_finali(a, cfg, lines):
             "inviluppo": envelope(w, sr),
             "seme": sc["seme"],
             "cer": sc["cer"],
+            # Valida per le voci fatte da questo script; le finali del prologo, dall'11 novembre, sono di HeyGen.
             "licenza": "Qwen3-TTS-12Hz-0.6B-Base (Apache-2.0), voce progettata con Qwen3-TTS-12Hz-1.7B-VoiceDesign (Apache-2.0) da una descrizione, nessuna persona reale",
         }
         print("%-22s %.2f s, parole: %s, CER %.3f" % (key, dur, metodo, sc["cer"]), flush=True)

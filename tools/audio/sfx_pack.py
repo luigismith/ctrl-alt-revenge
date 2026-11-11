@@ -6,13 +6,13 @@
 
 Le fonti sono pacchetti CC0 (Kenney, Freesound, OpenGameArt) e un pacchetto CC-BY 4.0 (i pugni di
 DavidW, per i colpi pesanti e il KO): l'elenco con autori, pagine e licenze è in FONTI_SFX, i
-crediti stanno in CREDITS.md. I file sorgente non stanno nel repo ma nel laboratorio, in
+crediti stanno in THIRD-PARTY-NOTICES.md. I file sorgente non stanno nel repo ma nel laboratorio, in
 sources/sfx/<pacchetto>/ (arrivano da un PC all'altro con la cartella condivisa).
 
 Ogni suono del gioco è una ricetta: uno o più strati (file, ritardo, guadagno, taglio, intonazione,
 filtri), mescolati e poi rifiniti come quelli di sfx_gen: picco a -1 dBFS, senza componente continua,
 code tagliate, dissolvenze. Ai colpi si aggiunge una saturazione morbida, che dà lo schiocco compresso
-dei picchiaduro a scorrimento di console. Il guadagno di missaggio di ogni suono va in mix.json, con
+dei giochi d'azione a scorrimento di console. Il guadagno di missaggio di ogni suono va in mix.json, con
 gli stessi livelli di loudness di sfx_gen.
 
   python -I tools/audio/sfx_pack.py                 # monta in tools/audio/out/sfx_pack/ e controlla
@@ -55,7 +55,7 @@ RD = "oga-rubberduck-100-cc0-sfx-2/"
 TW = "oga-thwack/PCM/"
 DW = "oga-davidw-punch-sfx/"
 
-# Le fonti, per i crediti (CREDITS.md) e per chi deve riscaricarle.
+# Le fonti, per i crediti (THIRD-PARTY-NOTICES.md) e per chi deve riscaricarle.
 FONTI_SFX = {
     "kenney-impact-sounds": ("Kenney", "Impact Sounds", "https://kenney.nl/assets/impact-sounds", "CC0-1.0"),
     "kenney-interface-sounds": ("Kenney", "Interface Sounds", "https://kenney.nl/assets/interface-sounds", "CC0-1.0"),

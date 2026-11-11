@@ -1,4 +1,4 @@
 # Audio ammesso nel repo pubblico (pattern fnmatch sul percorso).
 # Ogni voce deve avere anche la licenza in REUSE.toml.
-# Effetti sonori generati da noi con tools/audio (LicenseRef-CAR-Assets):
+# Effetti sonori montati da tools/audio/sfx_pack.py da suoni CC0 e CC BY 4.0 (LicenseRef-CAR-Assets; fonti in THIRD-PARTY-NOTICES.md):
 game/assets/sfx/*.wav
