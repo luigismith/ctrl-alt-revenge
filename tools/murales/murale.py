@@ -651,7 +651,8 @@ def main() -> None:
             st, se = np.zeros_like(img), np.zeros_like(emis)
             scritta(st, se, s, rng)
             st[..., 3] = np.where(st[..., :3].any(axis=2), 255, 0)
-            strati.append((st, {"nome": s["strato"], "file": f"scritta_{s['strato']}.png", "testo": s["testo"]}))
+            strati.append((st, {"nome": s["strato"], "file": f"scritta_{s['strato']}.png",
+                           "battuta": s.get("battuta", s["strato"])}))  # l'id, mai il testo: il repo è pubblico
         else:
             scritta(img, emis, s, rng)
     figs = []

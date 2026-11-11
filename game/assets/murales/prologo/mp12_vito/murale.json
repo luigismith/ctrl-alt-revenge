@@ -21,7 +21,7 @@
   ]
  },
  "camera": {
-  "nota": "ricordo del 2064, vignetta 2 (circa 5 s): primo piano di Vito che guarda il figlio fuori campo a sinistra. Spinta lentissima sul volto. La palpebra si chiude ogni tanto (figura_vito_blink) e la bocca si apre solo sulla battuta (figura_vito_talk), come i primi piani del gioco; la luce della lampada oscilla appena. Battuta di VITO, a fumetto e a pressione: «Una mano ce l'hai. L'altra fattela.» Poi la vignetta 3 nel motore: la telecamera si allarga dalla tastiera del murale a quella del 2087.",
+  "nota": "ricordo del 2064, vignetta 2 (circa 5 s): primo piano di Vito che guarda il figlio fuori campo a sinistra. Spinta lentissima sul volto. La palpebra si chiude ogni tanto (figura_vito_blink) e la bocca si apre solo sulla battuta (figura_vito_talk), come i primi piani del gioco; la luce della lampada oscilla appena. Battuta di VITO (ricordo_2064/vito_1), a fumetto e a pressione. Poi la vignetta 3 nel motore: la telecamera si allarga dalla tastiera del murale a quella del 2087.",
   "zoom_da": 1,
   "centro_da": [
    256,

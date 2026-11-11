@@ -21,7 +21,7 @@
   ]
  },
  "camera": {
-  "nota": "i colpi alla porta, vignetta MD-D2 (dal basso): la Vista accende di cyan il bordo del lucernario (l'emissivo pulsa), la pioggia scorre sul vetro. Battuta di TERE: «Catà. Sopra.» GIG guarda in su. La camera sale dal volto al lucernario. Il motore aggiunge la pioggia sopra il vetro.",
+  "nota": "i colpi alla porta, vignetta MD-D2 (dal basso): la Vista accende di cyan il bordo del lucernario (l'emissivo pulsa), la pioggia scorre sul vetro. Battuta di TERE (porta/tere_1). GIG guarda in su. La camera sale dal volto al lucernario. Il motore aggiunge la pioggia sopra il vetro.",
   "zoom_da": 1.12,
   "centro_da": [
    240,

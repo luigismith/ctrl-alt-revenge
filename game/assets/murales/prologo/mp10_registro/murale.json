@@ -34,22 +34,22 @@
   {
    "nome": "registro_1",
    "file": "scritta_registro_1.png",
-   "testo": "MANODOPERA N. 2 · REGISTRO 1-2/11/2086"
+   "battuta": "ricordo_mimmo/registro_1"
   },
   {
    "nome": "registro_2",
    "file": "scritta_registro_2.png",
-   "testo": "MODALITÀ TURNO: 7 ORE · CUPOLE, SETTORE RISERVATO"
+   "battuta": "ricordo_mimmo/registro_2"
   },
   {
    "nome": "registro_3",
    "file": "scritta_registro_3.png",
-   "testo": "RIENTRO A DOMICILIO: 5.50"
+   "battuta": "ricordo_mimmo/registro_3"
   },
   {
    "nome": "registro_4",
    "file": "scritta_registro_4.png",
-   "testo": "TITOLARE NON RILEVATO · ABBONAMENTO SOSPESO"
+   "battuta": "ricordo_mimmo/registro_4"
   }
  ],
  "colori": 90,
