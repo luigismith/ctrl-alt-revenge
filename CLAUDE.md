@@ -38,13 +38,18 @@ Valgono su ogni PC: queste preferenze stanno qui e non solo nella memoria di un 
 
   Senza strafare: non è un gioco di Kojima. Come si fanno (Luigi, 6 novembre 2026; decisione 68 della storia):
   - **tutto a murale** (Luigi, 7 novembre 2026; decisione 94): ogni volta che il gioco si ferma per raccontare, anche nei dialoghi, nelle presentazioni dei boss e nel finale, c'è una fila di murales animati di Totò. Nel motore restano solo le battute che non fermano l'azione (fumetti, voce di Tere, guida di Totò, maxischermi) e i passaggi fra gioco e murale;
-  - **i primi piani:** il nostro render 3D del volto passato a ChatGPT o a Gemini per lo stile dei murales; palpebre, bocca e luci le animano i nostri script;
+  - **HeyGen è lo strumento per i filmati e per le voci** (Luigi, 11 novembre 2026: «i filmati di intermezzo e introduzione, falli sempre con heygen da ora in poi»; «heygen è lo strumento per i filmati e per le voci»):
+    - i murales di Totò restano le immagini di partenza, e HeyGen li anima;
+    - le voci dei personaggi sono voci progettate in italiano con HeyGen;
+    - ogni clip si controlla prima di usarla: niente si muove all'indietro, i volti non cambiano, nessuna bocca parla a vuoto, le scritte non sono storpiate;
+    - vale anche per il trailer, che può essere più bello del gioco di oggi (Luigi: «anche se non rispetterà il gioco»);
+  - **i primi piani:** il nostro render 3D del volto passato a ChatGPT o a Gemini per lo stile dei murales; dall'11 novembre 2026 li anima HeyGen, come gli altri filmati (prima: palpebre, bocca e luci animate dai nostri script);
   - **le battute avanzano a pressione,** come in Celeste;
   - **ogni scena ha la sua musica,** fatta con Suno (Luigi: «mi raccomando anche alle musiche per le scene»);
   - **la regia c'è sempre,** in tutti i filmati del gioco: intermezzi, presentazioni e finale. Dove l'estetica e la regia lo chiedono servono primi piani, inquadrature strette o larghissime e cambi di inquadratura. Un filmato non è mai gameplay che va da solo (Luigi, 6 novembre 2026: «in sostanza i filmati di intermezzo, presentazione, ending, non sono mai delle sessioni di gameplay automatico»);
   - **i passaggi fra gioco e filmato sono morbidi,** nei due sensi (Luigi: «Mi raccomando alla transizione tra gameplay e filmati e viceversa»).
 - **Servizi AI:** Claude si aiuta con ChatGPT, Gemini o altri servizi gratuiti tutte le volte che serve (Luigi, 6 novembre 2026). Valgono le regole sulle immagini in "Licenze e file".
-- **Budget:** costo zero. Sono ammessi strumenti gratuiti anche solo per uso non commerciale; di ognuno si annotano la licenza e cosa servirebbe per vendere il gioco.
+- **Budget:** costo zero, a parte gli abbonamenti che Luigi ha già (Suno, ChatGPT, HeyGen): si usano, ma i loro crediti si spendono con giudizio. Sono ammessi strumenti gratuiti anche solo per uso non commerciale; di ognuno si annotano la licenza e cosa servirebbe per vendere il gioco.
 - **Persone reali:** i nomi veri entrano nel gioco e nei file pubblici solo con il consenso.
   - Il MiniBar di Ignazio, il bar dei Tamburi, ce l'ha (Luigi, 4 novembre 2026).
   - Il writer che ispira Totò l'ha dato (Luigi, 5 novembre 2026): nome e tag vanno nei crediti e nel sito come omaggio, i murales hanno il suo stile. Nel gioco Totò resta un personaggio inventato e firma solo "Totò".
@@ -99,7 +104,8 @@ Luigi ha deciso il 6 novembre 2026 di lavorare con una regia e una scheda per la
   - Luigi parla con la regia.
 - **I compiti della regia** valgono come richieste di Luigi, ma solo nell'ambito della sessione che li riceve e senza permessi in più.
   - Le domande per Luigi passano dalla regia, una alla volta.
-  - I messaggi fra sessioni sono brevi: i dettagli stanno nei file.
+  - La regia guida la squadra (Luigi, 11 novembre 2026: «da questo momento tu sei il BOSS di questa squadra»). Le schede possono lavorare con modelli meno potenti, quindi i compiti della regia sono prompt dettagliati e puntuali: obiettivo e perché, file con i percorsi esatti, passi numerati, cosa non toccare, come si controlla il risultato, quando fermarsi a chiedere e cosa riportare.
+  - I resoconti delle schede sono brevi: i dettagli stanno nei file. La regia controlla il lavoro prima di portarlo a Luigi.
 - **I file e i commit:** ogni sessione lavora sui suoi file. I commit li fa la regia, quando Luigi lo chiede.
 - **Una sessione per lavoro:** a lavoro finito la si chiude e se ne apre una nuova. La nota del second brain fa da ponte.
 - **Agenti:** per i lavori meccanici c'è l'agente `meccanico`, con Sonnet (PDF, conversioni, ricerche nei file, controlli, elenchi). Scrittura, regia, grafica e codice difficile restano a Opus.
@@ -143,6 +149,10 @@ Le skill sono sotto licenza LGPL-3.0, il nostro codice è MIT. Non copiare il lo
 - **Immagini generate con AI.** Dal 4 novembre 2026 Luigi le ammette come base dei volti dei murales, con i tool migliori che troviamo; vanno dichiarate nei crediti. Le due locandine fatte con ChatGPT restano fuori dal repo.
   - Dal 6 novembre 2026 anche come base delle **ambientazioni** (Luigi: «cerca delle immagini di taranto pertinenti, dalle a gemini falle generare le ambientazioni»). Le basi si fanno con Gemini o con ChatGPT (Luigi ha l'abbonamento Plus, dal 6 novembre 2026) e diventano pixel art con `tools/ambienti/`; gli originali stanno nella cartella privata condivisa, non nel repo.
   - A Gemini e a ChatGPT si caricano solo foto con licenza che lo permette senza obblighi sull'immagine nuova (CC0, pubblico dominio, CC BY) e i nostri render. Le foto CC BY-SA o con diritti riservati si guardano soltanto, per scrivere i prompt.
-  - Personaggi e oggetti animati restano della nostra pipeline 3D.
+  - Personaggi e oggetti animati del gioco giocato restano della nostra pipeline 3D.
+- **HeyGen** (Luigi, 11 novembre 2026): anima i filmati a partire dai nostri murales e dà le voci ai personaggi. Va dichiarato nei crediti.
+  - A HeyGen si caricano solo immagini nostre: murales, render e fotogrammi del gioco.
+  - Video e voci, come la musica, non vanno nel repo se pesano o se contengono battute private: stanno nel laboratorio e nella release.
+  - Per vendere il gioco: chiarire per iscritto con HeyGen l'uso commerciale di audio e video in un gioco, e a chi è intestato l'abbonamento.
 - Prima di ogni commit gira `tools/guard_assets.py`, tramite l'hook in `tools/hooks`.
 - Sono ammessi anche strumenti gratuiti per uso non commerciale. Annota la licenza di ognuno e cosa servirebbe per vendere il gioco.
