@@ -183,6 +183,8 @@ func start(scene: SceneData, room: TestRoom, poses: Dictionary, auto_lines: bool
 		if data.music != "" and Music.has_track(StringName(data.music)):
 			_music_mode = 2
 			Music.play(StringName(data.music), 0.8)
+			# Se quel brano già suonava più piano (il gioco), la scena lo porta al volume pieno.
+			Music.set_trim(0.0, 0.8)
 		else:
 			_music_mode = 1
 			Music.duck(true)
@@ -965,8 +967,8 @@ func _music_step(st: Dictionary) -> void:
 func _finish() -> void:
 	phase = Phase.DONE
 	if sound:
-		if _music_mode == 2 and _music_prev != &"":
-			Music.play(_music_prev, 0.8)
+		if _music_mode == 2:
+			host.scene_music_end(_music_prev)
 		elif _music_mode == 1:
 			Music.duck(false)
 	host.scene_end(self)

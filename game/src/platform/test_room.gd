@@ -357,7 +357,7 @@ func _ready() -> void:
 	# La musica del livello, se il laboratorio ha i brani (non tocca la simulazione).
 	if sound:
 		Music.duck(false)
-		Music.play(&"stage1")
+		_start_music()
 	_view = Node2D.new()
 	_view.draw.connect(_draw_back)
 	add_child(_view)
@@ -784,7 +784,8 @@ func _favors_tick(frame: InputFrame) -> void:
 		_on_favor_opened()
 
 
-## La voce di una battuta in gioco: una alla volta, la nuova ferma quella prima.
+## La voce di una battuta in gioco. Una alla volta: le battute che arrivano mentre ne suona una aspettano
+## in coda nei favori (Favors.queued), e arrivano qui quando tocca a loro.
 func _play_line_voice(v: AudioStream) -> void:
 	if _line_voice == null:
 		_line_voice = AudioStreamPlayer.new()
@@ -798,10 +799,12 @@ func _play_line_voice(v: AudioStream) -> void:
 ## girano in questo tratto, e la voce.
 func _say_in_game(id: String, tag: String) -> void:
 	var before := favors.voices.size()
-	favors._say(id, Vector2.ZERO, true, tag)
+	# Senza favori nessuno manda avanti la coda: la battuta parte subito, come prima.
+	favors._say(id, Vector2.ZERO, true, tag, not favors.is_empty())
 	if favors.is_empty():
 		# Senza favori nessuno farebbe scorrere il fumetto: resta solo la voce.
 		favors.bubbles.clear()
+		favors.drop_queue()
 	for i in range(before, favors.voices.size()):
 		_play_line_voice(favors.voices[i])
 	favors.voices.resize(before)
@@ -870,6 +873,8 @@ func hurt(dmg: int) -> bool:
 	if Game.energy > 0:
 		return false
 	_on_event("ko_energia")
+	# GIG è a terra: la battuta in coda non ha più senso.
+	favors.drop_queue()
 	if use_lives:
 		fall_t = 0
 		Game.lose_life()
@@ -942,6 +947,7 @@ func _lives_tick(frame: InputFrame) -> bool:
 
 func _start_fall() -> void:
 	fall_t = 0
+	favors.drop_queue()
 	Game.lose_life()
 	Game.count(&"cadute")
 	if sound:
@@ -1191,6 +1197,12 @@ func _vis_x1() -> float:
 
 
 ## Quello che si vede del mondo adesso (con lo zoom delle scene è più piccolo dello schermo).
+## Quanto resta libero in alto sopra i fumetti, in px del mondo: l'HUD sta lì. Le stanze con una scritta
+## più giù lo allargano.
+func _bubble_top() -> float:
+	return 20.0
+
+
 func _visible_rect() -> Rect2:
 	var size := View.SIZE / zoom
 	return Rect2(_view_c - size / 2.0, size)
@@ -1670,6 +1682,8 @@ func _start_scene() -> void:
 		push_warning("Scena %s non valida: %s" % [req["id"], "; ".join(sd.errors)])
 		return
 	scene_flags = {}
+	# Una battuta in coda appartiene al tratto di gioco di prima: la scena la scarta.
+	favors.drop_queue()
 	scene = ScenePlayer.new()
 	scene.name = "Scena"
 	add_child(scene)
@@ -1769,6 +1783,25 @@ func scene_handoff(sp: ScenePlayer) -> void:
 
 func _on_scene_handoff(_id: String) -> void:
 	pass
+
+
+## Il «Music» che la stanza usa: i test ne mettono uno finto.
+var music: Object = Music
+
+
+## La musica di fondo all'ingresso nella stanza: lo slice e la stanza di prova hanno `stage1`; il prologo
+## decide da sé (Prologue._music_update).
+func _start_music() -> void:
+	Music.play(&"stage1")
+
+
+## Fine di una scena che ha preso in mano la musica: torna il brano di prima, e se la scena era partita dal
+## silenzio il suo brano si ferma in 1,5 s (non resta acceso sul gioco). `prev` è il brano di prima.
+func scene_music_end(prev: StringName) -> void:
+	if prev != &"":
+		music.play(prev, 0.8)
+	else:
+		music.stop(1.5)
 
 
 func scene_end(_sp: ScenePlayer) -> void:
@@ -2165,7 +2198,7 @@ func _on_event(e: String) -> void:
 			for i in 5:
 				_spark(player.px - player.facing * 10, player.py - 2, -player.facing * _spark_rng.randf_range(0.5, 1.5), -_spark_rng.randf_range(0.2, 0.8), 12, C_DIM)
 		"registro_lampo":
-			# Il lampo della copia, piccolo come quello della Spinta, e Tere: «Questo lo teniamo.»
+			# Il lampo della copia, piccolo come quello della Spinta, e Tere (in_gioco/tere_registro).
 			var b: Registri.Base = registri.basi[registri.copying]
 			for i in 10:
 				var a := _spark_rng.randf_range(-0.85, -0.15) * PI
@@ -2264,7 +2297,7 @@ func _draw_fx(n: Node2D) -> void:
 		drones.draw(n, tick, _visible_rect(), _fx_glow)
 		drones.draw_reach(n, tick, player, favors.wanted_drones())
 		if not Game.options.no_hud:
-			favors.draw_bubbles(n, _visible_rect(), player)
+			favors.draw_bubbles(n, _visible_rect(), player, _bubble_top())
 	_draw_arm_glow()
 	for s: Array in _sparks:
 		var a := float(s[4]) / float(s[5])

@@ -80,6 +80,8 @@ func run(tree_root: Node) -> bool:
 	_test_pignoramento()
 	_test_rinforzi()
 	_test_scene_voices()
+	_test_line_queue()
+	_test_prologue_music()
 	_test_scene_thoughts()
 	_test_scene_mural()
 	_test_scene_writing()
@@ -3141,6 +3143,251 @@ func _test_prologue() -> void:
 	check(start == [true, true] and off == [false, false] and on == [true, true],
 		"Prologo: le luci del tempo sono accese e F5 le spegne e le riaccende", "%s %s %s" % [start, off, on])
 	_free_room(room)
+
+
+## Un Music finto: ricorda cosa gli si chiede.
+class FakeMusic extends RefCounted:
+	var cur: StringName = &""
+	var log: Array = []
+	var trims: Array = []
+	var have: Array = [&"stage1", &"pignoramento", &"lumini", &"riavvio", &"porta"]
+
+	func has_track(t: StringName) -> bool:
+		return have.has(t)
+
+	func play(t: StringName, fade: float = 0.5, db: float = 0.0) -> void:
+		if t == cur:
+			return  # come Music: lo stesso brano che suona non riparte
+		log.append(["play", t, fade, db])
+		cur = t
+
+	func set_trim(db: float, fade: float = 0.5) -> void:
+		trims.append([db, fade])
+
+	func stop(fade: float = 0.5) -> void:
+		log.append(["stop", fade])
+		cur = &""
+
+	func current_track() -> StringName:
+		return cur
+
+
+## La musica del prologo nuovo (Prologue._music_for): per ogni tratto il brano della tabella, il tratto
+## giusto dallo stato, la ripartenza in A1 senza `stage1`, e la fine del ricordo di Mimmo che ferma `lumini`.
+func _test_prologue_music() -> void:
+	var room := _prologue_room(Callable(), Prologue.PROLOGUE_MAP)
+	var fake := FakeMusic.new()
+	room.music = fake
+	var want := {"vecchio": "stage1", "A1": "lumini", "A2_A5": "lumini", "S1": "", "arena": "pignoramento", "A6": "",
+		"B1": "stage1", "B2": "stage1", "B2_cantine": "", "B3": "stage1", "B4": "stage1", "B4_porta": "",
+		"naso": "", "riavvio": "riavvio", "porta": "porta", "passaggio": ""}
+	var bad := []
+	for k: String in want:
+		if String(room._music_for(k)["brano"]) != want[k]:
+			bad.append(k)
+	check(bad.is_empty() and want.size() == Prologue.MUSIC.size(), "Musica: ogni tratto del prologo ha il suo brano", "diversi %s" % str(bad))
+	check(is_equal_approx(room._music_for("B1")["db"], -3.0) and is_equal_approx(room._music_for("B1")["fade"], 2.0)
+		and is_equal_approx(room._music_for("A6")["fade"], 4.0) and is_equal_approx(room._music_for("A1")["db"], -6.0)
+		and is_equal_approx(room._music_for("A2_A5")["fade"], 2.0),
+		"Musica: volume e dissolvenza stanno nella tabella (stage1 in B a -3 dB, lumini in A a -6 dB, A6 sfuma in 4 s)")
+
+	# Il tratto dallo stato.
+	var got := {}
+	room.player.place(200, 680)
+	got["A1"] = room._music_tratto()
+	room.player.place(1500, 680)
+	got["A2_A5"] = room._music_tratto()
+	room.player.place(2680, 670)
+	got["S1"] = room._music_tratto()
+	room.player.place(5600, 680)
+	got["A6"] = room._music_tratto()
+	room.player.place(1500, 680)
+	room.arena_phase = TestRoom.ArenaPhase.FIGHT
+	got["arena"] = room._music_tratto()
+	room.arena_phase = TestRoom.ArenaPhase.NONE
+	room._enter_level(1)
+	room.player.place(300, 680)
+	got["B1"] = room._music_tratto()
+	room.player.place(1000, 680)
+	got["B2"] = room._music_tratto()
+	room.player.place(1500, 800)
+	got["B2_cantine"] = room._music_tratto()
+	room.player.place(3000, 680)
+	got["B3"] = room._music_tratto()
+	room.player.place(3500, 680)
+	got["B4"] = room._music_tratto()
+	room._set_door(true)
+	got["B4_porta"] = room._music_tratto()
+	room.vignette = "riavvio"
+	got["riavvio"] = room._music_tratto()
+	room.vignette = "naso"
+	got["naso"] = room._music_tratto()
+	room.vignette = ""
+	room.rebooted = true
+	got["porta"] = room._music_tratto()
+	# Appena riavviato (la scarica) suona `riavvio`, poi `porta`.
+	room._music_riavvio = Prologue.MUSIC_RIAVVIO_TICKS
+	check(room._music_tratto() == "riavvio", "Musica: alla scarica del riavvio suona `riavvio`, poi `porta`")
+	room._music_riavvio = 0
+	room.rebooted = false
+	room.finished = true
+	got["passaggio"] = room._music_tratto()
+	room.finished = false
+	var wrong := []
+	for k: String in got:
+		if got[k] != k:
+			wrong.append("%s→%s" % [k, got[k]])
+	check(wrong.is_empty(), "Musica: il tratto si riconosce dallo stato (livello, x, interni, arena, porta, riavvio)", "storti %s" % str(wrong))
+
+	# La musica cambia solo col tratto, e senza il brano resta il silenzio senza errori.
+	room._enter_level(1)
+	fake.log.clear()
+	room.player.place(300, 680)
+	room._music_update()
+	room._music_update()
+	check(fake.log.size() == 1 and fake.log[0] == ["play", &"stage1", 2.0, -3.0],
+		"Musica: in B1 parte stage1 a -3 dB, una volta sola", str(fake.log))
+	fake.have = []
+	room._music_key = ""
+	fake.log.clear()
+	room._music_update()
+	check(fake.log.size() == 1 and fake.log[0][0] == "stop", "Musica: se il brano manca, silenzio e niente errori", str(fake.log))
+	fake.have = [&"stage1", &"pignoramento", &"lumini", &"riavvio", &"porta"]
+
+	# La ripartenza dal checkpoint in A1 non rimette stage1.
+	room._enter_level(0)
+	room.checkpoint = -1
+	fake.log.clear()
+	fake.cur = &"stage1"
+	room._reset()
+	room._music_update()
+	var plays := fake.log.filter(func(e: Array) -> bool: return e[0] == "play" and e[1] == &"stage1")
+	check(plays.is_empty() and fake.cur == &"lumini", "Musica: ripartire in A1 non rimette stage1, ma lumini piano", str(fake.log))
+
+	# La fine del ricordo di Mimmo: lumini non si ferma e non riparte, scende solo a -6 dB.
+	fake.cur = &"lumini"
+	fake.log.clear()
+	fake.trims.clear()
+	room.scene_music_end(&"lumini")
+	check(fake.cur == &"lumini" and fake.log.is_empty() and fake.trims == [[-6.0, 2.0]],
+		"Musica: a fine ricordo di Mimmo lumini continua, più piano (-6 dB)", "%s %s" % [str(fake.log), str(fake.trims)])
+	# Fine del pignoramento: lo scontro continua con lo stesso brano, senza ripartire.
+	room.arena_phase = TestRoom.ArenaPhase.FIGHT
+	room._music_key = ""
+	room._music_apply()
+	fake.log.clear()
+	room.scene_music_end(&"pignoramento")
+	check(fake.log.is_empty() and fake.cur == &"pignoramento", "Musica: a fine pignoramento il brano continua", str(fake.log))
+	room.arena_phase = TestRoom.ArenaPhase.NONE
+	_free_room(room)
+
+
+## Favors con testi e voci finti: ogni battuta dura quanto dice `durate` (tick), senza file né OGG.
+class QueueFavors extends Favors:
+	var durate: Dictionary = {}
+
+	func _text(id: String) -> String:
+		return "Battuta " + id
+
+	func _voice(id: String, _text_: String) -> Dictionary:
+		return {"stream": AudioStreamWAV.new(), "env": PackedByteArray(), "ticks": int(durate.get(id, 0))} if durate.has(id) else {}
+
+
+## La coda delle battute: una voce intera non viene tagliata dalla successiva, che parte dopo; ne resta
+## una sola in coda (vince l'ultima), dopo 8 s si scarta, il fumetto compare con la voce, e una scena o
+## un reset la svuotano.
+func _test_line_queue() -> void:
+	var g := _fv_grid([])
+	var p := PlatformPlayer.new(PlatformMoves.new(), g)
+	p.place(300, 240)
+	var f := QueueFavors.new()
+	f.durate = {"a": 400, "b": 100}
+	f.build(g)
+	# a suona (400 tick); b arriva al tick 90: aspetta e non crea il fumetto.
+	var bubbles_at_wait := -1
+	f._say("a", Vector2(100, 100))
+	var b_start := -1
+	for t in range(1, 700):
+		if t == 90:
+			f._say("b", Vector2(500, 100))
+			bubbles_at_wait = f.bubbles.size()
+		f.step(p, false, null, 60)
+		if f.voices.size() > 0 and b_start < 0 and t > 90:
+			b_start = t
+	check(bubbles_at_wait == 1, "Coda: la battuta che arriva mentre suona una voce non crea il fumetto", "fumetti %d" % bubbles_at_wait)
+	check(b_start >= 400 and b_start <= 402, "Coda: la seconda voce parte quando la prima finisce (tick 400)", "parte al tick %d" % b_start)
+
+	# Una terza battuta sostituisce quella in coda: vince l'ultima.
+	var f2 := QueueFavors.new()
+	f2.durate = {"a": 300, "b": 100, "c": 100}
+	f2.build(g)
+	f2._say("a", Vector2(100, 100))
+	f2.step(p, false, null, 60)
+	f2._say("b", Vector2(300, 100))
+	f2._say("c", Vector2(500, 100))
+	check(f2.queued.size() > 0 and f2.queued[0] == "c", "Coda: ne resta una sola, vince l'ultima arrivata")
+	var heard := []
+	for t in 500:
+		f2.step(p, false, null, 60)
+		for v in f2.voices:
+			heard.append(t)
+	check(heard.size() == 1, "Coda: della coda parte una battuta sola", "voci %d" % heard.size())
+
+	# Dopo 8 s di attesa si scarta (voce lunga 10 s).
+	var f3 := QueueFavors.new()
+	f3.durate = {"a": 700, "b": 100}
+	f3.build(g)
+	f3._say("a", Vector2(100, 100))
+	f3._say("b", Vector2(300, 100))
+	var late := 0
+	for t in 800:
+		f3.step(p, false, null, 60)
+		late += f3.voices.size()
+	check(f3.queued.is_empty() and late == 0, "Coda: una battuta in coda da più di 8 s si scarta", "voci %d" % late)
+
+	# Una scena o la ripartenza la svuotano; senza voce la battuta non aspetta mai.
+	var f4 := QueueFavors.new()
+	f4.durate = {"a": 300, "b": 100}
+	f4.build(g)
+	f4._say("a", Vector2(100, 100))
+	f4._say("b", Vector2(300, 100))
+	f4.drop_queue()
+	var n4 := 0
+	for t in 400:
+		f4.step(p, false, null, 60)
+		n4 += f4.voices.size()
+	check(n4 == 0 and f4.queued.is_empty(), "Coda: la scena o la morte di GIG svuotano la coda", "voci %d" % n4)
+	var f5 := QueueFavors.new()
+	f5.durate = {"a": 300}
+	f5.build(g)
+	f5._say("a", Vector2(100, 100))
+	f5._say("muta", Vector2(500, 100))
+	check(f5.queued.is_empty() and f5.bubbles.size() == 2, "Coda: una battuta senza voce compare subito, senza aspettare")
+
+	# Con le voci vere (sviluppo): signora_1 non è tagliata da loculo_marito, che parte dopo.
+	if SceneLines.available("prologo") and SceneVoices.dir_of("prologo") != "":
+		var gp := SolidGrid.load_file(Prologue.PROLOGUE_MAP + "#Prologo_A_Cimitero")
+		var fr := Favors.new()
+		fr.build(gp)
+		var tx1 := SceneLines.find("prologo", Favors.LINES_SCENE, "signora_1")
+		var tx2 := SceneLines.find("prologo", Favors.LINES_SCENE, "loculo_marito")
+		var v1 := SceneVoices.voice("prologo", Favors.LINES_SCENE, "signora_1", tx1)
+		var v2 := SceneVoices.voice("prologo", Favors.LINES_SCENE, "loculo_marito", tx2)
+		if not v1.is_empty() and not v2.is_empty():
+			var pp := PlatformPlayer.new(PlatformMoves.new(), gp)
+			pp.place(200, 680)
+			fr._say("signora_1", Vector2(3330, 580))
+			var first := fr.voices.size()
+			var l1 := int(v1["ticks"])
+			var start2 := -1
+			for t in l1 + 200:
+				fr.step(pp, false, null, 60)
+				if start2 < 0 and t == 87:
+					fr._say("loculo_marito", Vector2(3710, 460))
+				if fr.voices.size() > 0 and start2 < 0 and t > 87:
+					start2 = t
+			check(first == 1 and start2 >= l1 - 2 and start2 <= l1 + 2,
+				"Coda: signora_1 suona intera e loculo_marito parte dopo", "signora_1 %d tick, loculo_marito parte al %d" % [l1, start2])
 
 
 ## Le voci delle battute (SceneVoices): un manifest finto in user://. Una voce si usa solo se

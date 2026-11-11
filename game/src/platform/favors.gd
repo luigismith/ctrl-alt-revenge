@@ -50,6 +50,9 @@ const BUBBLE_W := 168
 const BUBBLE_MIN := 120
 const BUBBLE_PER_CHAR := 3
 const BUBBLE_MAX := 420
+## Una battuta che arriva mentre suona una voce aspetta in coda al massimo tanto, poi si scarta: 8 s, poco
+## sopra la voce in gioco più lunga (7,1 s), così una voce intera non fa perdere la battuta che aspetta.
+const QUEUE_WAIT := 480
 
 const C_PERSON := Color8(150, 132, 170)
 const C_PERSON_DARK := Color8(92, 80, 108)
@@ -147,6 +150,10 @@ var bubbles: Array[Bubble] = []
 ## Le voci da far partire in questo passo (AudioStream): le suona la stanza. Fuori dall'impronta.
 var voices: Array = []
 var lines_file: String = "prologo"
+## Tick che restano della voce che suona: finché sono più di zero, le battute nuove vanno in coda.
+var voice_left: int = 0
+## La battuta in coda (una sola: l'ultima arrivata vince), [id, at, on_player, tag, tick d'attesa]; vuota se non c'è.
+var queued: Array = []
 ## Tick che restano dello scatto del caffè.
 var coffee_t: int = 0
 ## L'arena della stanza è finita: le battute `dopo_arena` partono. Lo aggiorna la stanza.
@@ -171,6 +178,7 @@ func build(g: SolidGrid) -> void:
 	battute.clear()
 	firme.clear()
 	_where.clear()
+	drop_queue()
 	var prizes := {}
 	for e: Dictionary in g.entities:
 		_where[String(e["iid"])] = e["px"]
@@ -219,6 +227,7 @@ func build(g: SolidGrid) -> void:
 func reset(all: bool = false) -> void:
 	events.clear()
 	bubbles.clear()
+	drop_queue()
 	changed = false
 	coffee_t = 0
 	if held != null:
@@ -267,6 +276,7 @@ func step(p: PlatformPlayer, up: bool, dr: Drones, energy: int) -> int:
 		bubbles[i].t += 1
 		if bubbles[i].t >= bubbles[i].life:
 			bubbles.remove_at(i)
+	_step_queue()
 	var body := Rect2i(p.left(), p.top(), p.right() - p.left(), p.py - p.top())
 	for it in ristori:
 		if it.hidden or it.taken or not body.intersects(it.rect()):
@@ -387,11 +397,18 @@ func _line_bubble(l: Line, p: PlatformPlayer) -> void:
 		_say(l.id, Vector2.ZERO, true, "" if l.chi == "gig" else l.chi.to_upper())
 
 
-func _say(id: String, at: Vector2, on_player: bool = false, tag: String = "") -> void:
+## Una battuta col suo fumetto e la sua voce. Se suona ancora un'altra voce va in coda (`queue`), e
+## fumetto e voce partono quando quella finisce: una battuta non ne taglia un'altra.
+func _say(id: String, at: Vector2, on_player: bool = false, tag: String = "", queue: bool = true) -> void:
 	if id == "":
 		return
-	var text := SceneLines.find(lines_file, LINES_SCENE, id)
+	var text := _text(id)
 	if text == "":
+		return
+	var voice := _voice(id, text)
+	# Solo una battuta con la voce aspetta: senza voce nessuno la taglia, compare subito.
+	if queue and voice_left > 0 and not voice.is_empty():
+		queued = [id, at, on_player, tag, 0]
 		return
 	var b := Bubble.new()
 	b.lines = wrap_text(text, BUBBLE_W)
@@ -399,15 +416,46 @@ func _say(id: String, at: Vector2, on_player: bool = false, tag: String = "") ->
 	b.on_player = on_player
 	b.tag = tag
 	b.life = clampi(BUBBLE_MIN + text.length() * BUBBLE_PER_CHAR, BUBBLE_MIN, BUBBLE_MAX)
-	var voice := SceneVoices.voice(lines_file, LINES_SCENE, id, text)
 	if not voice.is_empty():
 		b.life = maxi(b.life, int(voice["ticks"]) + 30)
 		voices.append(voice["stream"])
+		voice_left = int(voice["ticks"])
 	# Un fumetto nuovo dallo stesso punto prende il posto del vecchio.
 	for i in range(bubbles.size() - 1, -1, -1):
 		if bubbles[i].on_player == on_player and bubbles[i].at.distance_to(at) < 40.0:
 			bubbles.remove_at(i)
 	bubbles.append(b)
+
+
+## Il testo della battuta (SceneLines.find): i test lo sostituiscono.
+func _text(id: String) -> String:
+	return SceneLines.find(lines_file, LINES_SCENE, id)
+
+
+## La voce della battuta (SceneVoices.voice): i test la sostituiscono.
+func _voice(id: String, text: String) -> Dictionary:
+	return SceneVoices.voice(lines_file, LINES_SCENE, id, text)
+
+
+## La coda, a inizio passo: la voce che suona va avanti di un tick; la battuta in coda parte quando la voce
+## è finita, o si scarta se aspetta da più di QUEUE_WAIT.
+func _step_queue() -> void:
+	voice_left = maxi(voice_left - 1, 0)
+	if queued.is_empty():
+		return
+	queued[4] += 1
+	if queued[4] > QUEUE_WAIT:
+		queued = []
+	elif voice_left == 0:
+		var q := queued
+		queued = []
+		_say(q[0], q[1], q[2], q[3])
+
+
+## Svuota la coda e dimentica la voce che suona: alla ripartenza, a un livello nuovo, quando parte una scena.
+func drop_queue() -> void:
+	queued = []
+	voice_left = 0
 
 
 ## Il testo a capo sulle parole, entro `w` px col font piccolo.
@@ -741,7 +789,7 @@ func _draw_ristoro(v: CanvasItem, it: Item, t: int) -> void:
 
 ## I fumetti, sopra tutto il resto del mondo: riquadro chiaro col bordo scuro, la punta verso chi
 ## parla, il testo su più righe. Restano dentro lo schermo.
-func draw_bubbles(v: CanvasItem, vis: Rect2, p: PlatformPlayer) -> void:
+func draw_bubbles(v: CanvasItem, vis: Rect2, p: PlatformPlayer, top: float = 20.0) -> void:
 	var lh := 11.0
 	for b in bubbles:
 		var at := Vector2(p.px, p.top() - 8) if b.on_player else b.at
@@ -756,7 +804,7 @@ func draw_bubbles(v: CanvasItem, vis: Rect2, p: PlatformPlayer) -> void:
 		var bw := float(w + 12)
 		var bh := rows * lh + 6.0
 		var x := clampf(roundf(at.x - bw / 2.0), vis.position.x + 4.0, vis.end.x - 4.0 - bw)
-		var y := maxf(vis.position.y + 20.0, roundf(at.y - bh - 8.0 + (1.0 - a) * 4.0))
+		var y := maxf(vis.position.y + top, roundf(at.y - bh - 8.0 + (1.0 - a) * 4.0))
 		var r := Rect2(x, y, bw, bh)
 		v.draw_rect(r.grow(1.0), Color(C_INK, a))
 		v.draw_rect(r, Color(C_PAPER, 0.95 * a))

@@ -60,6 +60,7 @@ var _current_id: StringName = &""
 var _amp: Dictionary = {}            # AudioStreamPlayer -> ampiezza della dissolvenza (0..1)
 var _gain: Dictionary = {}           # AudioStreamPlayer -> gain_db del brano
 var _fades: Dictionary = {}          # AudioStreamPlayer -> Tween
+var _trim_tweens: Dictionary = {}    # AudioStreamPlayer -> Tween del volume (set_trim)
 var _layer_tweens: Dictionary = {}   # StringName -> Tween
 var _duck_db: float = 0.0
 var _duck_tween: Tween
@@ -77,7 +78,8 @@ func _ready() -> void:
 
 # ------------------------------------------------------------------ interfaccia
 
-func play(track_id: StringName, fade_s: float = 0.5) -> void:
+## `trim_db`: volume in più o in meno solo per questa esecuzione (per esempio -3 dB per un brano riusato).
+func play(track_id: StringName, fade_s: float = 0.5, trim_db: float = 0.0) -> void:
 	if _silenced:
 		return
 	if _current != null and _current_id == track_id and _current.playing:
@@ -98,12 +100,36 @@ func play(track_id: StringName, fade_s: float = 0.5) -> void:
 	nxt.stop()
 	_reset_layers(track_id, stream)
 	nxt.stream = stream
-	_gain[nxt] = float(_tracks[track_id]["gain_db"])
+	if _trim_tweens.has(nxt) and (_trim_tweens[nxt] as Tween).is_valid():
+		(_trim_tweens[nxt] as Tween).kill()
+	_gain[nxt] = float(_tracks[track_id]["gain_db"]) + trim_db
 	_set_amp(0.0 if fade_s > 0.0 else 1.0, nxt)
 	nxt.play()
 	_fade(nxt, 1.0, fade_s, false)
 	_current = nxt
 	_current_id = track_id
+
+
+## Cambia il volume del brano che suona (`trim_db` rispetto al suo gain), in `fade_s`, senza farlo ripartire.
+func set_trim(trim_db: float, fade_s: float = 0.5) -> void:
+	if _current == null or not _tracks.has(_current_id):
+		return
+	var p := _current
+	var target := float(_tracks[_current_id]["gain_db"]) + trim_db
+	if _trim_tweens.has(p) and (_trim_tweens[p] as Tween).is_valid():
+		(_trim_tweens[p] as Tween).kill()
+	if fade_s <= 0.0 or is_equal_approx(float(_gain[p]), target):
+		_gain[p] = target
+		_apply_volume(p)
+		return
+	var tw := create_tween()
+	tw.tween_method(_set_gain.bind(p), float(_gain[p]), target, fade_s)
+	_trim_tweens[p] = tw
+
+
+func _set_gain(value_db: float, p: AudioStreamPlayer) -> void:
+	_gain[p] = value_db
+	_apply_volume(p)
 
 
 func stop(fade_s: float = 0.5) -> void:

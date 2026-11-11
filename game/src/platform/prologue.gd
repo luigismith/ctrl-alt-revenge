@@ -130,6 +130,39 @@ const PASSAGGIO := "passaggio_1"
 const END_HOLD := 240
 const END_SKIP := 60
 
+## La musica di ogni tratto e di ogni stato del prologo nuovo (tabella di car-musica, `musica-nel-gioco.md`).
+## Cambiare un brano è cambiare un valore: `brano` è l'id di music.json ("" = silenzio), `fade` i secondi della
+## dissolvenza (entrando nel tratto), `db` il volume in più o in meno. Se il brano manca, resta il silenzio.
+## Sul cimitero (A1-A5) continua `lumini` piano, -6 dB (Luigi, 11 novembre: «Lumini continua piano»).
+const MUSIC := {
+	"vecchio": {"brano": "stage1", "fade": 0.5},                # il prologo di prima, un livello solo
+	"A1": {"brano": "lumini", "fade": 2.0, "db": -6.0},         # la tomba di Mimmo
+	"A2_A5": {"brano": "lumini", "fade": 2.0, "db": -6.0},      # viale, trincee, Colombe
+	"S1": {"brano": "", "fade": 1.5},                           # il ricovero del custode
+	"arena": {"brano": "pignoramento", "fade": 0.8},            # gli Esattori: continua il brano del messo
+	"A6": {"brano": "", "fade": 4.0},                           # il cantiere sotto la pioggia
+	"B1": {"brano": "stage1", "fade": 2.0, "db": -3.0},         # la fuga
+	"B2": {"brano": "stage1", "fade": 1.5, "db": -3.0},
+	"B2_cantine": {"brano": "", "fade": 1.0},                   # sotto la strada: solo le gocce
+	"B3": {"brano": "stage1", "fade": 1.5, "db": -3.0},
+	"B4": {"brano": "stage1", "fade": 1.5, "db": -3.0},         # verso il garage, a porta aperta
+	"B4_porta": {"brano": "", "fade": 1.5},                     # dentro, con la porta chiusa: la pioggia
+	"naso": {"brano": "", "fade": 1.0},                         # il terzo tasto
+	"riavvio": {"brano": "riavvio", "fade": 0.0},               # Tere e l'occhio cyan
+	"porta": {"brano": "porta", "fade": 1.0},                   # i colpi alla porta, fino all'uscita
+	"passaggio": {"brano": "", "fade": 2.0},                    # il passaggio al capitolo 1 (niente jingle)
+}
+## Dove cominciano i tratti, in px (livello A: 20 px per cella nel piano di docs/lore/livelli/prologo.md).
+const MUSIC_A2_X := 720
+const MUSIC_A6_X := 5520
+const MUSIC_B2_X := 720
+const MUSIC_B3_X := 2640
+const MUSIC_B4_X := 3360
+## `riavvio` suona da quando si accende l'occhio cyan (la scarica del riavvio) per tanti tick, poi il
+## brano dei colpi alla porta (`porta`) prende il suo posto: i colpi cominciano subito, ma il risveglio
+## ha il suo momento.
+const MUSIC_RIAVVIO_TICKS := 300
+
 const C_VIGNETTE := Color8(18, 16, 24)
 const C_INK := Color8(240, 232, 210)
 ## La vecchia tastiera beige del padre, sul banco.
@@ -178,6 +211,10 @@ var seen_rinforzi: bool = false
 ## Il riavvio: 0 = non cominciato, 1-3 = tasti già premuti, 4 = fatto.
 var reboot_step: int = 0
 var door_closed: bool = false
+## Il tratto di cui la musica suona adesso (MUSIC); "" = da applicare.
+var _music_key: String = ""
+## Tick che restano del brano del risveglio (MUSIC_RIAVVIO_TICKS dalla scarica del riavvio).
+var _music_riavvio: int = 0
 ## Tick che mancano prima che gli Esattori sfondino la porta (-1 = non bussano).
 var door_t: int = -1
 ## Piove da quando arrivano gli Esattori (decisione 54).
@@ -1249,6 +1286,9 @@ func _meteo_at(p: Vector2i) -> int:
 
 
 func _reset() -> void:
+	# Alla ripartenza la musica si decide da capo dal tratto in cui si riparte.
+	_music_key = ""
+	_music_riavvio = 0
 	if grid == null or _door_cells.is_empty() and grid.marks.has("/"):
 		super._reset()
 		return
@@ -1409,6 +1449,7 @@ func _stage_tick(frame: InputFrame) -> InputFrame:
 
 
 func _stage_after_step() -> void:
+	_music_update()
 	if finished or switch_t > 0:
 		return
 	if outro_t >= 0:
@@ -1466,6 +1507,7 @@ func _end_prologue() -> void:
 	end_t = 0
 	end_tick = tick
 	_on_event("prologue_end")
+	_music_update()
 	# Il passaggio al capitolo 1: il gioco fermo a metà salto, MP13 a spray, poi il cartello.
 	request_scene(PASSAGGIO, {"gig": scene_pose_player("")})
 
@@ -1518,10 +1560,94 @@ func _on_arena_fight() -> void:
 
 
 ## Il gioco riparte dopo la scena del pignoramento: lo scontro ha la sua musica.
-func _on_scene_handoff(id: String) -> void:
-	if id == PIGNORAMENTO and sound and arena != null and not arena.active_wave.is_empty():
-		# Il brano della scena ha preso il posto di quello del livello: lo strato dell'arena riparte.
-		Music.set_layer(&"arena", true)
+func _on_scene_handoff(_id: String) -> void:
+	# Lo scontro non ha strati: continua il brano del pignoramento (MUSIC["arena"]).
+	pass
+
+
+# ------------------------------------------------------------------ musica
+
+## Il prologo nuovo decide la musica da sé, dal tratto (MUSIC). All'ingresso dall'introduzione resta il
+## tema del titolo, che la scena spegne sul murale del cimitero.
+func _start_music() -> void:
+	if not play_intro:
+		_music_update()
+
+
+## Il tratto o lo stato del prologo, a cui MUSIC dà il brano. Legge solo lo stato: la musica non entra
+## nella simulazione.
+func _music_tratto() -> String:
+	if not _multi_level():
+		return "vecchio"
+	if finished:
+		return "passaggio"
+	if vignette == "riavvio" or vignette == "naso":
+		return vignette
+	if rebooted:
+		return "riavvio" if _music_riavvio > 0 else "porta"
+	var feet := Vector2(player.px, player.py)
+	var inside := ""
+	var zi := _interior_at(feet)
+	if zi >= 0:
+		inside = str(_interiors[zi]["nome"])
+	if level == 0:
+		if arena_phase == ArenaPhase.FIGHT:
+			return "arena"
+		if arena_done or arena_phase == ArenaPhase.LEAVE or player.px >= MUSIC_A6_X:
+			return "A6"
+		if inside == "ricovero":
+			return "S1"
+		return "A1" if player.px < MUSIC_A2_X else "A2_A5"
+	if inside == "cantine":
+		return "B2_cantine"
+	if door_closed:
+		return "B4_porta"
+	if player.px < MUSIC_B2_X:
+		return "B1"
+	if player.px < MUSIC_B3_X:
+		return "B2"
+	return "B3" if player.px < MUSIC_B4_X else "B4"
+
+
+## La riga di MUSIC del tratto: {"brano": StringName ("" = silenzio), "fade": s, "db": dB}.
+func _music_for(tratto: String) -> Dictionary:
+	var row: Dictionary = MUSIC.get(tratto, {})
+	return {"brano": StringName(str(row.get("brano", ""))), "fade": float(row.get("fade", 0.5)),
+		"db": float(row.get("db", 0.0))}
+
+
+## Un tick: se il tratto è cambiato, la musica cambia. Durante una scena la musica è della scena.
+func _music_update() -> void:
+	if (not sound and music == Music) or scene != null or not _scene_request.is_empty():
+		return
+	_music_riavvio = maxi(_music_riavvio - 1, 0)
+	_music_apply()
+
+
+## Suona il brano del tratto di adesso, se non è già quello.
+func _music_apply() -> void:
+	var key := _music_tratto()
+	if key == _music_key:
+		return
+	_music_key = key
+	var row := _music_for(key)
+	var track: StringName = row["brano"]
+	if track != &"" and music.has_track(track):
+		music.play(track, row["fade"], row["db"])
+		# Lo stesso brano che già suona (lumini dopo il ricordo di Mimmo) non riparte: cambia solo il volume.
+		music.set_trim(row["db"], row["fade"])
+	else:
+		music.stop(row["fade"])
+
+
+## Fine di una scena: il brano del tratto in cui si torna (E1: se la scena era partita dal silenzio, il
+## suo brano si ferma invece di restare acceso sul gioco).
+func scene_music_end(_prev: StringName) -> void:
+	_music_key = ""
+	# La scena del ricordo del 2064 finisce sulla scarica del riavvio: da lì suona `riavvio`.
+	if _reboot_fx_pending:
+		_music_riavvio = MUSIC_RIAVVIO_TICKS
+	_music_apply()
 
 
 ## La pioggia si vede: fuori dalle scene sempre, quando piove; in una scena da quando il cielo si
@@ -1589,6 +1715,7 @@ func _event_sound(e: String) -> void:
 func _on_event(e: String) -> void:
 	super._on_event(e)
 	if e == "reboot":
+		_music_riavvio = MUSIC_RIAVVIO_TICKS
 		# Il braccio riparte: una scarica intorno a GIG, che va dal bianco al cyan al verde acqua e lascia
 		# la scia, e un lampo di luce cyan su di lui.
 		for i in 34:
@@ -2070,6 +2197,12 @@ func _draw_stage_hud(h: Control) -> void:
 	if door_t > 0:
 		UiFont.draw_text(h, Vector2(View.CX, 20), "GLI ESATTORI SFONDANO LA PORTA: ESCI DAL LUCERNARIO", C_LED_RED, 1, 1)
 	_draw_prologue_fades(h)
+
+
+## Mentre gli Esattori sfondano la porta, la scritta rossa sta sotto l'ora: i fumetti (Tere nel garage)
+## scendono sotto di lei invece di coprirla.
+func _bubble_top() -> float:
+	return maxf(super(), 34.0 / zoom) if door_t > 0 else super()
 
 
 ## Con --senza-hud resta solo questo: il buio della caduta, le vignette, i neri e il cartello finale.

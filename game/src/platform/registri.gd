@@ -22,7 +22,7 @@ const COPY_TICKS := 60
 ## I momenti della copia: la culla si accende, il lampo, la fine.
 const GLOW_AT := 6
 const FLASH_AT := 34
-## Tere al lampo: «Questo lo teniamo.» (battuta in_gioco, con la voce).
+## Tere al lampo (battuta in_gioco/tere_registro, con la voce).
 const LINE_TERE := "tere_registro"
 ## Quanto resta la scritta REGISTRO COPIATO.
 const TEXT_TICKS := 150

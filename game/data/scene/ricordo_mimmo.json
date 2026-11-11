@@ -5,7 +5,7 @@
  "spazio": "stanza",
  "rif": "M",
  "battute": "prologo",
- "musica": "",
+ "musica": "lumini",
  "attori": {
   "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
   "narratore": {"fuori_campo": true, "pensiero": true, "nome": "", "colore": "#ff9a5a"}

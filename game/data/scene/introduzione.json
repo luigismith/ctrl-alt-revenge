@@ -32,6 +32,7 @@
   {"fai": "scritta", "id": "scritta_1", "tick": 180},
   {"fai": "attendi", "tick": 150},
 
+  {"fai": "musica", "tace": true, "tick": 120},
   {"fai": "murale", "id": "prologo/mp06_cimitero", "rivela_tick": 90, "tick": 360},
   {"fai": "attendi", "tick": 60},
   {"fai": "bande", "entra": true},

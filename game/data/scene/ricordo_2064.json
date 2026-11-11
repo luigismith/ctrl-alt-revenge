@@ -1,0 +1,29 @@
+{
+ "formato": 1,
+ "id": "ricordo_2064",
+ "nota": "Il ricordo del 2064, dopo il terzo tasto del riavvio (docs/lore/murales-copioni.md, sezione 3): lo spray apre MP11 stretto sulla tastiera, che si allarga sul garage di Vito e di GIG a 27 anni, con la didascalia; stacco sul primo piano di Vito (MP12), con la sua battuta; stacco di nuovo stretto sulla tastiera (MP11), poi lo spray all'indietro e GIG è dov'era, davanti al banco del 2087. Il nero e la scarica del riavvio li fa il motore alla fine della scena. Le battute stanno nel file privato. Regia da rivedere in gioco.",
+ "spazio": "stanza",
+ "rif": "X",
+ "battute": "prologo",
+ "musica": "ricordo_2064",
+ "attori": {
+  "gig": {"tipo": "gig", "foglio": "gig_spento", "dal_gioco": true, "nome": "GIG", "colore": "#e8c07a"},
+  "narratore": {"fuori_campo": true, "pensiero": true, "nome": "", "colore": "#ff9a5a"},
+  "vito": {"fuori_campo": true, "nome": "VITO", "colore": "#9fb8d8"}
+ },
+ "passi": [
+  {"fai": "inquadra", "su": "gig", "alto": 50, "zoom": 3},
+  {"fai": "murale", "id": "prologo/mp11_garage", "rivela_tick": 90, "tick": 420},
+  {"fai": "battuta", "chi": "narratore", "id": "didascalia_1"},
+  {"fai": "attendi", "tick": 60},
+
+  {"fai": "murale", "id": "prologo/mp12_vito", "tick": 300},
+  {"fai": "battuta", "chi": "vito", "id": "vito_1"},
+  {"fai": "attendi", "tick": 40},
+
+  {"fai": "murale", "id": "prologo/mp11_garage", "centro": [418, 200], "zoom": 3, "tick": 150},
+  {"fai": "attendi", "tick": 40},
+
+  {"fai": "murale", "chiudi": true, "rivela_tick": 70}
+ ]
+}
