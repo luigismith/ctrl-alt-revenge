@@ -14,8 +14,8 @@
  "luci": [
   {
    "nome": "lanterna_neogotica",
-   "x": 1894,
-   "y": 566,
+   "x": 1937,
+   "y": 449,
    "colore": "#ffc070",
    "energia": 0.45,
    "raggio": 90,
@@ -23,6 +23,20 @@
    "alone": {
     "energia": 0.27,
     "raggio": 117,
+    "vuoto": 0.4
+   }
+  },
+  {
+   "nome": "torretta_aria",
+   "x": 1820,
+   "y": 532,
+   "colore": "#bfe8d4",
+   "energia": 0.3,
+   "raggio": 70,
+   "altezza": 16,
+   "alone": {
+    "energia": 0.18,
+    "raggio": 91,
     "vuoto": 0.4
    }
   },
@@ -56,8 +70,8 @@
   }
  ],
  "note": {
-  "cappelle": "le porte delle cappelle sono a 2 m: la neogotica è bassa (cornicione = presa a 2,3 m), quindi il rosone è un tondo sul parapetto",
-  "ricovero": "S1: la fessura sotto il cipresso (130, righe 31-33) è buio; il thermos del MiniBar è il Ristoro del gioco (134), non è disegnato",
+  "cappelle": "rifatte l'11 novembre sulle collisioni: la neogotica alta 5 m col parapetto a 380, l'egizia a quattro gradoni da 1 m (620, 560, 500, 440), la torretta ARIA+ (90-91) col cappello a 520; le porte restano a 2-2,2 m",
+  "ricovero": "S1: la lamiera del tetto ha il bordo a 540, sulla collisione; la fessura sotto il cipresso (130, righe 31-33) è buio; il thermos del MiniBar è il Ristoro del gioco (134), non è disegnato",
   "recinzione": "la recinzione-schermo (122-123) è liscia e senza cornice: niente prese"
  }
 }

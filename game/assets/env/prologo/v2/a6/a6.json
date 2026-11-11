@@ -50,7 +50,7 @@
   "led_eterna": {
    "image": "a6_led_eterna.png",
    "x": 6900,
-   "y": 342
+   "y": 350
   },
   "cancelletto_chiuso": {
    "image": "a6_cancelletto_chiuso.png",

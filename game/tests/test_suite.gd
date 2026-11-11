@@ -4135,7 +4135,7 @@ func _test_prologue_interiors() -> void:
 	# e sul tetto.
 	var s1: Dictionary = room._secrets[0] if room._secrets.size() == 1 else {}
 	var s1_k := func() -> float: return float(s1.get("k", -1.0))
-	var s1_mount := not s1.is_empty() and (s1["arte"][0] as Sprite2D).position == Vector2(2580, 570) \
+	var s1_mount := not s1.is_empty() and (s1["arte"][0] as Sprite2D).position == Vector2(2580, 550) \
 		and (s1["arte"] as Array).size() == 2 and (s1["luci"] as Array).size() == 1 \
 		and str((s1["luci"][0][0] as PointLight2D).name) == "Luce_targa_eterna" \
 		and ((s1["arte"][0] as Sprite2D).get_parent() as Node2D).z_index == 6

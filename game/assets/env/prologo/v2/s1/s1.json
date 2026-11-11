@@ -3,7 +3,7 @@
  "coordinate": "locali al livello A, in pixel; il pavimento è a y 680 (riga 34)",
  "nota": "S1, il ricovero del custode, dalla tavola di car-grafica: niente stacco, la facciata copre l'interno (l'Interno «ricovero») e sfuma da sola quando GIG entra dalla breccia",
  "segreto": {
-  "facciata": {"image": "s1_facciata.png", "x": 2580, "y": 570},
+  "facciata": {"image": "s1_facciata.png", "x": 2580, "y": 550},
   "emissione": {"image": "s1_emis.png", "x": 2699, "y": 605},
   "luci": [
    {"nome": "targa_eterna", "x": 2715, "y": 609, "colore": "#ff9a40", "energia": 0.12, "raggio": 40, "altezza": 10}
