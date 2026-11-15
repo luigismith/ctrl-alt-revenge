@@ -42,6 +42,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APRI_VETO: ${{ github.ref == 'refs/heads/main' && '--apri-veto' || '' }}
         run: python -I strumenti/controlli.py $APRI_VETO
+      - name: Prova della sentinella (date finte, senza rete)
+        run: python -I prove/prova_sentinella.py
       - name: Salva i numeri delle issue di veto
         if: github.ref == 'refs/heads/main'
         run: |

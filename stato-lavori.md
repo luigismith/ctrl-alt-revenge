@@ -1,4 +1,4 @@
-# A che punto siamo (15/11/2026, prima del riavvio)
+# A che punto siamo (15/11/2026, sera)
 
 Il clone di lavoro sta sul PC di casa in `%USERPROFILE%\ctrlaltrevenge-lab\social\` (ramo `main`).
 La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFILE%\ctrlaltrevenge-lab\social-privato\`.
@@ -11,9 +11,11 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Privacy e cancellazione dei dati**: `sito/pagine/` → `docs/privacy.html`, `docs/en/privacy.html`, `docs/cancellazione-dati.html`.
 - **Il veto**: una issue «In coda: <id>» per ogni contenuto. Se la chiude il bot dopo Instagram, lo Short esce lo stesso; se la chiude Luigi, si ferma tutto.
 - **Il primo post** `contenuti/2026-11-20-a1-cimitero.yml` è in bozza: aspetta il via della regia.
+- **Sentinella** (`strumenti/sentinella.py`, `.github/workflows/sentinella.yml`, ogni sera 22:25 d'inverno, 23:25 d'estate): uscite mancate, Short mancati, coda sotto i 14 giorni (una issue a settimana), token Instagram (età e prova di `/me`), refresh token di YouTube, sito. Ogni controllo si accende da solo quando la sua parte esiste: oggi tace. La prova con date finte (`prove/prova_sentinella.py`, 22 casi) gira anche nei controlli a ogni push.
+- **Pagina dei passi manuali di Luigi**: `ACCENSIONE.md`, sette passi con la verifica di ognuno.
 
 ## Da fare
 1. La prova a secco di YouTube su Actions.
-2. La sentinella (`sentinella.yml`, alle 23:25).
-3. La pagina con i passi manuali di Luigi («Accensione di Ctrl-Alt-Revenge»): non è ancora cominciata.
-4. Chiedere alla regia se si può accendere Pages sull'indirizzo `-nuovo`, per la prova vera degli URL.
+2. Il primo post (`contenuti/2026-11-20-a1-cimitero.yml`): lo guarda la regia, poi `stato: pronto` con il suo via.
+3. Con il via della regia: Pages sull'indirizzo `-nuovo` per la prova vera degli URL, la routine, lo scambio dei nomi.
+4. I passi di Luigi, in ordine, da `ACCENSIONE.md`.

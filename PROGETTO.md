@@ -171,7 +171,7 @@ stato: pronto              # bozza | pronto
 **La sentinella** è uno script, senza Claude. Apre una issue (una sola per problema, non la ripete se è già aperta) quando:
 - un'uscita prevista nell'ultima giornata chiusa non c'è;
 - la coda copre meno di 14 giorni;
-- il token IG scade entro 10 giorni, o il refresh token di YouTube non risponde;
+- il token IG scade entro 10 giorni o non risponde, o il refresh token di YouTube non risponde;
 - il sito non risponde con 200.
 
 Le issue arrivano per email a Luigi e la regia le vede con `gh issue list`.
@@ -195,7 +195,7 @@ Le issue arrivano per email a Luigi e la regia le vede con `gh issue list`.
 - la sentinella e le sue issue;
 - il rifornimento della coda (la routine, dal materiale della regia).
 
-**Resta a Luigi, una volta sola** (la lista passo per passo sarà la pagina «Accensione di Ctrl-Alt-Revenge»):
+**Resta a Luigi, una volta sola** (la lista passo per passo è in [`ACCENSIONE.md`](ACCENSIONE.md)):
 1. creare dal telefono l'account Instagram del gioco e passarlo a professionale (creator);
 2. creare un'app Meta nuova, con «Instagram API with Instagram Login», aggiungere l'account come tester e generare il token. L'app è nuova e non si riusa quella di Elettrofoni, così un problema su una non ferma l'altra e non si toccano le impostazioni di Elettrofoni;
 3. creare il canale YouTube del gioco (account brand con il nome Ctrl-Alt-Revenge);
@@ -231,7 +231,7 @@ Zero: le Actions sono gratuite sui repository pubblici, Pages e cron-job.org son
 2. Il prototipo della home in italiano, con le catture a 1440 px e da telefono, poi lo stop per Luigi.
 3. Il pubblicatore Instagram e la sua prova a secco.
 4. Il pubblicatore di YouTube Shorts e la sua prova a secco.
-5. La sentinella e la sua prova (anche con orari finti, come `prova_sentinella.py`).
+5. ✅ La sentinella e la sua prova (`strumenti/sentinella.py`, `prove/prova_sentinella.py`).
 6. Il workflow delle Pages.
-7. La pagina «Accensione di Ctrl-Alt-Revenge» con i passi di Luigi.
+7. ✅ La pagina «Accensione di Ctrl-Alt-Revenge» con i passi di Luigi: [`ACCENSIONE.md`](ACCENSIONE.md).
 8. Con il via della regia: la routine, poi il primo post e il primo Short, poi lo scambio dei nomi.

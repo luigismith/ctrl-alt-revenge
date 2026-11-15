@@ -1,0 +1,40 @@
+# La sentinella: ogni sera controlla uscite, coda, token e sito, e apre una
+# issue per problema (vedi strumenti/sentinella.py). È uno script: zero token
+# di Claude. Finché la pubblicazione non parte e i secret non ci sono, tace.
+name: Sentinella
+
+on:
+  schedule:
+    # 22:25 italiane d'inverno, 23:25 d'estate: sempre prima della mezzanotte
+    # di Roma, così «ieri» per lo script è davvero ieri.
+    - cron: '25 21 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: sentinella
+  cancel-in-progress: false
+
+jobs:
+  guarda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Sentinella
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          PAGES_ATTIVE: ${{ vars.PAGES_ATTIVE }}
+        run: python -I strumenti/sentinella.py
