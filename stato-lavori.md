@@ -21,9 +21,17 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - Sito rigenerato in locale; lista degli spoiler: zero voci trovate. La vista da telefono non è stata verificata.
 - **Luigi, 16/11 alle 00:30: «Sostituisci subito il vecchio».** Testi e torretta approvati per il sito. Le sei uscite restano bozze: ognuna aspetta la sua immagine e il via.
 
+## Ripasso della scheda social, 16/11/2026 notte
+- **Controlli** (`strumenti/controlli.py`) e **prova della sentinella** (22 casi) verdi in locale.
+- **Sentinella** lanciata a mano dopo lo scambio (run 43776134969): «sito: risponde», nessuna issue. L'indirizzo lo prende da `GITHUB_REPOSITORY`, quindi è già quello nuovo.
+- **Riferimenti a `-nuovo`:** nel codice, nei workflow e nelle pagine non ne resta nessuno; restano solo nei documenti che raccontano lo scambio. Variabili: `PAGES_ATTIVE`=si e `CARU_PAROLE_VIETATE`. Pages: build da workflow, HTTPS forzato; 404, privacy, cancellazione dei dati e media rispondono sull'indirizzo nuovo.
+- **Inglese del sito:** sette ritocchi in `sito/testi/en.json`, senza cambiare il senso (Carmine church, staccato, «take them down», «struck his name off the patents», «young hands, but skilled ones», «not a fingerprint on them»).
+- **Difetto nel generatore delle tavole** (`strumenti/genera_media.py`): il post e la storia usavano la stessa pagina e lo stesso profilo di Chrome, e a volte la storia usciva con la tavola del post. Ora ogni scatto ha un nome suo; provato due volte di fila.
+- **Uscita 1 in bozza:** `contenuti/torretta-scritta.yml` (immagine singola, senza data), con la didascalia in italiano e in inglese e con «Cattura di laboratorio» nella riga di onestà.
+
 ## Da fare
 1. La prova a secco di YouTube su Actions.
 2. Il primo post: aspettare le catture nuove di A1 in `inbox/`, rifare le tavole, data e nome del file, poi la regia lo guarda e dà il via.
-3. Con il via della regia: Pages sull'indirizzo `-nuovo` per la prova vera degli URL, la routine, lo scambio dei nomi.
+3. Con il via della regia: la routine settimanale (Pages e lo scambio dei nomi sono fatti, 16/11).
 4. I passi di Luigi, in ordine, da `ACCENSIONE.md`: li porta la regia quando ci sono le immagini nuove.
 5. Il secret `CARU_PAROLE_VIETATE` va rimesso dalla lista corretta (la riga 8 ora è «# ---»): lo fa Luigi, non è urgente.

@@ -23,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import uuid
 
 from PIL import Image
 
@@ -59,7 +60,9 @@ class Server:
 
 
 def fotografa(chrome, html, w, h, png, tmp):
-    pagina = RADICE / f"_tavola_{os.getpid()}.html"
+    # un nome nuovo a ogni scatto: con lo stesso indirizzo Chrome può servire
+    # dalla cache la tavola precedente (la storia usciva con la pagina del post)
+    pagina = RADICE / f"_tavola_{os.getpid()}_{uuid.uuid4().hex[:8]}.html"
     pagina.write_text(html, encoding="utf-8")
     try:
         subprocess.run([chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--no-sandbox",

@@ -19,7 +19,7 @@
   },
   "eroe": {
     "motto_1": "Taranto, 2087. Holy Thursday.",
-    "motto_2": "The hooded penitents set out from the Carmine, barefoot.",
+    "motto_2": "The hooded penitents set out from the Carmine church, barefoot.",
     "motto_3": "At the cemetery, two Esattori come to repossess an arm.",
     "alt": "GIG, a puppet with a white beard and a yellow shirt, walks along the cemetery's tufa wall, covered in torn posters, next to an iron gate.",
     "didascalia": "The side gate of the cemetery, on the prologue set. In-game capture, November 2026.",
@@ -31,11 +31,11 @@
     "titolo": "The game",
     "attacco": "You run, double-jump and clamber over a city made of cardboard. The camera follows GIG from the side like an operator on a film set: it closes in when the Esattori arrive, cranes up when the view opens out, and turns with the street.",
     "alt": "The cemetery seen from the side, in game: GIG runs across paving red with dust, past a row of headstones and crosses, with the chapels behind.",
-    "didascalia": "The cemetery, in game. GIG moves the way a puppet does: in steps, 15 poses a second.",
+    "didascalia": "The cemetery, in game. GIG moves in staccato, 15 poses a second, like a puppet.",
     "platform_titolo": "Jump",
     "platform_testo": "Tombs, rooftops, scaffolding, air purifiers. Anything that will hold a fifty-year-old man is a platform.",
     "arene_titolo": "Disarm",
-    "arene_testo": "The Esattori, SIDERA's repo men, are people from the neighbourhood, hired by the day, with an arm on lease. You don't put them down: you take them off the leash.",
+    "arene_testo": "The Esattori, SIDERA's repo men, are people from the neighbourhood, hired by the day, with an arm on lease. You don't take them down: you take them off the leash.",
     "hacking_titolo": "Unlock",
     "hacking_testo": "The cyber arm opens what SIDERA has locked. Every one of its functions used to be a paid extra: GIG takes them back, one at a time."
   },
@@ -55,7 +55,7 @@
     "alt": "GIG in close-up, in profile, in front of a tufa wall covered in posters: an eye, a hand, a sun, a wave.",
     "timbro": "Subscription expired",
     "nome": "Cataldo Gigante, 50, from the Tamburi.",
-    "p1": "A conveyor belt on the Linea took his left arm. He built the new one himself, in his mother's garage, and then built one for half the city. When Mimmo, his childhood friend, died, he asked too many questions: within a week SIDERA had taken his job, his house and his name off the patents. And switched off his arm.",
+    "p1": "A conveyor belt on the Linea took his left arm. He built the new one himself, in his mother's garage, and then built one for half the city. When Mimmo, his childhood friend, died, he asked too many questions: within a week SIDERA had taken his job and his house, and struck his name off the patents. And switched off his arm.",
     "p2": "Gruff, wry and stubborn. He can fix anything except his own life.",
     "nota": "He won't get there alone. You'll meet the others along the way."
   },
@@ -68,8 +68,8 @@
   },
   "come": {
     "titolo": "How it's made, honestly",
-    "v1": "<strong>It's a video game, made in Unreal Engine 5.</strong> It isn't hand-shot stop motion: the characters are 3D models that imitate puppets, and move in steps the way puppets do.",
-    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid with young but skilled hands. What belongs to the people is handmade. SIDERA's things are moulded plastic: smooth, without a fingerprint.",
+    "v1": "<strong>It's a video game, made in Unreal Engine 5.</strong> It isn't hand-shot stop motion: the characters are 3D models that imitate puppets, and move with the same staccato as real puppets.",
+    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid: young hands, but skilled ones. What belongs to the people is handmade. SIDERA's things are moulded plastic: smooth, not a fingerprint on them.",
     "v3": "<strong>Some of the tools are AI:</strong> reference images and painted surfaces with ChatGPT, 3D models with Meshy, voices with HeyGen, music with Suno.",
     "v4": "<strong>It's a personal project.</strong> It isn't for sale and has no release date."
   },
