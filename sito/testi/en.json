@@ -1,8 +1,8 @@
 {
   "meta": {
     "titolo": "Ctrl-Alt-Revenge · Taranto, 2087",
-    "descrizione": "A 2.5D action platformer set in Taranto, Italy, in 2087, with characters that look like stop-motion puppets on a cardboard set. In development; a personal project.",
-    "og_descrizione": "Taranto, 2087. The arm comes with a subscription. Revenge doesn't.",
+    "descrizione": "Taranto, Italy, 2087, Holy Thursday. A 2.5D action platformer with characters that look like stop-motion puppets and a cardboard city where air and arms are paid for in instalments. In development; a personal project.",
+    "og_descrizione": "Taranto, 2087. It's Holy Thursday, and they've come to repossess his arm.",
     "og_alt": "GIG, a puppet with a white beard and a yellow shirt, walks along the cemetery wall, covered in torn posters.",
     "og_locale": "en_GB"
   },
@@ -18,9 +18,9 @@
     "come": "How it's made"
   },
   "eroe": {
-    "motto_1": "Taranto, 2087.",
-    "motto_2": "The arm comes with a subscription.",
-    "motto_3": "Revenge doesn't.",
+    "motto_1": "Taranto, 2087. Holy Thursday.",
+    "motto_2": "The hooded penitents set out from the Carmine, barefoot.",
+    "motto_3": "At the cemetery, two Esattori come to repossess an arm.",
     "alt": "GIG, a puppet with a white beard and a yellow shirt, walks along the cemetery's tufa wall, covered in torn posters, next to an iron gate.",
     "didascalia": "The side gate of the cemetery, on the prologue set. In-game capture, November 2026.",
     "genere": "2.5D action platformer",
@@ -29,47 +29,47 @@
   },
   "gioco": {
     "titolo": "The game",
-    "attacco": "An action platformer with a double jump. You play along a path, and the camera follows GIG from the side like an operator on a film set: it moves in for the fights, cranes up when the view opens out, and turns with the street.",
+    "attacco": "You run, double-jump and clamber over a city made of cardboard. The camera follows GIG from the side like an operator on a film set: it closes in when the Esattori arrive, cranes up when the view opens out, and turns with the street.",
     "alt": "The cemetery seen from the side, in game: GIG runs across paving red with dust, past a row of headstones and crosses, with the chapels behind.",
     "didascalia": "The cemetery, in game. GIG moves the way a puppet does: in steps, 15 poses a second.",
-    "platform_titolo": "Platforming",
-    "platform_testo": "The backbone: walls, rooftops, building sites, and a double jump to reach them.",
-    "arene_titolo": "Arenas",
-    "arene_testo": "When the Esattori, SIDERA's repo men, turn up, the camera stops and you fight, in depth too: step back into the set to dodge.",
-    "hacking_titolo": "Hacking",
-    "hacking_testo": "GIG's cyber arm isn't just for hitting things: it's how you solve the puzzles."
+    "platform_titolo": "Jump",
+    "platform_testo": "Tombs, rooftops, scaffolding, air purifiers. Anything that will hold a fifty-year-old man is a platform.",
+    "arene_titolo": "Disarm",
+    "arene_testo": "The Esattori, SIDERA's repo men, are people from the neighbourhood, hired by the day, with an arm on lease. You don't put them down: you take them off the leash.",
+    "hacking_titolo": "Unlock",
+    "hacking_testo": "The cyber arm opens what SIDERA has locked. Every one of its functions used to be a paid extra: GIG takes them back, one at a time."
   },
   "mondo": {
     "titolo": "Under the red cloud",
-    "p1": "Taranto, 2087. The blast furnaces went cold more than sixty years ago, but the old steelworks is still sealed under white domes, and a red cloud hangs over the city. SIDERA, the holding company that owns the clean-up, calls it “clean-up steam”.",
-    "p2": "SIDERA owns the air too, sold by subscription as ARIA+ (<i lang=\"it\">aria</i> means air), and the arms of half the city: MANODOPERA (“workforce”), the cybernetic arm given to workers injured on the job. Miss a payment and it gets locked remotely. Then the Esattori come.",
-    "chiusa": "By 2087 almost everything in Taranto has changed, except the rites of Holy Week.",
+    "p1": "At San Brunone cemetery the white headstones don't stay white: anyone from the Tamburi district has always known that. By 2087 the steelworks has been cold for more than sixty years, sealed under white domes. The red cloud is still there. SIDERA calls it “clean-up steam”.",
+    "p2": "For generations Taranto had to choose between work and health. SIDERA found the answer: it rents out both. The air is called ARIA+ (<i lang=\"it\">aria</i> means air). The arm, for those hurt on the job, is called MANODOPERA (“workforce”). Miss a payment and it's switched off remotely. Then the Esattori come.",
+    "chiusa": "By 2087 almost everything in Taranto has changed. Not the rites of Holy Week. And someone still writes on the walls.",
     "manifesto_label": "A SIDERA advert, from the world of the game",
     "slogan": "The air you deserve.",
     "slogan_sotto": "Taranto's clean-up. By subscription.",
     "manifesto_nota": "A made-up ad, like SIDERA itself.",
-    "torretta_alt": "A white and mint-green ARIA+ tower next to GIG: it looks like a milk carton, with a bottle cap for a fan and a drinking straw for a pipe.",
-    "torretta_didascalia": "An ARIA+ tower: a milk carton, a bottle cap for a fan, a drinking straw for a pipe."
+    "torretta_alt": "A smooth white and mint-green plastic ARIA+ tower. Someone has stencilled on it in black spray paint: CHI RESPIRA PAGA. GIG stands next to it, seen from behind.",
+    "torretta_didascalia": "An ARIA+ tower, in the workshop. The writing isn't SIDERA's: “if you breathe, you pay”."
   },
   "gig": {
     "alt": "GIG in close-up, in profile, in front of a tufa wall covered in posters: an eye, a hand, a sun, a wave.",
     "timbro": "Subscription expired",
     "nome": "Cataldo Gigante, 50, from the Tamburi.",
-    "p1": "An engineer, he invented MANODOPERA in his mother's garage after a conveyor belt on the Linea took off his left arm. Then he asked too many questions: within a week SIDERA had taken his job, his house and his name off the patents, and locked his arm.",
+    "p1": "A conveyor belt on the Linea took his left arm. He built the new one himself, in his mother's garage, and then built one for half the city. When Mimmo, his childhood friend, died, he asked too many questions: within a week SIDERA had taken his job, his house and his name off the patents. And switched off his arm.",
     "p2": "Gruff, wry and stubborn. He can fix anything except his own life.",
-    "nota": "You'll meet the others along the way."
+    "nota": "He won't get there alone. You'll meet the others along the way."
   },
   "lab": {
     "titolo": "From the workshop",
     "attacco": "This is where the Instagram posts and YouTube Shorts land, one by one, each with its link.",
-    "vuoto": "Nothing yet: the first one is coming soon.",
+    "vuoto": "Nothing yet: the set is still being built.",
     "apri_ig": "Open on Instagram",
     "apri_yt": "Open on YouTube"
   },
   "come": {
     "titolo": "How it's made, honestly",
     "v1": "<strong>It's a video game, made in Unreal Engine 5.</strong> It isn't hand-shot stop motion: the characters are 3D models that imitate puppets, and move in steps the way puppets do.",
-    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid with young but skilled hands.",
+    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid with young but skilled hands. What belongs to the people is handmade. SIDERA's things are moulded plastic: smooth, without a fingerprint.",
     "v3": "<strong>Some of the tools are AI:</strong> reference images and painted surfaces with ChatGPT, 3D models with Meshy, voices with HeyGen, music with Suno.",
     "v4": "<strong>It's a personal project.</strong> It isn't for sale and has no release date."
   },

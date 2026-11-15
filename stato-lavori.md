@@ -14,6 +14,13 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Sentinella** (`strumenti/sentinella.py`, `.github/workflows/sentinella.yml`, ogni sera 22:25 d'inverno, 23:25 d'estate): uscite mancate, Short mancati, coda sotto i 14 giorni (una issue a settimana), token Instagram (età e prova di `/me`), refresh token di YouTube, sito. Ogni controllo si accende da solo quando la sua parte esiste: oggi tace. La prova con date finte (`prove/prova_sentinella.py`, 22 casi) gira anche nei controlli a ogni push.
 - **Pagina dei passi manuali di Luigi**: `ACCENSIONE.md`, sette passi con la verifica di ognuno.
 
+## Giro della regia del 16/11/2026 (la scheda social era chiusa)
+- **Testi del sito riscritti** in `sito/testi/it.json` e `en.json`, sulla base del messaggio del gioco: Luigi li vuole meno didascalici, che raccontino ai giocatori e a chi conosce la vicenda di Taranto, senza slogan. Stessa struttura e stesse chiavi di prima.
+- **Torretta ARIA+ nuova** (plastica, con la scritta «CHI RESPIRA PAGA») al posto di quella di cartone: `docs/media/torretta-scritta.*`, sorgente e nota in `inbox/2026-11-16-torretta-scritta/`. In `sito/modello.html` sono cambiati solo i due nomi del file.
+- **Sei uscite per i social** in `inbox/2026-11-16-messaggio/nota.md`: testi pronti, immagini in parte da fare.
+- Sito rigenerato in locale; lista degli spoiler: zero voci trovate. La vista da telefono non è stata verificata.
+- **Luigi, 16/11 alle 00:30: «Sostituisci subito il vecchio».** Testi e torretta approvati per il sito. Le sei uscite restano bozze: ognuna aspetta la sua immagine e il via.
+
 ## Da fare
 1. La prova a secco di YouTube su Actions.
 2. Il primo post: aspettare le catture nuove di A1 in `inbox/`, rifare le tavole, data e nome del file, poi la regia lo guarda e dà il via.
