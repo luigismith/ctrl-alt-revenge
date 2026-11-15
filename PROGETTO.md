@@ -212,12 +212,12 @@ Le issue arrivano per email a Luigi e la regia le vede con `gh issue list`.
 - il via alle risposte ai commenti;
 - le decisioni che la regia gli porta.
 
-## 9. Lo scambio dei nomi (alla fine, con il via della regia)
+## 9. Lo scambio dei nomi (fatto il 16/11/2026, con il sì di Luigi)
 
-1. Rinominare `ctrl-alt-revenge` in `ctrl-alt-revenge-2d`. Il suo sito si sposta da solo su `/ctrl-alt-revenge-2d/`: da decidere se tenerlo acceso come archivio o spegnerne le Pages.
-2. Rinominare `ctrl-alt-revenge-nuovo` in `ctrl-alt-revenge`.
-3. Rilanciare `pages.yml` e controllare che `luigismith.github.io/ctrl-alt-revenge/` mostri il sito nuovo.
-4. Aggiornare l'indirizzo in cron-job.org e i remote dei cloni locali.
+1. `ctrl-alt-revenge` è diventato `ctrl-alt-revenge-2d`. Il suo sito si è spostato su `/ctrl-alt-revenge-2d/` e resta acceso come archivio.
+2. `ctrl-alt-revenge-nuovo` è diventato `ctrl-alt-revenge`.
+3. `pages.yml` rilanciato: `luigismith.github.io/ctrl-alt-revenge/` mostra il sito nuovo.
+4. Il remote del clone di lavoro è aggiornato. Resta da mettere l'indirizzo nuovo in cron-job.org, quando i lavori si creano. Il clone locale del gioco 2D ha ancora il remote con il nome vecchio, che ora porta a questo repository: da lì non si fanno push.
 
 Rischio: fra il passo 1 e il passo 3 il sito è spento per qualche minuto, e i link di GitHub al vecchio nome restano senza redirect, perché il nome viene ripreso dal repository nuovo.
 

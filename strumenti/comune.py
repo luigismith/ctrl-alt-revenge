@@ -27,7 +27,7 @@ RADICE = pathlib.Path(__file__).resolve().parent.parent
 FILE_STATO = RADICE / "stato.json"
 ROMA = zoneinfo.ZoneInfo("Europe/Rome")
 
-REPO = os.environ.get("GITHUB_REPOSITORY", "luigismith/ctrl-alt-revenge-nuovo")
+REPO = os.environ.get("GITHUB_REPOSITORY", "luigismith/ctrl-alt-revenge")
 PROPRIETARIO, NOME_REPO = REPO.split("/")
 URL_SITO = f"https://{PROPRIETARIO}.github.io/{NOME_REPO}/"
 UA = "ctrl-alt-revenge-bot/1.0 (+https://github.com/%s)" % REPO

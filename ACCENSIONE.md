@@ -110,15 +110,15 @@ Il cron di GitHub a volte ritarda o salta. cron-job.org è un secondo innesco in
    | Instagram | `pubblica-ig.yml` | martedì, venerdì e domenica, 18:15 |
    | YouTube | `pubblica-yt.yml` | domenica, 20:15 |
 
-   `<repository>` per ora è `ctrl-alt-revenge-nuovo`. Dopo lo scambio dei nomi (passo 6) diventa `ctrl-alt-revenge`, e l'URL dei due lavori va corretto.
+   `<repository>` è `ctrl-alt-revenge` (lo scambio dei nomi è fatto: passo 6).
 
-## 6. Pages e lo scambio dei nomi
+## 6. Pages e lo scambio dei nomi (fatto il 16/11/2026)
 
-Si fa con la regia, quando lei dà il via. Luigi dà il consenso, i comandi li lancia la sessione social.
+Luigi ha detto «Sostituisci subito il vecchio» il 16/11/2026; i comandi li ha lanciati la regia.
 
-1. Il vecchio repository del gioco 2D diventa `ctrl-alt-revenge-2d` e resta un archivio. Da decidere con la regia se il suo vecchio sito resta acceso su `/ctrl-alt-revenge-2d/` o si spegne.
-2. `ctrl-alt-revenge-nuovo` diventa `ctrl-alt-revenge`.
-3. **Settings → Pages → Source: GitHub Actions**, poi la variabile `PAGES_ATTIVE` = `si`. Da quel momento il sito si aggiorna da solo.
+1. Il vecchio repository del gioco 2D ora si chiama `ctrl-alt-revenge-2d` ed è un archivio. Il suo sito in pixel art resta acceso su `/ctrl-alt-revenge-2d/`.
+2. `ctrl-alt-revenge-nuovo` ora si chiama `ctrl-alt-revenge`.
+3. Pages è acceso (Source: GitHub Actions) e la variabile `PAGES_ATTIVE` vale `si`: il sito si aggiorna da solo a ogni push su `docs/`.
 4. Il sito risponde su `https://luigismith.github.io/ctrl-alt-revenge/` (e `/en/`). Questo indirizzo va:
    - nella bio di Instagram (**Modifica profilo → Link**) e nella descrizione del canale YouTube;
    - negli URL dei due lavori di cron-job.org (passo 5).

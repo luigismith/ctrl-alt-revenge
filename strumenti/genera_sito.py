@@ -21,7 +21,7 @@ TESTI = RADICE / "sito" / "testi"
 DOCS = RADICE / "docs"
 STATO = RADICE / "stato.json"
 
-REPO = os.environ.get("GITHUB_REPOSITORY", "luigismith/ctrl-alt-revenge-nuovo")
+REPO = os.environ.get("GITHUB_REPOSITORY", "luigismith/ctrl-alt-revenge")
 PROPRIETARIO, NOME = REPO.split("/")
 URL_SITO = f"https://{PROPRIETARIO}.github.io/{NOME}/"
 URL_CODICE = f"https://github.com/{REPO}"

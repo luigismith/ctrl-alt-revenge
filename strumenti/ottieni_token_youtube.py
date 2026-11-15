@@ -36,7 +36,7 @@ import urllib.request
 import webbrowser
 
 AMBITI = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly"
-REPO_PREDEFINITO = "luigismith/ctrl-alt-revenge-nuovo"
+REPO_PREDEFINITO = "luigismith/ctrl-alt-revenge"
 
 
 def chiedi(testo):
