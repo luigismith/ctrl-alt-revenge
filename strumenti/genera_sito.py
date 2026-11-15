@@ -100,6 +100,13 @@ def genera():
         uscita.parent.mkdir(parents=True, exist_ok=True)
         uscita.write_text(pagina, encoding="utf-8", newline="\n")
         print(f"[ok] {uscita.relative_to(RADICE)}")
+    # le pagine fisse (privacy, cancellazione dei dati, 404): solo gli indirizzi cambiano
+    for modello_p in sorted((RADICE / "sito" / "pagine").rglob("*.html")):
+        rel = modello_p.relative_to(RADICE / "sito" / "pagine")
+        testo = modello_p.read_text(encoding="utf-8").replace("{{url_codice}}", URL_CODICE).replace("{{url_sito}}", URL_SITO)
+        (DOCS / rel).parent.mkdir(parents=True, exist_ok=True)
+        (DOCS / rel).write_text(testo, encoding="utf-8", newline="\n")
+        print(f"[ok] docs/{rel.as_posix()}")
 
 
 if __name__ == "__main__":

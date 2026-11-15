@@ -1,0 +1,24 @@
+# Primo post. Resta in «bozza» finché la regia non dà il via (regola: il
+# primo post e il primo Short si pubblicano solo con il suo sì).
+id: 2026-11-20-a1-cimitero
+tipo: carosello
+uscita: 2026-11-20
+stato: bozza
+fonte: inbox/2026-11-15-a1-cimitero
+tavole:
+  - media: gig_profilo.jpg
+    testo: "Il cimitero di San Brunone, il primo tratto del gioco. Il set è di cartone tagliato e dipinto."
+    alt: "GIG, un pupazzo con la barba bianca e la camicia gialla, corre su una passerella di cartone sopra una trincea, nel cimitero; dietro, file di lapidi e croci, le cappelle, i cipressi e un pino."
+    inquadra: "40% 50%"
+  - media: torretta_aria.jpg
+    testo: "Una torretta ARIA+: l'aria, nel 2087, si paga. Per GIG è anche un appoggio per saltare."
+    alt: "Una torretta bianca e menta con il marchio ARIA+ dipinto, fatta come una scatola di cartone, accanto a una cappella gotica rosa; GIG è dietro, mezzo nascosto."
+    inquadra: "70% 50%"
+didascalia: |
+  Taranto, 2087. Il primo tratto del cimitero di San Brunone, dal laboratorio: il set è un diorama di cartone tagliato e dipinto, e GIG un personaggio 3D che sembra un pupazzo da stop motion. Il cielo è ancora provvisorio.
+  È un videogioco in sviluppo, fatto in Unreal Engine 5.
+
+  Taranto, 2087. The first stretch of San Brunone cemetery, from the workshop: the set is a diorama of cut and painted cardboard, and GIG a 3D character made to look like a stop-motion puppet. The sky is still a placeholder.
+  A video game in development, made in Unreal Engine 5.
+hashtag: [ctrlaltrevenge, indiegame, unrealengine5, stopmotion, taranto]
+ai: false

@@ -1,0 +1,22 @@
+# CONTENUTO DI PROVA: sta in prove/, non in contenuti/, quindi non esce mai.
+# Serve alla prova a secco dei pubblicatori (--prova).
+id: prova-carosello
+tipo: carosello
+uscita: 2026-11-17
+stato: pronto
+fonte: docs/media
+tavole:
+  - media: cancello.jpg
+    testo: "Il cancello laterale del cimitero, sul set del prologo."
+    alt: "GIG, un pupazzo con la barba bianca e la camicia gialla, cammina lungo il muro di tufo del cimitero coperto di manifesti strappati."
+  - media: cancello-vicino.jpg
+    testo: "GIG da vicino. Il muro è fatto di conci di cartone dipinti uno per uno."
+    alt: "GIG di profilo davanti al muro di tufo coperto di manifesti: un occhio, una mano, un sole, un'onda."
+  - media: cimitero-gioco.jpg
+    testo: "Dentro il cimitero, dal gioco: 15 pose al secondo, come un pupazzo."
+    alt: "Il cimitero visto di lato: GIG corre sul selciato rosso davanti a una fila di lapidi."
+didascalia: |
+  Taranto, 2087. Il cancello laterale del cimitero, sul set del prologo.
+  Taranto, 2087. The side gate of the cemetery, on the prologue set.
+hashtag: [ctrlaltrevenge, indiegame, unrealengine5, gamedev, taranto]
+ai: false

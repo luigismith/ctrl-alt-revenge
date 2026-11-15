@@ -1,0 +1,53 @@
+# Controlli a ogni push: la coda (lunghezze, file, spoiler), l'inbox e il sito.
+# Sul ramo principale apre anche la issue di veto ai contenuti «pronto».
+name: Controlli
+
+on:
+  push:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: controlli-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  controlla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Dipendenze
+        timeout-minutes: 8
+        run: pip install -r requirements.txt imageio-ffmpeg
+      - name: ffmpeg (da pip: su ubuntu-latest non c'è)
+        timeout-minutes: 4
+        run: |
+          sudo ln -sf "$(python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg
+          ffmpeg -version    # niente pipe: deve poter fallire davvero
+      - name: Identità git
+        run: |
+          git config user.name "ctrl-alt-revenge-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Controlli
+        env:
+          CARU_PAROLE_VIETATE: ${{ secrets.CARU_PAROLE_VIETATE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APRI_VETO: ${{ github.ref == 'refs/heads/main' && '--apri-veto' || '' }}
+        run: python -I strumenti/controlli.py $APRI_VETO
+      - name: Salva i numeri delle issue di veto
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git add contenuti
+          if ! git diff --cached --quiet; then
+            git commit -m "coda: issue di veto aperte"
+            for i in 1 2 3; do git pull --rebase --autostash && git push && exit 0; sleep 5; done
+            exit 1
+          fi

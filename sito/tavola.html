@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<!-- Modello delle tavole social: lo riempie strumenti/genera_media.py.
+     Formati: post 1080x1350 (4:5), verticale 1080x1920 (storia e fondo del reel). -->
+<style>
+@font-face { font-family: "Bungee"; src: url("/docs/font/Bungee-400.woff2") format("woff2"); }
+@font-face { font-family: "Permanent Marker"; src: url("/docs/font/PermanentMarker-400.woff2") format("woff2"); }
+@font-face { font-family: "Special Elite"; src: url("/docs/font/SpecialElite-400.woff2") format("woff2"); }
+* { box-sizing: border-box; margin: 0; }
+html, body { width: {{larghezza}}px; height: {{altezza}}px; overflow: hidden; }
+body {
+  position: relative; color: #1f1a15;
+  background:
+    radial-gradient(120% 80% at 50% 40%, transparent 55%, rgba(40,20,0,.35)),
+    linear-gradient(rgba(236,205,150,.22), rgba(236,205,150,.22)),
+    url("/docs/media/set/kraft.webp") 0 0 / 760px auto, #c79f68;
+}
+.marchio { position: absolute; left: 60px; top: 56px; display: flex; align-items: center; gap: 14px; }
+.tasto {
+  position: relative; font: 400 {{tasto_px}}px/1 "Bungee"; text-transform: uppercase;
+  padding: .22em .38em .32em; border-radius: .16em;
+  background: linear-gradient(#e2dacb, #cbc1ae);
+  box-shadow: inset 0 -.13em 0 rgba(0,0,0,.16), 0 .13em 0 #8e8574, 0 .22em .45em rgba(0,0,0,.35);
+  transform: rotate(-3deg);
+}
+.tasto + .tasto { transform: rotate(2.5deg); }
+.tasto::after {
+  content: ""; position: absolute; top: -.2em; left: 50%; width: 1.3em; height: .42em; translate: -50% 0; rotate: 6deg;
+  background: url("/docs/media/set/nastro.webp") center / 100% 100% no-repeat;
+}
+.spray { font: 400 {{spray_px}}px/1 "Permanent Marker"; color: #d3262e; transform: rotate(-6deg); margin-left: 10px;
+  text-shadow: 0 0 .06em rgba(211,38,46,.55); }
+.quadro {
+  position: absolute; left: 50%; top: {{quadro_top}}px; translate: -50% 0; width: {{quadro_w}}px;
+  padding: 18px; background: url("/docs/media/set/kraft.webp") 0 0 / 560px auto, #c79f68;
+  box-shadow: 0 9px 0 #8c6538, 0 22px 40px rgba(40,15,0,.45);
+  rotate: {{rotazione}}deg;
+}
+.quadro img { display: block; width: 100%; height: {{img_h}}px; object-fit: cover; object-position: {{inquadra}}; }
+.quadro::before, .quadro::after {
+  content: ""; position: absolute; width: 150px; height: 66px; z-index: 2;
+  background: url("/docs/media/set/nastro.webp") center / 100% 100% no-repeat;
+}
+.quadro::before { top: -26px; left: -40px; rotate: -30deg; }
+.quadro::after { top: -26px; right: -40px; rotate: 28deg; }
+.scritta {
+  position: absolute; left: 70px; right: 70px; top: {{scritta_top}}px;
+  font: 400 {{scritta_px}}px/1.32 "Special Elite"; text-align: left;
+  background: rgba(240,228,196,.94); padding: 22px 30px; rotate: -.8deg;
+  box-shadow: 0 3px 8px rgba(0,0,0,.2);
+}
+.scritta:empty { display: none; }
+.strati { position: absolute; left: 0; right: 0; bottom: 0; height: {{strati_h}}px;
+  background: url("/docs/media/set/strati.webp") 0 0 / auto 100% repeat-x;
+  box-shadow: 0 -6px 14px rgba(40,15,0,.3); }
+.vuoto .quadro { display: none; }
+</style>
+</head>
+<body class="{{classe}}">
+  <div class="marchio"><span class="tasto">Ctrl</span><span class="tasto">Alt</span><span class="spray">Revenge</span></div>
+  <div class="quadro"><img src="{{immagine}}" alt=""></div>
+  <p class="scritta">{{scritta}}</p>
+  <div class="strati"></div>
+</body>
+</html>

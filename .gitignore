@@ -8,3 +8,6 @@ __pycache__/
 *.pyc
 .venv/
 docs/_telefono*.html
+prove/media/
+_tavola_*.html
+__pycache__/

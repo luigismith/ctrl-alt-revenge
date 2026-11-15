@@ -1,0 +1,16 @@
+# CONTENUTO DI PROVA: sta in prove/, non in contenuti/, quindi non esce mai.
+id: prova-reel
+tipo: reel
+uscita: 2026-11-17
+stato: pronto
+fonte: prove/media
+video: prova.mp4
+scritta: "Prova a secco: il video vero lo manda la regia."
+didascalia: |
+  Prova a secco del reel.
+hashtag: [ctrlaltrevenge, indiegame]
+youtube:
+  titolo: "Ctrl-Alt-Revenge, prova a secco"
+  descrizione: |
+    Prova a secco. Questo video non viene pubblicato.
+ai: false

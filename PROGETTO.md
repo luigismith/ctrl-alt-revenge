@@ -115,7 +115,7 @@ stato: pronto              # bozza | pronto
   - Se la lista manca, i controlli **falliscono**: non si pubblica alla cieca.
   - Quando trova una parola vietata, il log dice solo il file e la riga, mai la parola (i log sono pubblici). GitHub maschera comunque i valori dei secret nei log, ma una parola comune scritta da noi non deve dipendere da quella maschera.
 - **Finestra di veto:** un contenuto entra in coda almeno 48 ore prima dell'uscita. Quando la routine lo mette in coda, uno script apre una issue «In coda: <id>, esce il <data>», con l'anteprima delle tavole e della didascalia.
-  - **Per fermarlo basta chiudere la issue**, anche dall'app GitHub sul telefono. Il pubblicatore lo salta e lo rimette in `bozza`.
+  - **Per fermarlo basta chiudere la issue**, anche dall'app GitHub sul telefono. Il pubblicatore lo salta finché la issue resta chiusa.
   - Per farlo ripartire si riapre la issue.
   - Dopo l'uscita la issue la chiude il bot, con il permalink.
 

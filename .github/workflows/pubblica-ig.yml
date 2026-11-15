@@ -1,0 +1,174 @@
+# Pubblica su Instagram la prossima uscita della coda (post, carosello o reel),
+# con la storia. Tutto vive qui: il PC di Luigi può restare spento.
+#
+# Prova a secco: «Run workflow» con prova = true. Fa tutto (file, sito,
+# controlli, indirizzi) tranne le chiamate che pubblicano. Con «file» si prova
+# un contenuto preciso, per esempio prove/prova-carosello.yml.
+name: Pubblica su Instagram
+
+on:
+  schedule:
+    # Martedì, venerdì e domenica. Tre passate, perché il cron di GitHub a
+    # volte ritarda di ore o salta (Elettrofoni, 27/08/2026): i doppioni li
+    # ferma stato.json. Minuti «storti», mai allo scoccare dell'ora.
+    # Le ore UTC sono scelte per cadere nella finestra 17-22 italiane sia con
+    # l'ora solare sia con quella legale: non vanno spostate a marzo.
+    - cron: '50 16 * * 0,2,5'   # 17:50 d'inverno, 18:50 d'estate
+    - cron: '35 17 * * 0,2,5'   # 18:35 / 19:35
+    - cron: '40 19 * * 0,2,5'   # 20:40 / 21:40, ultima spiaggia
+  workflow_dispatch:
+    inputs:
+      prova:
+        description: 'Prova a secco: tutto tranne la pubblicazione'
+        type: boolean
+        default: false
+      file:
+        description: 'Solo per la prova: un contenuto preciso (es. prove/prova-carosello.yml)'
+        type: string
+        default: ''
+      forza:
+        description: 'Pubblica anche fuori dalla finestra 17-22 (solo chi sa perché)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: pubblicazione        # mai due pubblicazioni insieme, neanche con YouTube
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PROVA: ${{ inputs.prova && '1' || '0' }}
+      FILE_PROVA: ${{ inputs.file }}
+      PAGES_ATTIVE: ${{ vars.PAGES_ATTIVE == 'si' && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Dipendenze
+        timeout-minutes: 8
+        run: pip install -r requirements.txt
+      # ffmpeg serve solo ai reel: se non si installa, un post di immagini esce lo stesso.
+      - name: ffmpeg (facoltativo, da pip)
+        timeout-minutes: 5
+        continue-on-error: true
+        run: |
+          pip install -q imageio-ffmpeg
+          sudo ln -sf "$(python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg
+          ffmpeg -version
+      - name: Identità git
+        run: |
+          git config user.name "ctrl-alt-revenge-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Quale contenuto
+        id: quale
+        run: |
+          if [ "$PROVA" = "1" ] && [ -n "$FILE_PROVA" ]; then
+            case "$FILE_PROVA" in prove/*.yml|contenuti/*.yml) ;; *) echo "file non ammesso"; exit 1;; esac
+            echo "file=$FILE_PROVA" >> "$GITHUB_OUTPUT"
+            echo "id=$(basename "$FILE_PROVA" .yml)" >> "$GITHUB_OUTPUT"
+          else
+            ID=$(python -I strumenti/coda.py prossimo)
+            echo "id=$ID" >> "$GITHUB_OUTPUT"
+            [ -n "$ID" ] && echo "file=contenuti/$ID.yml" >> "$GITHUB_OUTPUT"
+          fi
+          echo "contenuto: ${ID:-$FILE_PROVA}"
+
+      - name: Niente in coda
+        if: steps.quale.outputs.id == ''
+        run: echo "Niente in coda per oggi. Mai riempitivi; se la coda è corta lo dice la sentinella."
+
+      - name: Genera i file e il sito
+        if: steps.quale.outputs.id != ''
+        env:
+          FILE_CONTENUTO: ${{ steps.quale.outputs.file }}
+        run: |
+          # il video del reel di prova non sta in git: lo si fa qui, dalla cattura del cancello
+          if [ "$PROVA" = "1" ] && [ ! -f prove/media/prova.mp4 ]; then
+            mkdir -p prove/media
+            ffmpeg -y -v error -loop 1 -i docs/media/cancello.jpg -vf "scale=2400:-2,crop=1920:1080:'(in_w-out_w)*t/8':0,fps=30,format=yuv420p" -t 8 -c:v libx264 prove/media/prova.mp4 || true
+          fi
+          python -I strumenti/genera_media.py --file "$FILE_CONTENUTO"
+          python -I strumenti/genera_sito.py
+          # In prova i file non si committano: vanno online solo se Pages è attivo.
+          if [ "$PROVA" != "1" ]; then
+            git add docs
+            if ! git diff --cached --quiet; then
+              git commit -m "social: file di ${{ steps.quale.outputs.id }}"
+              for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done
+            fi
+          fi
+
+      # Prima delle chiamate a Instagram i file devono essere online.
+      - name: Configura Pages
+        if: steps.quale.outputs.id != '' && (env.PROVA != '1' || env.PAGES_ATTIVE == '1')
+        uses: actions/configure-pages@v5
+        with:
+          enablement: false      # Pages si accende a mano, con il via della regia
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.quale.outputs.id != '' && (env.PROVA != '1' || env.PAGES_ATTIVE == '1')
+        with:
+          path: docs
+      # Il deploy a volte resta in «syncing_files» e si arrende a 10 minuti
+      # (Elettrofoni, 10/11/2026): un secondo tentativo, una volta sola.
+      - name: Deploy Pages
+        id: deploy1
+        if: steps.quale.outputs.id != '' && (env.PROVA != '1' || env.PAGES_ATTIVE == '1')
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Deploy Pages, secondo tentativo
+        if: steps.deploy1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+
+      - name: Pubblica (o prova)
+        if: steps.quale.outputs.id != ''
+        env:
+          STATE_KEY: ${{ secrets.STATE_KEY }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          CARU_PAROLE_VIETATE: ${{ secrets.CARU_PAROLE_VIETATE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORZA_ORARIO: ${{ inputs.forza && '1' || '0' }}
+          FILE_CONTENUTO: ${{ steps.quale.outputs.file }}
+        run: |
+          if [ "$PROVA" = "1" ]; then
+            ARGS="--prova"
+            [ -n "$FILE_PROVA" ] && ARGS="$ARGS --file $FILE_CONTENUTO"
+            [ "$PAGES_ATTIVE" != "1" ] && ARGS="$ARGS --locale"
+            python -I strumenti/pubblica_ig.py $ARGS
+          else
+            python -I strumenti/pubblica_ig.py
+          fi
+
+      # Il post è uscito: da qui nessun errore deve farlo sembrare fallito.
+      - name: Aggiorna il sito con il permalink
+        if: steps.quale.outputs.id != '' && env.PROVA != '1'
+        run: |
+          git pull --rebase --autostash
+          python -I strumenti/genera_sito.py
+          git add docs
+          if ! git diff --cached --quiet; then
+            git commit -m "sito: Dal laboratorio aggiornato"
+            for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.quale.outputs.id != '' && env.PROVA != '1'
+        with:
+          path: docs
+          name: github-pages-dopo     # due artifact con lo stesso nome danno 409
+      - name: Redeploy Pages
+        if: steps.quale.outputs.id != '' && env.PROVA != '1'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-dopo
