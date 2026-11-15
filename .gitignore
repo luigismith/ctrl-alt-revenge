@@ -1,0 +1,9 @@
+# segreti: mai nel repository
+.env
+*.env
+client_secret*.json
+*token*.json
+!package*.json
+__pycache__/
+*.pyc
+.venv/
