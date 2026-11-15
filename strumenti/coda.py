@@ -135,9 +135,12 @@ def valida(c, vietate):
     i log del repository sono pubblici."""
     e = []
     nome = c["_file"].name
-    for campo in ("id", "tipo", "uscita", "stato", "fonte", "didascalia"):
+    for campo in ("id", "tipo", "stato", "fonte", "didascalia"):
         if not c.get(campo):
             e.append(f"{nome}: manca «{campo}»")
+    # una bozza può stare senza data (in attesa di materiale nuovo); un «pronto» no
+    if not c.get("uscita") and c.get("stato") != "bozza":
+        e.append(f"{nome}: manca «uscita»")
     if e:
         return e
     if c["_file"].stem != str(c["id"]):
@@ -147,7 +150,8 @@ def valida(c, vietate):
     if c["stato"] not in STATI:
         e.append(f"{nome}: stato «{c['stato']}» sconosciuto")
     try:
-        data_uscita(c)
+        if c.get("uscita"):
+            data_uscita(c)
     except ValueError:
         e.append(f"{nome}: data di uscita non valida")
     if not fonte(c).is_dir():

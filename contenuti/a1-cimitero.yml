@@ -1,8 +1,10 @@
 # Primo post. Resta in «bozza» finché la regia non dà il via (regola: il
 # primo post e il primo Short si pubblicano solo con il suo sì).
-id: 2026-11-20-a1-cimitero
+# Rimandato dalla regia il 15/11/2026: il set di A1 cambia (sfondo più cupo,
+# colature rosse da correggere). Le catture nuove arriveranno in inbox/; la
+# data e il nome definitivo del file si mettono allora.
+id: a1-cimitero
 tipo: carosello
-uscita: 2026-11-20
 stato: bozza
 fonte: inbox/2026-11-15-a1-cimitero
 tavole:
@@ -20,5 +22,5 @@ didascalia: |
 
   Taranto, 2087. The first stretch of San Brunone cemetery, from the workshop: the set is a diorama of cut and painted cardboard, and GIG a 3D character made to look like a stop-motion puppet. The sky is still a placeholder.
   A video game in development, made in Unreal Engine 5.
-hashtag: [ctrlaltrevenge, indiegame, unrealengine5, stopmotion, taranto]
+hashtag: [ctrlaltrevenge, indiegame, unrealengine5, gamedev, taranto]
 ai: false

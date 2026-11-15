@@ -10,12 +10,13 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Sito** (`pages.yml`): deploy a ogni push su `docs/**` e alla fine del workflow YouTube. Non fa niente finché la variabile `PAGES_ATTIVE` non vale `si`. Pages è ancora spento.
 - **Privacy e cancellazione dei dati**: `sito/pagine/` → `docs/privacy.html`, `docs/en/privacy.html`, `docs/cancellazione-dati.html`.
 - **Il veto**: una issue «In coda: <id>» per ogni contenuto. Se la chiude il bot dopo Instagram, lo Short esce lo stesso; se la chiude Luigi, si ferma tutto.
-- **Il primo post** `contenuti/2026-11-20-a1-cimitero.yml` è in bozza: aspetta il via della regia.
+- **Il primo post** `contenuti/a1-cimitero.yml` è in bozza, senza data e con #gamedev al posto di #stopmotion. La regia l'ha rimandato il 15/11: il set di A1 cambia (sfondo più cupo, colature rosse da correggere) e le catture nuove arriveranno in `inbox/`. Una bozza ora può stare senza `uscita`; un «pronto» no.
 - **Sentinella** (`strumenti/sentinella.py`, `.github/workflows/sentinella.yml`, ogni sera 22:25 d'inverno, 23:25 d'estate): uscite mancate, Short mancati, coda sotto i 14 giorni (una issue a settimana), token Instagram (età e prova di `/me`), refresh token di YouTube, sito. Ogni controllo si accende da solo quando la sua parte esiste: oggi tace. La prova con date finte (`prove/prova_sentinella.py`, 22 casi) gira anche nei controlli a ogni push.
 - **Pagina dei passi manuali di Luigi**: `ACCENSIONE.md`, sette passi con la verifica di ognuno.
 
 ## Da fare
 1. La prova a secco di YouTube su Actions.
-2. Il primo post (`contenuti/2026-11-20-a1-cimitero.yml`): lo guarda la regia, poi `stato: pronto` con il suo via.
+2. Il primo post: aspettare le catture nuove di A1 in `inbox/`, rifare le tavole, data e nome del file, poi la regia lo guarda e dà il via.
 3. Con il via della regia: Pages sull'indirizzo `-nuovo` per la prova vera degli URL, la routine, lo scambio dei nomi.
-4. I passi di Luigi, in ordine, da `ACCENSIONE.md`.
+4. I passi di Luigi, in ordine, da `ACCENSIONE.md`: li porta la regia quando ci sono le immagini nuove.
+5. Il secret `CARU_PAROLE_VIETATE` va rimesso dalla lista corretta (la riga 8 ora è «# ---»): lo fa Luigi, non è urgente.
