@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta.titolo}}</title>
+<meta name="description" content="{{meta.descrizione}}">
+<meta property="og:title" content="Ctrl-Alt-Revenge">
+<meta property="og:description" content="{{meta.og_descrizione}}">
+<meta property="og:image" content="{{url_sito}}media/cancello.jpg">
+<meta property="og:image:alt" content="{{meta.og_alt}}">
+<meta property="og:locale" content="{{meta.og_locale}}">
+<link rel="canonical" href="{{url_pagina}}">
+<link rel="alternate" hreflang="it" href="{{url_sito}}">
+<link rel="alternate" hreflang="en" href="{{url_sito}}en/">
+<link rel="preload" href="{{base}}font/Bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{base}}stile.css">
+</head>
+<body>
+<a class="salta" href="#contenuto">{{ui.salta}}</a>
+
+<header class="testata">
+  <div class="testata__dentro">
+    <a class="marchio-mini" href="./" aria-label="{{ui.marchio_label}}">
+      <span class="tasto tasto--mini">Ctrl</span><span class="tasto tasto--mini">Alt</span><span class="spray-mini">Revenge</span>
+    </a>
+    <nav class="menu" aria-label="{{ui.sezioni}}">
+      <ul>
+        <li><a href="#gioco">{{nav.gioco}}</a></li>
+        <li><a href="#mondo">{{nav.mondo}}</a></li>
+        <li><a href="#gig">GIG</a></li>
+        <li><a href="#laboratorio">{{nav.laboratorio}}</a></li>
+        <li><a href="#come">{{nav.come}}</a></li>
+      </ul>
+    </nav>
+    <a class="lingua" href="{{url_altra}}" hreflang="{{altra_lang}}" lang="{{altra_lang}}">{{altra_sigla}}</a>
+  </div>
+</header>
+
+<main id="contenuto">
+
+<section class="eroe" aria-labelledby="titolo">
+  <div class="eroe__dentro">
+    <h1 id="titolo" class="marchio" aria-label="Ctrl-Alt-Revenge">
+      <span class="tasto" aria-hidden="true">Ctrl</span>
+      <span class="tasto tasto--due" aria-hidden="true">Alt</span>
+      <span class="spray" aria-hidden="true">Revenge</span>
+    </h1>
+    <p class="motto"><span>{{eroe.motto_1}}</span> <span>{{eroe.motto_2}}</span> <span>{{eroe.motto_3}}</span></p>
+
+    <figure class="teatrino">
+      <div class="teatrino__boccascena">
+        <picture>
+          <source srcset="{{base}}media/cancello.webp" type="image/webp">
+          <img src="{{base}}media/cancello.jpg" width="1920" height="1080" alt="{{eroe.alt}}">
+        </picture>
+      </div>
+      <div class="strati" aria-hidden="true"></div>
+      <figcaption class="nastro-scritta">{{eroe.didascalia}}</figcaption>
+    </figure>
+
+    <div class="etichette">
+      <p class="cartellino">{{eroe.genere}}</p>
+      <p class="cartellino cartellino--giallo">{{eroe.sviluppo}}</p>
+      <p class="cartellino cartellino--carta">{{eroe.social}}</p>
+    </div>
+  </div>
+</section>
+
+<section id="gioco" class="sezione sezione--cartone" aria-labelledby="t-gioco">
+  <div class="dentro">
+    <h2 id="t-gioco" class="insegna">{{gioco.titolo}}</h2>
+    <p class="attacco">{{gioco.attacco}}</p>
+
+    <div class="gioco">
+      <figure class="tv">
+        <div class="tv__cassa">
+          <div class="tv__schermo">
+            <picture>
+              <source srcset="{{base}}media/cimitero-gioco.webp" type="image/webp">
+              <img src="{{base}}media/cimitero-gioco.jpg" width="1600" height="750" loading="lazy" alt="{{gioco.alt}}">
+            </picture>
+          </div>
+          <div class="tv__manopole" aria-hidden="true"><i></i><i></i></div>
+        </div>
+        <figcaption>{{gioco.didascalia}}</figcaption>
+      </figure>
+
+      <ol class="ingredienti">
+        <li class="pezzo pezzo--a">
+          <span class="numero">1</span>
+          <h3>{{gioco.platform_titolo}}</h3>
+          <p>{{gioco.platform_testo}}</p>
+        </li>
+        <li class="pezzo pezzo--b">
+          <span class="numero">2</span>
+          <h3>{{gioco.arene_titolo}}</h3>
+          <p>{{gioco.arene_testo}}</p>
+        </li>
+        <li class="pezzo pezzo--c">
+          <span class="numero">3</span>
+          <h3>{{gioco.hacking_titolo}}</h3>
+          <p>{{gioco.hacking_testo}}</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="mondo" class="sezione sezione--nube" aria-labelledby="t-mondo">
+  <div class="dentro mondo">
+    <div class="mondo__testo">
+      <h2 id="t-mondo" class="insegna insegna--chiara">{{mondo.titolo}}</h2>
+      <p>{{mondo.p1}}</p>
+      <p>{{mondo.p2}}</p>
+      <p class="mondo__chiusa">{{mondo.chiusa}}</p>
+    </div>
+
+    <div class="mondo__bacheca">
+      <aside class="manifesto" aria-label="{{mondo.manifesto_label}}">
+        <p class="manifesto__marchio">ARIA<span>+</span></p>
+        <p class="manifesto__slogan">{{mondo.slogan}}</p>
+        <p class="manifesto__piccolo">{{mondo.slogan_sotto}}</p>
+        <p class="manifesto__nota">{{mondo.manifesto_nota}}</p>
+      </aside>
+      <figure class="polaroid polaroid--storta">
+        <picture>
+          <source srcset="{{base}}media/torretta-aria.webp" type="image/webp">
+          <img src="{{base}}media/torretta-aria.jpg" width="1280" height="720" loading="lazy" alt="{{mondo.torretta_alt}}">
+        </picture>
+        <figcaption>{{mondo.torretta_didascalia}}</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="gig" class="sezione sezione--carta" aria-labelledby="t-gig">
+  <div class="dentro gig">
+    <figure class="polaroid polaroid--grande">
+      <picture>
+        <source srcset="{{base}}media/cancello-vicino.webp" type="image/webp">
+        <img src="{{base}}media/cancello-vicino.jpg" width="1600" height="900" loading="lazy" alt="{{gig.alt}}">
+      </picture>
+      <span class="timbro" aria-hidden="true">{{gig.timbro}}</span>
+    </figure>
+    <div class="gig__testo">
+      <h2 id="t-gig" class="insegna">GIG</h2>
+      <p class="gig__nome">{{gig.nome}}</p>
+      <p>{{gig.p1}}</p>
+      <p>{{gig.p2}}</p>
+      <p class="nota-mano">{{gig.nota}}</p>
+    </div>
+  </div>
+</section>
+
+<section id="laboratorio" class="sezione sezione--cartone" aria-labelledby="t-lab">
+  <div class="dentro">
+    <h2 id="t-lab" class="insegna">{{lab.titolo}}</h2>
+    <p class="attacco">{{lab.attacco}}</p>
+{{LABORATORIO}}
+  </div>
+</section>
+
+<section id="come" class="sezione sezione--quaderno" aria-labelledby="t-come">
+  <div class="dentro">
+    <div class="foglio">
+      <h2 id="t-come" class="insegna insegna--piccola">{{come.titolo}}</h2>
+      <ul class="onesta">
+        <li>{{come.v1}}</li>
+        <li>{{come.v2}}</li>
+        <li>{{come.v3}}</li>
+        <li>{{come.v4}}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="piede">
+  <div class="piede__onda" aria-hidden="true"></div>
+  <div class="dentro piede__dentro">
+    <p class="firma" aria-hidden="true">Revenge</p>
+    <p>{{piede.fantasia}}</p>
+    <ul class="piede__link">
+      <li><a href="{{base}}{{piede.privacy_url}}">{{piede.privacy}}</a></li>
+      <li><a href="{{url_codice}}">{{piede.codice}}</a></li>
+      <li><a href="{{url_altra}}" hreflang="{{altra_lang}}" lang="{{altra_lang}}">{{piede.altra_lingua}}</a></li>
+    </ul>
+    <p class="piede__piccolo">{{piede.caratteri}}</p>
+  </div>
+</footer>
+</body>
+</html>

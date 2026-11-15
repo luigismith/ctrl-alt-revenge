@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "titolo": "Ctrl-Alt-Revenge · Taranto, 2087",
+    "descrizione": "A 2.5D action platformer set in Taranto, Italy, in 2087, with characters that look like stop-motion puppets on a cardboard set. In development; a personal project.",
+    "og_descrizione": "Taranto, 2087. The arm comes with a subscription. Revenge doesn't.",
+    "og_alt": "GIG, a puppet with a white beard and a yellow shirt, walks along the cemetery wall, covered in torn posters.",
+    "og_locale": "en_GB"
+  },
+  "ui": {
+    "salta": "Skip to content",
+    "marchio_label": "Ctrl-Alt-Revenge, home",
+    "sezioni": "Site sections"
+  },
+  "nav": {
+    "gioco": "The game",
+    "mondo": "The world",
+    "laboratorio": "From the workshop",
+    "come": "How it's made"
+  },
+  "eroe": {
+    "motto_1": "Taranto, 2087.",
+    "motto_2": "The arm comes with a subscription.",
+    "motto_3": "Revenge doesn't.",
+    "alt": "GIG, a puppet with a white beard and a yellow shirt, walks along the cemetery's tufa wall, covered in torn posters, next to an iron gate.",
+    "didascalia": "The side gate of the cemetery, on the prologue set. In-game capture, November 2026.",
+    "genere": "2.5D action platformer",
+    "sviluppo": "In development",
+    "social": "Instagram and YouTube: coming soon"
+  },
+  "gioco": {
+    "titolo": "The game",
+    "attacco": "An action platformer with a double jump. You play along a path, and the camera follows GIG from the side like an operator on a film set: it moves in for the fights, cranes up when the view opens out, and turns with the street.",
+    "alt": "The cemetery seen from the side, in game: GIG runs across paving red with dust, past a row of headstones and crosses, with the chapels behind.",
+    "didascalia": "The cemetery, in game. GIG moves the way a puppet does: in steps, 15 poses a second.",
+    "platform_titolo": "Platforming",
+    "platform_testo": "The backbone: walls, rooftops, building sites, and a double jump to reach them.",
+    "arene_titolo": "Arenas",
+    "arene_testo": "When the Esattori, SIDERA's repo men, turn up, the camera stops and you fight, in depth too: step back into the set to dodge.",
+    "hacking_titolo": "Hacking",
+    "hacking_testo": "GIG's cyber arm isn't just for hitting things: it's how you solve the puzzles."
+  },
+  "mondo": {
+    "titolo": "Under the red cloud",
+    "p1": "Taranto, 2087. The blast furnaces went cold more than sixty years ago, but the old steelworks is still sealed under white domes, and a red cloud hangs over the city. SIDERA, the holding company that owns the clean-up, calls it “clean-up steam”.",
+    "p2": "SIDERA owns the air too, sold by subscription as ARIA+ (<i lang=\"it\">aria</i> means air), and the arms of half the city: MANODOPERA (“workforce”), the cybernetic arm given to workers injured on the job. Miss a payment and it gets locked remotely. Then the Esattori come.",
+    "chiusa": "By 2087 almost everything in Taranto has changed, except the rites of Holy Week.",
+    "manifesto_label": "A SIDERA advert, from the world of the game",
+    "slogan": "The air you deserve.",
+    "slogan_sotto": "Taranto's clean-up. By subscription.",
+    "manifesto_nota": "A made-up ad, like SIDERA itself.",
+    "torretta_alt": "A white and mint-green ARIA+ tower next to GIG: it looks like a milk carton, with a bottle cap for a fan and a drinking straw for a pipe.",
+    "torretta_didascalia": "An ARIA+ tower: a milk carton, a bottle cap for a fan, a drinking straw for a pipe."
+  },
+  "gig": {
+    "alt": "GIG in close-up, in profile, in front of a tufa wall covered in posters: an eye, a hand, a sun, a wave.",
+    "timbro": "Subscription expired",
+    "nome": "Cataldo Gigante, 50, from the Tamburi.",
+    "p1": "An engineer, he invented MANODOPERA in his mother's garage after a conveyor belt on the Linea took off his left arm. Then he asked too many questions: within a week SIDERA had taken his job, his house and his name off the patents, and locked his arm.",
+    "p2": "Gruff, wry and stubborn. He can fix anything except his own life.",
+    "nota": "You'll meet the others along the way."
+  },
+  "lab": {
+    "titolo": "From the workshop",
+    "attacco": "This is where the Instagram posts and YouTube Shorts land, one by one, each with its link.",
+    "vuoto": "Nothing yet: the first one is coming soon.",
+    "apri_ig": "Open on Instagram",
+    "apri_yt": "Open on YouTube"
+  },
+  "come": {
+    "titolo": "How it's made, honestly",
+    "v1": "<strong>It's a video game, made in Unreal Engine 5.</strong> It isn't hand-shot stop motion: the characters are 3D models that imitate puppets, and move in steps the way puppets do.",
+    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid with young but skilled hands.",
+    "v3": "<strong>Some of the tools are AI:</strong> reference images and painted surfaces with ChatGPT, 3D models with Meshy, voices with HeyGen, music with Suno.",
+    "v4": "<strong>It's a personal project.</strong> It isn't for sale and has no release date."
+  },
+  "piede": {
+    "fantasia": "Ctrl-Alt-Revenge is a work of fiction. SIDERA, ARIA+, MANODOPERA and all the characters are made up, and any resemblance to real people or companies is coincidental. The places and rituals of Taranto are real, and we treat them with respect.",
+    "privacy": "Privacy",
+    "privacy_url": "en/privacy.html",
+    "codice": "The site's code",
+    "altra_lingua": "Italiano",
+    "caratteri": "Fonts: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). The cardboard surfaces come from the game's set."
+  }
+}

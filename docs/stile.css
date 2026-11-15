@@ -20,6 +20,9 @@
   --menta: #74d4b2;          /* ARIA+ */
   --nube: #8e2f28;
   --nastro: rgba(236, 221, 176, .86);
+  /* superfici vere, ritagliate dalle catture del set (a1d retro, a5d terreno) */
+  --kraft: url("media/set/kraft.webp") 0 0 / 560px auto;
+  --kraft-chiaro: url("media/set/kraft-chiaro.webp") 0 0 / 560px auto;
   --larghezza: 1200px;
 
   --rumore: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .2 0 0 0 0 .08 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -38,7 +41,7 @@ body {
   margin: 0;
   font: 400 1.125rem/1.6 "Archivo", system-ui, sans-serif;
   color: var(--inchiostro);
-  background: var(--rumore), var(--fibre), var(--cartone);
+  background: linear-gradient(rgba(236,205,150,.22), rgba(236,205,150,.22)), var(--kraft), var(--cartone);
   overflow-x: hidden;
 }
 img { display: block; max-width: 100%; height: auto; }
@@ -100,9 +103,9 @@ p { margin: 0 0 1em; }
 }
 .tasto::after { /* nastro di carta che tiene su il tasto */
   content: ""; position: absolute; top: -.18em; left: 50%; width: 1.3em; height: .38em;
-  translate: -50% 0; rotate: 6deg; background: var(--nastro);
-  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
-  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  translate: -50% 0; rotate: 6deg; background: url("media/set/nastro.webp") center / 100% 100% no-repeat;
+  
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.2));
 }
 .tasto--due { transform: rotate(2.5deg) translateY(.08em); margin-left: .12em; }
 .marchio { display: flex; flex-wrap: wrap; align-items: center; gap: .1em .25em; margin-bottom: 14px; }
@@ -123,13 +126,10 @@ p { margin: 0 0 1em; }
   padding: 34px 0 54px;
   position: relative;
 }
-.eroe::after { /* il bordo tagliato del cartone, verso la sezione dopo */
-  content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 14px; z-index: 1;
-  background:
-    linear-gradient(var(--cartone-chiaro), var(--cartone-chiaro)) 0 0/100% 3px no-repeat,
-    var(--onda) 0 3px/14px 8px repeat-x,
-    var(--buco);
-  clip-path: polygon(0 0, 100% 0, 100% 80%, 92% 100%, 70% 85%, 48% 100%, 25% 82%, 0 100%);
+.eroe::after { /* il bordo tagliato, con gli strati veri */
+  content: ""; position: absolute; left: 0; right: 0; bottom: -14px; height: 28px; z-index: 1;
+  background: url("media/set/strati.webp") 0 0 / auto 100% repeat-x;
+  box-shadow: 0 4px 8px rgba(0,0,0,.25);
 }
 .eroe__dentro { width: min(var(--larghezza), 100% - 32px); margin-inline: auto; position: relative; }
 .motto { font: 600 clamp(1.05rem, 2.2vw, 1.35rem)/1.4 "Archivo", sans-serif; margin: 0 0 26px; }
@@ -141,7 +141,7 @@ p { margin: 0 0 1em; }
 .teatrino { margin: 0; position: relative; }
 .teatrino__boccascena {
   position: relative; padding: clamp(10px, 1.6vw, 20px);
-  background: var(--rumore), var(--fibre), var(--cartone);
+  background: linear-gradient(rgba(236,205,150,.22), rgba(236,205,150,.22)), var(--kraft), var(--cartone);
   box-shadow: 0 8px 0 var(--cartone-scuro), 0 18px 30px rgba(60,20,10,.35);
   clip-path: polygon(0.4% 1%, 99.6% 0, 100% 99%, 0 100%);
 }
@@ -151,23 +151,14 @@ p { margin: 0 0 1em; }
 }
 .teatrino::before, .teatrino::after { /* nastro agli angoli */
   content: ""; position: absolute; z-index: 2; width: clamp(70px, 10vw, 130px); height: 30px;
-  background: var(--nastro); box-shadow: 0 1px 2px rgba(0,0,0,.2);
-  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+  background: url("media/set/nastro.webp") center / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+  
 }
 .teatrino::before { top: -10px; left: -18px; rotate: -32deg; }
 .teatrino::after { top: -12px; right: -16px; rotate: 28deg; }
-.strati { /* il terreno a strati di cartone, la firma del diorama */
-  height: 42px; margin: 0 6px;
-  background:
-    linear-gradient(#f2e6c9, #f2e6c9) 0 0/100% 4px no-repeat,
-    var(--onda) 0 4px/14px 8px repeat-x,
-    linear-gradient(#a8804d, #a8804d) 0 12px/100% 5px no-repeat,
-    var(--onda-giu) 7px 17px/14px 8px repeat-x,
-    linear-gradient(#8a6640, #8a6640) 0 25px/100% 4px no-repeat,
-    var(--onda) 0 29px/14px 8px repeat-x,
-    linear-gradient(#6f4f2d, #6f4f2d) 0 37px/100% 5px no-repeat,
-    var(--buco);
-  clip-path: polygon(0 0, 100% 0, 99.5% 100%, 0.6% 96%);
+.strati { /* il terreno a strati di cartone del gioco: ritaglio vero da a5d */
+  height: clamp(64px, 8vw, 116px); margin: 0 6px;
+  background: url("media/set/strati.webp") 0 0 / auto 100% repeat-x;
   box-shadow: 0 10px 16px rgba(60,20,10,.25);
 }
 .nastro-scritta {
@@ -180,7 +171,7 @@ p { margin: 0 0 1em; }
 .etichette { display: flex; flex-wrap: wrap; gap: 12px 14px; margin-top: 22px; }
 .cartellino {
   margin: 0; font: .95rem/1 "Bungee", sans-serif; text-transform: uppercase;
-  padding: 10px 14px 9px; background: var(--rumore), var(--cartone-chiaro);
+  padding: 10px 14px 9px; background: var(--kraft-chiaro), var(--cartone-chiaro);
   box-shadow: 0 3px 0 var(--cartone-scuro);
   clip-path: polygon(2% 0, 100% 4%, 98% 100%, 0 95%);
 }
@@ -192,7 +183,7 @@ p { margin: 0 0 1em; }
 
 /* ------------------------------------------------------------ sezioni */
 .sezione { padding: clamp(56px, 7vw, 96px) 0; position: relative; }
-.sezione--cartone { background: var(--rumore), var(--fibre), var(--cartone); }
+.sezione--cartone { background: linear-gradient(rgba(236,205,150,.22), rgba(236,205,150,.22)), var(--kraft), var(--cartone); }
 .sezione--carta { background: var(--rumore), var(--carta); }
 .sezione--nube {
   color: var(--carta);
@@ -201,7 +192,7 @@ p { margin: 0 0 1em; }
     radial-gradient(35% 45% at 85% 70%, rgba(40,5,5,.4), transparent 70%),
     var(--rumore), linear-gradient(160deg, #a23a30, var(--nube) 55%, #5e1c18);
 }
-.sezione--quaderno { background: var(--rumore), var(--fibre), var(--cartone-scuro); }
+.sezione--quaderno { background: linear-gradient(rgba(60,35,10,.38), rgba(60,35,10,.38)), var(--kraft), var(--cartone-scuro); }
 
 .insegna {
   display: inline-block; margin-bottom: 18px;
@@ -259,7 +250,7 @@ p { margin: 0 0 1em; }
 .ingredienti { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; }
 .pezzo {
   position: relative; padding: 20px 22px 18px 76px;
-  background: var(--rumore), var(--fibre), var(--cartone-chiaro);
+  background: var(--kraft-chiaro), var(--cartone-chiaro);
   box-shadow: 0 5px 0 var(--cartone-scuro), 0 10px 18px rgba(40,20,0,.25);
 }
 .pezzo--a { clip-path: polygon(0 3%, 99% 0, 100% 96%, 1% 100%); rotate: .6deg; }
@@ -301,8 +292,8 @@ p { margin: 0 0 1em; }
 }
 .polaroid::before { /* un pezzo di nastro in cima */
   content: ""; position: absolute; top: -14px; left: 50%; width: 110px; height: 28px; translate: -50% 0; rotate: -4deg;
-  background: var(--nastro); z-index: 1;
-  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+  background: url("media/set/nastro.webp") center / 100% 100% no-repeat; z-index: 1;
+  
 }
 .polaroid figcaption { font: .98rem/1.35 "Special Elite", monospace; color: var(--inchiostro); margin-top: 10px; }
 .polaroid--storta { position: absolute; right: 0; bottom: 0; width: 66%; rotate: 4deg; }
@@ -350,8 +341,8 @@ p { margin: 0 0 1em; }
 }
 .foglio::before {
   content: ""; position: absolute; top: -14px; left: 40%; width: 140px; height: 30px; rotate: 3deg;
-  background: var(--nastro);
-  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+  background: url("media/set/nastro.webp") center / 100% 100% no-repeat;
+  
 }
 .onesta { margin: 0; padding-left: 1.1em; font: 1.05rem/2 "Special Elite", monospace; }
 .onesta li { margin-bottom: .2em; }
@@ -360,11 +351,8 @@ p { margin: 0 0 1em; }
 /* ------------------------------------------------------------ piede */
 .piede { position: relative; color: var(--carta); background: var(--rumore), #2b2219; padding: 46px 0 34px; }
 .piede__onda {
-  position: absolute; top: -12px; left: 0; right: 0; height: 14px;
-  background:
-    linear-gradient(var(--cartone-chiaro), var(--cartone-chiaro)) 0 100%/100% 3px no-repeat,
-    var(--onda-giu) 0 0/14px 8px repeat-x,
-    var(--buco);
+  position: absolute; top: -26px; left: 0; right: 0; height: 28px;
+  background: url("media/set/strati.webp") 0 0 / auto 100% repeat-x;
 }
 .piede__dentro { font-size: .98rem; }
 .piede__dentro > p { max-width: 70ch; }
@@ -403,3 +391,13 @@ p { margin: 0 0 1em; }
   .timbro { font-size: .85rem; top: auto; bottom: 64px; right: 14px; }
   .firma { font-size: 2.6rem; }
 }
+
+/* ------------------------------------------------------------ uscite pubblicate (Dal laboratorio) */
+.uscite { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 26px; }
+.uscita a { display: block; text-decoration: none; background: var(--rumore), #faf7f0; padding: 10px 10px 12px; box-shadow: 0 8px 18px rgba(0,0,0,.3); }
+.uscita:nth-child(odd) a { rotate: -1.2deg; }
+.uscita:nth-child(even) a { rotate: 1deg; }
+.uscita img { aspect-ratio: 4 / 5; object-fit: cover; width: 100%; }
+.uscita__data { display: block; margin-top: 8px; font: .85rem/1.2 "Special Elite", monospace; }
+.uscita__titolo { display: block; font-weight: 700; line-height: 1.3; margin: 4px 0; }
+.uscita__dove { font: .8rem/1 "Bungee", sans-serif; color: var(--rosso); }

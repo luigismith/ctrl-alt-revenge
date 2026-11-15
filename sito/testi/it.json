@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "titolo": "Ctrl-Alt-Revenge · Taranto, 2087",
+    "descrizione": "Un platform d'azione in 2,5D ambientato a Taranto nel 2087, con personaggi che sembrano pupazzi da stop motion e un set di cartone. In sviluppo, progetto personale.",
+    "og_descrizione": "Taranto, 2087. Il braccio è in abbonamento. La vendetta no.",
+    "og_alt": "GIG, un pupazzo con la barba bianca e la camicia gialla, cammina lungo il muro del cimitero coperto di manifesti strappati.",
+    "og_locale": "it_IT"
+  },
+  "ui": {
+    "salta": "Vai al contenuto",
+    "marchio_label": "Ctrl-Alt-Revenge, inizio",
+    "sezioni": "Sezioni del sito"
+  },
+  "nav": {
+    "gioco": "Il gioco",
+    "mondo": "Il mondo",
+    "laboratorio": "Dal laboratorio",
+    "come": "Come è fatto"
+  },
+  "eroe": {
+    "motto_1": "Taranto, 2087.",
+    "motto_2": "Il braccio è in abbonamento.",
+    "motto_3": "La vendetta no.",
+    "alt": "GIG, un pupazzo con la barba bianca e la camicia gialla, cammina lungo il muro di tufo del cimitero, coperto di manifesti strappati, accanto a un cancello di ferro.",
+    "didascalia": "Il cancello laterale del cimitero, sul set del prologo. Cattura dal gioco, novembre 2026.",
+    "genere": "Platform d'azione in 2,5D",
+    "sviluppo": "In sviluppo",
+    "social": "Instagram e YouTube: in arrivo"
+  },
+  "gioco": {
+    "titolo": "Il gioco",
+    "attacco": "Un platform d'azione con il doppio salto. Si gioca lungo un percorso, e la telecamera segue GIG di lato come un operatore sul set: si avvicina negli scontri, si alza quando si apre la vista, gira con la strada.",
+    "alt": "Il cimitero visto di lato, dal gioco: GIG corre sul selciato rosso di polvere, davanti a una fila di lapidi e croci, con le cappelle sullo sfondo.",
+    "didascalia": "Il cimitero, dal gioco. GIG si muove a scatti, 15 pose al secondo, come un pupazzo.",
+    "platform_titolo": "Il platform",
+    "platform_testo": "La spina dorsale: muri, tetti, cantieri e un doppio salto per arrivarci.",
+    "arene_titolo": "Le arene",
+    "arene_testo": "Quando arrivano gli Esattori la camera si ferma e si combatte, anche in profondità: ci si sposta verso il fondo per schivare.",
+    "hacking_titolo": "L'hacking",
+    "hacking_testo": "Il braccio cyber di GIG non serve solo a colpire: con lui si risolvono i puzzle."
+  },
+  "mondo": {
+    "titolo": "Sotto la nube rossa",
+    "p1": "Taranto, 2087. Gli altiforni sono spenti da più di sessant'anni, ma la vecchia fabbrica sta chiusa sotto cupole bianche e sopra la città resta una nube rossa. SIDERA, la holding che possiede la bonifica, la chiama «vapore di bonifica».",
+    "p2": "SIDERA possiede anche l'aria, venduta in abbonamento con il nome di ARIA+, e le braccia di mezza città: MANODOPERA, il braccio cibernetico degli operai infortunati. Chi salta una rata se lo vede bloccare a distanza. Poi arrivano gli Esattori.",
+    "chiusa": "Nel 2087 a Taranto è cambiato quasi tutto, tranne i riti della Settimana Santa.",
+    "manifesto_label": "Una pubblicità di SIDERA, nel mondo del gioco",
+    "slogan": "L'aria che meriti.",
+    "slogan_sotto": "La bonifica di Taranto. In abbonamento.",
+    "manifesto_nota": "Pubblicità inventata, come SIDERA.",
+    "torretta_alt": "Una torretta ARIA+ bianca e menta, accanto a GIG: sembra un cartone del latte con una ventola fatta da un tappo e un tubo di cannuccia.",
+    "torretta_didascalia": "Una torretta ARIA+: un cartone del latte, un tappo per ventola, una cannuccia per tubo."
+  },
+  "gig": {
+    "alt": "GIG da vicino, di profilo, davanti a un muro di tufo coperto di manifesti: un occhio, una mano, un sole, un'onda.",
+    "timbro": "Abbonamento scaduto",
+    "nome": "Cataldo Gigante, 50 anni, dei Tamburi.",
+    "p1": "Ingegnere, ha inventato MANODOPERA nel garage di sua madre, dopo che un nastro della Linea gli aveva tranciato il braccio sinistro. Poi ha fatto troppe domande: in una settimana SIDERA gli ha tolto il lavoro, la casa e il nome sui brevetti, e gli ha bloccato il braccio.",
+    "p2": "Burbero, ironico e testardo. Aggiusta tutto, tranne la sua vita.",
+    "nota": "Gli altri li incontrerete strada facendo."
+  },
+  "lab": {
+    "titolo": "Dal laboratorio",
+    "attacco": "Qui arrivano i post di Instagram e gli Shorts di YouTube, uno per uno, con il loro link.",
+    "vuoto": "Ancora niente: il primo arriva presto.",
+    "apri_ig": "Apri su Instagram",
+    "apri_yt": "Apri su YouTube"
+  },
+  "come": {
+    "titolo": "Come è fatto, davvero",
+    "v1": "<strong>È un videogioco, fatto in Unreal Engine 5.</strong> Non è stop motion girato a mano: i personaggi sono modelli 3D che imitano i pupazzi, e si muovono a scatti come loro.",
+    "v2": "<strong>Il set imita un diorama</strong> di cartone, plastilina e materiali di recupero, come se Taranto l'avesse costruita un ragazzino con le mani giovani ma esperte.",
+    "v3": "<strong>Alcuni strumenti sono di intelligenza artificiale:</strong> immagini di riferimento e superfici dipinte con ChatGPT, modelli 3D con Meshy, voci con HeyGen, musica con Suno.",
+    "v4": "<strong>È un progetto personale.</strong> Non è in vendita e non ha una data di uscita."
+  },
+  "piede": {
+    "fantasia": "Ctrl-Alt-Revenge è un'opera di fantasia. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, e ogni somiglianza con persone o aziende reali è casuale. I luoghi e i riti di Taranto sono veri, e li raccontiamo con rispetto.",
+    "privacy": "Privacy",
+    "privacy_url": "privacy.html",
+    "codice": "Il codice del sito",
+    "altra_lingua": "English",
+    "caratteri": "Caratteri: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). Le superfici di cartone vengono dal set del gioco."
+  }
+}
