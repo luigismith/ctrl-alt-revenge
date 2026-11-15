@@ -238,6 +238,9 @@ def veto(c):
     i = leggi_issue(c["issue"])
     if i.get("state") == "closed":
         chi = (i.get("closed_by") or {}).get("login", "?")
+        if chi == BOT:
+            # chiusa dal pubblicatore di Instagram dopo il reel: lo Short può uscire
+            return True, f"issue #{c['issue']} chiusa dal bot dopo Instagram, nessun veto"
         return False, f"issue #{c['issue']} chiusa da {chi}: contenuto fermato"
     aperta = dt.datetime.fromisoformat(i["created_at"].replace("Z", "+00:00"))
     if dt.datetime.now(dt.timezone.utc) - aperta < dt.timedelta(hours=VETO_ORE):
@@ -259,4 +262,7 @@ if __name__ == "__main__":
     from comune import leggi_stato, uscite_di
     if sys.argv[1:] == ["prossimo"]:
         c = prossimo(tutti(), {u["id"] for u in uscite_di(leggi_stato(), "instagram")}, TIPI)
+        print(c["id"] if c else "")
+    elif sys.argv[1:] == ["prossimo-short"]:
+        c = prossimo(tutti(), {u["id"] for u in uscite_di(leggi_stato(), "youtube")}, {"reel"})
         print(c["id"] if c else "")

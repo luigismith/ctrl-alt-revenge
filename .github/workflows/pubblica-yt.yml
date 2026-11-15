@@ -1,0 +1,104 @@
+# Carica su YouTube lo Short del reel della domenica, circa un'ora dopo
+# Instagram. YouTube riceve il file dal runner: Pages non serve.
+#
+# Prova a secco: «Run workflow» con prova = true (e, se si vuole, il file
+# prove/prova-reel.yml). Fa tutto tranne le chiamate a YouTube.
+name: Pubblica su YouTube
+
+on:
+  schedule:
+    # La domenica, tre passate. Lo script esce senza fare niente se il reel su
+    # Instagram ha meno di 55 minuti, o se lo Short è già uscito. Le ore UTC
+    # valgono con l'ora solare e con la legale (finestra 17-23 italiane).
+    - cron: '55 17 * * 0'   # 18:55 d'inverno, 19:55 d'estate
+    - cron: '45 18 * * 0'   # 19:45 / 20:45
+    - cron: '25 20 * * 0'   # 21:25 / 22:25, ultima spiaggia
+  workflow_dispatch:
+    inputs:
+      prova:
+        description: 'Prova a secco: tutto tranne il caricamento'
+        type: boolean
+        default: false
+      file:
+        description: 'Solo per la prova: un contenuto preciso (es. prove/prova-reel.yml)'
+        type: string
+        default: ''
+
+concurrency:
+  group: pubblicazione        # mai insieme a Instagram
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PROVA: ${{ inputs.prova && '1' || '0' }}
+      FILE_PROVA: ${{ inputs.file }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Dipendenze e ffmpeg
+        timeout-minutes: 8
+        run: |
+          pip install -r requirements.txt imageio-ffmpeg
+          sudo ln -sf "$(python -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')" /usr/local/bin/ffmpeg
+          ffmpeg -version
+      - name: Identità git
+        run: |
+          git config user.name "ctrl-alt-revenge-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Il video
+        run: |
+          if [ "$PROVA" = "1" ] && [ -n "$FILE_PROVA" ]; then
+            case "$FILE_PROVA" in prove/*.yml|contenuti/*.yml) ;; *) echo "file non ammesso"; exit 1;; esac
+            if [ ! -f prove/media/prova.mp4 ]; then
+              mkdir -p prove/media
+              ffmpeg -y -v error -loop 1 -i docs/media/cancello.jpg -vf "scale=2400:-2,crop=1920:1080:'(in_w-out_w)*t/8':0,fps=30,format=yuv420p" -t 8 -c:v libx264 prove/media/prova.mp4
+            fi
+            python -I strumenti/genera_media.py --file "$FILE_PROVA"
+          else
+            # di norma reel.mp4 l'ha già fatto e committato il giro di Instagram;
+            # se Instagram non è passato, lo si fa qui
+            ID=$(python -I strumenti/coda.py prossimo-short)
+            if [ -n "$ID" ] && [ ! -f "docs/social/$ID/reel.mp4" ]; then
+              python -I strumenti/genera_media.py --file "contenuti/$ID.yml"
+            fi
+          fi
+
+      - name: Carica (o prova)
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          CARU_PAROLE_VIETATE: ${{ secrets.CARU_PAROLE_VIETATE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$PROVA" = "1" ]; then
+            ARGS="--prova"
+            [ -n "$FILE_PROVA" ] && ARGS="$ARGS --file $FILE_PROVA"
+            python -I strumenti/pubblica_yt.py $ARGS
+          else
+            python -I strumenti/pubblica_yt.py
+          fi
+
+      # Lo Short è uscito: il sito prende il permalink. Il deploy lo fa pages.yml,
+      # che parte alla fine di questo workflow (un push del bot non fa partire workflow).
+      - name: Aggiorna il sito
+        if: env.PROVA != '1'
+        run: |
+          git pull --rebase --autostash
+          python -I strumenti/genera_sito.py
+          git add docs
+          if ! git diff --cached --quiet; then
+            git commit -m "sito: Dal laboratorio aggiornato (YouTube)"
+            for i in 1 2 3; do git pull --rebase --autostash && git push && break; sleep 5; done
+          fi

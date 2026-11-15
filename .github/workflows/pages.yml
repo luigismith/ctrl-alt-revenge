@@ -1,0 +1,53 @@
+# Il deploy del sito su GitHub Pages.
+# - a ogni push che tocca docs/ (Luigi, la regia, la routine);
+# - alla fine di «Pubblica su YouTube»: i push fatti dal bot con GITHUB_TOKEN
+#   non fanno partire altri workflow, quindi qui lo si chiede esplicitamente;
+# - a mano, con «Run workflow».
+# Pages non si accende da qui (enablement: false): si accende a mano, con il
+# via della regia. Finché la variabile PAGES_ATTIVE non vale «si», non fa niente.
+name: Sito
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+  workflow_run:
+    workflows: ['Pubblica su YouTube']
+    types: [completed]
+  workflow_dispatch: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    if: vars.PAGES_ATTIVE == 'si'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy1.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # dopo workflow_run serve l'ultimo main, non il commit che l'ha fatto partire
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: false
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      # Il deploy a volte resta in «syncing_files» e si arrende (Elettrofoni, 10/11/2026): un secondo tentativo.
+      - name: Deploy
+        id: deploy1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Deploy, secondo tentativo
+        if: steps.deploy1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
