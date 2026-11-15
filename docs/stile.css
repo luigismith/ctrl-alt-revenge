@@ -1,0 +1,405 @@
+/* Ctrl-Alt-Revenge: il sito come un diorama costruito da Totò.
+   Cartone, nastro di carta, manifesti, spray e tappi. Niente pixel art. */
+
+@font-face { font-family: "Bungee"; src: url("font/Bungee-400.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Permanent Marker"; src: url("font/PermanentMarker-400.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Special Elite"; src: url("font/SpecialElite-400.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("font/Archivo-var.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+
+:root {
+  --cartone: #c79f68;
+  --cartone-chiaro: #d9b784;
+  --cartone-scuro: #8c6538;
+  --cartone-grigio: #cfc6b5;
+  --buco: #4f3519;           /* il buio dentro l'onda */
+  --carta: #f4ecdc;
+  --inchiostro: #1f1a15;
+  --rosso: #d3262e;          /* SIDERA */
+  --cyan: #18bfd3;           /* MANODOPERA, l'occhio */
+  --giallo: #f4c31a;         /* la camicia di GIG, il nastro da cantiere */
+  --menta: #74d4b2;          /* ARIA+ */
+  --nube: #8e2f28;
+  --nastro: rgba(236, 221, 176, .86);
+  --larghezza: 1200px;
+
+  --rumore: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .2 0 0 0 0 .08 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* le onde del cartone viste in trasparenza sotto la copertina */
+  --fibre: repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 9px, rgba(80,50,20,.07) 9px 18px);
+  /* il profilo dell'onda, per i bordi tagliati */
+  --onda: radial-gradient(circle at 50% 100%, transparent 4.5px, var(--cartone-chiaro) 5px 6.5px, transparent 7px);
+  --onda-giu: radial-gradient(circle at 50% 0, transparent 4.5px, var(--cartone-chiaro) 5px 6.5px, transparent 7px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font: 400 1.125rem/1.6 "Archivo", system-ui, sans-serif;
+  color: var(--inchiostro);
+  background: var(--rumore), var(--fibre), var(--cartone);
+  overflow-x: hidden;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+h1, h2, h3 { margin: 0; font-weight: 400; }
+p { margin: 0 0 1em; }
+
+.salta { position: absolute; left: -9999px; top: 8px; background: var(--carta); padding: 8px 12px; z-index: 10; }
+.salta:focus { left: 16px; }
+
+.dentro { width: min(var(--larghezza), 100% - 32px); margin-inline: auto; }
+
+/* ------------------------------------------------------------ testata */
+.testata {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--rumore), #2b2219;
+  color: var(--carta);
+  box-shadow: 0 3px 0 var(--buco), 0 6px 14px rgba(0,0,0,.3);
+}
+.testata__dentro {
+  width: min(var(--larghezza), 100% - 32px); margin-inline: auto;
+  display: flex; align-items: center; gap: 20px; min-height: 58px;
+}
+.marchio-mini { display: flex; align-items: center; gap: 5px; text-decoration: none; flex: none; }
+.tasto--mini { font-size: .78rem !important; padding: .28em .45em .36em !important; transform: none !important; }
+.tasto--mini::after { display: none; }
+.spray-mini { font: 1.15rem/1 "Permanent Marker", cursive; color: var(--rosso); margin-left: 4px; transform: rotate(-4deg); }
+
+.menu { flex: 1; min-width: 0; }
+.menu ul {
+  list-style: none; margin: 0; padding: 4px 0; display: flex; gap: 4px;
+  overflow-x: auto; scrollbar-width: none; justify-content: flex-end;
+}
+.menu ul::-webkit-scrollbar { display: none; }
+.menu a {
+  display: block; white-space: nowrap; padding: 6px 12px; text-decoration: none;
+  font: 600 .95rem/1.2 "Archivo", sans-serif; letter-spacing: .02em;
+  border-radius: 3px;
+}
+.menu a:hover { background: var(--giallo); color: var(--inchiostro); }
+.lingua {
+  flex: none; font: .85rem/1 "Bungee", sans-serif; text-decoration: none;
+  padding: 7px 9px 6px; background: var(--carta); color: var(--inchiostro);
+  transform: rotate(3deg); box-shadow: 0 2px 0 var(--cartone-scuro);
+}
+
+/* ------------------------------------------------------------ marchio */
+.tasto {
+  position: relative; display: inline-block;
+  font: 400 clamp(2.1rem, 6.2vw, 4.4rem)/1 "Bungee", sans-serif;
+  text-transform: uppercase; color: var(--inchiostro);
+  padding: .22em .38em .32em;
+  background: var(--rumore), linear-gradient(#e2dacb, #cbc1ae);
+  border-radius: .16em;
+  box-shadow: inset 0 -.13em 0 rgba(0,0,0,.16), inset 0 .05em 0 rgba(255,255,255,.5),
+              0 .13em 0 #8e8574, 0 .22em .45em rgba(0,0,0,.35);
+  transform: rotate(-3deg);
+}
+.tasto::after { /* nastro di carta che tiene su il tasto */
+  content: ""; position: absolute; top: -.18em; left: 50%; width: 1.3em; height: .38em;
+  translate: -50% 0; rotate: 6deg; background: var(--nastro);
+  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.tasto--due { transform: rotate(2.5deg) translateY(.08em); margin-left: .12em; }
+.marchio { display: flex; flex-wrap: wrap; align-items: center; gap: .1em .25em; margin-bottom: 14px; }
+.spray {
+  position: relative; display: inline-block;
+  font: 400 clamp(3rem, 10vw, 7.4rem)/1 "Permanent Marker", cursive;
+  color: var(--rosso); letter-spacing: .01em;
+  transform: rotate(-6deg) translateY(.05em); margin-left: .12em;
+  text-shadow: 0 0 .06em rgba(211,38,46,.55), 0 0 .22em rgba(211,38,46,.25);
+}
+
+/* ------------------------------------------------------------ apertura */
+.eroe {
+  background:
+    radial-gradient(120% 70% at 75% 0%, rgba(255,240,235,.75), transparent 60%),
+    var(--rumore),
+    linear-gradient(#efd6cf, #e3b7ad 70%, #d9a397);
+  padding: 34px 0 54px;
+  position: relative;
+}
+.eroe::after { /* il bordo tagliato del cartone, verso la sezione dopo */
+  content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 14px; z-index: 1;
+  background:
+    linear-gradient(var(--cartone-chiaro), var(--cartone-chiaro)) 0 0/100% 3px no-repeat,
+    var(--onda) 0 3px/14px 8px repeat-x,
+    var(--buco);
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 92% 100%, 70% 85%, 48% 100%, 25% 82%, 0 100%);
+}
+.eroe__dentro { width: min(var(--larghezza), 100% - 32px); margin-inline: auto; position: relative; }
+.motto { font: 600 clamp(1.05rem, 2.2vw, 1.35rem)/1.4 "Archivo", sans-serif; margin: 0 0 26px; }
+.motto span { display: inline-block; background: var(--carta); padding: 2px 8px; margin: 0 2px 6px 0;
+  box-shadow: 0 1px 0 rgba(0,0,0,.15); }
+.motto span:nth-child(2) { transform: rotate(-1deg); }
+.motto span:last-child { background: var(--inchiostro); color: var(--carta); transform: rotate(1.2deg); }
+
+.teatrino { margin: 0; position: relative; }
+.teatrino__boccascena {
+  position: relative; padding: clamp(10px, 1.6vw, 20px);
+  background: var(--rumore), var(--fibre), var(--cartone);
+  box-shadow: 0 8px 0 var(--cartone-scuro), 0 18px 30px rgba(60,20,10,.35);
+  clip-path: polygon(0.4% 1%, 99.6% 0, 100% 99%, 0 100%);
+}
+.teatrino__boccascena::after { /* la profondità della scatola */
+  content: ""; position: absolute; inset: clamp(10px, 1.6vw, 20px); pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgba(60,35,10,.5), inset 0 10px 24px rgba(30,10,0,.45);
+}
+.teatrino::before, .teatrino::after { /* nastro agli angoli */
+  content: ""; position: absolute; z-index: 2; width: clamp(70px, 10vw, 130px); height: 30px;
+  background: var(--nastro); box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+}
+.teatrino::before { top: -10px; left: -18px; rotate: -32deg; }
+.teatrino::after { top: -12px; right: -16px; rotate: 28deg; }
+.strati { /* il terreno a strati di cartone, la firma del diorama */
+  height: 42px; margin: 0 6px;
+  background:
+    linear-gradient(#f2e6c9, #f2e6c9) 0 0/100% 4px no-repeat,
+    var(--onda) 0 4px/14px 8px repeat-x,
+    linear-gradient(#a8804d, #a8804d) 0 12px/100% 5px no-repeat,
+    var(--onda-giu) 7px 17px/14px 8px repeat-x,
+    linear-gradient(#8a6640, #8a6640) 0 25px/100% 4px no-repeat,
+    var(--onda) 0 29px/14px 8px repeat-x,
+    linear-gradient(#6f4f2d, #6f4f2d) 0 37px/100% 5px no-repeat,
+    var(--buco);
+  clip-path: polygon(0 0, 100% 0, 99.5% 100%, 0.6% 96%);
+  box-shadow: 0 10px 16px rgba(60,20,10,.25);
+}
+.nastro-scritta {
+  display: inline-block; margin: 16px 0 0 4%; max-width: 92%;
+  font: 1rem/1.35 "Special Elite", monospace;
+  background: var(--nastro); padding: 6px 14px; rotate: -.8deg;
+  clip-path: polygon(0 10%, 1.5% 0, 98.5% 4%, 100% 0, 99.4% 45%, 100% 80%, 98.5% 100%, 1.5% 94%, 0 100%, .6% 50%);
+}
+
+.etichette { display: flex; flex-wrap: wrap; gap: 12px 14px; margin-top: 22px; }
+.cartellino {
+  margin: 0; font: .95rem/1 "Bungee", sans-serif; text-transform: uppercase;
+  padding: 10px 14px 9px; background: var(--rumore), var(--cartone-chiaro);
+  box-shadow: 0 3px 0 var(--cartone-scuro);
+  clip-path: polygon(2% 0, 100% 4%, 98% 100%, 0 95%);
+}
+.cartellino:nth-child(2) { rotate: 1.5deg; }
+.cartellino:nth-child(3) { rotate: -1deg; }
+.cartellino--giallo { background: var(--giallo); box-shadow: 0 3px 0 #a07c06;
+  clip-path: polygon(0 4%, 98% 0, 100% 96%, 3% 100%); }
+.cartellino--carta { background: var(--carta); font-family: "Special Elite", monospace; text-transform: none; font-size: 1rem; }
+
+/* ------------------------------------------------------------ sezioni */
+.sezione { padding: clamp(56px, 7vw, 96px) 0; position: relative; }
+.sezione--cartone { background: var(--rumore), var(--fibre), var(--cartone); }
+.sezione--carta { background: var(--rumore), var(--carta); }
+.sezione--nube {
+  color: var(--carta);
+  background:
+    radial-gradient(40% 50% at 15% 20%, rgba(230,120,95,.35), transparent 70%),
+    radial-gradient(35% 45% at 85% 70%, rgba(40,5,5,.4), transparent 70%),
+    var(--rumore), linear-gradient(160deg, #a23a30, var(--nube) 55%, #5e1c18);
+}
+.sezione--quaderno { background: var(--rumore), var(--fibre), var(--cartone-scuro); }
+
+.insegna {
+  display: inline-block; margin-bottom: 18px;
+  font: 400 clamp(2rem, 5vw, 3.4rem)/1.05 "Bungee", sans-serif; text-transform: uppercase;
+  color: var(--carta);
+  text-shadow: 3px 3px 0 var(--rosso), 6px 6px 0 var(--inchiostro);
+  rotate: -1.5deg;
+}
+.sezione--carta .insegna { color: var(--inchiostro); text-shadow: 3px 3px 0 var(--giallo), 6px 6px 0 var(--rosso); }
+.insegna--chiara { text-shadow: 3px 3px 0 var(--inchiostro), 6px 6px 0 rgba(0,0,0,.35); }
+.insegna--piccola { font-size: clamp(1.5rem, 3.4vw, 2.2rem); color: var(--inchiostro); text-shadow: 2px 2px 0 var(--giallo); rotate: 0deg; }
+.attacco { max-width: 62ch; font-size: clamp(1.1rem, 1.6vw, 1.25rem); }
+
+/* ------------------------------------------------------------ il gioco */
+.gioco { display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: start; margin-top: 84px; }
+
+.tv { margin: 0; }
+.tv__cassa {
+  position: relative; display: flex; gap: 18px; align-items: center;
+  padding: 20px 20px 20px 20px;
+  background: var(--rumore), linear-gradient(#ddd4c3, #c3b9a5);
+  border-radius: 22px;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.12), 0 9px 0 #8f8572, 0 20px 30px rgba(40,20,0,.35);
+  rotate: -.8deg;
+}
+.tv__cassa::before { /* antenna di fil di ferro */
+  content: ""; position: absolute; left: 50%; top: -58px; width: 90px; height: 60px; translate: -50% 0;
+  background:
+    linear-gradient(55deg, transparent 48%, #6d6d6d 48% 52%, transparent 52%) 0 0/50% 100% no-repeat,
+    linear-gradient(-55deg, transparent 48%, #6d6d6d 48% 52%, transparent 52%) 100% 0/50% 100% no-repeat;
+}
+.tv__schermo {
+  position: relative; flex: 1; min-width: 0; overflow: hidden;
+  border-radius: 28px / 24px; background: #111;
+  box-shadow: 0 0 0 6px #2b2620, 0 0 0 9px #9d937f;
+}
+.tv__schermo::after { /* righe del tubo: il sapore anni '90, solo qui */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(rgba(0,0,0,.12) 0 1px, transparent 1px 3px),
+              radial-gradient(120% 100% at 50% 50%, transparent 60%, rgba(0,0,0,.45));
+}
+.tv__manopole { display: flex; flex-direction: column; gap: 18px; flex: none; }
+.tv__manopole i { /* due tappi a corona */
+  display: block; width: 46px; height: 46px; border-radius: 50%;
+  background:
+    radial-gradient(circle, #e8463f 0 52%, #b51f1a 54% 60%, transparent 62%),
+    repeating-conic-gradient(#a71a16 0 9deg, #e0433c 9deg 18deg);
+  box-shadow: 0 3px 0 rgba(0,0,0,.3);
+}
+.tv__manopole i + i { background:
+    radial-gradient(circle, #f3f0e8 0 52%, #c9c3b6 54% 60%, transparent 62%),
+    repeating-conic-gradient(#b8b1a3 0 9deg, #efebe2 9deg 18deg); }
+.tv figcaption { margin-top: 22px; font: 1rem/1.4 "Special Elite", monospace; }
+
+.ingredienti { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; }
+.pezzo {
+  position: relative; padding: 20px 22px 18px 76px;
+  background: var(--rumore), var(--fibre), var(--cartone-chiaro);
+  box-shadow: 0 5px 0 var(--cartone-scuro), 0 10px 18px rgba(40,20,0,.25);
+}
+.pezzo--a { clip-path: polygon(0 3%, 99% 0, 100% 96%, 1% 100%); rotate: .6deg; }
+.pezzo--b { clip-path: polygon(1% 0, 100% 4%, 99% 100%, 0 97%); rotate: -.8deg; background: var(--rumore), var(--rosso); color: var(--carta); box-shadow: 0 5px 0 #7d1217, 0 10px 18px rgba(40,20,0,.25); }
+.pezzo--c { clip-path: polygon(0 0, 98% 3%, 100% 100%, 2% 97%); rotate: .4deg; background: var(--rumore), var(--cyan); }
+.pezzo h3 { font: 400 1.4rem/1.1 "Bungee", sans-serif; text-transform: uppercase; margin-bottom: 6px; }
+.pezzo p { margin: 0; }
+.numero { /* numero a stencil dentro un tappo */
+  position: absolute; left: 16px; top: 18px; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 1.35rem/1 "Bungee", sans-serif; color: var(--inchiostro);
+  background: radial-gradient(circle, var(--carta) 0 58%, transparent 60%),
+              repeating-conic-gradient(#b4ab99 0 9deg, #ece6da 9deg 18deg);
+}
+
+/* ------------------------------------------------------------ il mondo */
+.mondo { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.mondo__testo p { max-width: 56ch; }
+.mondo__chiusa { font: 1.3rem/1.35 "Permanent Marker", cursive; color: var(--giallo); rotate: -1deg; }
+.mondo__bacheca { position: relative; min-height: 470px; }
+.manifesto {
+  position: absolute; left: 0; top: 0; width: 62%; padding: 26px 24px 40px;
+  background: var(--rumore), linear-gradient(#fbfaf5, #e8efe9);
+  color: #1d5a4a; rotate: -3deg;
+  clip-path: polygon(0 0, 100% 2%, 99% 88%, 94% 93%, 90% 87%, 82% 96%, 74% 89%, 63% 99%, 55% 90%, 44% 97%, 33% 88%, 22% 95%, 12% 87%, 4% 94%, 0 89%);
+  box-shadow: 0 8px 18px rgba(0,0,0,.35);
+}
+.manifesto__marchio { font: 400 clamp(2.6rem, 5vw, 3.8rem)/1 "Bungee", sans-serif; color: var(--menta); margin: 0 0 6px;
+  text-shadow: 2px 2px 0 #1d5a4a; }
+.manifesto__marchio span { color: #1d5a4a; text-shadow: none; }
+.manifesto__slogan { font: 800 1.5rem/1.2 "Archivo", sans-serif; margin-bottom: 6px; }
+.manifesto__piccolo { font-size: 1rem; margin-bottom: 14px; }
+.manifesto__nota { font: .8rem/1.3 "Special Elite", monospace; color: #55706a; margin: 0; }
+
+.polaroid {
+  margin: 0; background: var(--rumore), #faf7f0; padding: 12px 12px 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  position: relative;
+}
+.polaroid::before { /* un pezzo di nastro in cima */
+  content: ""; position: absolute; top: -14px; left: 50%; width: 110px; height: 28px; translate: -50% 0; rotate: -4deg;
+  background: var(--nastro); z-index: 1;
+  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+}
+.polaroid figcaption { font: .98rem/1.35 "Special Elite", monospace; color: var(--inchiostro); margin-top: 10px; }
+.polaroid--storta { position: absolute; right: 0; bottom: 0; width: 66%; rotate: 4deg; }
+
+/* ------------------------------------------------------------ GIG */
+.gig { display: grid; grid-template-columns: 1.1fr 1fr; gap: 54px; align-items: center; }
+.polaroid--grande { rotate: -2deg; padding-bottom: 46px; }
+.timbro {
+  position: absolute; right: 26px; bottom: 70px; rotate: -8deg;
+  font: 1.35rem/1 "Bungee", sans-serif; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--rosso); padding: 10px 14px 8px;
+  border: 4px double var(--rosso); border-radius: 6px;
+  background: rgba(250,247,240,.35);
+  mix-blend-mode: multiply; opacity: .92;
+  -webkit-mask: var(--rumore), linear-gradient(#000, #000); mask: var(--rumore), linear-gradient(#000, #000);
+  -webkit-mask-composite: source-over;
+}
+.gig__testo .insegna { font-size: clamp(3rem, 8vw, 5.4rem); }
+.gig__nome { font: 800 1.3rem/1.3 "Archivo", sans-serif; }
+.nota-mano { font: 1.35rem/1.3 "Permanent Marker", cursive; color: var(--rosso); rotate: -2deg; margin-top: 18px; }
+
+/* ------------------------------------------------------------ laboratorio */
+.scatola-vuota {
+  margin-top: 26px; padding: 30px 26px 34px;
+  background: var(--rumore), var(--buco);
+  box-shadow: inset 0 14px 26px rgba(0,0,0,.55), 0 6px 0 var(--cartone-chiaro);
+  clip-path: polygon(0 2%, 100% 0, 99.6% 100%, .4% 98%);
+}
+.scatola-vuota__scritta { font: 1.5rem/1.3 "Permanent Marker", cursive; color: var(--carta); margin-bottom: 22px; }
+.bacheca-vuota { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 170px)); gap: 18px; }
+.bacheca-vuota li { aspect-ratio: 4 / 5; border: 3px dashed rgba(244,236,220,.35); border-radius: 4px; }
+.bacheca-vuota li:nth-child(2) { rotate: 1.5deg; }
+.bacheca-vuota li:nth-child(3) { rotate: -1deg; }
+
+/* ------------------------------------------------------------ come è fatto */
+.foglio {
+  max-width: 780px; margin-inline: auto; padding: 34px 34px 30px 70px;
+  background:
+    linear-gradient(90deg, transparent 50px, rgba(211,38,46,.55) 50px 52px, transparent 52px),
+    repeating-linear-gradient(transparent 0 31px, rgba(24,120,190,.22) 31px 32px),
+    var(--rumore), #fbf8f1;
+  background-position: 0 0, 0 14px, 0 0, 0 0;
+  box-shadow: 0 12px 26px rgba(0,0,0,.35);
+  rotate: .6deg; position: relative;
+}
+.foglio::before {
+  content: ""; position: absolute; top: -14px; left: 40%; width: 140px; height: 30px; rotate: 3deg;
+  background: var(--nastro);
+  clip-path: polygon(0 12%, 4% 0, 96% 6%, 100% 0, 98% 40%, 100% 75%, 96% 100%, 4% 92%, 0 100%, 3% 55%);
+}
+.onesta { margin: 0; padding-left: 1.1em; font: 1.05rem/2 "Special Elite", monospace; }
+.onesta li { margin-bottom: .2em; }
+.onesta strong { font-weight: 400; background: linear-gradient(transparent 55%, rgba(244,195,26,.6) 55%); }
+
+/* ------------------------------------------------------------ piede */
+.piede { position: relative; color: var(--carta); background: var(--rumore), #2b2219; padding: 46px 0 34px; }
+.piede__onda {
+  position: absolute; top: -12px; left: 0; right: 0; height: 14px;
+  background:
+    linear-gradient(var(--cartone-chiaro), var(--cartone-chiaro)) 0 100%/100% 3px no-repeat,
+    var(--onda-giu) 0 0/14px 8px repeat-x,
+    var(--buco);
+}
+.piede__dentro { font-size: .98rem; }
+.piede__dentro > p { max-width: 70ch; }
+.firma { display: inline-block; font: 3.4rem/1.35 "Permanent Marker", cursive; color: var(--rosso); rotate: -5deg; margin-bottom: 22px;
+  text-shadow: 0 0 .2em rgba(211,38,46,.35); }
+.piede__link { list-style: none; padding: 0; margin: 18px 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-weight: 600; }
+.piede__piccolo { font-size: .82rem; opacity: .7; }
+
+/* ------------------------------------------------------------ telefono */
+@media (max-width: 860px) {
+  .gioco, .mondo, .gig { grid-template-columns: 1fr; gap: 34px; }
+  .mondo__bacheca { min-height: 0; display: grid; gap: 30px; }
+  .manifesto, .polaroid--storta { position: relative; width: 100%; }
+  .polaroid--storta { width: 92%; justify-self: end; rotate: 2.5deg; }
+}
+@media (max-width: 600px) {
+  body { font-size: 1.05rem; }
+  .testata__dentro { flex-wrap: wrap; gap: 4px 12px; padding: 6px 0 2px; }
+  .menu { order: 3; flex-basis: 100%; }
+  .menu ul { justify-content: flex-start; }
+  .menu a { padding: 6px 10px; font-size: .9rem; }
+  .lingua { margin-left: auto; }
+  .eroe { padding-top: 24px; }
+  .teatrino::before, .teatrino::after { height: 22px; }
+  .tv__cassa { padding: 12px; gap: 10px; border-radius: 16px; }
+  .tv__manopole { gap: 10px; }
+  .tv__manopole i { width: 28px; height: 28px; }
+  .pezzo { padding: 18px 18px 16px 68px; }
+  .scatola-vuota__scritta { font-size: 1.25rem; }
+  .bacheca-vuota { gap: 10px; grid-template-columns: repeat(3, 1fr); }
+  .bacheca-vuota li:nth-child(4) { display: none; }
+  .gioco { margin-top: 70px; }
+  .foglio { padding: 28px 18px 24px 46px; background-position: 0 0, 0 12px, 0 0, 0 0;
+    background-image: linear-gradient(90deg, transparent 32px, rgba(211,38,46,.55) 32px 34px, transparent 34px),
+      repeating-linear-gradient(transparent 0 31px, rgba(24,120,190,.22) 31px 32px), var(--rumore); }
+  .timbro { font-size: .85rem; top: auto; bottom: 64px; right: 14px; }
+  .firma { font-size: 2.6rem; }
+}

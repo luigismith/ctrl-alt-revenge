@@ -108,8 +108,16 @@ stato: pronto              # bozza | pronto
 ```
 
 - Gli script generano le tavole e il video finale in `docs/social/<id>/`: Claude scrive solo testi e scelte, il resto è codice deterministico.
-- `strumenti/controlli.py` gira a ogni push e prima di ogni pubblicazione: lunghezze (didascalia 2200, titolo YouTube 100), al massimo 5 hashtag, al massimo 10 slide, i file esistono, video verticale 1080×1920 fra 3 e 90 secondi con audio AAC, nessuna parola della lista nera degli spoiler (`strumenti/spoiler.txt`, la scrive la regia; è pubblica, quindi contiene solo nomi già noti, non frasi della trama).
-- **Finestra di veto:** un contenuto entra in coda almeno 48 ore prima dell'uscita. La regia può toglierlo o rimetterlo in `bozza`.
+- `strumenti/controlli.py` gira a ogni push e prima di ogni pubblicazione: lunghezze (didascalia 2200, titolo YouTube 100), al massimo 5 hashtag, al massimo 10 slide, i file esistono, video verticale 1080×1920 fra 3 e 90 secondi con audio AAC, nessuna parola della lista nera degli spoiler.
+- **La lista nera degli spoiler non sta nel repository:** anche solo come elenco di nomi, in un repository pubblico sarebbe un indice della trama. La scrive la regia.
+  - Nelle Actions, `controlli.py` la legge dal secret `CARU_PAROLE_VIETATE`, una parola o frase per riga.
+  - In locale la legge da `C:\Users\Admin\ctrlaltrevenge-lab\social-privato\spoiler.txt`, fuori dal repository e mai committato.
+  - Se la lista manca, i controlli **falliscono**: non si pubblica alla cieca.
+  - Quando trova una parola vietata, il log dice solo il file e la riga, mai la parola (i log sono pubblici). GitHub maschera comunque i valori dei secret nei log, ma una parola comune scritta da noi non deve dipendere da quella maschera.
+- **Finestra di veto:** un contenuto entra in coda almeno 48 ore prima dell'uscita. Quando la routine lo mette in coda, uno script apre una issue «In coda: <id>, esce il <data>», con l'anteprima delle tavole e della didascalia.
+  - **Per fermarlo basta chiudere la issue**, anche dall'app GitHub sul telefono. Il pubblicatore lo salta e lo rimette in `bozza`.
+  - Per farlo ripartire si riapre la issue.
+  - Dopo l'uscita la issue la chiude il bot, con il permalink.
 
 ## 4. La routine settimanale
 
