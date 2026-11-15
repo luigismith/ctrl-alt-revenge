@@ -11,3 +11,4 @@ docs/_telefono*.html
 prove/media/
 _tavola_*.html
 __pycache__/
+docs/social/prova-*/
