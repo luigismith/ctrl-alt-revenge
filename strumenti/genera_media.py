@@ -102,7 +102,7 @@ def tavola(chrome, tmp, immagine_url, rapporto, scritta, formato, prima=False, i
         w, hh = 1080, 1920
         quadro_w, top = 940, 340
         img_h = 1000
-        v = dict(tasto_px=58, spray_px=104, strati_h=150, scritta_px=44)
+        v = dict(tasto_px=58, spray_px=104, strati_h=150, scritta_px=40)
     v.update(larghezza=w, altezza=hh, quadro_top=top, quadro_w=quadro_w, img_h=img_h,
              scritta_top=top + img_h + 36 + 70, rotazione=-1.2 if prima else 0.8,
              immagine=immagine_url or "", scritta=h.escape(scritta or ""), inquadra=inquadra,

@@ -28,6 +28,7 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Inglese del sito:** sette ritocchi in `sito/testi/en.json`, senza cambiare il senso (Carmine church, staccato, «take them down», «struck his name off the patents», «young hands, but skilled ones», «not a fingerprint on them»).
 - **Difetto nel generatore delle tavole** (`strumenti/genera_media.py`): il post e la storia usavano la stessa pagina e lo stesso profilo di Chrome, e a volte la storia usciva con la tavola del post. Ora ogni scatto ha un nome suo; provato due volte di fila.
 - **Uscita 1 in bozza:** `contenuti/torretta-scritta.yml` (immagine singola, senza data), con la didascalia in italiano e in inglese e con «Cattura di laboratorio» nella riga di onestà.
+- **Regia, 00:48:** il primo post resta `a1-cimitero`, la torretta è la seconda uscita (voto alla tavola: 6,5). La scritta ora va a capo dove si vuole (`white-space: pre-line` in `sito/tavola.html`, `\n` nel testo), e la scritta delle storie è scesa da 44 a 40 px perché la riga di ARIA+ ci stia intera. Quando arrivano da `caru-3d` le due catture nuove (torretta pulita e con lo strato della gente, GIG intero, fondo chiaro), l'uscita diventa un carosello di due tavole: sulla prima la riga di ARIA+, sulla seconda «La scritta non è di SIDERA.». L'immagine singola resta come ripiego.
 
 ## Da fare
 1. La prova a secco di YouTube su Actions.
