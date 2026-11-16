@@ -1,8 +1,7 @@
 # Uscita 1 (la torretta) come carosello «prima e dopo». Seconda uscita del
 # profilo, dopo a1-cimitero. Bozza senza data finché la regia non dà il via.
-# Le due immagini sono segnaposto finché in inbox/2026-11-16-torretta-carosello
-# c'è il file SEGNAPOSTO: quando caru-3d consegna i due png si sostituiscono
-# (stessi nomi), si cancella SEGNAPOSTO, si rileggono gli alt e l'inquadratura.
+# Catture di caru-3d approvate dalla regia il 16/11 (7 e 7,5), ritagliate di
+# 20 px a sinistra per togliere un filo scuro: vedi la nota della fonte.
 # Il ripiego a immagine singola è contenuti/torretta-scritta.yml.
 id: torretta-carosello
 tipo: carosello
@@ -11,12 +10,12 @@ fonte: inbox/2026-11-16-torretta-carosello
 tavole:
   - media: social_torretta_pulita.png
     testo: "ARIA+. Plastica stampata, bianca e menta."
-    alt: "Una torretta ARIA+ di plastica bianca e verde menta, liscia e pulita, com'esce dalla fabbrica. Accanto c'è GIG, un pupazzo con la barba bianca e la camicia gialla."
-    inquadra: "50% 50%"
+    alt: "Una torretta ARIA+ di plastica bianca e verde menta, liscia e pulita, com'esce dalla fabbrica, davanti a un fondale di cartone. GIG, un pupazzo con i capelli bianchi e la camicia gialla, la guarda di spalle, di tre quarti; il braccio sinistro è di metallo."
+    inquadra: "20% 50%"   # uguale nelle due tavole, così sfogliando la foto non salta; nella storia tiene intero GIG
   - media: social_torretta_gente.png
     testo: "La scritta non è di SIDERA."
-    alt: "La stessa torretta ARIA+, coperta di nastro e adesivi. Qualcuno ci ha scritto sopra a spray nero, con uno stencil: CHI RESPIRA PAGA. Accanto c'è GIG."
-    inquadra: "50% 50%"
+    alt: "La stessa torretta ARIA+, sullo stesso fondale di cartone, con nastro e adesivi. Qualcuno ci ha scritto sopra a spray, con uno stencil: CHI RESPIRA PAGA. GIG la guarda di spalle."
+    inquadra: "20% 50%"
 didascalia: |
   Nel gioco tutto quello che è della gente è fatto a mano: cartone, nastro, vernice. Le cose di SIDERA sono le uniche di plastica stampata, lisce, senza un'impronta. Questa è una torretta ARIA+, l'aria in abbonamento del 2087. Lo stencil ce l'ha messo il quartiere.
   Catture di laboratorio. È un videogioco in sviluppo, fatto in Unreal Engine 5.
