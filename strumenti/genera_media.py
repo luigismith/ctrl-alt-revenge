@@ -90,21 +90,23 @@ def proporzione(percorso):
         return im.height / im.width
 
 
-def tavola(chrome, tmp, immagine_url, rapporto, scritta, formato, prima=False, inquadra="50% 50%"):
+def tavola(chrome, tmp, immagine_url, rapporto, scritta, formato, inquadra="50% 50%"):
     import html as h
     if formato == "post":
+        # tutte le tavole di un carosello hanno la stessa testata e la cornice
+        # nello stesso punto: sfogliando cambiano solo la foto e la scritta
         w, hh = 1080, 1350
-        quadro_w, top = 980, (250 if prima else 220)
+        quadro_w, top = 980, 250
         # 4:5 è più alto di 16:9: si riempie il quadro e si ritaglia ai lati
         img_h = 700
-        v = dict(tasto_px=46 if prima else 34, spray_px=80 if prima else 58, strati_h=110, scritta_px=36)
+        v = dict(tasto_px=46, spray_px=80, strati_h=110, scritta_px=36, rotazione=-1.2)
     else:
         w, hh = 1080, 1920
         quadro_w, top = 940, 340
         img_h = 1000
-        v = dict(tasto_px=58, spray_px=104, strati_h=150, scritta_px=40)
+        v = dict(tasto_px=58, spray_px=104, strati_h=150, scritta_px=40, rotazione=0.8)
     v.update(larghezza=w, altezza=hh, quadro_top=top, quadro_w=quadro_w, img_h=img_h,
-             scritta_top=top + img_h + 36 + 70, rotazione=-1.2 if prima else 0.8,
+             scritta_top=top + img_h + 36 + 70,
              immagine=immagine_url or "", scritta=h.escape(scritta or ""), inquadra=inquadra,
              classe="vuoto" if immagine_url is None else "")
     if immagine_url is None:  # fondo del reel: la scritta va in basso, il video in mezzo
@@ -148,7 +150,7 @@ def genera(c, uscita):
             for n, tv in enumerate(c["tavole"], start=1):
                 media = coda.fonte(c) / tv["media"]
                 im = tavola(chrome, tmp, f"{base}/{tv['media']}", proporzione(media), tv.get("testo"), "post",
-                            prima=(n == 1), inquadra=tv.get("inquadra", "50% 50%"))
+                            inquadra=tv.get("inquadra", "50% 50%"))
                 f = uscita / f"{n:02d}.jpg"
                 im.save(f, quality=90, optimize=True, progressive=False)  # JPEG semplice: l'API vuole JPEG
                 prodotti.append(f)
