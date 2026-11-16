@@ -1,0 +1,27 @@
+# Uscita 1 (la torretta) come carosello «prima e dopo». Seconda uscita del
+# profilo, dopo a1-cimitero. Bozza senza data finché la regia non dà il via.
+# Le due immagini sono segnaposto finché in inbox/2026-11-16-torretta-carosello
+# c'è il file SEGNAPOSTO: quando caru-3d consegna i due png si sostituiscono
+# (stessi nomi), si cancella SEGNAPOSTO, si rileggono gli alt e l'inquadratura.
+# Il ripiego a immagine singola è contenuti/torretta-scritta.yml.
+id: torretta-carosello
+tipo: carosello
+stato: bozza
+fonte: inbox/2026-11-16-torretta-carosello
+tavole:
+  - media: social_torretta_pulita.png
+    testo: "ARIA+. Plastica stampata, bianca e menta."
+    alt: "Una torretta ARIA+ di plastica bianca e verde menta, liscia e pulita, com'esce dalla fabbrica. Accanto c'è GIG, un pupazzo con la barba bianca e la camicia gialla."
+    inquadra: "50% 50%"
+  - media: social_torretta_gente.png
+    testo: "La scritta non è di SIDERA."
+    alt: "La stessa torretta ARIA+, coperta di nastro e adesivi. Qualcuno ci ha scritto sopra a spray nero, con uno stencil: CHI RESPIRA PAGA. Accanto c'è GIG."
+    inquadra: "50% 50%"
+didascalia: |
+  Nel gioco tutto quello che è della gente è fatto a mano: cartone, nastro, vernice. Le cose di SIDERA sono le uniche di plastica stampata, lisce, senza un'impronta. Questa è una torretta ARIA+, l'aria in abbonamento del 2087. Lo stencil ce l'ha messo il quartiere.
+  Catture di laboratorio. È un videogioco in sviluppo, fatto in Unreal Engine 5.
+
+  In the game, everything that belongs to the people is handmade: cardboard, tape, paint. SIDERA's things are the only ones in moulded plastic, smooth, not a fingerprint on them. This is an ARIA+ tower, the air subscription of 2087. The stencil is the neighbourhood's work.
+  Workshop captures. A video game in development, made in Unreal Engine 5.
+hashtag: [ctrlaltrevenge, indiegame, unrealengine5, gamedev, taranto]
+ai: false

@@ -156,6 +156,9 @@ def valida(c, vietate):
         e.append(f"{nome}: data di uscita non valida")
     if not fonte(c).is_dir():
         e.append(f"{nome}: la cartella della fonte non esiste")
+    # immagini provvisorie: finché c'è il file SEGNAPOSTO il contenuto resta bozza
+    elif c["stato"] != "bozza" and (fonte(c) / "SEGNAPOSTO").exists():
+        e.append(f"{nome}: la fonte ha ancora le immagini segnaposto (file SEGNAPOSTO)")
     if unita_utf16(str(c["didascalia"])) > MAX_DIDASCALIA:
         e.append(f"{nome}: didascalia oltre {MAX_DIDASCALIA} caratteri")
     hashtag = c.get("hashtag") or []
