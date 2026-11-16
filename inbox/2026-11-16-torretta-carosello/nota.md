@@ -17,6 +17,7 @@ Consegna della regia del 16/11/2026: l'uscita 1 di `inbox/2026-11-16-messaggio` 
 - Sulla tavola: «La scritta non è di SIDERA.»
 
 ## Attenzione
-- Finché c'è il file `SEGNAPOSTO` le immagini non sono quelle vere.
+- Finché c'è il file `SEGNAPOSTO` le immagini non sono quelle vere. Valgono solo quelle che la regia annuncia con un messaggio.
+- Formato (regia, 16/11): orizzontale 7:5, 1400×1000, GIG e torretta interi, 5% di margine per il ritaglio, fondale di cartone. La cornice della tavola è 980×700: un 4:5 perderebbe metà dell'altezza.
 - Quando arrivano: rileggere i testi alternativi e la riga «Catture di laboratorio» in `contenuti/torretta-carosello.yml`, e scegliere l'inquadratura.
 - Nessuna battuta.
