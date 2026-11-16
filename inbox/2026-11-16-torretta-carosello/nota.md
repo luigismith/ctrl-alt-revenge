@@ -1,5 +1,5 @@
 ---
-approvato: in attesa di Luigi
+approvato: si
 mostra: mondo
 uso: [post]
 battute: []
@@ -7,6 +7,8 @@ musica: nessuna
 ai: no
 ---
 Consegna della regia del 16/11/2026: l'uscita 1 di `inbox/2026-11-16-messaggio` diventa un carosello di due tavole, «prima e dopo».
+
+Luigi, 16/11/2026 alle 07:10, sulla dashboard: «Sì, va bene così». Le due tavole sono approvate così come sono. L'uscita resta in bozza, senza data, finché Luigi non fa i passi di `ACCENSIONE.md`, e poi aspetta il via della regia.
 
 Le catture sono di `caru-3d`, annunciate e approvate dalla regia il 16/11 alle 02:07 (voti 7 e 7,5). Gli originali, 1400×1000, stanno in `unreal/catture/oggetti_lotto3/social75/` (`social75_torretta_*.png`). Qui sono ritagliate a 1380×986 (20 px a sinistra, 7 sopra e sotto, sempre 7:5): sul bordo sinistro in basso c'era un filo scuro che nella cornice si vedeva.
 

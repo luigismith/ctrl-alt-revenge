@@ -32,9 +32,10 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Carosello della torretta pronto a ricevere le catture** (regia, 01:12): `contenuti/torretta-carosello.yml`, fonte `inbox/2026-11-16-torretta-carosello/` con due segnaposto che hanno già i nomi di `caru-3d` (`social_torretta_pulita.png`, `social_torretta_gente.png`). Quando arrivano: sostituire i due file, cancellare `SEGNAPOSTO`, rileggere gli alt e scegliere l'inquadratura. Finché `SEGNAPOSTO` c'è, `coda.py` non lascia passare il contenuto a «pronto».
 - **Catture della torretta montate** (regia, 02:07: approvate, voti 7 e 7,5). Le copie in inbox sono ritagliate a 1380×986 per togliere un filo scuro sul bordo sinistro; gli originali stanno in `unreal/catture/oggetti_lotto3/social75/`. `SEGNAPOSTO` è tolto, gli alt sono riscritti (GIG di spalle e di tre quarti, braccio di metallo, fondale di cartone). L'inquadratura è al 20% in tutte e due le tavole: la foto entra in un riquadro un po' più stretto del 7:5, quindi conta anche nel post. Le foto delle due tavole sono allineate (spostamento migliore 0,0). Resta bozza senza data; nella nota «approvato» resta «in attesa di Luigi».
 - **Carosello visto dalla regia: voto 7, mandato a Luigi.** Il limite: la foto e la tavola sono tutte e due color cartone, e la foto si stacca poco dal fondo. La tavola approvata non si tocca. Se Luigi lo chiede, la proposta è un bordo chiaro da stampa fotografica attorno alla foto.
+- **Luigi, 16/11 alle 07:10: «Sì, va bene così».** Le due tavole del carosello della torretta sono approvate, senza cambiare la tavola. La nota della fonte ora dice `approvato: si`.
 
 ## Da fare
-1. Il carosello della torretta: aspetta il sì di Luigi alle immagini e il via della regia (seconda uscita, dopo a1-cimitero).
+1. Il carosello della torretta: è approvato, ma resta in bozza senza data finché Luigi non fa i passi di `ACCENSIONE.md`. Poi aspetta la data e il via della regia (seconda uscita, dopo a1-cimitero).
 2. Il primo post: aspettare le catture nuove di A1 in `inbox/`, rifare le tavole, data e nome del file, poi la regia lo guarda e dà il via.
 3. Con il via della regia: la routine settimanale (Pages e lo scambio dei nomi sono fatti, 16/11).
 4. I passi di Luigi, in ordine, da `ACCENSIONE.md`: li porta la regia quando ci sono le immagini nuove.
