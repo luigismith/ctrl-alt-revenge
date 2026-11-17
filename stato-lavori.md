@@ -34,6 +34,8 @@ La lista degli spoiler e le catture stanno fuori dal repository, in `%USERPROFIL
 - **Carosello visto dalla regia: voto 7, mandato a Luigi.** Il limite: la foto e la tavola sono tutte e due color cartone, e la foto si stacca poco dal fondo. La tavola approvata non si tocca. Se Luigi lo chiede, la proposta è un bordo chiaro da stampa fotografica attorno alla foto.
 - **Luigi, 16/11 alle 07:10: «Sì, va bene così».** Le due tavole del carosello della torretta sono approvate, senza cambiare la tavola. La nota della fonte ora dice `approvato: si`.
 
+- **Concorso Z-Axis Awards (Meshy), 17/11:** Luigi vuole partecipare. Deciso di aspettare una demo giocabile (per Gaming serve un'opera completa nella forma finale); scadenza 24/01/2027. La scheda è pronta in `social-privato/concorsi/z-axis-awards.md` (fuori dal repository), niente è stato inviato.
+
 ## Da fare
 1. Il carosello della torretta: è approvato, ma resta in bozza senza data finché Luigi non fa i passi di `ACCENSIONE.md`. Poi aspetta la data e il via della regia (seconda uscita, dopo a1-cimitero).
 2. Il primo post: aspettare le catture nuove di A1 in `inbox/`, rifare le tavole, data e nome del file, poi la regia lo guarda e dà il via.
