@@ -63,7 +63,9 @@
     "p1": "Il braccio sinistro gliel'ha preso un nastro della Linea. Quello nuovo se l'è costruito da solo, nel garage di sua madre, e poi l'ha costruito per mezza città. Quando è morto Mimmo, l'amico d'infanzia, ha fatto troppe domande: in una settimana SIDERA gli ha tolto il lavoro, la casa e il nome sui brevetti. E gli ha spento il braccio.",
     "p2": "Burbero, ironico e testardo. Aggiusta tutto, tranne la sua vita.",
     "nota": "Da solo non ci arriva. Gli altri li incontrerete strada facendo.",
-    "extra": "<p>Porta la camicia ocra di suo padre Vito, gruista al porto. Il primo braccio l'hanno fatto insieme, nel garage. Vito diceva: «Una mano ce l'hai. L'altra fattela.»</p><p>Da ragazzo aveva il sinistro migliore dei Tamburi. Poi il sinistro gliel'ha preso la Linea.</p>"
+    "extra": "<p>Porta la camicia ocra di suo padre Vito, gruista al porto. Il primo braccio l'hanno fatto insieme, nel garage. Vito diceva: «Una mano ce l'hai. L'altra fattela.»</p><p>Da ragazzo aveva il sinistro migliore dei Tamburi. Poi il sinistro gliel'ha preso la Linea.</p>",
+    "viewer_alt": "Il modello 3D di GIG, il pupazzo del gioco: lo si può girare e ingrandire.",
+    "viewer_did": "Il modello 3D di GIG, quello del gioco: fatto con Meshy partendo da immagini nostre. Trascina per girarlo, pizzica per ingrandire."
   },
   "lab": {
     "titolo": "Dal laboratorio",

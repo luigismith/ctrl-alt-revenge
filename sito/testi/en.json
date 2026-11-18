@@ -63,7 +63,9 @@
     "p1": "A conveyor belt on the Linea took his left arm. He built the new one himself, in his mother's garage, and then built one for half the city. When Mimmo, his childhood friend, died, he asked too many questions: within a week SIDERA had taken his job and his house, and struck his name off the patents. And switched off his arm.",
     "p2": "Gruff, wry and stubborn. He can fix anything except his own life.",
     "nota": "He won't get there alone. You'll meet the others along the way.",
-    "extra": "<p>He wears the ochre shirt of his father Vito, a crane operator at the port. They built the first arm together, in the garage. Vito used to say: “You've got one hand. Make yourself the other.”</p><p>As a boy he had the best left in the Tamburi. Then the Linea took his left.</p>"
+    "extra": "<p>He wears the ochre shirt of his father Vito, a crane operator at the port. They built the first arm together, in the garage. Vito used to say: “You've got one hand. Make yourself the other.”</p><p>As a boy he had the best left in the Tamburi. Then the Linea took his left.</p>",
+    "viewer_alt": "GIG's 3D model, the puppet from the game: you can turn it and zoom in.",
+    "viewer_did": "GIG's 3D model, the one used in the game: made with Meshy from our own images. Drag to turn it, pinch to zoom."
   },
   "lab": {
     "titolo": "From the workshop",
