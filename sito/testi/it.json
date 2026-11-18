@@ -16,7 +16,10 @@
     "mondo": "Il mondo",
     "laboratorio": "Dal laboratorio",
     "come": "Come è fatto",
-    "demo": "La demo"
+    "demo": "La demo",
+    "gig": "Chi c'è",
+    "storia": "Giovedì Santo",
+    "citta": "La città"
   },
   "eroe": {
     "motto_1": "Taranto, 2087. Giovedì Santo.",
@@ -69,10 +72,9 @@
   },
   "come": {
     "titolo": "Come è fatto, davvero",
-    "v1": "<strong>È un videogioco, fatto in Unreal Engine 5.</strong> Non è stop motion girato a mano: i personaggi sono modelli 3D che imitano i pupazzi, e si muovono a scatti come loro.",
-    "v2": "<strong>Il set imita un diorama</strong> di cartone, plastilina e materiali di recupero, come se Taranto l'avesse costruita un ragazzino con le mani giovani ma esperte. Quello che è della gente è fatto a mano. Le cose di SIDERA sono di plastica stampata: lisce, senza un'impronta.",
-    "v3": "<strong>Alcuni strumenti sono di intelligenza artificiale:</strong> immagini di riferimento e superfici dipinte con ChatGPT, modelli 3D con Meshy, voci con HeyGen, musica con Suno.",
-    "v4": "<strong>È un progetto personale.</strong> Non è in vendita e non ha una data di uscita."
+    "v1": "<strong>È un videogioco, fatto in Unreal Engine 5,</strong> che imita lo stop motion: i personaggi sono modelli 3D che si muovono a scatti come pupazzi.",
+    "v2": "<strong>Alcuni strumenti sono di intelligenza artificiale.</strong>",
+    "v3": "<strong>È un progetto personale.</strong> Non è in vendita e non ha una data di uscita."
   },
   "piede": {
     "fantasia": "Ctrl-Alt-Revenge è un'opera di fantasia. SIDERA, ARIA+, MANODOPERA e tutti i personaggi sono inventati, e ogni somiglianza con persone o aziende reali è casuale. I luoghi e i riti di Taranto sono veri, e li raccontiamo con rispetto.",
@@ -94,5 +96,12 @@
     "d5": "<strong>Non è in vendita e non ha una data di uscita.</strong>",
     "bottone": "Scarica la demo (Windows 64 bit)",
     "nota": "Il file è nelle release del progetto su GitHub, come anteprima."
+  },
+  "segnaposto": "TESTO IN ARRIVO",
+  "storia": {
+    "titolo": "Giovedì Santo, ore 15"
+  },
+  "citta": {
+    "titolo": "La città"
   }
 }

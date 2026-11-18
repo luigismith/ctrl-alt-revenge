@@ -16,7 +16,10 @@
     "mondo": "The world",
     "laboratorio": "From the workshop",
     "come": "How it's made",
-    "demo": "The demo"
+    "demo": "The demo",
+    "gig": "Who's in it",
+    "storia": "Holy Thursday",
+    "citta": "The city"
   },
   "eroe": {
     "motto_1": "Taranto, 2087. Holy Thursday.",
@@ -69,10 +72,9 @@
   },
   "come": {
     "titolo": "How it's made, honestly",
-    "v1": "<strong>It's a video game, made in Unreal Engine 5.</strong> It isn't hand-shot stop motion: the characters are 3D models that imitate puppets, and move with the same staccato as real puppets.",
-    "v2": "<strong>The set imitates a diorama</strong> of cardboard, modelling clay and salvaged bits, as if Taranto had been built by a kid: young hands, but skilled ones. What belongs to the people is handmade. SIDERA's things are moulded plastic: smooth, not a fingerprint on them.",
-    "v3": "<strong>Some of the tools are AI:</strong> reference images and painted surfaces with ChatGPT, 3D models with Meshy, voices with HeyGen, music with Suno.",
-    "v4": "<strong>It's a personal project.</strong> It isn't for sale and has no release date."
+    "v1": "<strong>It is a video game, made in Unreal Engine 5,</strong> that imitates stop motion: the characters are 3D models that move in jerky steps like puppets.",
+    "v2": "<strong>Some of the tools are artificial intelligence.</strong>",
+    "v3": "<strong>It is a personal project.</strong> It is not for sale and has no release date."
   },
   "piede": {
     "fantasia": "Ctrl-Alt-Revenge is a work of fiction. SIDERA, ARIA+, MANODOPERA and all the characters are made up, and any resemblance to real people or companies is coincidental. The places and rituals of Taranto are real, and we treat them with respect.",
@@ -94,5 +96,12 @@
     "d5": "<strong>It is not for sale and has no release date.</strong>",
     "bottone": "Download the demo (64-bit Windows)",
     "nota": "The file is in the project's GitHub releases, as a pre-release."
+  },
+  "segnaposto": "TEXT COMING SOON",
+  "storia": {
+    "titolo": "Holy Thursday, 3 pm"
+  },
+  "citta": {
+    "titolo": "The city"
   }
 }

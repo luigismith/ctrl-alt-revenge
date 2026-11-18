@@ -28,7 +28,9 @@
       <ul>
         <li><a href="#gioco">{{nav.gioco}}</a></li>
         <li><a href="#mondo">{{nav.mondo}}</a></li>
-        <li><a href="#gig">GIG</a></li>
+        <li><a href="#gig">{{nav.gig}}</a></li>
+        <li><a href="#storia">{{nav.storia}}</a></li>
+        <li><a href="#citta">{{nav.citta}}</a></li>
         <li><a href="#laboratorio">{{nav.laboratorio}}</a></li>
         <li><a href="#demo">{{nav.demo}}</a></li>
         <li><a href="#come">{{nav.come}}</a></li>
@@ -115,6 +117,7 @@
       <p>{{mondo.p1}}</p>
       <p>{{mondo.p2}}</p>
       <p class="mondo__chiusa">{{mondo.chiusa}}</p>
+      <p class="segnaposto">{{segnaposto}}</p>
     </div>
 
     <div class="mondo__bacheca">
@@ -150,7 +153,22 @@
       <p>{{gig.p1}}</p>
       <p>{{gig.p2}}</p>
       <p class="nota-mano">{{gig.nota}}</p>
+      <p class="segnaposto">{{segnaposto}}</p>
     </div>
+  </div>
+</section>
+
+<section id="storia" class="sezione sezione--quaderno" aria-labelledby="t-storia">
+  <div class="dentro">
+    <h2 id="t-storia" class="insegna insegna--chiara">{{storia.titolo}}</h2>
+    <p class="segnaposto">{{segnaposto}}</p>
+  </div>
+</section>
+
+<section id="citta" class="sezione sezione--nube" aria-labelledby="t-citta">
+  <div class="dentro">
+    <h2 id="t-citta" class="insegna insegna--chiara">{{citta.titolo}}</h2>
+    <p class="segnaposto">{{segnaposto}}</p>
   </div>
 </section>
 
@@ -194,7 +212,6 @@
         <li>{{come.v1}}</li>
         <li>{{come.v2}}</li>
         <li>{{come.v3}}</li>
-        <li>{{come.v4}}</li>
       </ul>
     </div>
   </div>

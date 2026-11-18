@@ -415,3 +415,9 @@ p { margin: 0 0 1em; }
 .demo__nota { font: .95rem/1.5 "Special Elite", monospace; }
 .demo > * { min-width: 0; }
 .demo__foto.polaroid--storta { position: relative; right: auto; bottom: auto; width: 100%; max-width: 520px; justify-self: center; rotate: 2deg; }
+
+/* Segnaposto: si vede che il testo manca (solo nel ramo di lavoro) */
+.segnaposto {
+  display: inline-block; margin: 14px 0; padding: 18px 26px; border: 4px dashed currentColor;
+  font: 1.3rem/1 "Bungee", sans-serif; letter-spacing: .06em; rotate: -1deg; opacity: .85;
+}
