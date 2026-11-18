@@ -424,7 +424,9 @@ p { margin: 0 0 1em; }
 .cronologia li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 14px; align-items: baseline; }
 .cronologia p { margin: 0; }
 .anno { font: 1.35rem/1 "Bungee", sans-serif; color: var(--giallo); }
-.chi { display: grid; gap: 22px; margin-top: 56px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.chi { display: grid; gap: 22px; margin-top: 56px; grid-template-columns: 1fr; }
+@media (min-width: 600px) { .chi { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width: 960px) { .chi { grid-template-columns: repeat(3, minmax(0,1fr)); } }
 .scheda { background: #fbf8f1; padding: 22px 24px; box-shadow: 0 8px 18px rgba(0,0,0,.25); border-top: 8px solid var(--rosso); }
 .scheda:nth-child(odd) { rotate: -.6deg; }
 .scheda:nth-child(even) { rotate: .5deg; }
