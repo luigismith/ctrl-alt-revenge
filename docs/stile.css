@@ -401,3 +401,15 @@ p { margin: 0 0 1em; }
 .uscita__data { display: block; margin-top: 8px; font: .85rem/1.2 "Special Elite", monospace; }
 .uscita__titolo { display: block; font-weight: 700; line-height: 1.3; margin: 4px 0; }
 .uscita__dove { font: .8rem/1 "Bungee", sans-serif; color: var(--rosso); }
+
+/* La demo: pagina carta, testo a sinistra e una foto storta a destra */
+.demo { display: grid; gap: 32px; align-items: center; }
+@media (min-width: 860px) { .demo { grid-template-columns: 1.3fr 1fr; } }
+.onesta--demo { font-size: 1.05rem; line-height: 1.8; }
+.bottone {
+  display: inline-block; padding: 14px 24px; background: var(--rosso); color: #fff;
+  font-family: "Bungee", sans-serif; font-size: 1.1rem; text-decoration: none; text-transform: uppercase;
+  box-shadow: 0 5px 0 var(--inchiostro); transition: translate .1s, box-shadow .1s;
+}
+.bottone:hover { translate: 0 2px; box-shadow: 0 3px 0 var(--inchiostro); }
+.demo__nota { font: .95rem/1.5 "Special Elite", monospace; }

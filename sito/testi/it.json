@@ -15,7 +15,8 @@
     "gioco": "Il gioco",
     "mondo": "Il mondo",
     "laboratorio": "Dal laboratorio",
-    "come": "Come è fatto"
+    "come": "Come è fatto",
+    "demo": "La demo"
   },
   "eroe": {
     "motto_1": "Taranto, 2087. Giovedì Santo.",
@@ -80,5 +81,17 @@
     "codice": "Il codice del sito",
     "altra_lingua": "English",
     "caratteri": "Caratteri: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). Le superfici di cartone vengono dal set del gioco."
+  },
+  "demo": {
+    "titolo": "La demo",
+    "attacco": "Il prologo si può già giocare: il cimitero e il cancello. È una demo di lavorazione del 18 novembre 2026, non il gioco finito.",
+    "alt": "Il cimitero visto di lato, dal gioco: GIG corre sul selciato rosso di polvere, davanti a una fila di lapidi e croci, con le cappelle sullo sfondo.",
+    "d1": "<strong>I livelli sono ancora scatole grigie.</strong> Il set di cartone arriva. I personaggi, invece, sono già i pupazzi.",
+    "d2": "<strong>I filmati non ci sono ancora,</strong> e l'acqua elettrica, per ora, non fa danno.",
+    "d3": "<strong>Windows 64 bit.</strong> Meglio con il gamepad: i comandi sono nel file LEGGIMI dentro lo zip.",
+    "d4": "<strong>Windows può avvisare che il programma non è riconosciuto:</strong> è un eseguibile non firmato.",
+    "d5": "<strong>Non è in vendita e non ha una data di uscita.</strong>",
+    "bottone": "Scarica la demo (Windows 64 bit)",
+    "nota": "Il file è nelle release del progetto su GitHub, come anteprima."
   }
 }

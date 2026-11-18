@@ -30,6 +30,7 @@
         <li><a href="#mondo">{{nav.mondo}}</a></li>
         <li><a href="#gig">GIG</a></li>
         <li><a href="#laboratorio">{{nav.laboratorio}}</a></li>
+        <li><a href="#demo">{{nav.demo}}</a></li>
         <li><a href="#come">{{nav.come}}</a></li>
       </ul>
     </nav>
@@ -158,6 +159,30 @@
     <h2 id="t-lab" class="insegna">{{lab.titolo}}</h2>
     <p class="attacco">{{lab.attacco}}</p>
 {{LABORATORIO}}
+  </div>
+</section>
+
+<section id="demo" class="sezione sezione--carta" aria-labelledby="t-demo">
+  <div class="dentro demo">
+    <div class="demo__testo">
+      <h2 id="t-demo" class="insegna">{{demo.titolo}}</h2>
+      <p class="attacco">{{demo.attacco}}</p>
+      <ul class="onesta onesta--demo">
+        <li>{{demo.d1}}</li>
+        <li>{{demo.d2}}</li>
+        <li>{{demo.d3}}</li>
+        <li>{{demo.d4}}</li>
+        <li>{{demo.d5}}</li>
+      </ul>
+      <p><a class="bottone" href="{{url_codice}}/releases/tag/demo-prologo-2026-11-18">{{demo.bottone}}</a></p>
+      <p class="demo__nota">{{demo.nota}}</p>
+    </div>
+    <figure class="polaroid polaroid--storta demo__foto">
+      <picture>
+        <source srcset="{{base}}media/cimitero-gioco.webp" type="image/webp">
+        <img src="{{base}}media/cimitero-gioco.jpg" width="1600" height="750" loading="lazy" alt="{{demo.alt}}">
+      </picture>
+    </figure>
   </div>
 </section>
 

@@ -15,7 +15,8 @@
     "gioco": "The game",
     "mondo": "The world",
     "laboratorio": "From the workshop",
-    "come": "How it's made"
+    "come": "How it's made",
+    "demo": "The demo"
   },
   "eroe": {
     "motto_1": "Taranto, 2087. Holy Thursday.",
@@ -80,5 +81,17 @@
     "codice": "The site's code",
     "altra_lingua": "Italiano",
     "caratteri": "Fonts: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). The cardboard surfaces come from the game's set."
+  },
+  "demo": {
+    "titolo": "The demo",
+    "attacco": "The prologue is already playable: the cemetery and the gate. This is a work-in-progress demo from 18 November 2026, not the finished game.",
+    "alt": "The cemetery seen from the side, from the game: GIG runs along the red dusty paving in front of a row of gravestones and crosses, with the chapels in the background.",
+    "d1": "<strong>The levels are still grey boxes.</strong> The cardboard set is on its way. The characters, though, are already the puppets.",
+    "d2": "<strong>There are no cutscenes yet,</strong> and the electric water is harmless, for now.",
+    "d3": "<strong>64-bit Windows.</strong> Best with a gamepad: the controls are in the README file inside the zip.",
+    "d4": "<strong>Windows may warn that the program is not recognised:</strong> it is an unsigned executable.",
+    "d5": "<strong>It is not for sale and has no release date.</strong>",
+    "bottone": "Download the demo (64-bit Windows)",
+    "nota": "The file is in the project's GitHub releases, as a pre-release."
   }
 }
