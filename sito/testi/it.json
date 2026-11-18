@@ -53,7 +53,8 @@
     "slogan_sotto": "La bonifica di Taranto. In abbonamento.",
     "manifesto_nota": "Pubblicità inventata, come SIDERA.",
     "torretta_alt": "Una torretta ARIA+ di plastica bianca e verde menta, liscia. Qualcuno ci ha scritto sopra a spray nero, con uno stencil: CHI RESPIRA PAGA. Accanto c'è GIG, di spalle.",
-    "torretta_didascalia": "Una torretta ARIA+, in laboratorio. La scritta non è di SIDERA."
+    "torretta_didascalia": "Una torretta ARIA+, in laboratorio. La scritta non è di SIDERA.",
+    "sotto": "<div class=\"mondo-sotto__col\"><h3 class=\"sottotitolo\">Come ci si è arrivati</h3><ol class=\"cronologia\"><li><span class=\"anno\">2026</span><p>Gli altiforni si spengono. Una società che si chiama SIDERA compra la fabbrica e promette la bonifica.</p></li><li><span class=\"anno\">2041</span><p>Sopra la fabbrica salgono le cupole bianche. Sulle cupole c'è scritto «Cantiere, accesso vietato». I nastri che portavano il minerale vengono rifatti e alzati sui piloni, dal porto alle cupole: la gente la chiama la Linea. Sul fianco c'è scritto «terre da bonificare».</p></li><li><span class=\"anno\">2065</span><p>SIDERA regala un braccio nuovo agli operai che si sono fatti male al lavoro. Si chiama MANODOPERA. L'ha inventato un ingegnere dei Tamburi.</p></li><li><span class=\"anno\">2067</span><p>Il braccio passa all'abbonamento mensile. Gli operai della bonifica portano anche la manica, sul braccio sano. Arriva la «modalità turno». La pubblicità dice: fisioterapia notturna, mentre dormi.</p></li><li><span class=\"anno\">2087</span><p>SIDERA ha fissato la data: la Domenica di Pasqua si festeggia la fine della bonifica. «Taranto è pura.»</p></li></ol></div><div class=\"mondo-sotto__col\"><h3 class=\"sottotitolo\">L'aria</h3><p>L'aria si chiama ARIA+ e si paga a rate, come le serie in streaming. Le torrette bianche e verde menta sono le sue. Sopra la nube, per chi può, c'è ARIA+ Alta Quota.</p><p>Le Colombe sono bianche, hanno il marchio ARIA+ e misurano l'aria. Mentono. Quando il maestrale porta la polvere sui Tamburi, il Comune avvisa che è Wind Day. Le Colombe dicono di no, e spruzzano profumo di pulito.</p></div>"
   },
   "gig": {
     "alt": "GIG da vicino, di profilo, davanti a un muro di tufo coperto di manifesti: un occhio, una mano, un sole, un'onda.",
@@ -61,7 +62,8 @@
     "nome": "Cataldo Gigante, 50 anni, dei Tamburi.",
     "p1": "Il braccio sinistro gliel'ha preso un nastro della Linea. Quello nuovo se l'è costruito da solo, nel garage di sua madre, e poi l'ha costruito per mezza città. Quando è morto Mimmo, l'amico d'infanzia, ha fatto troppe domande: in una settimana SIDERA gli ha tolto il lavoro, la casa e il nome sui brevetti. E gli ha spento il braccio.",
     "p2": "Burbero, ironico e testardo. Aggiusta tutto, tranne la sua vita.",
-    "nota": "Da solo non ci arriva. Gli altri li incontrerete strada facendo."
+    "nota": "Da solo non ci arriva. Gli altri li incontrerete strada facendo.",
+    "extra": "<p>Porta la camicia ocra di suo padre Vito, gruista al porto. Il primo braccio l'hanno fatto insieme, nel garage. Vito diceva: «Una mano ce l'hai. L'altra fattela.»</p><p>Da ragazzo aveva il sinistro migliore dei Tamburi. Poi il sinistro gliel'ha preso la Linea.</p>"
   },
   "lab": {
     "titolo": "Dal laboratorio",
@@ -73,7 +75,7 @@
   "come": {
     "titolo": "Come è fatto, davvero",
     "v1": "<strong>È un videogioco, fatto in Unreal Engine 5,</strong> che imita lo stop motion: i personaggi sono modelli 3D che si muovono a scatti come pupazzi.",
-    "v2": "<strong>Alcuni strumenti sono di intelligenza artificiale.</strong>",
+    "v2": "<strong>Alcuni strumenti sono di intelligenza artificiale:</strong> ChatGPT, Meshy, HeyGen, Suno.",
     "v3": "<strong>È un progetto personale.</strong> Non è in vendita e non ha una data di uscita."
   },
   "piede": {
@@ -97,11 +99,17 @@
     "bottone": "Scarica la demo (Windows 64 bit)",
     "nota": "Il file è nelle release del progetto su GitHub, come anteprima."
   },
-  "segnaposto": "TESTO IN ARRIVO",
   "storia": {
-    "titolo": "Giovedì Santo, ore 15"
+    "titolo": "Giovedì Santo, ore 15",
+    "corpo": "<p>Il 17 aprile 2087 è Giovedì Santo. Alle tre del pomeriggio i perdoni escono dal Carmine, scalzi. Il cielo è velato, le tombe di San Brunone sono rosse di polvere.</p><p>GIG è davanti alla lapide di Mimmo. «Ciao, Mimmo. Ti ho portato il caffè.»</p><p>La notte dei morti del 2086 il cimitero era pieno di lumini. SIDERA disse che Mimmo era morto nel sonno. Il registro del suo braccio diceva un'altra cosa: sette ore di lavoro, sotto le cupole, settore riservato. Rientro a domicilio alle 5.50. Titolare non rilevato. Abbonamento sospeso.</p><p>GIG ha fatto domande. In una settimana ha perso il lavoro, la casa e il nome sui brevetti. Il suo braccio, il numero 1, è spento da allora.</p><p>Adesso al cancello ci sono gli Esattori, e un messo con un atto da leggere. «Gentile ex collaboratore Gigante Cataldo, SIDERA la ringrazia per aver scelto MANODOPERA.»</p><p class=\"battuta\">«L'ho inventato io.»</p><p class=\"battuta\">«Non risulta.»</p><p>Comincia a piovere. GIG scappa fra le tombe e per le strade dei Tamburi, con un braccio che non risponde.</p><p>Nel garage di sua madre c'è ancora la tastiera di Vito. Il numero 1 è un prototipo, con una porta di servizio. Tre tasti.</p><p>Il braccio si riaccende. L'occhio destro, quello che l'azienda usava per mandargli la pubblicità, diventa cyan. Una voce che non sentiva da vent'anni dice: «Vent'anni spenta, Catà. Che mi sono persa?»</p><p class=\"battuta\">«Niente di buono.»</p><p class=\"battuta\">«Stanotte vado a vedere dove portano le braccia.»</p><p class=\"storia__nota\">Il prologo finisce qui. È quello che si gioca nella demo.</p>"
   },
   "citta": {
-    "titolo": "La città"
+    "titolo": "La città",
+    "corpo": "<article class=\"luogo\"><h3>San Brunone</h3><p>Il cimitero è attaccato alla fabbrica. Le lapidi bianche non restano bianche.</p></article><article class=\"luogo\"><h3>I Tamburi</h3><p>Il quartiere sotto la Linea. Panni stesi, purificatori ai balconi, manifesti strappati uno sull'altro.</p></article><article class=\"luogo\"><h3>La Linea</h3><p>I nastri sui piloni, dal porto alle cupole. Passano sopra l'ultima strada del quartiere.</p></article><article class=\"luogo\"><h3>Le cupole</h3><p>Bianche, sigillate. Dentro, dicono, c'è la bonifica.</p></article><article class=\"luogo\"><h3>La Settimana Santa</h3><p>I perdoni a coppie, scalzi, incappucciati. La troccola al posto delle campane, che in quei giorni sono legate. Nel 2087 a Taranto è cambiato quasi tutto. Questo no.</p></article>",
+    "foto_alt": "Il tratto del cancello del cimitero, costruito in cartone: un muro di blocchi dipinti con manifesti strappati, un cancello di ferro, casse e bancali. GIG cammina in mezzo.",
+    "foto_did": "Il cancello del cimitero, in cartone. Cattura dal gioco, novembre 2026."
+  },
+  "chi": {
+    "corpo": "<article class=\"scheda\"><h3>Mimmo</h3><p>L'amico d'infanzia, gruista anche lui. Il braccio numero 2 è il suo: GIG gliel'ha costruito dopo l'incidente al porto. È morto la notte dei morti del 2086, nel sonno. Per SIDERA è stato un malore.</p></article><article class=\"scheda\"><h3>Addolorata</h3><p>La madre. Sarta, settantacinque anni, lo chiama Catà. Il garage è il suo. A cinquant'anni GIG è tornato a dormire da lei.</p></article><article class=\"scheda\"><h3>Tere</h3><p>La voce del braccio numero 1. GIG ce l'ha messa nel 2064. Dal 2067 è stata zitta.</p></article><article class=\"scheda\"><h3>Totò</h3><p>Undici anni, asmatico. Nei giorni di vento non può uscire. Scrive REVENGE sui muri. Questa storia la racconta lui: «Quella notte avevo undici anni. Ve la racconto come me la ricordo. Con qualche colore in più.»</p></article><article class=\"scheda\"><h3>Gli Esattori</h3><p>Pignorano le braccia a chi salta una rata. Sono gente dei quartieri, pagata a pignoramento: il rider con lo zaino, l'esattore con la pettorina, quello preso a noleggio, il messo con l'atto in mano.</p></article><article class=\"scheda\"><h3>SIDERA</h3><p>Non ha una faccia. Ha i manifesti, gli schermi, le torrette, le Colombe. Parla solo per comunicati.</p></article>"
   }
 }

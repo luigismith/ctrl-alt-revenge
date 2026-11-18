@@ -117,7 +117,6 @@
       <p>{{mondo.p1}}</p>
       <p>{{mondo.p2}}</p>
       <p class="mondo__chiusa">{{mondo.chiusa}}</p>
-      <p class="segnaposto">{{segnaposto}}</p>
     </div>
 
     <div class="mondo__bacheca">
@@ -136,6 +135,7 @@
       </figure>
     </div>
   </div>
+  <div class="dentro mondo-sotto">{{mondo.sotto}}</div>
 </section>
 
 <section id="gig" class="sezione sezione--carta" aria-labelledby="t-gig">
@@ -152,23 +152,31 @@
       <p class="gig__nome">{{gig.nome}}</p>
       <p>{{gig.p1}}</p>
       <p>{{gig.p2}}</p>
+      {{gig.extra}}
       <p class="nota-mano">{{gig.nota}}</p>
-      <p class="segnaposto">{{segnaposto}}</p>
     </div>
   </div>
+  <div class="dentro chi">{{chi.corpo}}</div>
 </section>
 
 <section id="storia" class="sezione sezione--quaderno" aria-labelledby="t-storia">
   <div class="dentro">
     <h2 id="t-storia" class="insegna insegna--chiara">{{storia.titolo}}</h2>
-    <p class="segnaposto">{{segnaposto}}</p>
+    <div class="foglio foglio--storia">{{storia.corpo}}</div>
   </div>
 </section>
 
 <section id="citta" class="sezione sezione--nube" aria-labelledby="t-citta">
   <div class="dentro">
     <h2 id="t-citta" class="insegna insegna--chiara">{{citta.titolo}}</h2>
-    <p class="segnaposto">{{segnaposto}}</p>
+    <figure class="polaroid polaroid--larga">
+      <picture>
+        <source srcset="{{base}}media/citta-cartone.webp" type="image/webp">
+        <img src="{{base}}media/citta-cartone.jpg" width="1600" height="1023" loading="lazy" alt="{{citta.foto_alt}}">
+      </picture>
+      <figcaption>{{citta.foto_did}}</figcaption>
+    </figure>
+    <div class="luoghi">{{citta.corpo}}</div>
   </div>
 </section>
 

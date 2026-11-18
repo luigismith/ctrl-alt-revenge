@@ -53,7 +53,8 @@
     "slogan_sotto": "Taranto's clean-up. By subscription.",
     "manifesto_nota": "A made-up ad, like SIDERA itself.",
     "torretta_alt": "A smooth white and mint-green plastic ARIA+ tower. Someone has stencilled on it in black spray paint: CHI RESPIRA PAGA. GIG stands next to it, seen from behind.",
-    "torretta_didascalia": "An ARIA+ tower, in the workshop. The writing isn't SIDERA's: “if you breathe, you pay”."
+    "torretta_didascalia": "An ARIA+ tower, in the workshop. The writing isn't SIDERA's: “if you breathe, you pay”.",
+    "sotto": "<div class=\"mondo-sotto__col\"><h3 class=\"sottotitolo\">How we got here</h3><ol class=\"cronologia\"><li><span class=\"anno\">2026</span><p>The blast furnaces go out. A company called SIDERA buys the plant and promises a clean-up.</p></li><li><span class=\"anno\">2041</span><p>White domes rise above the plant. On the domes it says “Construction site, no entry”. The belts that used to carry the ore are rebuilt and raised on pylons, from the port to the domes: people call it the Linea. On its side it says “land to be cleaned up”.</p></li><li><span class=\"anno\">2065</span><p>SIDERA gives a new arm to workers who were hurt on the job. It is called MANODOPERA. An engineer from the Tamburi invented it.</p></li><li><span class=\"anno\">2067</span><p>The arm moves to a monthly subscription. The clean-up workers also wear the sleeve, on their good arm. “Shift mode” arrives. The ad says: night-time physiotherapy, while you sleep.</p></li><li><span class=\"anno\">2087</span><p>SIDERA has set the date: on Easter Sunday the end of the clean-up will be celebrated. “Taranto is pure.”</p></li></ol></div><div class=\"mondo-sotto__col\"><h3 class=\"sottotitolo\">The air</h3><p>The air is called ARIA+ and you pay for it in instalments, like streaming series. The white and mint-green towers are its own. Above the cloud, for those who can afford it, there is ARIA+ High Altitude.</p><p>The Colombe (the Doves) are white, carry the ARIA+ logo and measure the air. They lie. When the mistral carries the dust over the Tamburi, the council announces a Wind Day. The Colombe say no, and spray the scent of clean.</p></div>"
   },
   "gig": {
     "alt": "GIG in close-up, in profile, in front of a tufa wall covered in posters: an eye, a hand, a sun, a wave.",
@@ -61,7 +62,8 @@
     "nome": "Cataldo Gigante, 50, from the Tamburi.",
     "p1": "A conveyor belt on the Linea took his left arm. He built the new one himself, in his mother's garage, and then built one for half the city. When Mimmo, his childhood friend, died, he asked too many questions: within a week SIDERA had taken his job and his house, and struck his name off the patents. And switched off his arm.",
     "p2": "Gruff, wry and stubborn. He can fix anything except his own life.",
-    "nota": "He won't get there alone. You'll meet the others along the way."
+    "nota": "He won't get there alone. You'll meet the others along the way.",
+    "extra": "<p>He wears the ochre shirt of his father Vito, a crane operator at the port. They built the first arm together, in the garage. Vito used to say: “You've got one hand. Make yourself the other.”</p><p>As a boy he had the best left in the Tamburi. Then the Linea took his left.</p>"
   },
   "lab": {
     "titolo": "From the workshop",
@@ -73,7 +75,7 @@
   "come": {
     "titolo": "How it's made, honestly",
     "v1": "<strong>It is a video game, made in Unreal Engine 5,</strong> that imitates stop motion: the characters are 3D models that move in jerky steps like puppets.",
-    "v2": "<strong>Some of the tools are artificial intelligence.</strong>",
+    "v2": "<strong>Some of the tools are artificial intelligence:</strong> ChatGPT, Meshy, HeyGen, Suno.",
     "v3": "<strong>It is a personal project.</strong> It is not for sale and has no release date."
   },
   "piede": {
@@ -97,11 +99,17 @@
     "bottone": "Download the demo (64-bit Windows)",
     "nota": "The file is in the project's GitHub releases, as a pre-release."
   },
-  "segnaposto": "TEXT COMING SOON",
   "storia": {
-    "titolo": "Holy Thursday, 3 pm"
+    "titolo": "Holy Thursday, 3 pm",
+    "corpo": "<p>17 April 2087 is Holy Thursday. At three in the afternoon the hooded penitents set out from the Carmine church, barefoot. The sky is hazy, and the graves of San Brunone are red with dust.</p><p>GIG is standing in front of Mimmo's headstone. “Hi, Mimmo. I brought you your coffee.”</p><p>On the night of the dead in 2086 the cemetery was full of votive lights. SIDERA said Mimmo had died in his sleep. The log of his arm said something else: seven hours of work, under the domes, restricted sector. Return to address at 5:50. Holder not detected. Subscription suspended.</p><p>GIG asked questions. In a week he lost his job, his house and his name on the patents. His arm, number 1, has been switched off ever since.</p><p>Now the Esattori are at the gate, and a bailiff with a notice to read out. “Dear former associate Gigante Cataldo, SIDERA thanks you for choosing MANODOPERA.”</p><p class=\"battuta\">“I invented it.”</p><p class=\"battuta\">“Not according to our records.”</p><p>It starts to rain. GIG runs between the graves and through the streets of the Tamburi, with an arm that doesn't respond.</p><p>In his mother's garage Vito's keyboard is still there. Number 1 is a prototype, with a service door. Three keys.</p><p>The arm comes back on. The right eye, the one the company used to send him ads through, turns cyan. A voice he hasn't heard in twenty years says: “Twenty years switched off, Catà. What did I miss?”</p><p class=\"battuta\">“Nothing good.”</p><p class=\"battuta\">“Tonight I'm going to see where they take the arms.”</p><p class=\"storia__nota\">The prologue ends here. It is what you play in the demo.</p>"
   },
   "citta": {
-    "titolo": "The city"
+    "titolo": "The city",
+    "corpo": "<article class=\"luogo\"><h3>San Brunone</h3><p>The cemetery is right up against the plant. The white headstones don't stay white.</p></article><article class=\"luogo\"><h3>The Tamburi</h3><p>The district under the Linea. Washing on the lines, air purifiers on the balconies, torn posters pasted one over another.</p></article><article class=\"luogo\"><h3>The Linea</h3><p>The belts on their pylons, from the port to the domes. They pass over the last street of the district.</p></article><article class=\"luogo\"><h3>The domes</h3><p>White, sealed. Inside, they say, is the clean-up.</p></article><article class=\"luogo\"><h3>Holy Week</h3><p>The hooded penitents in pairs, barefoot. The troccola (a wooden rattle) instead of bells, which are tied up in those days. In 2087 almost everything in Taranto has changed. Not this.</p></article>",
+    "foto_alt": "The stretch of cemetery wall and gate built in cardboard: a wall of painted blocks with torn posters, an iron gate, crates and pallets. GIG walks through the middle.",
+    "foto_did": "The cemetery gate, in cardboard. Capture from the game, November 2026."
+  },
+  "chi": {
+    "corpo": "<article class=\"scheda\"><h3>Mimmo</h3><p>His childhood friend, a crane operator too. Arm number 2 is his: GIG built it for him after the accident at the port. He died on the night of the dead, 2086, in his sleep. For SIDERA, it was a sudden illness.</p></article><article class=\"scheda\"><h3>Addolorata</h3><p>His mother. A seamstress, seventy-five years old, she calls him Catà. The garage is hers. At fifty, GIG moved back in with her.</p></article><article class=\"scheda\"><h3>Tere</h3><p>The voice of arm number 1. GIG put her there in 2064. Since 2067 she has been silent.</p></article><article class=\"scheda\"><h3>Totò</h3><p>Eleven years old, asthmatic. On windy days he can't go out. He writes REVENGE on the walls. He is the one telling this story: “I was eleven that night. I'll tell it the way I remember it. With a few extra colours.”</p></article><article class=\"scheda\"><h3>The Esattori</h3><p>They repossess the arms of anyone who misses a payment. They are people from the neighbourhoods, paid per repossession: the rider with the backpack, the collector in the bib, the one hired on rental, the bailiff with the writ in hand.</p></article><article class=\"scheda\"><h3>SIDERA</h3><p>It has no face. It has the posters, the screens, the towers, the Colombe. It only speaks through press releases.</p></article>"
   }
 }

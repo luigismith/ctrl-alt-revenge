@@ -416,8 +416,26 @@ p { margin: 0 0 1em; }
 .demo > * { min-width: 0; }
 .demo__foto.polaroid--storta { position: relative; right: auto; bottom: auto; width: 100%; max-width: 520px; justify-self: center; rotate: 2deg; }
 
-/* Segnaposto: si vede che il testo manca (solo nel ramo di lavoro) */
-.segnaposto {
-  display: inline-block; margin: 14px 0; padding: 18px 26px; border: 4px dashed currentColor;
-  font: 1.3rem/1 "Bungee", sans-serif; letter-spacing: .06em; rotate: -1deg; opacity: .85;
-}
+/* La lore: cronologia, schede dei personaggi, racconto, luoghi */
+.mondo-sotto { display: grid; gap: 40px; margin-top: 56px; }
+@media (min-width: 860px) { .mondo-sotto { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: 56px; } }
+.sottotitolo { font: 1.5rem/1.1 "Bungee", sans-serif; color: var(--giallo); margin: 0 0 18px; }
+.cronologia { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.cronologia li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 14px; align-items: baseline; }
+.cronologia p { margin: 0; }
+.anno { font: 1.35rem/1 "Bungee", sans-serif; color: var(--giallo); }
+.chi { display: grid; gap: 22px; margin-top: 56px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.scheda { background: #fbf8f1; padding: 22px 24px; box-shadow: 0 8px 18px rgba(0,0,0,.25); border-top: 8px solid var(--rosso); }
+.scheda:nth-child(odd) { rotate: -.6deg; }
+.scheda:nth-child(even) { rotate: .5deg; }
+.scheda h3, .luogo h3 { font: 1.25rem/1.1 "Bungee", sans-serif; margin: 0 0 8px; }
+.scheda p { margin: 0; font-size: .98rem; line-height: 1.55; color: var(--inchiostro); }
+.foglio--storia { max-width: 760px; rotate: -.4deg; }
+.foglio--storia p { margin: 0 0 14px; font: 1.05rem/1.75 "Special Elite", monospace; color: var(--inchiostro); }
+.foglio--storia .battuta { margin-left: 1.4em; font-size: 1.15rem; }
+.foglio--storia .storia__nota { margin-top: 26px; font-style: italic; opacity: .8; }
+.polaroid--larga { position: relative; max-width: 980px; margin: 0 auto 40px; rotate: -1deg; }
+.luoghi { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.luogo { padding: 4px 0 0; }
+.luogo h3 { color: var(--giallo); }
+.luogo p { margin: 0; line-height: 1.55; }
