@@ -404,7 +404,7 @@ p { margin: 0 0 1em; }
 
 /* La demo: pagina carta, testo a sinistra e una foto storta a destra */
 .demo { display: grid; gap: 32px; align-items: center; }
-@media (min-width: 860px) { .demo { grid-template-columns: 1.3fr 1fr; } }
+@media (min-width: 860px) { .demo { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); } }
 .onesta--demo { font-size: 1.05rem; line-height: 1.8; }
 .bottone {
   display: inline-block; padding: 14px 24px; background: var(--rosso); color: #fff;
@@ -413,3 +413,5 @@ p { margin: 0 0 1em; }
 }
 .bottone:hover { translate: 0 2px; box-shadow: 0 3px 0 var(--inchiostro); }
 .demo__nota { font: .95rem/1.5 "Special Elite", monospace; }
+.demo > * { min-width: 0; }
+.demo__foto.polaroid--storta { position: relative; right: auto; bottom: auto; width: 100%; max-width: 520px; justify-self: center; rotate: 2deg; }
