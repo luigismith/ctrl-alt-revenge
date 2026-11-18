@@ -136,12 +136,15 @@
 
 <section id="gig" class="sezione sezione--carta" aria-labelledby="t-gig">
   <div class="dentro gig">
-    <figure class="polaroid polaroid--grande">
-      <picture>
-        <source srcset="media/cancello-vicino.webp" type="image/webp">
-        <img src="media/cancello-vicino.jpg" width="1600" height="900" loading="lazy" alt="GIG da vicino, di profilo, davanti a un muro di tufo coperto di manifesti: un occhio, una mano, un sole, un&#x27;onda.">
-      </picture>
+    <figure class="polaroid polaroid--grande" data-modello="modelli/gig.glb" data-script="vendor/model-viewer-4.3.1.min.js" data-alt="Il modello 3D di GIG, il pupazzo del gioco: lo si può girare e ingrandire.">
+      <div class="cornice-3d">
+        <picture>
+          <source srcset="media/cancello-vicino.webp" type="image/webp">
+          <img src="media/cancello-vicino.jpg" width="1600" height="900" loading="lazy" alt="GIG da vicino, di profilo, davanti a un muro di tufo coperto di manifesti: un occhio, una mano, un sole, un&#x27;onda.">
+        </picture>
+      </div>
       <span class="timbro" aria-hidden="true">Abbonamento scaduto</span>
+      <figcaption class="didascalia-3d" hidden>Il modello 3D di GIG, quello del gioco: fatto con Meshy partendo da immagini nostre. Trascina per girarlo, pizzica per ingrandire.</figcaption>
     </figure>
     <div class="gig__testo">
       <h2 id="t-gig" class="insegna">GIG</h2>
@@ -193,5 +196,46 @@
     <p class="piede__piccolo">Caratteri: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). Le superfici di cartone vengono dal set del gioco.</p>
   </div>
 </footer>
+<script>
+/* Il modello 3D di GIG: lo script del visualizzatore (1 MB) parte solo se il file del modello esiste,
+   il browser ha WebGL e la sezione sta per entrare nello schermo. Altrimenti resta la foto. */
+(function () {
+  var f = document.querySelector("[data-modello]");
+  if (!f || !("IntersectionObserver" in window)) return;
+  try {
+    var c = document.createElement("canvas");
+    if (!(c.getContext("webgl2") || c.getContext("webgl"))) return;
+  } catch (e) { return; }
+  var io = new IntersectionObserver(function (es) {
+    if (!es[0].isIntersecting) return;
+    io.disconnect();
+    fetch(f.dataset.modello, { method: "HEAD" }).then(function (r) {
+      if (!r.ok) throw 0;
+      var s = document.createElement("script");
+      s.type = "module"; s.src = f.dataset.script; s.onload = monta;
+      document.head.appendChild(s);
+    }).catch(function () {});
+  }, { rootMargin: "200px" });
+  io.observe(f);
+  function monta() {
+    var mv = document.createElement("model-viewer");
+    mv.setAttribute("src", f.dataset.modello);
+    mv.setAttribute("alt", f.dataset.alt);
+    mv.setAttribute("camera-controls", "");
+    mv.setAttribute("disable-pan", "");
+    mv.setAttribute("touch-action", "pan-y");
+    mv.setAttribute("interaction-prompt", "none");
+    mv.setAttribute("shadow-intensity", "1");
+    mv.setAttribute("environment-image", "neutral");
+    mv.setAttribute("min-camera-orbit", "auto auto 60%");
+    mv.setAttribute("max-camera-orbit", "auto auto 140%");
+    mv.addEventListener("load", function () {
+      f.classList.add("f-3d");
+      f.querySelector(".didascalia-3d").hidden = false;
+    });
+    f.querySelector(".cornice-3d").appendChild(mv);
+  }
+})();
+</script>
 </body>
 </html>
