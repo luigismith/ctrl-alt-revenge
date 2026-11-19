@@ -61,6 +61,16 @@
     "viewer_alt": "GIG's 3D model, the puppet from the game: you can turn it and zoom in.",
     "viewer_did": "A lightened version of the game's model: GIG in 3D, made with Meshy from our own images. Drag to turn it, pinch to zoom."
   },
+  "stampa": {
+    "titolo": "Print it",
+    "testo": "GIG for your desk: a figurine made for 3D printing, with the files ready to download. If you have a printer, it's yours.",
+    "formati": "STL works with almost every slicer; 3MF keeps the model and its settings together.",
+    "stl": "Download STL",
+    "mf": "Download 3MF",
+    "licenza": "Licence <a href=\"https://creativecommons.org/licenses/by-nc/4.0/\" rel=\"license noopener\">CC BY-NC 4.0</a>: you can print it, give it away and share it with credit to Ctrl-Alt-Revenge, but not sell it.",
+    "alt": "3D preview of the GIG figurine: you can turn it and zoom in.",
+    "anteprima": "Preview of the figurine. Drag to turn it."
+  },
   "lab": {
     "titolo": "From the workshop",
     "attacco": "This is where the Instagram posts and YouTube Shorts land, one by one, each with its link.",

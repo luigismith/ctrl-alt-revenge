@@ -412,3 +412,22 @@ p { margin: 0 0 1em; }
 .f-3d .cornice-3d picture { visibility: hidden; }
 .f-3d .timbro { display: none; }
 .didascalia-3d { font: .98rem/1.35 "Special Elite", monospace; color: var(--inchiostro); margin-top: 10px; }
+
+/* «Stampala»: anteprima a sinistra, file e licenza a destra; nascosto finché il file non esiste */
+.stampa { display: grid; gap: 28px; align-items: center; margin-top: 48px; }
+.stampa[hidden] { display: none; }
+@media (min-width: 860px) { .stampa { grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); } }
+.stampa > * { min-width: 0; }
+.cornice-stampa { aspect-ratio: 1 / 1; background: radial-gradient(circle at 50% 40%, #efe3c8, #cdbb97); border: 3px solid var(--inchiostro); }
+.cornice-stampa model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+.stampa__bottoni { display: flex; flex-wrap: wrap; gap: 14px; margin: 18px 0; }
+.stampa .sottotitolo { color: var(--inchiostro); }
+
+/* Bottone e nota (usati dal blocco «Stampala») */
+.bottone {
+  display: inline-block; padding: 14px 24px; background: var(--rosso); color: #fff;
+  font-family: "Bungee", sans-serif; font-size: 1.1rem; text-decoration: none; text-transform: uppercase;
+  box-shadow: 0 5px 0 var(--inchiostro); transition: translate .1s, box-shadow .1s;
+}
+.bottone:hover { translate: 0 2px; box-shadow: 0 3px 0 var(--inchiostro); }
+.demo__nota { font: .95rem/1.5 "Special Elite", monospace; }

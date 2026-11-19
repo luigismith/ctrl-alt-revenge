@@ -61,6 +61,16 @@
     "viewer_alt": "Il modello 3D di GIG, il pupazzo del gioco: lo si può girare e ingrandire.",
     "viewer_did": "Una versione alleggerita del modello del gioco: GIG in 3D, fatto con Meshy partendo da immagini nostre. Trascina per girarlo, pizzica per ingrandire."
   },
+  "stampa": {
+    "titolo": "Stampala",
+    "testo": "GIG da tenere sul tavolo: una statuetta pensata per la stampa 3D, con i file pronti da scaricare. Se hai una stampante, è tua.",
+    "formati": "STL va bene per quasi tutti i programmi di stampa; 3MF tiene insieme il modello e le impostazioni.",
+    "stl": "Scarica STL",
+    "mf": "Scarica 3MF",
+    "licenza": "Licenza <a href=\"https://creativecommons.org/licenses/by-nc/4.0/deed.it\" rel=\"license noopener\">CC BY-NC 4.0</a>: puoi stamparla, regalarla e condividerla citando Ctrl-Alt-Revenge, ma non venderla.",
+    "alt": "Anteprima 3D della statuetta di GIG: la si può girare e ingrandire.",
+    "anteprima": "Anteprima della statuetta. Trascina per girarla."
+  },
   "lab": {
     "titolo": "Dal laboratorio",
     "attacco": "Qui arrivano i post di Instagram e gli Shorts di YouTube, uno per uno, con il loro link.",

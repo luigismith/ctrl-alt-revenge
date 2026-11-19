@@ -154,6 +154,22 @@
       <p class="nota-mano">{{gig.nota}}</p>
     </div>
   </div>
+  <div class="dentro stampa" id="stampala" data-stl="{{base}}modelli/gig-statuetta.stl" data-glb="{{base}}modelli/gig-statuetta.glb" data-script="{{base}}vendor/model-viewer-4.3.1.min.js" data-alt="{{stampa.alt}}" hidden>
+    <div class="stampa__anteprima">
+      <div class="cornice-stampa"></div>
+      <p class="didascalia-3d">{{stampa.anteprima}}</p>
+    </div>
+    <div class="stampa__testo">
+      <h3 class="sottotitolo">{{stampa.titolo}}</h3>
+      <p>{{stampa.testo}}</p>
+      <p class="stampa__bottoni">
+        <a class="bottone" href="{{base}}modelli/gig-statuetta.stl" download>{{stampa.stl}}</a>
+        <a class="bottone" href="{{base}}modelli/gig-statuetta.3mf" download>{{stampa.mf}}</a>
+      </p>
+      <p class="demo__nota">{{stampa.formati}}</p>
+      <p class="demo__nota">{{stampa.licenza}}</p>
+    </div>
+  </div>
 </section>
 
 <section id="laboratorio" class="sezione sezione--cartone" aria-labelledby="t-lab">
@@ -232,6 +248,36 @@
     });
     f.querySelector(".cornice-3d").appendChild(mv);
   }
+})();
+</script>
+<script>
+/* «Stampala»: il blocco compare solo se il file STL esiste davvero; l'anteprima 3D solo se c'è anche il .glb. */
+(function () {
+  var b = document.getElementById("stampala");
+  if (!b || !window.fetch) return;
+  fetch(b.dataset.stl, { method: "HEAD" }).then(function (r) {
+    if (!r.ok) throw 0;
+    b.hidden = false;
+    return fetch(b.dataset.glb, { method: "HEAD" });
+  }).then(function (r) {
+    if (!r || !r.ok) { b.querySelector(".stampa__anteprima").hidden = true; return; }
+    var c = document.createElement("canvas");
+    if (!(c.getContext("webgl2") || c.getContext("webgl"))) { b.querySelector(".stampa__anteprima").hidden = true; return; }
+    var s = document.createElement("script");
+    s.type = "module"; s.src = b.dataset.script;
+    s.onload = function () {
+      var mv = document.createElement("model-viewer");
+      mv.setAttribute("src", b.dataset.glb);
+      mv.setAttribute("alt", b.dataset.alt);
+      ["camera-controls", "disable-pan"].forEach(function (a) { mv.setAttribute(a, ""); });
+      mv.setAttribute("touch-action", "pan-y");
+      mv.setAttribute("interaction-prompt", "none");
+      mv.setAttribute("shadow-intensity", "1");
+      mv.setAttribute("environment-image", "neutral");
+      b.querySelector(".cornice-stampa").appendChild(mv);
+    };
+    document.head.appendChild(s);
+  }).catch(function () {});
 })();
 </script>
 </body>
