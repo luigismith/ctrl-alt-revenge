@@ -27,6 +27,7 @@
     <nav class="menu" aria-label="Site sections">
       <ul>
         <li><a href="#gioco">The game</a></li>
+        <li><a href="#galleria">Screenshots</a></li>
         <li><a href="#mondo">The world</a></li>
         <li><a href="#gig">GIG</a></li>
         <li><a href="#laboratorio">From the workshop</a></li>
@@ -104,6 +105,25 @@
         </li>
       </ol>
     </div>
+  </div>
+</section>
+
+<section id="galleria" class="sezione sezione--carta" aria-labelledby="t-galleria">
+  <div class="dentro">
+    <h2 id="t-galleria" class="insegna">In-game screenshots</h2>
+    <ul class="galleria">
+      <li class="scatto"><a href="../media/galleria/01_platform_galleria_appiglio.jpg"><img src="../media/galleria/01_platform_galleria_appiglio-800.webp" width="800" height="450" loading="lazy" alt="GIG hanging from a handhold in the cemetery gallery."></a></li>
+      <li class="scatto"><a href="../media/galleria/02_platform_acqua_elettrica.jpg"><img src="../media/galleria/02_platform_acqua_elettrica-800.webp" width="800" height="450" loading="lazy" alt="GIG jumps over a puddle of electrified water on a building site."></a></li>
+      <li class="scatto"><a href="../media/galleria/03_platform_tetti_doppio_salto.jpg"><img src="../media/galleria/03_platform_tetti_doppio_salto-800.webp" width="800" height="450" loading="lazy" alt="GIG double-jumps across the rooftops at night, in the rain."></a></li>
+      <li class="scatto"><a href="../media/galleria/04_fuga_vicolo_rider.jpg"><img src="../media/galleria/04_fuga_vicolo_rider-800.webp" width="800" height="450" loading="lazy" alt="GIG runs down an alley, chased by a rider on a scooter."></a></li>
+      <li class="scatto"><a href="../media/galleria/05_fuga_droni_trincea.jpg"><img src="../media/galleria/05_fuga_droni_trincea-800.webp" width="800" height="450" loading="lazy" alt="GIG slides across the bakery yard under the drones."></a></li>
+      <li class="scatto"><a href="../media/galleria/06_arena_cancello_rider.jpg"><img src="../media/galleria/06_arena_cancello_rider-800.webp" width="800" height="450" loading="lazy" alt="The fight with a rider in front of the cemetery gate."></a></li>
+      <li class="scatto"><a href="../media/galleria/07_arena_bruto_esattore.jpg"><img src="../media/galleria/07_arena_bruto_esattore-800.webp" width="800" height="450" loading="lazy" alt="GIG blocks a brute&#x27;s blow with the cyber arm."></a></li>
+      <li class="scatto"><a href="../media/galleria/08_hacking_braccio.jpg"><img src="../media/galleria/08_hacking_braccio-800.webp" width="800" height="450" loading="lazy" alt="GIG&#x27;s cyber arm plugged into a lock."></a></li>
+      <li class="scatto"><a href="../media/galleria/09_filmato_murale_catena.jpg"><img src="../media/galleria/09_filmato_murale_catena-800.webp" width="800" height="450" loading="lazy" alt="From a cutscene: the chain mural on the cemetery wall."></a></li>
+      <li class="scatto"><a href="../media/galleria/10_filmato_pignoramento.jpg"><img src="../media/galleria/10_filmato_pignoramento-800.webp" width="800" height="450" loading="lazy" alt="From a cutscene: the bailiff with a tablet at the gate."></a></li>
+      <li class="scatto"><a href="../media/galleria/12_panorama_ponte_girevole.jpg"><img src="../media/galleria/12_panorama_ponte_girevole-800.webp" width="800" height="450" loading="lazy" alt="The Swing Bridge, the Aragonese Castle and the Old Town of Taranto."></a></li>
+    </ul>
   </div>
 </section>
 
@@ -212,6 +232,37 @@
     <p class="piede__piccolo">Fonts: Bungee, Archivo (SIL Open Font License), Permanent Marker, Special Elite (Apache 2.0). The cardboard surfaces come from the game's set.</p>
   </div>
 </footer>
+<dialog class="lightbox" id="lightbox" aria-label="In-game screenshots">
+  <div class="lightbox__dentro"><img alt=""></div>
+  <button type="button" class="lightbox__prec" aria-label="Previous image">&#9664;</button>
+  <button type="button" class="lightbox__succ" aria-label="Next image">&#9654;</button>
+  <button type="button" class="lightbox__chiudi" aria-label="Close">&times;</button>
+</dialog>
+<script>
+/* Immagini di gioco: senza JavaScript il clic apre il JPEG a piena grandezza; con JavaScript si apre qui. */
+(function () {
+  var d = document.getElementById("lightbox");
+  var voci = [].slice.call(document.querySelectorAll(".scatto a"));
+  if (!d || !d.showModal || !voci.length) return;
+  var img = d.querySelector("img"), i = 0;
+  function mostra(n) {
+    i = (n + voci.length) % voci.length;
+    img.src = voci[i].href;
+    img.alt = voci[i].querySelector("img").alt;
+  }
+  voci.forEach(function (a, n) {
+    a.addEventListener("click", function (e) { e.preventDefault(); mostra(n); d.showModal(); });
+  });
+  d.querySelector(".lightbox__prec").addEventListener("click", function () { mostra(i - 1); });
+  d.querySelector(".lightbox__succ").addEventListener("click", function () { mostra(i + 1); });
+  d.querySelector(".lightbox__chiudi").addEventListener("click", function () { d.close(); });
+  d.addEventListener("click", function (e) { if (e.target === d || e.target.classList.contains("lightbox__dentro")) d.close(); });
+  d.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") mostra(i - 1);
+    if (e.key === "ArrowRight") mostra(i + 1);
+  });
+})();
+</script>
 <script>
 /* Il modello 3D di GIG: lo script del visualizzatore (1 MB) parte solo se il file del modello esiste,
    il browser ha WebGL e la sezione sta per entrare nello schermo. Altrimenti resta la foto. */

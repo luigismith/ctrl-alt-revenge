@@ -431,3 +431,21 @@ p { margin: 0 0 1em; }
 }
 .bottone:hover { translate: 0 2px; box-shadow: 0 3px 0 var(--inchiostro); }
 .demo__nota { font: .95rem/1.5 "Special Elite", monospace; }
+
+/* ------------------------------------------------------------ immagini di gioco (galleria) */
+.galleria { list-style: none; margin: 26px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 26px; }
+.scatto a { display: block; background: var(--rumore), #faf7f0; padding: 10px; box-shadow: 0 10px 22px rgba(0,0,0,.35); transition: transform .15s; }
+.scatto:nth-child(odd) a { rotate: -.8deg; }
+.scatto:nth-child(even) a { rotate: .7deg; }
+.scatto a:hover, .scatto a:focus-visible { transform: scale(1.02); }
+.scatto img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--inchiostro); }
+.lightbox { border: 0; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; }
+.lightbox::backdrop { background: rgba(20, 14, 8, .92); }
+.lightbox__dentro { display: grid; place-items: center; width: 100%; height: 100%; }
+.lightbox img { max-width: min(96vw, 1600px); max-height: 88vh; width: auto; height: auto; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+.lightbox button { position: fixed; font: 400 1.1rem/1 "Bungee", sans-serif; color: var(--inchiostro); background: var(--giallo); border: 2px solid var(--inchiostro); border-radius: 6px; min-width: 48px; min-height: 48px; cursor: pointer; }
+.lightbox__chiudi { top: 12px; right: 12px; }
+.lightbox__prec { left: 10px; top: 50%; translate: 0 -50%; }
+.lightbox__succ { right: 10px; top: 50%; translate: 0 -50%; }
+@media (max-width: 600px) { .galleria { grid-template-columns: 1fr; gap: 24px; } }
+@media (prefers-reduced-motion: reduce) { .scatto a { transition: none; } }

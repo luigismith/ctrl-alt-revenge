@@ -13,6 +13,7 @@
   },
   "nav": {
     "gioco": "Il gioco",
+    "galleria": "Immagini",
     "mondo": "Il mondo",
     "laboratorio": "Dal laboratorio",
     "come": "Come è fatto"
@@ -38,6 +39,24 @@
     "arene_testo": "Gli Esattori sono gente dei quartieri, presa a giornata, con un braccio a noleggio. Non si abbattono: gli si stacca il guinzaglio.",
     "hacking_titolo": "Sbloccare",
     "hacking_testo": "Il braccio cyber apre quello che SIDERA ha chiuso. Ogni sua funzione era a pagamento: GIG se le riprende, una alla volta."
+  },
+  "galleria": {
+    "titolo": "Immagini di gioco",
+    "a01_alt": "GIG appeso a un appiglio nella galleria del cimitero.",
+    "a02_alt": "GIG salta una pozza di acqua elettrica in un cantiere.",
+    "a03_alt": "GIG fa il doppio salto sui tetti, di notte sotto la pioggia.",
+    "a04_alt": "GIG fugge in un vicolo, inseguito da un rider in monopattino.",
+    "a05_alt": "GIG scivola nel cortile del forno, sotto i droni.",
+    "a06_alt": "Lo scontro con un rider davanti al cancello del cimitero.",
+    "a07_alt": "GIG para con il braccio cyber il colpo di un bruto.",
+    "a08_alt": "Il braccio cyber di GIG collegato a una serratura.",
+    "a09_alt": "Da un filmato: il murale della catena sul muro del cimitero.",
+    "a10_alt": "Da un filmato: il messo con il tablet davanti al cancello.",
+    "a12_alt": "Il Ponte Girevole, il Castello Aragonese e la Città Vecchia di Taranto.",
+    "apri": "Ingrandisci",
+    "chiudi": "Chiudi",
+    "prec": "Immagine precedente",
+    "succ": "Immagine successiva"
   },
   "mondo": {
     "titolo": "Sotto la nube rossa",

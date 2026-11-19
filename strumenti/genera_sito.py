@@ -80,6 +80,27 @@ def laboratorio(t, base, uscite):
     return '    <ul class="uscite">\n' + "\n".join(schede) + "\n    </ul>"
 
 
+FOTO_GALLERIA = [
+    "01_platform_galleria_appiglio", "02_platform_acqua_elettrica", "03_platform_tetti_doppio_salto",
+    "04_fuga_vicolo_rider", "05_fuga_droni_trincea", "06_arena_cancello_rider", "07_arena_bruto_esattore",
+    "08_hacking_braccio", "09_filmato_murale_catena", "10_filmato_pignoramento", "12_panorama_ponte_girevole",
+]
+
+
+def galleria(t, base):
+    """Le immagini di gioco, nell'ordine dei numeri. Senza didascalie: solo il testo alternativo."""
+    voci = []
+    for nome in FOTO_GALLERIA:
+        alt = html.escape(t[f"galleria.a{nome[:2]}_alt"], quote=True)
+        voci.append(
+            '      <li class="scatto">'
+            f'<a href="{base}media/galleria/{nome}.jpg">'
+            f'<img src="{base}media/galleria/{nome}-800.webp" width="800" height="450" loading="lazy" alt="{alt}">'
+            "</a></li>"
+        )
+    return '    <ul class="galleria">\n' + "\n".join(voci) + "\n    </ul>"
+
+
 def genera():
     modello = MODELLO.read_text(encoding="utf-8")
     uscite = leggi_uscite()
@@ -91,6 +112,10 @@ def genera():
             "altra_lang": altra_lang, "altra_sigla": altra_sigla,
             "url_sito": URL_SITO, "url_pagina": URL_SITO + cartella, "url_codice": URL_CODICE,
             "LABORATORIO": laboratorio(testi, base, uscite),
+            "GALLERIA": galleria(testi, base),
+            "ui.galleria_chiudi": html.escape(testi["galleria.chiudi"], quote=True),
+            "ui.galleria_prec": html.escape(testi["galleria.prec"], quote=True),
+            "ui.galleria_succ": html.escape(testi["galleria.succ"], quote=True),
         })
         pagina = re.sub(r"\{\{([\w.]+)\}\}", lambda m: valori[m.group(1)] if m.group(1) in valori else m.group(0), modello)
         rimasti = re.findall(r"\{\{[\w.]+\}\}", pagina)

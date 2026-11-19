@@ -13,6 +13,7 @@
   },
   "nav": {
     "gioco": "The game",
+    "galleria": "Screenshots",
     "mondo": "The world",
     "laboratorio": "From the workshop",
     "come": "How it's made"
@@ -38,6 +39,24 @@
     "arene_testo": "The Esattori, SIDERA's repo men, are people from the neighbourhood, hired by the day, with an arm on lease. You don't take them down: you take them off the leash.",
     "hacking_titolo": "Unlock",
     "hacking_testo": "The cyber arm opens what SIDERA has locked. Every one of its functions used to be a paid extra: GIG takes them back, one at a time."
+  },
+  "galleria": {
+    "titolo": "In-game screenshots",
+    "a01_alt": "GIG hanging from a handhold in the cemetery gallery.",
+    "a02_alt": "GIG jumps over a puddle of electrified water on a building site.",
+    "a03_alt": "GIG double-jumps across the rooftops at night, in the rain.",
+    "a04_alt": "GIG runs down an alley, chased by a rider on a scooter.",
+    "a05_alt": "GIG slides across the bakery yard under the drones.",
+    "a06_alt": "The fight with a rider in front of the cemetery gate.",
+    "a07_alt": "GIG blocks a brute's blow with the cyber arm.",
+    "a08_alt": "GIG's cyber arm plugged into a lock.",
+    "a09_alt": "From a cutscene: the chain mural on the cemetery wall.",
+    "a10_alt": "From a cutscene: the bailiff with a tablet at the gate.",
+    "a12_alt": "The Swing Bridge, the Aragonese Castle and the Old Town of Taranto.",
+    "apri": "Enlarge",
+    "chiudi": "Close",
+    "prec": "Previous image",
+    "succ": "Next image"
   },
   "mondo": {
     "titolo": "Under the red cloud",

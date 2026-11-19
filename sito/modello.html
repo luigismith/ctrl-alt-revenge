@@ -27,6 +27,7 @@
     <nav class="menu" aria-label="{{ui.sezioni}}">
       <ul>
         <li><a href="#gioco">{{nav.gioco}}</a></li>
+        <li><a href="#galleria">{{nav.galleria}}</a></li>
         <li><a href="#mondo">{{nav.mondo}}</a></li>
         <li><a href="#gig">GIG</a></li>
         <li><a href="#laboratorio">{{nav.laboratorio}}</a></li>
@@ -104,6 +105,13 @@
         </li>
       </ol>
     </div>
+  </div>
+</section>
+
+<section id="galleria" class="sezione sezione--carta" aria-labelledby="t-galleria">
+  <div class="dentro">
+    <h2 id="t-galleria" class="insegna">{{galleria.titolo}}</h2>
+{{GALLERIA}}
   </div>
 </section>
 
@@ -209,6 +217,37 @@
     <p class="piede__piccolo">{{piede.caratteri}}</p>
   </div>
 </footer>
+<dialog class="lightbox" id="lightbox" aria-label="{{galleria.titolo}}">
+  <div class="lightbox__dentro"><img alt=""></div>
+  <button type="button" class="lightbox__prec" aria-label="{{ui.galleria_prec}}">&#9664;</button>
+  <button type="button" class="lightbox__succ" aria-label="{{ui.galleria_succ}}">&#9654;</button>
+  <button type="button" class="lightbox__chiudi" aria-label="{{ui.galleria_chiudi}}">&times;</button>
+</dialog>
+<script>
+/* Immagini di gioco: senza JavaScript il clic apre il JPEG a piena grandezza; con JavaScript si apre qui. */
+(function () {
+  var d = document.getElementById("lightbox");
+  var voci = [].slice.call(document.querySelectorAll(".scatto a"));
+  if (!d || !d.showModal || !voci.length) return;
+  var img = d.querySelector("img"), i = 0;
+  function mostra(n) {
+    i = (n + voci.length) % voci.length;
+    img.src = voci[i].href;
+    img.alt = voci[i].querySelector("img").alt;
+  }
+  voci.forEach(function (a, n) {
+    a.addEventListener("click", function (e) { e.preventDefault(); mostra(n); d.showModal(); });
+  });
+  d.querySelector(".lightbox__prec").addEventListener("click", function () { mostra(i - 1); });
+  d.querySelector(".lightbox__succ").addEventListener("click", function () { mostra(i + 1); });
+  d.querySelector(".lightbox__chiudi").addEventListener("click", function () { d.close(); });
+  d.addEventListener("click", function (e) { if (e.target === d || e.target.classList.contains("lightbox__dentro")) d.close(); });
+  d.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") mostra(i - 1);
+    if (e.key === "ArrowRight") mostra(i + 1);
+  });
+})();
+</script>
 <script>
 /* Il modello 3D di GIG: lo script del visualizzatore (1 MB) parte solo se il file del modello esiste,
    il browser ha WebGL e la sezione sta per entrare nello schermo. Altrimenti resta la foto. */
