@@ -64,7 +64,7 @@
   "stampa": {
     "titolo": "Stampala",
     "testo": "GIG da tenere sul tavolo: una statuetta pensata per la stampa 3D, con i file pronti da scaricare. Se hai una stampante, è tua.",
-    "formati": "STL va bene per quasi tutti i programmi di stampa; 3MF tiene insieme il modello e le impostazioni.",
+    "formati": "STL va bene per quasi tutti i programmi di stampa; 3MF è lo stesso modello, con le misure in millimetri già dentro.",
     "stl": "Scarica STL",
     "mf": "Scarica 3MF",
     "licenza": "Licenza <a href=\"https://creativecommons.org/licenses/by-nc/4.0/deed.it\" rel=\"license noopener\">CC BY-NC 4.0</a>: puoi stamparla, regalarla e condividerla citando Ctrl-Alt-Revenge, ma non venderla.",

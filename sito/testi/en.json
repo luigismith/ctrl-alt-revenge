@@ -64,7 +64,7 @@
   "stampa": {
     "titolo": "Print it",
     "testo": "GIG for your desk: a figurine made for 3D printing, with the files ready to download. If you have a printer, it's yours.",
-    "formati": "STL works with almost every slicer; 3MF keeps the model and its settings together.",
+    "formati": "STL works with almost every slicer; 3MF is the same model, with millimetre units built in.",
     "stl": "Download STL",
     "mf": "Download 3MF",
     "licenza": "Licence <a href=\"https://creativecommons.org/licenses/by-nc/4.0/\" rel=\"license noopener\">CC BY-NC 4.0</a>: you can print it, give it away and share it with credit to Ctrl-Alt-Revenge, but not sell it.",
